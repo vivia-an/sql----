@@ -1,0 +1,289 @@
+
+
+
+3.2 主要表结构信息
+3.2.1 [T_JCXX](检查信息)
+F_BLK	病例库名称	VARCHAR(20)	　
+F_BLH	病理号	VARCHAR(20)	主键
+F_BRBH	病人编号	VARCHAR(40)	就诊卡号
+F_SQXH	申请序号	VARCHAR(40)	　
+F_YZID	医嘱ID	VARCHAR(20)	　
+F_YZXM	医嘱项目	VARCHAR(200)	　
+F_STUDY_UID	STUDY_UID	VARCHAR(40)	PACS
+F_XM	姓名	VARCHAR(20)	　
+F_XB	性别	VARCHAR(4)	男/女/其他
+F_NL	年龄	VARCHAR(8)	岁/月/天/小时
+F_AGE	年龄数字	FLOAT	　
+F_HY	婚姻	VARCHAR(4)	　
+F_MZ	民族	VARCHAR(20)	　
+F_ZY	职业	VARCHAR(20)	农民，干部，退休，个体，工人，教师，学生，商人，驾驶员，军人，警察
+F_SFZH	身份证号	VARCHAR(20)	　
+F_LXXX	联系信息	VARCHAR(200)	包括地址，电话，邮编等
+F_BRLB	病人类别	VARCHAR(20)	门诊，住院，体检，急诊，转院
+F_FB	费别	VARCHAR(20)	医保，自费
+F_ZYH	住院号	VARCHAR(20)	　
+F_MZH	门诊号	VARCHAR(20)	　
+F_BQ	病区	VARCHAR(50)	　
+F_SJKS	送检单位	VARCHAR(50)	　
+F_CH	床号	VARCHAR(8)	　
+F_SJDW	送检单位	VARCHAR(50)	　
+F_SJYS	送检医生	VARCHAR(20)	　
+F_SDRQ	收到日期	VARCHAR(20)	　
+F_JSY	接收员	VARCHAR(20)	　
+F_BBLX	标本类型	VARCHAR(20)	　
+F_BBQK	标本情况	VARCHAR(50)	满意/不满意
+F_JSYY	拒收原因	VARCHAR(100)	　
+F_SF	收费	FLOAT	　
+F_BBMC	标本名称	VARCHAR(50)	　
+F_LCZD	临床诊断	VARCHAR(100)	　
+F_LCZL	临床资料	VARCHAR(4000)	包括临床病史，手术范围，标本采取部位
+F_RYSJ	肉眼所见	VARCHAR(2000)	　
+F_QCYS	取材医生	VARCHAR(20)	　
+F_QCRQ	取材日期	VARCHAR(20)	　
+F_JLY	记录员	VARCHAR(20)	　
+F_LKZS	待包埋数	INT	　
+F_CKZS	材块总数	INT	和取材的工作量有关
+F_FY	附言	VARCHAR(40)	脱钙，保留，用完
+F_JXSJ	镜下所见	VARCHAR(2000)	　
+F_BLZD	病理诊断	VARCHAR(2000)	细胞学诊断
+F_TSJC	特殊检查	VARCHAR(300)	　
+F_CZYJ	初诊意见	VARCHAR(1000)	　
+F_XGYJ	修改意见	VARCHAR(500)	　
+F_BGYS	报告医生	VARCHAR(20)	　
+F_SHYS	审核医生	VARCHAR(20)	　
+F_BGRQ	报告日期	VARCHAR(20)	　
+F_ZDGJC	诊断关键词	VARCHAR(100)	　
+F_YYX	阴阳性	VARCHAR(10)	　
+F_WFBGYY	未发报告原因	VARCHAR(50)	　
+F_BZ	备注	VARCHAR(50)	　
+F_BGZT	报告状态	VARCHAR(10)	已登记/已取材/已包埋/已制片/报告延期/已写报告/已审核
+F_SFCT	是否采图	VARCHAR(2)	"是"，""
+F_TXML	图像目录	VARCHAR(30)	　
+F_SFDY	是否打印	VARCHAR(2)	"是"，""
+F_BGGS	报告格式	VARCHAR(50)	　
+F_GDZT	归档状态	VARCHAR(10)	"已归档"，""
+F_KNHZ	科内会诊	INT	0:不需要会诊，1：会诊进行中，2：结束复核
+F_ZJYJ	专家意见	VARCHAR(500)	　
+F_WYYJ	外院意见	VARCHAR(500)	　
+F_SFZT	随访状态	INT	0:不需要随访，1：随访进行中，2：结束随访
+F_SFJG	随访结果	VARCHAR(1000)	　
+F_JBBM_CN	疾病编码(中文)	VARCHAR(1000)	传报项目
+F_JBBM_ENG	疾病编码(E文)	VARCHAR(1000)	　
+F_JBMC	疾病名称(部位)	VARCHAR(500)	　
+F_YBLH	原病理号	VARCHAR(20)	　
+F_SJCL	送检材料	VARCHAR(100)	切片号，蜡块号
+F_YBLZD	原病理诊断	VARCHAR(500)	　
+F_BGFSFS	报告发送方式	VARCHAR(20)	自取/邮寄
+F_SCYS	收藏医生	VARCHAR(200)	　
+F_SFFH	是否符合	VARCHAR(2)	临床和病理；原诊断和会诊结果
+F_BD_SFFH	冰冻是否符合	VARCHAR(10)	　
+F_BY1	备用1	VARCHAR(50)	　
+F_BY2	备用2	VARCHAR(50)	　
+F_QSB_DYZT	签收本打印状态	VARCHAR(10)	　
+F_BGWZ	报告位置	VARCHAR(100)	　
+F_BGWZ_QRSJ	报告位置的确认时间	VARCHAR(50)	　
+F_BGWZ_QRCZY	报告位置的确认操作员	VARCHAR(20)	　
+F_BBWZ	标本位置	VARCHAR(50)	　
+F_LKWZ	蜡块位置	VARCHAR(50)	　
+F_QPWZ	切片位置	VARCHAR(50)	　
+F_GDCZY	归档操作员	VARCHAR(20)	　
+F_GDSJ	归档时间	VARCHAR(50)	　
+F_GDBZ	归档备注	VARCHAR(50)	　
+F_ZPZT	制片状态	VARCHAR(10)	用于细胞学打标签用
+F_MCYJ	末次月经	VARCHAR(20)	　
+F_SFJJ	是否绝经	VARCHAR(5)	　
+F_TBSID	结构化报告ID	INT	　
+F_TBSMC	结构化报告名称	VARCHAR(50)	　
+F_SPARE1	复片状态	VARCHAR(50)	"1":申请复片;"2":复片结束
+F_SPARE2	复片医生	VARCHAR(50)	　
+F_SPARE3	评价医生	VARCHAR(50)	　
+F_SPARE4	复片结果	VARCHAR(50)	“符合”，“基本符合”，“不符合”
+F_SPARE5	审核时间	VARCHAR(50)	　
+F_SPARE6	复片申请时间	VARCHAR(200)	　
+F_SPARE7	报告到期时间	VARCHAR(200)	　
+F_SPARE8	组织库号	VARCHAR(200)	　
+F_SPARE9	报告延期原因	VARCHAR(500)	　
+F_SPARE10	结构化报告中的备注	VARCHAR(500)	　
+F_BGLRY	报告录入员	VARCHAR(20)	　
+F_FZYS	复诊医生	VARCHAR(50)	　
+F_YL1	会诊符合	VARCHAR(50)	　
+F_YL2	报告核对状态	VARCHAR(50)	　
+F_YL3	报告核对员	VARCHAR(50) 	　
+F_YL4	拼音码	VARCHAR(50) 	　
+F_YL5	责任医生	VARCHAR(50) 	　
+F_YL6	危急值发送记录	VARCHAR(500) 	　
+F_YL7	浙一门诊自助打印记录	VARCHAR(500) 	　
+F_YL8	用于记录申请复片的申请医生	VARCHAR(500) 	　
+F_YL9	冰冻制片信息	VARCHAR(500)	冰冻分库时，包括离体时间，制片人，制片时间，块数
+F_YL10	初步诊断 	VARCHAR(500)	　
+F_ICD10_BM1	ICD10编码	VARCHAR(30)	　
+F_ICD10_MC1	ICD10名称	VARCHAR(100) 	　
+F_BL1	特检医嘱恢复执行时的申请医生	VARCHAR(50)	只保留一个，审核后就清空了。 
+F_BL2	科内会诊的申请医生姓名 	VARCHAR(50)	　
+F_BL3	随访的申请医生姓名 	VARCHAR(50)	　
+F_BL4	取信息保留字段1	VARCHAR(50)	　
+F_BL5	取信息保留字段2	VARCHAR(50)	　
+F_BL6	短信记录	VARCHAR(500)	　
+F_BL7	取信息保留字段3	VARCHAR(500)	　
+F_BL8	取信息保留字段4	VARCHAR(500)	　
+F_BL9	科内会诊医生列表	VARCHAR(500)	　
+F_BL10	取信息保留字段5	VARCHAR(500)	　
+F_ICD10_BM2	ICD0编码	VARCHAR(30)	　
+F_ICD10_MC2	ICD0名称	VARCHAR(100)	　
+F_FBSJ 	发布时间	VARCHAR(20) 	　
+F_FBYS 	发布医生	VARCHAR(20) 	　
+F_KNDPZT	科内读片状态	VARCHAR(10)	"1":申请读片，"2":读片结束。
+F_KNDPSQYS	科内读片申请医生	VARCHAR(50)	　
+F_KNDPSQSJ	科内读片申请时间	VARCHAR(50)	　
+
+3.2.2 [T_BCBG](补充报告)
+[F_ID]	[int]IDENTITY(1,1)NOTNULL,	递增+1
+[F_BLH]	[varchar](20)	病理号
+[F_BC_BGXH]	[int]	序号
+[F_BC_BGYS]	[varchar](20)	补充报告的报告医生
+[F_BC_SHYS]	[varchar](20)	补充报告的审核医生
+[F_BC_BGRQ]	[varchar](20)	补充报告的报告日期
+[F_BCZD]	[varchar](500)	补充诊断
+[F_BC_BGZT]	[varchar](10)	补充报告的报告状态
+
+3.2.3 [T_BDBG](冰冻报告)
+[F_ID]	[int]IDENTITY(1,1)NOTNULL,	递增+1
+[F_BLH]	[varchar](20)	病理号
+[F_BD_BGXH]	[int]	序号
+[F_BD_BGYS]	[varchar](30)	冰冻报告的报告医生
+[F_BD_SHYS]	[varchar](20)	冰冻报告的审核医生
+[F_BD_BGRQ]	[varchar](20)	冰冻报告的报告日期
+[F_BD_BGZT]	[varchar](10)	冰冻报告的报告状态
+[F_BDZD]	[varchar](200)	冰冻诊断
+[F_BD_ZPR]	[varchar](20)	冰冻制片人
+
+3.2.4 [T_BGHJ](报告痕迹)
+[F_ID]	[int]IDENTITY(1,1)NOTNULL,	递增+1
+[F_BLH]	[varchar](20)	病理号
+[F_RQ]	[varchar](50)	日期时间
+[F_CZY]	[varchar](20)	操作员
+[F_WZ]	[varchar](50)	位置：计算机名
+[F_DZ]	[varchar](50)	动作
+[F_NR]	[varchar](2000)	内容
+[F_EXEMC]	[varchar](50)	QP，BM，BPS，RPT
+[F_CTMC]	[varchar](50)	窗体名称
+
+3.2.5 [T_JHP](借还片)
+[F_ID] 	[int] IDENTITY (1, 1) NOT NULL ,	
+[F_BLH] 	[varchar] (200) 	病理号
+[F_JHPBH] 	[varchar] (20) 	借还片编号
+[F_XM]  	[varchar] (500)	姓名
+[F_BM] 	[varchar] (500) 	病名
+[F_JHP_QPSM] 	[varchar] (500) 	切片说明
+[F_JHP_QPTMH] 	[varchar] (500) 	切片条码号
+[F_JHP_LKSM] 	[varchar] (500) 	蜡块说明
+[F_JHP_LKH] 	[varchar] (500) 	蜡块号
+[F_YJ]	[int] 	押金
+[F_JHPZT] 	[varchar] (30) 	借还片状态
+[F_JCCZY] 	[varchar] (20) 	借出操作员
+[F_JCSJ]	[varchar] (30) 	借出时间
+[F_GHCZY]	[varchar] (20) 	归还操作员
+[F_GHSJ] 	[varchar] (30) 	归还时间
+[F_JHPLX] 	[varchar] (10) 	借还片类型
+[F_JHPYY]	[varchar] (50) 	借还片原因
+[F_SFZH]	[varchar] (30) 	身份证号
+[F_HZGX]  	[varchar] (30) 	患者关系
+[F_JYR] 	[varchar] (20) 	借阅人
+[F_LXXX]  	[varchar] (100)	联系信息
+[F_BZ] 	[varchar] (50)	备注
+
+3.2.6 [T_LK](蜡块表)
+[F_ID] [int] IDENTITY (1, 1) NOT NULL ,	
+[F_BLH]	[varchar] (20)	病理号
+[F_RWLY]	[varchar] (20)	任务来源
+[F_QCXH]	[int] NULL ,	取材序号
+[F_LKH]	[varchar] (30)	蜡块号
+[F_LKZT]	[varchar] (10)	蜡块状态
+[F_QPZT]	[varchar] (10)	切片状态
+[F_CZY]	[varchar] (10)	操作员
+[F_BMSJ]	[varchar] (20)	包埋时间
+[F_GDZT]	[varchar] (30)	归档状态
+[F_GDCZY]	[varchar] (20)	归档操作员
+[F_GDSJ]	[varchar] (30)	归档时间
+[F_BZ]	[varchar] (50)	备注
+
+3.2.7 [T_TX](图像)
+[F_ID] [int] IDENTITY (1, 1) NOT NULL ,	
+[F_BLH] 	[varchar] (20)	病理号
+[F_TXM] 	[varchar] (40) 	图像名
+[F_TXSM] 	[varchar] (50) 	图像说明
+[F_SFDY] 	[int] NOT NULL ,	是否打印
+[F_TXLB] 	[varchar] (20) 	图像类别
+
+3.2.8 [T_JSYZ](技术医嘱)
+字段名称	字段类型	字段说明	备注
+F_ID	int	主键	
+F_BLH	varchar(20)	病理号	
+F_JSYZH	varchar(30)	技术医嘱号	
+F_YZLX	varchar(20)	医嘱类型	
+F_LKH	varchar(40)	蜡块号	
+F_SL	int	数量	
+F_SQYS	varchar(20)	申请医生	
+F_SQSJ	varchar(20)	申请时间	
+F_YZZT	varchar(10)	医嘱状态	
+F_ZXSJ	varchar(20)	执行时间	
+F_ZXR	varchar(20)	执行人	
+F_BZ	varchar(30)	备注	
+F_YZLRY	varchar(20)	医嘱录入员	
+F_KDD	varchar(20)	开单地	
+F_JSYZYY	varchar(100)	原因	
+3.2.9 [T_TJYZ](特检医嘱)
+字段名称	字段类型	字段说明	备注
+	F_ID	int	主键	
+	F_BLH	varchar(20)	病理号	
+	F_TJYZH	varchar(30)	特检医嘱号	
+	F_YZLX	varchar(20)	医嘱类型	
+	F_LKH	varchar(30)	蜡块号	
+	F_BJW	varchar(30)	标记物	
+	F_SL	int	数量	
+	F_BX	varchar(10)	表型	
+	F_QD	varchar(20)	轻度	
+	F_BZ	varchar(30)	备注	
+	F_SQYS	varchar(20)	申请医生	
+	F_SQSJ	varchar(20)	申请时间	
+	F_YZZT	varchar(10)	医嘱状态	
+	F_ZXSJ	varchar(20)	执行时间	
+	F_ZXR	varchar(20)	执行人	
+	F_DKRH	varchar(30)	特检号	
+	F_LX	varchar(20)	类型	
+	F_CJ	varchar(20)	结果医生	
+	F_FF	varchar(20)	方法	
+F_ZXSB	varchar(20)	执行设备	
+F_FSSJ	varchar(20)	发送时间	
+F_YZLRY	varchar(20)	医嘱录入员	
+F_SFZT	varchar(20)	收费状态	
+F_ZXXH	int	执行序号	
+F_KDD	varchar(20)	开单地	
+F_SFZTCZY	varchar(20)	收费操作员	
+F_SFZTCZSJ	varchar(30)	收费操作时间	
+F_TJHSCSJ	varchar(20)	特检号生成时间	
+3.2.10 [T_QCMX](取材明细)
+字段名称	字段类型	字段说明	备注
+F_ID	int	主键	
+F_PXID	int	排序号	
+F_BLH	varchar(20)	病理号	
+F_RWLY	varchar(10)	任务来源	
+F_QCXH	varchar(10)	取材序号	
+F_ZZMC	varchar(50)	组织名称	
+F_CKS	varchar(20)	材块数	
+F_QCYS	varchar(20)	取材医生	
+F_QCRQ	varchar(20)	取材日期	
+F_BMZT	varchar(10)	包埋状态	
+F_SM	varchar(100)	说明	
+F_BZ	varchar(50)	备注	
+F_SJZT	varchar(50)	上机状态	
+F_QCSJ	varchar(20)	取材时间	
+F_JLY	varchar(20)	记录员	
+F_HDZT	varchar(10)	核对状态	
+F_HDR	varchar(20)	核对人	
+F_HDSJ	varchar(30)	核对时间	
+F_LGLINK_CLJG	varchar(100)	处理结果	
+F_LGLINK_CLR	varchar(30)	处理人	
+F_LGLINK_CLSJ	datetime	处理时间	
+F_LGLINK_PJR	varchar(30)	评价人	
+F_LGLINK_PJSJ	datetime	评价时间	

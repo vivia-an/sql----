@@ -1,0 +1,228 @@
+
+select
+ipi.id "患者标识",
+an.sam_apply_id "手术标识",
+mz.mzfscmc "麻醉方式",
+dep.department_chinese_name "患者科室",
+an.oper_end_date "手术结束时间",
+ipi.ipi_registration_no "患者登记号",
+t.patient_name "患者姓名",
+sr.oper_room "手术间",
+reg_p.operation_name "手术名称",
+reg_p.operator_doctor_id "主刀医生",
+ee.employee_name "主刀医生名字",
+an.narcotic_doctor_id "麻醉医生",
+ep.employee_name "麻醉医生姓名",
+T.oper_type "手术类型",
+t.scheduled_date "手术日期",
+an.rec_in_date "进入恢复室时间",
+an.rec_out_date "离开恢复室时间",
+case when reg.is_emergency ='1' then '急诊' else '非急诊' end as "是否急诊",
+case when reg.is_daytime='1' then '日间' else '非日间' end as "是否日间"
+,
+case when ent.tw_place like '%ICU%' or ent.tw_place like '%icu%' then 'ICU' when ent.tw_place like '%PACU%' or ent.tw_place like '%pacu%' then 'PACU'
+when dept.department_code is not null then '病房'
+else '' end as "去向"
+from
+hid0101_orcl_operaanesthisa_emrhis.SAM_ANA AN left join
+hid0101_orcl_operaanesthisa_emrhis.SAM_APPLY T on AN.SAM_APPLY_ID = T.ID
+left join hid0101_orcl_operaanesthisa_emrhis.SAM_APPLY_OP P on P.SAM_APPLY_ID = T.ID
+left join hid0101_orcl_operaanesthisa_emrhis.sam_reg reg on t.ID = reg.sam_apply_id
+left join hid0101_orcl_operaanesthisa_emrhis.sam_reg_op reg_p on reg_p.sam_reg_id = reg.id -- 实际手术名称
+left join hid0101_orcl_operaanesthisa_emrhis.ipi_registration ipi on ipi.id = an.ipi_registration_id
+left join hid0101_orcl_operaanesthisa_emrhis.hrm_employee ee on reg_p.operator_doctor_id = ee.id
+left join hid0101_orcl_operaanesthisa_emrhis.hrm_employee ep on an.narcotic_doctor_id = ep.id
+left join hid0101_orcl_operaanesthisa_emrhis.sam_room sr on t.sam_room_id = sr.id
+left join (select r.sam_apply_id , array_join(array_agg(r.node_value order by r.sam_apply_id ),';') as mzfscmc from ( select sam_apply_id,node_value from hid0101_orcl_operaanesthisa_emrhis.sam_emr_rec r
+left join hid0101_orcl_operaanesthisa_emrhis.sam_emr_rec_nv n on n.sam_emr_rec_id = r.id
+where r.rss_emr_type_id = 'sam_mzfs' and n.node_name = 'S_MZFS_DM' and r.isdeleted ='0' and n.isdeleted ='0' group by sam_apply_id,node_value) r group by r.sam_apply_id ) mz on an.sam_apply_id = mz.sam_apply_id
+left join hid0101_orcl_operaanesthisa_emrhis.hra00_department dep on dep.id=t.patient_dept_id
+left join hid0101_orcl_operaanesthisa_emrhis.sam_anar_enent ent on t.id = ent.sam_apply_id
+left join hid0101_orcl_operaanesthisa_emrhis.hra00_department dept on ent.tw_place = dept.department_code
+where T.HEALTH_SERVICE_ORG_ID = 'HXSSMZK'
+and T.OPER_TYPE = 'ROOM_OPER'
+and P.IS_MAIN_OPERATION = '1'
+and T.IS_REJECT = '2'
+and T.S_SSSYZT_DM = '90'
+and T.SCHEDULED_DATE between '2024-08-01 00:00:00' and '2024-11-01 23:59:59'
+and t.isdeleted ='0'
+and reg.isdeleted ='0'
+and reg_p.isdeleted ='0'
+and ipi.isdeleted = '0'
+and ep.isdeleted = '0'
+and sr.isdeleted = '0'
+and ( (AN.REC_IN_DATE is null
+or an.rec_out_date is null ) )
+and ent.isdeleted = '0'
+and ent.event_text ='出手术室'
+
+
+
+术后未进入恢复室明细
+
+
+select ipi.id "患者标识",ipi.ipi_registration_no "患者登记号", t.patient_name "患者姓名",sr.oper_room "手术间", p.operation_name "手术名称",p.operator_doctor_id "主刀医生",ee.employee_name "主刀医生名字",an.narcotic_doctor_id "麻醉医生",ep.employee_name "麻醉医生姓名",
+T.oper_type "手术类型", t.scheduled_date "手术日期", an.rec_in_date "进入恢复室时间",an.rec_out_date "离开恢复室时间"
+FROM hid0101_orcl_operaanesthisa_emrhis.SAM_ANA AN,hid0101_orcl_operaanesthisa_emrhis.SAM_APPLY T,hid0101_orcl_operaanesthisa_emrhis.SAM_APPLY_OP P,hid0101_orcl_operaanesthisa_emrhis.hra00_health_service_org
+,hid0101_orcl_operaanesthisa_emrhis.ipi_registration ipi ,hid0101_orcl_operaanesthisa_emrhis.hrm_employee ee,hid0101_orcl_operaanesthisa_emrhis.hrm_employee ep
+,hid0101_orcl_operaanesthisa_emrhis.sam_room sr
+WHERE AN.SAM_APPLY_ID = T.ID
+and ipi.id = an.ipi_registration_id
+and p.operator_doctor_id = ee.id
+and an.narcotic_doctor_id = ep.id
+and t.sam_room_id = sr.id
+AND T.HEALTH_SERVICE_ORG_ID = 'HXSSMZK'
+AND T.OPER_TYPE = 'ROOM_OPER'
+AND P.SAM_APPLY_ID = T.ID
+AND P.IS_MAIN_OPERATION = '1'
+AND T.IS_REJECT = '2'
+AND T.S_SSSYZT_DM = '90'
+AND ( (AN.REC_IN_DATE IS NULL
+AND (EXISTS (SELECT 1
+FROM hid0101_orcl_operaanesthisa_emrhis.Sam_Emr_Rec r
+inner JOIN hid0101_orcl_operaanesthisa_emrhis.Sam_Emr_Rec_nv n
+ON n.sam_emr_rec_id = r.ID
+and n.node_name = 'S_MZFS_DM'
+and n.node_value in ('表面麻醉','局部浸润麻醉','局部阻滞麻醉')
+WHERE r.sam_apply_id = T.ID
+)--局麻手术未进恢复室
+OR
+UPPER(T.S_MZFS_DM) = 'JM'--局麻手术未进恢复室
+OR
+EXISTS (SELECT 1
+FROM hid0101_orcl_operaanesthisa_emrhis.SAM_ANAR_ENENT EN
+WHERE EN.SAM_APPLY_ID = T.ID
+AND UPPER(EN.Tw_Place) like '%ICU%'--去icu未进恢复室
+)
+)
+)
+)
+AND T.SCHEDULED_DATE BETWEEN
+'2024-08-01 00:00:00' AND
+'2024-11-01 23:59:59'
+
+进入恢复室更新结果，修改为从 登记 中出真实的手术信息，申请表手术信息不对
+
+
+
+
+
+
+
+================= 未出恢复室，最新添加病人去向
+
+
+
+
+select
+ipi.id "患者标识",
+an.sam_apply_id "手术标识",
+mz.mzfscmc "麻醉方式",
+dep.department_chinese_name "患者科室",
+an.oper_end_date "手术结束时间",
+ipi.ipi_registration_no "患者登记号",
+t.patient_name "患者姓名",
+sr.oper_room "手术间",
+reg_p.operation_name "手术名称",
+reg_p.operator_doctor_id "主刀医生",
+ee.employee_name "主刀医生名字",
+an.narcotic_doctor_id "麻醉医生",
+ep.employee_name "麻醉医生姓名",
+T.oper_type "手术类型",
+t.scheduled_date "手术日期",
+an.rec_in_date "进入恢复室时间",
+an.rec_out_date "离开恢复室时间",
+case when reg.is_emergency ='1' then '急诊' else '非急诊' end as "是否急诊",
+case when reg.is_daytime='1' then '日间' else '非日间' end as "是否日间"
+,
+case when ent.tw_place like '%ICU%' or ent.tw_place like '%icu%' then 'ICU' when ent.tw_place like '%PACU%' or ent.tw_place like '%pacu%' then 'PACU'
+when dept.department_code is not null then '病房'
+else '' end as "去向"
+from
+hid0101_orcl_operaanesthisa_emrhis.SAM_ANA AN left join
+hid0101_orcl_operaanesthisa_emrhis.SAM_APPLY T on AN.SAM_APPLY_ID = T.ID
+left join hid0101_orcl_operaanesthisa_emrhis.SAM_APPLY_OP P on P.SAM_APPLY_ID = T.ID
+left join hid0101_orcl_operaanesthisa_emrhis.sam_reg reg on t.ID = reg.sam_apply_id
+left join hid0101_orcl_operaanesthisa_emrhis.sam_reg_op reg_p on reg_p.sam_reg_id = reg.id -- 实际手术名称
+left join hid0101_orcl_operaanesthisa_emrhis.ipi_registration ipi on ipi.id = an.ipi_registration_id
+left join hid0101_orcl_operaanesthisa_emrhis.hrm_employee ee on reg_p.operator_doctor_id = ee.id
+left join hid0101_orcl_operaanesthisa_emrhis.hrm_employee ep on an.narcotic_doctor_id = ep.id
+left join hid0101_orcl_operaanesthisa_emrhis.sam_room sr on t.sam_room_id = sr.id
+left join (select r.sam_apply_id , array_join(array_agg(r.node_value order by r.sam_apply_id ),';') as mzfscmc from ( select sam_apply_id,node_value from hid0101_orcl_operaanesthisa_emrhis.sam_emr_rec r
+left join hid0101_orcl_operaanesthisa_emrhis.sam_emr_rec_nv n on n.sam_emr_rec_id = r.id
+where r.rss_emr_type_id = 'sam_mzfs' and n.node_name = 'S_MZFS_DM' and r.isdeleted ='0' and n.isdeleted ='0' group by sam_apply_id,node_value) r group by r.sam_apply_id ) mz on an.sam_apply_id = mz.sam_apply_id
+left join hid0101_orcl_operaanesthisa_emrhis.hra00_department dep on dep.id=t.patient_dept_id
+left join hid0101_orcl_operaanesthisa_emrhis.sam_anar_enent ent on t.id = ent.sam_apply_id
+left join hid0101_orcl_operaanesthisa_emrhis.hra00_department dept on ent.tw_place = dept.department_code
+where T.HEALTH_SERVICE_ORG_ID = 'HXSSMZK'
+and T.OPER_TYPE = 'ROOM_OPER'
+and P.IS_MAIN_OPERATION = '1'
+and T.IS_REJECT = '2'
+and T.S_SSSYZT_DM = '90'
+and T.SCHEDULED_DATE between '2024-08-01 00:00:00' and '2024-11-01 23:59:59'
+and t.isdeleted ='0'
+and reg.isdeleted ='0'
+and reg_p.isdeleted ='0'
+and ipi.isdeleted = '0'
+and ep.isdeleted = '0'
+and sr.isdeleted = '0'
+and ( (AN.REC_IN_DATE is null
+or an.rec_out_date is null ) )
+and ent.isdeleted = '0'
+and ent.event_text ='出手术室'
+
+
+
+
+
+=================================最新 手麻与病案首页，右边不加时间限制是好的，但是这是骚操作，不可取
+
+
+
+
+
+
+SELECT COUNT(1) AS "手术名称L" FROM (
+SELECT "电子病历模板ID", "字段值" FROM (SELECT INstancedataid AS "电子病历模板ID",datavalue AS "字段值", templateid AS "模板ID",simpleitemcode AS "字段ID" FROM hid0101_cache_his_dhcapp_emrinstance.icompositesimple
+) "电子病历模板"
+WHERE "模板ID" = '38' AND "字段ID" IN ('I0169','I0170','I0171','I0172','I0173','I0174','I0175') AND "字段值" <> ''
+) "病案首页手术名称字段"
+JOIN (SELECT "电子病历模板ID","字段值" FROM (SELECT "电子病历模板ID","字段值" ,row_number() OVER(partitiON by "电子病历模板ID" order by "字段值" desc) row_num FROM (SELECT INstancedataid AS "电子病历模板ID",datavalue AS "字段值", templateid AS "模板ID",simpleitemcode AS "字段ID" FROM hid0101_cache_his_dhcapp_emrinstance.icompositesimple) "电子病历模板"
+WHERE "模板ID" = '38' AND "字段ID" IN ('D0153', 'D0154', 'D0155', 'D0156', 'D0157', 'D0158', 'D0159', 'D0160')
+
+)
+WHERE row_num = 1 AND "字段值" <>'') "病案首页手术时间排序" ON "病案首页手术名称字段"."电子病历模板ID" = "病案首页手术时间排序"."电子病历模板ID" WHERE "病案首页手术时间排序"."字段值" BETWEEN '2024-08-01' AND '2024-11-01' AND "病案首页手术名称字段"."字段值" IN
+(
+select
+reg_p.operation_name "手术名称"
+from
+hid0101_orcl_operaanesthisa_emrhis.SAM_ANA AN left join
+hid0101_orcl_operaanesthisa_emrhis.SAM_APPLY T on AN.SAM_APPLY_ID = T.ID
+left join hid0101_orcl_operaanesthisa_emrhis.SAM_APPLY_OP P on P.SAM_APPLY_ID = T.ID
+left join hid0101_orcl_operaanesthisa_emrhis.sam_reg reg on t.ID = reg.sam_apply_id
+left join hid0101_orcl_operaanesthisa_emrhis.sam_reg_op reg_p on reg_p.sam_reg_id = reg.id -- 实际手术名称
+left join hid0101_orcl_operaanesthisa_emrhis.ipi_registration ipi on ipi.id = an.ipi_registration_id
+left join hid0101_orcl_operaanesthisa_emrhis.hrm_employee ee on reg_p.operator_doctor_id = ee.id
+left join hid0101_orcl_operaanesthisa_emrhis.hrm_employee ep on an.narcotic_doctor_id = ep.id
+left join hid0101_orcl_operaanesthisa_emrhis.sam_room sr on t.sam_room_id = sr.id
+left join (select r.sam_apply_id , array_join(array_agg(r.node_value order by r.sam_apply_id ),';') as mzfscmc from ( select sam_apply_id,node_value from hid0101_orcl_operaanesthisa_emrhis.sam_emr_rec r
+left join hid0101_orcl_operaanesthisa_emrhis.sam_emr_rec_nv n on n.sam_emr_rec_id = r.id
+where r.rss_emr_type_id = 'sam_mzfs' and n.node_name = 'S_MZFS_DM' and r.isdeleted ='0' and n.isdeleted ='0' group by sam_apply_id,node_value) r group by r.sam_apply_id ) mz on an.sam_apply_id = mz.sam_apply_id
+left join hid0101_orcl_operaanesthisa_emrhis.hra00_department dep on dep.id=t.patient_dept_id
+where T.HEALTH_SERVICE_ORG_ID = 'HXSSMZK'
+and T.OPER_TYPE = 'ROOM_OPER'
+and P.IS_MAIN_OPERATION = '1'
+and T.IS_REJECT = '2'
+and T.S_SSSYZT_DM = '90'
+and t.isdeleted ='0'
+and reg.isdeleted ='0'
+and reg_p.isdeleted ='0'
+and ipi.isdeleted = '0'
+and ep.isdeleted = '0'
+and sr.isdeleted = '0'
+)
+
+
+
+
+

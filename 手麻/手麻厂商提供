@@ -1,0 +1,100 @@
+
+SELECT
+    dpt.department_chinese_name 科室,
+    nvl(ieg.ipi_registration_no,opc.opc_registration_no) 患者住院号,
+    info.patient_Name 患者姓名,
+    xb.s_xb_cmc 性别,
+    f_j_getage(info.scheduled_date, info.birthday) 年龄,
+    info.bed_no 床号,
+    (rank() over(partition by info.room_id,trunc(info.scheduled_date) order by info.in_oproom_date, info.operator_begin_date)) 台次,
+    info.in_oproom_date 入室时间,
+    info.out_oproom_date 出室时间,
+    info.operator_begin_date 手术开始时间,
+    info.operator_end_date 手术结束时间,
+    info.ana_beging_date 麻醉开始时间,
+    info.ana_end_date 麻醉结束时间,    
+    info.operName 手术名称,
+    info.opercode 手术编码,
+    info.main_diag 诊断,
+    ssem.employee_name 主刀医生 ,
+    mzem.employee_name 麻醉医生 ,
+    mzem1.employee_name 麻醉助手1 ,
+    mzem2.employee_name 麻醉助手2 ,
+    xhdoc.employee_name 巡回护士,
+    xsdoc.employee_name 洗手护士,
+    mzfs.mzfsCmc 麻醉方式,
+    info.asa ASA分级,
+    rm.oper_room 手术间,
+    (case when info.emergency='1' then '急诊' else '择期' end ) 手术类型,
+    info.qkdj 切口等级,
+    info.ssdj 手术等级
+from (select a.id apply_id,
+           max(a.is_reject) is_reject,
+           max(ar.id) anar_id,
+           max(a.is_emergency) emergency,
+           max(reg.ipi_registration_id) ipi_registration_id,
+           max(reg.opc_registration_id) opc_registration_id,
+           max(reg.patient_name) patient_Name,
+           max(o.operation_name)  operation_Name,
+           max(a.is_emergency) is_emergency,
+           max(reg.s_xb_dm) s_xb_dm,
+           max(reg.sam_room_id) room_id,
+           max(a.s_sssyzt_dm) s_sssyzt_dm,
+           max(reg.bed_no) bed_no,
+           max(a.scheduled_date) scheduled_date,
+           max(reg.birthday) birthday,
+           max(reg.main_diag) main_diag,
+           max(o.operator_doctor_id) ssdoc_id,
+           max(o.narcotic_doctor_id) mzdoc_id,
+           max(o.narcotic_assistant_1) mzzs1_id,
+           max(o.narcotic_assistant_2) mzzs2_id,
+           max(o.CIRCUIT_NURSE_01) xhdoc_id,
+           max(o.SCRUB_NURSE_01) xsdoc_id,
+           max(o.s_asamzfj_dm) asa,
+           max(o.s_ssjb_dm) ssdj,
+           max(o.s_ssqk_dj_dm) qkdj,
+           max(o.operation_code) opercode,
+           listagg(o.operation_name, ';') within group(order by a.id) operName,
+           max(reg.patient_dept_id) dept_id,
+           max(ar.in_oproom_date) in_oproom_date,
+           max(ar.out_oproom_date) out_oproom_date,
+           max(ar.oper_beging_date) operator_begin_date,
+           max(ar.oper_end_date) operator_end_date,
+           max(ar.ana_beging_date) ana_beging_date,
+           max(ar.ana_end_date) ana_end_date
+      from sam_apply a
+      left join sam_reg reg 
+        on reg.id =  a.id 
+    left join ipi_registration ig
+    on ig.id = reg.ipi_registration_id
+    left join opc_registration og
+    on og.id = reg.opc_registration_id
+      left join sam_reg_op o on reg.id = o.sam_reg_id
+      left join sam_anar ar on a.id = ar.sam_apply_id
+        -- start 请在此处编写SQL条件 --
+        where a.scheduled_date between TO_DATE( '2024-01-01 00:00:00', 'yyyy-mm-dd hh24:mi:ss' ) AND TO_DATE( '2024-12-01 00:00:00', 'yyyy-mm-dd hh24:mi:ss' )
+       and a.oper_type = 'ROOM_OPER' and a.s_sssyzt_dm='90'
+        -- end--
+     group by a.id  
+     ) info
+  left join ipi_registration ieg on ieg.id = info.ipi_registration_id
+  left join opc_registration opc on opc.id = info.opc_registration_id
+  left join hra00_department dpt on dpt.id = info.dept_Id
+  left join pub_sssyzt ps on ps.s_sssyzt_dm = info.s_sssyzt_dm
+  left join sam_room rm  on rm.id = info.room_id 
+  left join hrm_employee ssem on ssem.id = info.ssdoc_id
+  left join hrm_employee mzem on mzem.id = info.mzdoc_id
+  left join hrm_employee mzem1 on mzem1.id = info.mzzs1_id
+  left join hrm_employee mzem2 on mzem2.id = info.mzzs2_id
+  left join hrm_employee xhdoc on xhdoc.id = info.xhdoc_id
+  left join hrm_employee xsdoc on xsdoc.id = info.xsdoc_id
+  left join GB_T_2261_1_2003 xb on xb.s_xb_dm = info.s_xb_dm
+  left join (select r.sam_apply_id,
+                    listagg(n.node_value, ';') within group(order by n.id) mzfsCmc
+           from sam_emr_rec r
+           left join sam_emr_rec_nv n
+             on n.sam_emr_rec_id = r.id
+          where r.rss_emr_type_id = 'sam_mzfs'
+            and n.node_name = 'S_MZFS_DM'
+          group by r.sam_apply_id) mzfs on mzfs.sam_apply_id = info.apply_id
+order by info.scheduled_date desc                                                                                                                                                              

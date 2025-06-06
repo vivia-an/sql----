@@ -1,0 +1,159 @@
+
+=== 数据采集说明 ===
+
+国家医保飞行检查数据采集清单-医院端
+数据提取要求
+"1.院端数据提取应提取“全口径”数据。包括自费数据，医院接收跨省异地就医人员数据。数据提供前需明确医院是否有分院、附院，如存在需一并提取。
+2.日间手术，血透治疗等按照本院实际情况提取在住院信息表或门诊信息表。
+3.如数据量较大，可先提取一个月的数据，待检查组对进行数据校验通过以后按照检查周期导出数据；也可根据实际情况提取全部数据，自行数据校验以后按照检查周期导出数据。
+4.提取有效数据。必提字段，如确实没有，请及时与“数据分析人员”沟通情况；非必提字段，确实没有为空填写“”；
+"
+数据导出格式
+"1．参检方及被检方提数工程师提前对数据库版本进行沟通，如果数据提供方的版本高于检查方的Oracle版本，请在导出数据时添加version参数。
+2．医药机构端建议返回自身数据库的备份文件(oracle返回数据泵，mssql返回分离文件，mysql返回sqldump文件，其他按照模板返回csv文件)。参检方及被检方提数工程师提前对导出格式进行沟通（数据泵、DMP、CSV等），dmp提供导出的用户名，表空间。
+3．确定提数字符集。如需要压缩导出，对导出形式，导出日志，导入用户进行详细文字说明。
+4．由被检省省医保局牵头进行数据提取，扎口提供给参检省信息组。
+5．如导出的数据格式为csv，注意事项:
+①导出的数据的字段内容含有逗号的，导出分隔符改为“|@|”（正常情况下较为难以出现的字符），避免导入时数据串列；
+②提取字段内容无科学计数法；
+③文件格式为UTF-8；
+④提供对应的表建表语句；
+⑤导出的日期类型为DATE/DATETIME；
+⑥导出的数据一定要带表头，提取数据表字段名称需参照《医疗机构端数据采集表清单》的英文名称导出。"
+数据验证逻辑
+"1.被检省提取导出数据能否重新导回原提数数据库。
+2.被检省重新导回的数据是否跟导出的数据量一致（csv）。
+3.主单表的“TOTAL_AMOUNT”（医疗总费用）总计与明细表的“COST”（金额）总计是否相同或接近。（允许不超过0.5%的误差）
+4.导出的数据""主单""与""明细""的""HISID(结算单据号)""的数量是否一致（允许不超过0.1%的无法关联）。
+5.导出的数据""主单""与""明细""通过""HISID(结算单据号)""是否可以关联（允许不超过0.1%的无法关联）。
+6.主单表中HISID（结算单据号）验证是否存在重复（允许不超过0.1%的重复）。
+7.导出的数据""主单""与""明细""的""结算日期""是否符合数据提取时间范围的要求
+8.各个月份均有数据，每月度数据提取是否遗漏。
+9.主单中的医疗总费用原则上不能出现负值，退费除外；
+10.参照提数标准校验必填字段是否有值。
+11.提供的医疗总费用与财务报表是否对应。
+12.院端数据医保结算病例总金额与医保端数据总金额是否一致（第三方入库后校验）。"
+
+=== 医疗机构端数据采集表清单 ===
+
+数据表格目录	Unnamed: 1	Unnamed: 2
+序号	中文名称	英文名称
+1	检查记录表	EXAMINFO
+2	检验记录表	LABINFO
+3	医嘱套餐表	MEDICAL_ORDER_PACKAGE
+4	医嘱执行表	MEDICAL_ORDER_EXECUTE
+5	财务报表（含明细）	MEDICAL_FINICAL_INFO
+
+=== 检查记录表 ===
+
+1.检查记录表（EXAMINFO ）	Unnamed: 1	Unnamed: 2	Unnamed: 3	Unnamed: 4	Unnamed: 5	Unnamed: 6
+序号	程序字段名	所需字段	字段格式	主键	非空	备注
+1	HOSPITAL_ID	医疗机构编码	VARCHAR(100)	√	√	医保系统中医疗机构编码（一般取医保结算时上传的本院医疗机构编码）
+2	HOSPITAL_NAME	医疗机构名称	VARCHAR(100)		√	医保系统中医疗机构名称（一般取医保结算时上传的本院医疗机构编码）
+3	BRIDGE_ID	病案关联字段	VARCHAR(100)			与病案的关联编码，可关联该病人病案首页相关诊断等信息。门诊病例可不填。
+4	HISID	结算单据号	VARCHAR(100)		√	"重要字段！用于：
+1.识别本次化验的收费情况；
+2.关联字段，关联“住院/门诊费用主单”。"
+5	PATIENT_ID	个人编码	VARCHAR(100)		√	医保患者提供医保的个人编码、自费患者请提供本院唯一的身份编码
+6	APPY_NO	申请单号	VARCHAR(50)	√	√	
+7	APPY_DEPT_NAME	申请科室名称	VARCHAR(50)		√	
+8	APPY_DR_NAME	申请医生姓名	VARCHAR(50)		√	
+9	EXAM_DATE	检查日期	DATE		√	
+10	EXAM_ITEM_CODE	医院检查项目代码	VARCHAR(50)		√	医院HIS系统中该检查项目代码
+11	EXAM_ITEM_NAME	医院检查项目名称	VARCHAR(50)		√	医院HIS系统中该检查项目名称
+12	YB_EXAM_ITEM_CODE	医保检查项目代码	VARCHAR(50)			上传医保结算的检查项目代码
+13	YB_EXAM_ITEM_NAME	医保检查项目名称	VARCHAR(50)			上传医保结算的检查项目名称
+14	EXAM_PART	检查部位	VARCHAR(50)		√	
+15	EXAM_DEPT_NAME	检查科室名称	VARCHAR(50)		√	
+16	EXAM_DEV_NO	检查设备编码	VARCHAR(50)		√	医院物资设备管理中对该检查设备的唯一编码
+17	RPOTC_NO	报告单号	VARCHAR(50)		√	
+18	RPT_DATE	报告日期	DATE		√	
+19	EXAM_RSTL_ABN	检查结果异常标志	VARCHAR(50)		√	
+20	EXAM_RESULT	检查结果	VARCHAR(50)			检查结果具体数值
+21	EXAM_CCLS	检查结论	VARCHAR(200)		√	
+22	EXAM_PIC_NO	检查图像编码	VARCHAR(50)			关联医院PACS系统中该检查图像的编码
+23	VALI_FLAG	有效标志	VARCHAR(10)		√	
+
+=== 检验记录表 ===
+
+2.检验记录表（LABINFO）	Unnamed: 1	Unnamed: 2	Unnamed: 3	Unnamed: 4	Unnamed: 5	Unnamed: 6
+序号	程序字段名	所需字段	字段格式	主键	非空	备注
+1	HOSPITAL_ID	医疗机构编码	VARCHAR(100)	√	√	医保系统中医疗机构编码（一般取医保结算时上传的本院医疗机构编码）
+2	HOSPITAL_NAME	医疗机构名称	VARCHAR(100)		√	医保系统中医疗机构名称（一般取医保结算时上传的本院医疗机构编码）
+3	BRIDGE_ID	病案关联字段	VARCHAR(100)			与病案的关联编码，可关联该病人病案首页相关诊断等信息。门诊病例可不填。
+4	HISID	结算单据号	VARCHAR(100)		√	"重要字段！用于：
+1.识别本次化验的收费情况；
+2.关联字段，关联“住院/门诊费用主单”。"
+5	PATIENT_ID	个人编码	VARCHAR(100)		√	医保患者提供医保的个人编码、自费患者请提供本院唯一的身份编码
+6	APPY_NO	申请单号	VARCHAR(50)	√	√	
+7	APPY_DEPT_CODE	申请科室名称	VARCHAR(50)		√	
+8	BILG_DR_NAME	申请医生姓名	VARCHAR(50)		√	
+9	EXAM_SAMPLE_TYPE	送检样本类型	VARCHAR(50)		√	血液、尿液、粪便等
+10	EXAM_SAMPLE_NO	送检标本号	VARCHAR(50)	√	√	
+11	EXAM_ORG_CODE	外检机构代码	VARCHAR(50)			如检查样本外送至院外第三方检验，填写该字段。
+12	EXAM_ORG_NAME	外检机构名称	VARCHAR(50)			如检查样本外送至院外第三方检验，填写该字段。
+13	EXAM_DEPT_CODE	检验科室名称	VARCHAR(50)			院内检验科室名称
+14	EXAM_ITEM_CODE	检验项目代码	VARCHAR(50)			医院HIS系统中该检验项目代码
+15	EXAM_ITEM_NAME	检验项目名称	VARCHAR(50)			医院HIS系统中该检验项目名称
+16	EXAM_RESULT	检查结果	VARCHAR(50)		√	检查结果数值
+17	EXAM_RESULT_UNIT	检查结果单位	VARCHAR(50)		√	
+18	REFER_RESULT	参考范围	VARCHAR(50)		√	
+19	MACHINE_TIME	上机时间	DATE		√	
+20	RPT_NO	报告单据号	VARCHAR(50)		√	
+21	RPT_DATE	报告日期	DATE		√	
+22	RPT_DOC	报告医师	VARCHAR(50)		√	
+23	VALI_FLAG	有效标志	VARCHAR(10)		√	
+
+=== 医嘱套餐表 ===
+
+3.医嘱套餐表（MEDICAL_ORDER_PACKAGE）	Unnamed: 1	Unnamed: 2	Unnamed: 3	Unnamed: 4	Unnamed: 5	Unnamed: 6
+序号	程序字段名	所需字段	字段格式	主键	非空	备注
+1	HOSPITAL_ID	医疗机构编码	VARCHAR(100)	√	√	医保系统中医疗机构编码（一般取医保结算时上传的本院医疗机构编码）
+2	HOSPITAL_NAME	医疗机构名称	VARCHAR(100)		√	医保系统中医疗机构名称（一般取医保结算时上传的本院医疗机构编码）
+3	PACKAGE_ID	收费组套编码	VARCHAR2(128)	√	√	填报医院规定的收费组套，不包含医生自定义组套
+4	PACKAGE_NAME	收费组套名称	VARCHAR2(128)		√	
+5	PACKAGE_PRICE	收费组套价格	NUMBER(18,4)		√	
+6	ITEM_ID_HOSP	医院项目编码	VARCHAR2(128)		√	
+7	ITEM_NAME_HOSP	医院项目名称	VARCHAR2(128)		√	
+8	WJ_CODE	对应物价编码	VARCHAR2(128)		√	发改委物价编码
+9	ITEM_PRICE	项目单价	NUMBER(18,4)			
+10	ITEM_NUM	项目数量	NUMBER(18,4)		√	
+11	EXEC_DEPT_CODE	执行科室代码	VARCHAR2(128)			
+12	EXEC_DEPT_NAME	执行科室名称	VARCHAR2(128)			
+13	START_DATE	开始便用时间	DATE/DATETIME			
+14	STOP_DATE	停止使用时间	DATE/DATETIME			
+15	IS_ENABLE	使用标识	VARCHAR2(1)		√	 1 启用0 禁用
+
+=== 医嘱执行表 ===
+
+4.医嘱执行表（MEDICAL_ORDER_EXECUTE）	Unnamed: 1	Unnamed: 2	Unnamed: 3	Unnamed: 4	Unnamed: 5	Unnamed: 6
+序号	程序字段名	所需字段	字段格式	主键	非空	备注
+1	HOSPITAL_ID	医疗机构编码	VARCHAR(100)	√	√	医保系统中医疗机构编码（一般取医保结算时上传的本院医疗机构编码）
+2	HOSPITAL_NAME	医疗机构名称	VARCHAR(100)		√	医保系统中医疗机构名称（一般取医保结算时上传的本院医疗机构编码）
+3	HISID	唯一就诊标识	VARCHAR2(128)		√	"　重要字段！用于：
+1.识别本次住院的唯一id；
+2.关联字段，关联“住院费用明细”，“住院诊断信息表”、“手术操作信息表”"
+4	ZYH	住院号	VARCHAR2(128)		√	个人本人住院唯一编码
+5	VISIT_ID	住院流水号	VARCHAR2(128)		√	本次住院流水号
+6	PATIENT_ID	患者个人编码/患者ID/医保证号	VARCHAR2(128)		√	　
+7	ID_CARD	身份证号	VARCHAR(100)		√	患者身份证号
+8	ORDER_ID	医嘱ID	VARCHAR2(128)	√	√	唯一医嘱标识,包含医嘱顺序号
+9	ORDER_CODE	医嘱编码	VARCHAR2(128)	√	√	开具项目编码即医院项目编码item_id_hosp
+10	ORDER_NAME	医嘱名称	VARCHAR2(128)		√	
+11	PACKAGE_ID	组套代码	VARCHAR2(128)			
+12	PACKAGE_NAME	组套名称	VARCHAR2(128)			
+13	ORDER_NAME	医嘱内容	VARCHAR2(1024)			　
+14	ORDER_TYPE	医嘱类型	VARCHAR2(1024)			长期医嘱，临时医嘱
+15	ORDER_LB	医嘱类别	VARCHAR2(128)			如：护理、治疗 、出院、 检查、手术、检验、嘱托等
+16	INPUT_DEPT_NAME	开立科室	VARCHAR2(32)		√	　
+17	INPUT_DOCTOR_NAME	开立医生	VARCHAR2(128)		√	　
+18	INPUT_TIME	开立时间	DATE/DATETIME		√	　
+19	EXEC_TIME	执行时间	DATE/DATETIME			每次执行对应一条数据
+20	EXEC_DEPT_NAME	执行科室	VARCHAR2(32)			　
+21	EXEC_NURSE_NAME	执行护士	VARCHAR2(128)			　
+22	EXEC_STOP_TIME	执行结束时间	DATE/DATETIME			　
+
+=== 财务报名（含明细） ===
+
+5.财务报表含明细（MEDICAL_ORDER_EXECUTE）
+检查组根据需求提取院端财务年度报表及所需财务明细表

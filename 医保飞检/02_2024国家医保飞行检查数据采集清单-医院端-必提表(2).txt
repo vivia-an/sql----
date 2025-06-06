@@ -1,0 +1,762 @@
+
+=== 数据采集说明 ===
+
+国家医保飞行检查数据采集清单-医院端
+
+数据提取要求
+
+"1.院端数据提取应提取“全口径”数据。包括自费数据，医院接收跨省异地就医人员数据。数据提供前需明确医院是否有分院、附院，如存在需一并提取。
+2.日间手术，血透治疗等按照本院实际情况提取在住院信息表或门诊信息表。
+3.如数据量较大，可先提取一个月的数据，待检查组对进行数据校验通过以后按照检查周期导出数据；也可根据实际情况提取全部数据，自行数据校验以后按照检查周期导出数据。
+4.提取有效数据。必提字段，如确实没有，请及时与“数据分析人员”沟通情况；非必提字段，确实没有为空填写“”；
+5.主单与明细相关表格据提取时间以结算时间为准。医疗机构端物资库存表，出入库明细表，入库明细表，设备记录表数据提取时间以实际发生时间为准。
+6.提数的日期类型为DATE/DATETIME。
+7.出入库含多个库时需要全部提取，且多个库需要分别表格提取。
+"
+
+数据导出格式
+
+"1．参检方及被检方提数工程师提前对数据库版本进行沟通，如果数据提供方的版本高于检查方的Oracle版本，请在导出数据时添加version参数。
+2．医药机构端建议返回自身数据库的备份文件(oracle返回数据泵，mssql返回分离文件，mysql返回sqldump文件，其他按照模板返回csv文件)。参检方及被检方提数工程师提前对导出格式进行沟通（数据泵、DMP、CSV等），dmp提供导出的用户名，表空间。
+3．确定提数字符集。如需要压缩导出，对导出形式，导出日志，导入用户进行详细文字说明。
+4．由被检省省医保局牵头进行数据提取，扎口提供给参检省信息组。
+5．如导出的数据格式为csv，注意事项:
+①导出的数据的字段内容含有逗号的，导出分隔符改为“|@|”（正常情况下较为难以出现的字符），避免导入时数据串列；
+②提取字段内容无科学计数法；
+③文件格式为UTF-8；
+④提供对应的表建表语句；
+⑤导出的日期类型为DATE/DATETIME；
+⑥导出的数据一定要带表头，提取数据表字段名称需参照《医疗机构端数据采集表清单》的英文名称导出。"
+
+数据验证逻辑
+
+"1.被检省提取导出数据能否重新导回原提数数据库。
+2.被检省重新导回的数据是否跟导出的数据量一致（csv）。
+3.主单表的“TOTAL_AMOUNT”（医疗总费用）总计与明细表的“COST”（金额）总计是否相同或接近。（允许不超过0.5%的误差）
+4.导出的数据""主单""与""明细""的""HISID(结算单据号)""的数量是否一致（允许不超过0.1%的无法关联）。
+5.导出的数据""主单""与""明细""通过""HISID(结算单据号)""是否可以关联（允许不超过0.1%的无法关联）。
+6.主单表中HISID（结算单据号）验证是否存在重复（允许不超过0.1%的重复）。
+7.导出的数据""主单""与""明细""的""结算日期""是否符合数据提取时间范围的要求
+8.各个月份均有数据，每月度数据提取是否遗漏。
+9.主单中的医疗总费用原则上不能出现负值，退费除外；
+10.参照提数标准校验必填字段是否有值。
+11.提供的医疗总费用与财务报表是否对应。
+12.院端数据医保结算病例总金额与医保端数据总金额是否一致（第三方入库后校验）。"
+
+
+=== 医疗机构端数据采集表清单 ===
+
+数据表格目录	Unnamed: 1	Unnamed: 2
+
+序号	中文名称	英文名称
+
+1	住院结算主单	SETTLE_ZY
+
+2	住院诊断信息表	SETTLE_ZY_DIAGNOSIS
+
+3	手术操作信息表	MDCS_FUND_SETL_LIST_OPRN_D
+
+4	住院结算明细	SETTLE_ZY_DETAIL
+
+5	门诊结算主单	SETTLE_MZ
+
+6	门诊结算明细	SETTLE_MZ_DETAIL
+
+7	物资码映射关系表	HIS_VS_YB_STORE_MAPPING
+
+8	物资库存表	HIS_VS_YB_STORE
+
+9	入库明细表	HIS_VS_YB_INVENTORY
+
+10	出库明细表	HIS_VS_YB_DELIVER
+
+11	包材转化比表	CONVERT_UNIT
+
+
+=== 住院结算主单 ===
+
+1.住院结算主单	Unnamed: 1	Unnamed: 2	Unnamed: 3	Unnamed: 4	Unnamed: 5	Unnamed: 6
+
+序号	程序字段名	所需字段	字段格式	主键	非空	备注
+
+1	HOSPITAL_ID	医疗机构编码	VARCHAR(100)		√	医保系统中医疗机构编码（一般取医保结算时上传的本院医疗机构编码）
+
+2	HOSPITAL_NAME	医疗机构名称	VARCHAR(100)		√	医保系统中医疗机构名称（一般取医保结算时上传的本院医疗机构名称）
+
+3	BRIDGE_ID	病案关联字段	VARCHAR(100)	√	√	与病案的关联编码，可关联该病人病案首页相关诊断等信息。
+
+4	HISID	结算单据号	VARCHAR(100)	√	√	"重要字段！用于：
+1.识别本次住院的唯一id；
+2.关联字段，关联“住院费用明细”、“住院诊断信息表”、“手术操作信息表”。"
+
+5	P_LEVEL	医保结算等级	VARCHAR(30)		√	0\1\2\3
+
+6	BILL_DATE	结算日期	DATE/DATETIME		√	
+
+7	ZYH	住院号	VARCHAR(100)		√	病人在医院的住院号，如患者唯一或循环使用请处理成唯一
+
+8	PATIENT_ID	个人编码	VARCHAR(100)		√	医保患者请提供医保的个人编码、自费患者请提供本院HIS唯一的身份编码，需确保患者唯一
+
+9	SOCIAL_ID	患者社会保障号码	VARCHAR(100)			参保人社保号码（或提取社保卡号），自费为空
+
+10	ID_CARD	身份证号	VARCHAR(100)		√	患者身份证号
+
+11	BENEFIT_TYPE	险种类型	VARCHAR(50)			城乡居民、城镇职工、自费
+
+12	BENEFIT_GROUP_ID	人员类型	VARCHAR(30)			在岗职工、退休职工、学生、一般居民、低保户、特困供养、孤儿等
+
+13	ADMISSION_DEPT_ID	入院科室编码	VARCHAR(30)			
+
+14	ADMISSION_DEPT_NAME	入院科室名称	VARCHAR(30)		√	
+
+15	TRANSFER_DEPT_ID	转诊科室编码	VARCHAR(50)			
+
+16	TRANSFER_DEPT_NAME	转科科室名称	VARCHAR(50)			转科科室，多个以“|”隔开
+
+17	DISCHARGE_DEPT_ID	出院科室编码	VARCHAR(30)			
+
+18	DISCHARGE_DEPT_NAME	出院科室名称	VARCHAR(30)		√	
+
+19	DOCTOR_ID	主诊医师编码	VARCHAR(30)			该病例主诊医师编码
+
+20	DOCTOR_NAME	主诊医师姓名	VARCHAR(30)		√	该病例主诊医师姓名
+
+21	PATIENT_GENDER	患者性别	VARCHAR(30)		√	
+
+22	PATIENT_BIRTHDAY	患者出生日期	DATE/DATETIME 		√	
+
+23	PATIENT_AGE	患者年龄	DECIMAL(16,2)		√	就诊时的年龄
+
+24	BEDID	患者床位号	VARCHAR(30)			患者床位号，如涉及转科或转床，多个以“|”隔开
+
+25	NB_TYPE	新生儿入院类型	VARCHAR(30)			
+
+26	NB_BIRTH_WEIGHT	新生儿出生体重	DECIMAL(16,2)			单位“G”
+
+27	NB_INPATIENT_WEIGHT	新生儿入院体重	DECIMAL(16,2)			单位“G”
+
+28	CLAIM_TYPE	住院医疗类型	VARCHAR(30)		√	"日间手术、普通住院、单病种住院、生育住院等等。
+按照医院字典的该字段，提取汉字，不用与上述列举名称保持完全一致"
+
+29	IF_LOCAL_FLAG	异地标志	VARCHAR(30)		√	用于区分本地异地就医，请提供：“异地”，“本地”
+
+30	ADMISSION_DATE	入院日期	DATE/DATETIME 		√	
+
+31	DISCHARGE_DATE	出院日期	DATE/DATETIME 		√	
+
+32	ZYTS	住院天数	DECIMAL(16,2)		√	实际住院天数
+
+33	DISCHARGE_STATUS	离院方式	VARCHAR(30)		√	1.医嘱离院 2.医嘱转院、转社区、转卫生机构 3.非医嘱离院 4.死亡 9.其他
+
+34	TOTAL_AMOUNT	医疗总费用	DECIMAL(16,2)		√	
+
+35	BMI_PAY_AMOUNT	基本统筹支付	DECIMAL(16,2)		√	基本统筹账户支付的金额
+
+36	CASH	个人现金支付	DECIMAL(16,2)			现金
+
+37	SELF_PAY_AMOUNT	个人账户支付	DECIMAL(16,2)			个人账户支付费用
+
+38	SELF_PAY_IN	个人自付	DECIMAL(16,2)			医保报销范围内需个人承担的费用
+
+39	SELF_PAY_OUT	个人自费	DECIMAL(16,2)			报销范围外全部由个人承担的费用
+
+40	BMI_CONVERED_AMOUNT	符合基本医疗保险的费用	DECIMAL(16,2)			纳入医保范畴的费用总额，并非全部医保报销，其中包含按比例由基金支付及个人支付金额
+
+41	HOSPITAL_AREA	院区	VARCHAR(30)		√	飞检涉及多个院区时，需提供每条结算信息所属院区，院区归属与纸质病例档案归属院区一致。只有一个院区，或只检查一个院区，可为空
+
+42	MEDICAL_INSURANCE_FLAG	医保结算与非医保结算标志	VARCHAR(30)		√	医保结算：0，非医保结算：1
+
+43	REFUND_FLAG_TYPE	退费标识	VARCHAR(6)		√	非退费为:0，退费单据为:1
+
+44	REFUND_HISID	退费冲销原结算单据号	VARCHAR(100)		√	如进行退费冲销，提供冲销的结算单据号HISID
+
+
+=== 住院诊断信息表 ===
+
+2.住院诊断信息表	Unnamed: 1	Unnamed: 2	Unnamed: 3	Unnamed: 4	Unnamed: 5	Unnamed: 6
+
+序号	程序字段名	所需字段	字段格式	主键	非空	备注
+
+1	HOSPITAL_ID	医疗机构编码	VARCHAR(100)		√	医保系统中医疗机构编码（一般取医保结算时上传的本院医疗机构编码）
+
+2	HOSPITAL_NAME	医疗机构名称	VARCHAR(100)		√	医保系统中医疗机构名称（一般取医保结算时上传的本院医疗机构名称）
+
+3	BRIDGE_ID	病案关联字段	VARCHAR(100)	√	√	与病案的关联编码，可关联该病人病案首页相关诊断等信息
+
+4	HISID	结算单据号	VARCHAR(100)	√	√	"重要字段！用于：
+1.识别本次住院的唯一id；
+2.关联字段，关联“住院费用明细”，“住院诊断信息表”、“手术操作信息表”"
+
+5	ZYH	住院号	VARCHAR(100)		√	病人在医院的住院号，如患者唯一或循环使用请处理成唯一
+
+6	PATIENT_ID	个人编码	VARCHAR(100)		√	医保患者请提供医保的个人编码、自费患者请提供本院HIS唯一的身份编码，需确保患者唯一
+
+7	SOCIAL_ID	患者社会保障号码	VARCHAR(100)			参保人社保号码（或提取社保卡号），自费为空
+
+8	ID_CARD	身份证号	VARCHAR(100)		√	患者身份证号
+
+9	ADMISSION_DISEASE_ID	入院诊断编码	VARCHAR(200)		√	入院诊断编码，多个按照诊断顺序以“|”隔开,需要提取所有主诊断和副诊断,主诊断在最前
+
+10	ADMISSION_DISEASE_NAME	入院诊断名称	VARCHAR(200)		√	入院诊断名称，多个按照诊断顺序以“|”隔开,需要提取所有主诊断和副诊断,主诊断在最前
+
+11	DISCHARGE_DISEASE_ID_MAIN	出院主诊断编码	VARCHAR(20)		√	
+
+12	DISCHARGE_DISEASE_NAME_MAIN	出院主诊断名称	VARCHAR(50)		√	
+
+13	DISCHARGE_DISEASE_ID_OTHER1	出院副诊断编码-1	VARCHAR(20)			
+
+14	DISCHARGE_DISEASE_NAME_OTHER1	出院副诊断名称-1	VARCHAR(50)			
+
+15	DISCHARGE_DISEASE_ID_OTHER2	出院副诊断编码-2	VARCHAR(20)			
+
+16	DISCHARGE_DISEASE_NAME_OTHER2	出院副诊断名称-2	VARCHAR(50)			
+
+17	DISCHARGE_DISEASE_ID_OTHER3	出院副诊断编码-3	VARCHAR(20)			
+
+18	DISCHARGE_DISEASE_NAME_OTHER3	出院副诊断名称-3	VARCHAR(50)			
+
+19	DISCHARGE_DISEASE_ID_OTHER4	出院副诊断编码-4	VARCHAR(20)			
+
+20	DISCHARGE_DISEASE_NAME_OTHER4	出院副诊断名称-4	VARCHAR(50)			
+
+21	DISCHARGE_DISEASE_ID_OTHER5	出院副诊断编码-5	VARCHAR(20)			
+
+22	DISCHARGE_DISEASE_NAME_OTHER5	出院副诊断名称-5	VARCHAR(50)			
+
+23	DISCHARGE_DISEASE_ID_OTHER6	出院副诊断编码-6	VARCHAR(20)			
+
+24	DISCHARGE_DISEASE_NAME_OTHER6	出院副诊断名称-6	VARCHAR(50)			
+
+25	DISCHARGE_DISEASE_ID_OTHER7	出院副诊断编码-7	VARCHAR(20)			
+
+26	DISCHARGE_DISEASE_NAME_OTHER7	出院副诊断名称-7	VARCHAR(50)			
+
+27	DISCHARGE_DISEASE_ID_OTHER8	出院副诊断编码-8	VARCHAR(20)			
+
+28	DISCHARGE_DISEASE_NAME_OTHER8	出院副诊断名称-8	VARCHAR(50)			
+
+29	DISCHARGE_DISEASE_ID_OTHER9	出院副诊断编码-9	VARCHAR(20)			
+
+30	DISCHARGE_DISEASE_NAME_OTHER9	出院副诊断名称-9	VARCHAR(50)			
+
+31	DISCHARGE_DISEASE_ID_OTHER10	出院副诊断编码-10	VARCHAR(20)			
+
+32	DISCHARGE_DISEASE_NAME_OTHER10	出院副诊断名称-10	VARCHAR(50)			
+
+33	DISCHARGE_DISEASE_ID_OTHER11	出院副诊断编码-11	VARCHAR(20)			
+
+34	DISCHARGE_DISEASE_NAME_OTHER11	出院副诊断名称-11	VARCHAR(50)			
+
+35	DISCHARGE_DISEASE_ID_OTHER12	出院副诊断编码-12	VARCHAR(20)			
+
+36	DISCHARGE_DISEASE_NAME_OTHER12	出院副诊断名称-12	VARCHAR(50)			
+
+37	DISCHARGE_DISEASE_ID_OTHER13	出院副诊断编码-13	VARCHAR(20)			
+
+38	DISCHARGE_DISEASE_NAME_OTHER13	出院副诊断名称-13	VARCHAR(50)			
+
+39	DISCHARGE_DISEASE_ID_OTHER14	出院副诊断编码-14	VARCHAR(20)			
+
+40	DISCHARGE_DISEASE_NAME_OTHER14	出院副诊断名称-14	VARCHAR(50)			
+
+41	DISCHARGE_DISEASE_ID_OTHER15	出院副诊断编码-15	VARCHAR(20)			
+
+42	DISCHARGE_DISEASE_NAME_OTHER15	出院副诊断名称-15	VARCHAR(50)			
+
+
+=== 手术操作信息表 ===
+
+3.手术操作信息表	Unnamed: 1	Unnamed: 2	Unnamed: 3	Unnamed: 4	Unnamed: 5	Unnamed: 6
+
+序号	程序字段名	所需字段	字段格式	主键	非空	备注
+
+1	HOSPITAL_ID	医疗机构编码	VARCHAR(100)		√	医保系统中医疗机构编码（一般取医保结算时上传的本院医疗机构编码）
+
+2	HOSPITAL_NAME	医疗机构名称	VARCHAR(100)		√	医保系统中医疗机构名称（一般取医保结算时上传的本院医疗机构名称）
+
+3	HISID	结算单据号	VARCHAR(100)	√	√	"重要字段！用于：
+1.识别本次住院的唯一id；
+2.关联字段，关联“住院费用明细”，“住院诊断信息表”、“手术操作信息表”"
+
+4	ZYH	住院号	VARCHAR(100)		√	病人在医院的住院号，如患者唯一或循环使用请处理成唯一
+
+5	PATIENT_ID	个人编码	VARCHAR(100)		√	医保患者请提供医保的个人编码、自费患者请提供本院HIS唯一的身份编码，需确保患者唯一
+
+6	SOCIAL_ID	患者社会保障号码	VARCHAR(100)			参保人社保号码（或提取社保卡号），自费为空
+
+7	ID_CARD	身份证号	VARCHAR(100)		√	患者身份证号
+
+8	ICD9_CODE_MAIN	主手术及操作编码	VARCHAR(100)		√	主要手术及操作编码
+
+9	ICD9_NAME_MAIN	主手术及操作名称	VARCHAR(100)		√	主要手术及操作名称
+
+10	ICD9_CODE_OTHER	其他手术及操作编码	VARCHAR(4000)		√	次要手术及操作编码，多个按照顺序以“|”隔开
+
+11	ICD9_NAME_OTHER	其他手术及操作名称	VARCHAR(4000)		√	次要手术及操作编码，多个按照顺序以“|”隔开
+
+12	OPRN_OPRT_DATE	手术操作日期	DATE/DATETIME 			
+
+13	ANST_WAY	麻醉方式	VARCHAR(100)		√	
+
+14	ANST_BEGIN_TIME	麻醉开始时间	DATE/DATETIME 			
+
+15	ANST_END_TIME	麻醉结束时间	DATE/DATETIME 			
+
+16	OPER_BEGIN_TIME	手术开始时间	DATE/DATETIME 			
+
+17	OPER_END_TIME	手术结束时间	DATE/DATETIME 			
+
+18	OPER_DR_NAME	主刀术者医师姓名	VARCHAR(50)		√	
+
+19	OPER_DR_CODE	主刀术者医师代码	VARCHAR(50)			
+
+20	OPER_OTHER_DR_NAME	其他术者医师姓名	VARCHAR(50)			多个按照顺序以“|”隔开
+
+21	OPER_OTHER_DR_CODE	其他术者医师代码	VARCHAR(50)			多个按照顺序以“|”隔开
+
+22	ANST_DR_NAME	麻醉医师姓名	VARCHAR(50)			
+
+23	ANST_DR_CODE	麻醉医师代码	VARCHAR(50)			
+
+
+=== 住院结算明细 ===
+
+4.住院结算明细	Unnamed: 1	Unnamed: 2	Unnamed: 3	Unnamed: 4	Unnamed: 5	Unnamed: 6
+
+序号	字段	名称	数据类型	主键	非空	备注
+
+新增字段
+
+fee_billdet_persno 登记号 
+
+1	HOSPITAL_ID	医疗机构编码	VARCHAR(100)		√	医保系统中医疗机构编码（一般取医保结算时上传的本院医疗机构编码）
+
+2	HOSPITAL_NAME	医疗机构名称	VARCHAR(100)		√	医保系统中医疗机构名称（一般取医保结算时上传的本院医疗机构名称）
+
+3	HISID	结算单据号	VARCHAR(100)	√	√	"重要字段！用于：
+1.识别本次住院的唯一id；
+2.关联字段，关联“住院费用明细”，“住院诊断信息表”、“手术操作信息表”"
+
+4	PATIENT_ID	个人编码	VARCHAR(100)			医保患者请提供医保的个人编码、自费患者请提供本院唯一的身份编码
+
+5	ZYH	住院号	VARCHAR(100)	√		参保人在医院的住院号
+
+6	ID_CARD	身份证号	VARCHAR(100)		√	患者身份证号
+
+7	BILLING_DEPT_ID	开单科室编码	VARCHAR(30)			
+
+8	BILLING_DEPT_NAME	开单科室名称	VARCHAR(30)		√	
+
+9	BILLING_TIME	项目开单时间	DATE/DATETIME 			开具此项目的时点
+
+10	USAGE_DATE	项目执行时间	DATE/DATETIME 			执行此项目的时点
+
+11	EXCUTE_DEPT_ID	执行科室编码	VARCHAR(30)		√	
+
+12	EXCUTE_DEPT_NAME	执行科室名称	VARCHAR(30)		√	
+
+13	DOCTOR_ID	开单医师编码	VARCHAR(30)			医师编码
+
+14	DOCTOR_NAME	开单医师姓名	VARCHAR(30)		√	医师名称
+
+15	P_CATEGORY	费用类别	VARCHAR(30)		√	"床位费、诊查费、检查费、化验费、治疗费、手术费、护理费、卫生材料费、西药费、中药饮片费、中成药费、一般诊疗费、挂号费、其他费；如果目前费用类别与此统计口径有差异，按照目前费用类别提取
+按照医院字典的该字段，提取汉字，不用与上述列举名称保持完全一致"
+
+16	BILL_DATE	结算日期	DATE/DATETIME 		√	
+
+17	DISCHARGE_MEDICATION	出院带药标识	VARCHAR(30)			0否，1是，无为空
+
+18	ITEM_ID_HOSP	医院项目编码	VARCHAR(50)		√	医院HIS结算端项目编码，即院内收费编码。
+
+19	ITEM_NAME_HOSP	医院项目名称	VARCHAR(100)		√	医院HIS结算端项目名称，即院内收费编码。
+
+20	ITEM_ID	医保项目编码	VARCHAR(50)		√	医保项目编码，请提取历史数据，自费患者为“”
+
+21	ITEM_NAME	医保项目名称	VARCHAR(100)		√	医保项目名称，请提取历史数据，自费患者为“”
+
+22	DRUG_SPEC	规格	VARCHAR(100)			药品必须提供
+
+23	DOSAGE_FORM	剂型	VARCHAR(100)			药品必须提供
+
+24	PACKAGE_UNIT	计价单位	VARCHAR(30)			
+
+25	UNIT_PRICE	单价	DECIMAL(16,2)		√	该项目单价，保留两位小数
+
+26	NUM	数量	DECIMAL(16,2)		√	该项目数量
+
+27	COST	金额	DECIMAL(16,2)		√	该项目单价*数量
+
+28	SELF_PAY_LIMIT	拒付金额	DECIMAL(16,2)			部分地区为超限价自付金额
+
+29	BMI_CONVERED_AMOUNT	医保范围内金额	DECIMAL(16,2)			该项目医保范围内金额，自费患者为“”
+
+30	P_TYPE	支付类别	DECIMAL(16,2)			指甲、乙、丙类，自费患者为“”
+
+31	P_TYPE_PCT	报销比例	DECIMAL(16,2)			甲类为100%，乙类根据当地实际情况（80%，70%），丙类（0%或其他），自费患者为“”
+
+32	REFUND_FLAG_TYPE	退费标识	VARCHAR(2)		√	非退费为:0，退费单据为:1
+
+33	REFUND_HISID	退费冲销原结算单据号	VARCHAR(100)		√	如进行退费冲销，提供冲销的结算单据号HISID
+
+
+=== 门诊结算主单 ===
+
+5.门诊结算主单	Unnamed: 1	Unnamed: 2	Unnamed: 3	Unnamed: 4	Unnamed: 5	Unnamed: 6
+
+序号	程序字段名	所需字段	字段格式	主键	非空	备注
+
+1	HOSPITAL_ID	医疗机构编码	VARCHAR(100)	√	√	医保系统中医疗机构编码（一般取医保结算时上传的本院医疗机构编码）
+
+2	HOSPITAL_NAME	医疗机构名称	VARCHAR(100)		√	医保系统中医疗机构名称（一般取医保结算时上传的本院医疗机构编码）
+
+3	HISID	结算单据号	VARCHAR(100)	√	√	"重要字段！用于：
+1.识别本次住院的唯一id；
+2.关联字段，关联“住院费用明细”，“住院诊断信息表”、“手术操作信息表”"
+
+4	P_LEVEL	医保结算等级	VARCHAR(30)			0\1\2\3
+
+5	BILL_DATE	结算日期	DATE/DATETIME		√	
+
+6	YEAR	结算年份	VARCHAR(30)			根据结算日期计算的结算年份
+
+7	MONTH	结算月份	VARCHAR(30)			根据结算日期计算的结算月份
+
+8	PATIENT_ID	个人编码	VARCHAR(100)		√	参保人在金保系统中的编号（医院结算能查到的个人编号）、自费患者请提供本院HIS唯一的身份编码，需确保患者唯一
+
+9	SOCIAL_ID	患者社会保障号码	VARCHAR(50)		√	参保人社保号码（或提取社保卡号），自费为空
+
+10	BENEFIT_TYPE	险种类型	VARCHAR(50)			市属职工、市属居民、省直（职工）、省内异地（省内新农合+省内职工医保+省内居民）、异地省外等、自费、离休、伤残军人、生育。按照医院字典的该字段，提取汉字，不用与上述列举名称保持完全一致
+
+11	BENEFIT_GROUP_ID	人员类别	VARCHAR(50)			在岗职工、退休职工、学生等
+
+12	MZH	门诊号	VARCHAR(50)		√	患者挂号时产生的门诊流水号，如患者唯一或循环使用请处理成唯一
+
+13	ADMISSION_DEPT_ID	就诊科室编码	VARCHAR(50)		√	
+
+14	ADMISSION_DEPT_NAME	就诊科室名称	VARCHAR(50)		√	
+
+15	DOCTOR_ID	医师编码	VARCHAR(50)			该病例主诊医师编码
+
+16	DOCTOR_NAME	医师名称	VARCHAR(50)		√	该病例主诊医师姓名
+
+17	ID_CARD	身份证号	VARCHAR(100)		√	患者身份证号
+
+18	PATIENT_GENDER	患者性别	VARCHAR(6)		√	
+
+19	PATIENT_BIRTHDAY	患者出生日期	DATE/DATETIME		√	日期型字段,不含分秒时
+
+20	PATIENT_AGE	患者年龄	DECIMAL(16,2)		√	就诊时的实际年龄
+
+21	CLAIM_TYPE	就医类型	VARCHAR(50)		√	普通门诊、急诊、门慢、门特。按照医院字典的该字段，提取汉字
+
+22	IF_LOCAL_FLAG	异地标志	VARCHAR(50)		√	用于区分本地异地就医，请提供：“异地”，“本地”
+
+23	ADMISSION_DATE	就诊日期	DATE/DATETIME		√	
+
+24	OUTPATIENT_DISEASE_ID	诊断编码	VARCHAR(300)		√	普通门诊、门慢、门特诊断编码，多个按照诊断顺序以“|”隔开，需要提取所有诊断
+
+25	ADMISSION_DISEASE_NAME	诊断名称	VARCHAR(300)		√	普通门诊、门慢、门特诊断名称，多个按照诊断顺序以“|”隔开，需要提取所有诊断
+
+26	TOTAL_AMOUNT	医疗总费用	DECIMAL(16,2)		√	
+
+27	BMI_PAY_AMOUNT	基本统筹支付	DECIMAL(16,2)			结算系统按项目付费基本统筹支持金额
+
+28	CASH	现金支付	DECIMAL(16,2)			现金
+
+29	SELF_PAY_AMOUNT	个人账户支付	DECIMAL(16,2)			个人账户支付费用
+
+30	BMI_CONVERED_AMOUNT	符合基本医疗保险的费用	DECIMAL(16,2)			纳入医保范畴的费用总额，并非全部医保报销，其中包含按比例由基金支付及个人支付金额
+
+31	HOSPITAL_AREA	院区	VARCHAR(30)		√	飞检涉及多个院区时，需提供每条结算信息所属院区，院区归属与纸质病例档案归属院区一致。只有一个院区，或只检查一个院区，可为空
+
+32	MEDICAL_INSURANCE_FLAG	医保结算与非医保结算标志	VARCHAR(6)		√	医保结算：0，非医保结算：1
+
+33	REFUND_FLAG_TYPE	退费标识	VARCHAR(6)		√	退费单据为:1，非退费为:0
+
+34	REFUND_HISID	退费冲销原结算单据号	VARCHAR(100)		√	如进行退费冲销，提供冲销的结算单据号HISID
+
+
+=== 门诊结算明细 ===
+
+6.门诊结算明细	Unnamed: 1	Unnamed: 2	Unnamed: 3	Unnamed: 4	Unnamed: 5	Unnamed: 6
+
+序号	程序字段名	所需字段	字段格式	主键	非空	备注
+
+1	HOSPITAL_ID	医疗机构编码	VARCHAR(100)	√	√	医保系统中医疗机构编码（一般取医保结算时上传的本院医疗机构编码）
+
+2	HOSPITAL_NAME	医疗机构名称	VARCHAR(100)		√	医保系统中医疗机构名称（一般取医保结算时上传的本院医疗机构编码）
+
+3	HISID	结算单据号	VARCHAR(100)	√	√	"重要字段！用于：
+1.识别本次住院的唯一id；
+2.关联字段，关联“住院费用明细”，“住院诊断信息表”、“手术操作信息表” "
+
+4	PATIENT_ID	个人编码	VARCHAR(100)			医保患者请提供医保的个人编码、自费患者请提供本院HIS唯一的身份编码，需确保患者唯一
+
+5	DISCHARGE_DEPT_ID	开单科室编码	VARCHAR(50)		√	
+
+6	DISCHARGE_DEPT_NAME	开单科室名称	VARCHAR(50)		√	
+
+7	BILLING_TIME	项目开单时间	DATE/DATETIME 		√	开具此项目的时点
+
+8	EXCUTE_DEPT_ID	执行科室编码	VARCHAR(50)		√	
+
+9	EXCUTE_DEPT_NAME	执行科室名称	VARCHAR(50)		√	
+
+10	USAGE_DATE	项目执行时间	DATE/DATETIME 		√	执行此项目的时点
+
+11	DOCTOR_ID	开单医师编码	VARCHAR(50)			
+
+12	DOCTOR_NAME	开单医师姓名	VARCHAR(50)		√	
+
+13	BILL_DATE	结算日期	DATE/DATETIME		√	
+
+14	PRESCRIPTION	处方号	VARCHAR(100)		√	一个医院的处方号不能出现重复，如出现重复，请加上结算日期
+
+15	P_CATEGORY	费用类别	VARCHAR(50)		√	"床位费、诊查费、检查费、化验费、治疗费、手术费、护理费、卫生材料费、西药费、中药饮片费、中成药费、一般诊疗费、挂号费、其他费；如果目前费用类别与此统计口径有差异，按照目前费用类别提取
+按照医院字典的该字段，提取汉字，不用与上述列举名称保持完全一致"
+
+16	ITEM_ID_HOSP	医院项目编码	VARCHAR(100)		√	医院HIS结算端项目编码，即院内收费明细
+
+17	ITEM_NAME_HOSP	医院项目名称	VARCHAR(100)		√	医院HIS结算端项目名称，即院内收费明细
+
+18	ITEM_ID	医保项目编码	VARCHAR(100)		√	医保项目编码，请提取历史数据，自费患者为“”
+
+19	ITEM_NAME	医保项目名称	VARCHAR(100)		√	医保项目名称，请提取历史数据，自费患者为“”
+
+20	DRUG_SPEC	规格	VARCHAR(100)		√	请提取历史数据，药品必须提供
+
+21	DOSAGE_FORM	剂型	VARCHAR(100)		√	请提取历史数据，药品必须提供
+
+22	PACKAGE_UNIT	计价单位	VARCHAR(30)		√	请提取历史数据
+
+23	UNIT_PRICE	单价	DECIMAL(16,2)		√	该项目单价，保留两位小数
+
+24	NUM	数量	DECIMAL(16,2)		√	该项目数量
+
+25	COST	金额	DECIMAL(16,2)		√	该项目单价*数量
+
+26	SELF_PAY_LIMIT	拒付金额	DECIMAL(16,2)			部分地区为超限价自付金额，超限价部分=单价*数量，自费患者为“”
+
+27	BMI_CONVERED_AMOUNT	医保范围内金额	DECIMAL(16,2)			该项目医保范围内金额，自费患者为空
+
+28	P_TYPE	支付类别	DECIMAL(16,2)		√	指甲、乙、丙类，自费患者为空
+
+29	P_TYPE_PCT	报销比例	DECIMAL(16,2)		√	甲类为100%，乙类根据当地实际情况（80%，70%），丙类（0%），自费患者为空
+
+30	REFUND_FLAG_TYPE	处方退费标识	VARCHAR(30)		√	退费处方为是，非退费为否
+
+31	REFUND_HISID	退费冲销原结算单据号	VARCHAR(100)		√	如进行退费冲销，提供冲销的结算单据号HISID
+
+
+=== 物资码映射关系表 ===
+
+7.物资码映射关系表	Unnamed: 1	Unnamed: 2	Unnamed: 3	Unnamed: 4	Unnamed: 5	Unnamed: 6
+
+序号	程序字段名	所需字段	字段格式	主键	非空	备注
+
+1	HOSPITAL_ID	医疗机构编码	VARCHAR(100)	√	√	医保系统中医疗机构编码（一般取医保结算时上传的本院医疗机构编码）
+
+2	HOSPITAL_NAME	医疗机构名称	VARCHAR(100)		√	医保系统中医疗机构名称（一般取医保结算时上传的本院医疗机构编码）
+
+3	ITEM_ID_STORE	物资项目编码	VARCHAR(100)	√	√	医院物资库系统中对该商品的编码
+
+4	ITEM_NAME_STORE	物资项目名称	VARCHAR(100)		√	医院物资库系统中对该商品的名称
+
+5	ITEM_ID	医保项目编码	VARCHAR(100)	√	√	医保项目编码，请提取历史数据，自费患者为“”
+
+6	ITEM_NAME	医保项目名称	VARCHAR(100)		√	医保项目名称，请提取历史数据，自费患者为“”
+
+7	ITEM_ID_HOSP	医院项目编码	VARCHAR(100)	√	√	医院HIS结算端项目编码
+
+8	ITEM_NAME_HOSP	医院项目名称	VARCHAR(100)		√	医院HIS结算端项目名称
+
+9	SELF_PAY_FLAG	自费物资标识	VARCHAR(2)		√	“1”为自费物资，“0”为非自费物资
+
+10	NO_CHARGE_FLAG	单独收费物资标识	VARCHAR(2)		√	“1”为不可单独收费物资，“0”为可单独收费物资
+
+
+=== 物资库存表 ===
+
+8.物资库存表	Unnamed: 1	Unnamed: 2	Unnamed: 3	Unnamed: 4	Unnamed: 5	Unnamed: 6
+
+序号	程序字段名	所需字段	字段格式	主键	非空	备注
+
+1	HOSPITAL_ID	医疗机构编码	VARCHAR(100)	√	√	医保系统中医疗机构编码（一般取医保结算时上传的本院医疗机构编码）
+
+2	HOSPITAL_NAME	医疗机构名称	VARCHAR(100)		√	医保系统中医疗机构名称（一般取医保结算时上传的本院医疗机构编码）
+
+3	INVENTORY_NAME	库名称	VARCHAR(30)	√	√	医院库房名称
+
+4	INVENTORY_LEVEL	库级别	VARCHAR(30)	√	√	医院库房等级，比如一级库、二级库
+
+5	ITEM_ID_STORE	物资项目编码	VARCHAR(100)	√	√	医院物资库系统中对该商品的编码
+
+6	ITEM_NAME_STORE	物资项目名称	VARCHAR(100)		√	医院物资库系统中对该商品的名称
+
+7	DRUG_TRACEABILITY_CODE	药品追溯码	VARCHAR(100)			国家药监局药品追溯码
+
+8	BATCH_NO	批号	VARCHAR(100)		√	生产批号
+
+9	SPEC	规格	VARCHAR(100)		√	
+
+10	OPENING_DATE	期初时间	DATE/DATETIME		√	
+
+11	OPENING_PRICE	期初单价	DECIMAL(16,2)		√	
+
+12	OPENING_BALANCE	期初数量	DECIMAL(16,2)		√	
+
+13	CLOSING_DATE	期末时间	DATE		√	
+
+14	CLOSING_PRICE 	期末单价	DECIMAL(16,2)		√	
+
+15	CLOSING_BALANCE	期末数量	DECIMAL(16,2)		√	
+
+16	SPLER_NAME	供货商名称	VARCHAR(100)		√	
+
+17	PRODENTP_NAME	生产企业	VARCHAR(100)		√	
+
+18	PROD_CONVRAT	产品转换比	DECIMAL(16,2)		√	入库包装转化成最小计价单位的系数
+
+19	MIN_PRCUNT	最小计价单位	VARCHAR(30)		√	
+
+20	MCS_TYPE	耗材分类	VARCHAR(6)		√	01=医疗器械/02=常规耗材/03=体外诊断 IVD 试剂
+
+21	HIGHVAL_MCS_FLAG	高值耗材标志	VARCHAR(6)		√	0=否/1=是
+
+22	HIGHVAL_MCS_TYPE	高值耗材分类	VARCHAR(6)		√	01=高值耗材/02=一次性耗材/03=其它耗材
+
+
+=== 入库明细表 ===
+
+9.入库明细表	Unnamed: 1	Unnamed: 2	Unnamed: 3	Unnamed: 4	Unnamed: 5	Unnamed: 6
+
+序号	程序字段名	所需字段	字段格式	主键	非空	备注
+
+1	HOSPITAL_ID	医疗机构编码	VARCHAR(100)		√	医保系统中医疗机构编码（一般取医保结算时上传的本院医疗机构编码）
+
+2	HOSPITAL_NAME	医疗机构名称	VARCHAR(100)		√	医保系统中医疗机构名称（一般取医保结算时上传的本院医疗机构编码）
+
+3	INVENTORY_NAME	库名称	VARCHAR(30)		√	医院库房名称
+
+4	INVENTORY_LEVEL	库级别	VARCHAR(30)		√	医院库房等级，比如一级库、二级库
+
+5	STORE_CODE	入库单编号	VARCHAR(100)	√	√	
+
+6	STORE_DATE	入库时间	DATE/DATETIME		√	
+
+7	UNT	入库单位	VARCHAR(30)		√	
+
+8	IMPORT_PRIC	入库单价	DECIMAL(16,2)		√	
+
+9	IMPORT_CNT	入库数量	DECIMAL(16,2)		√	
+
+10	ITEM_ID_STORE	物资项目编码	VARCHAR(100)		√	医院物资库系统中对该商品的编码
+
+11	ITEM_NAME_STORE	物资项目名称	VARCHAR(100)		√	医院物资库系统中对该商品的名称
+
+12	INVOICE_NO	发票号	VARCHAR(100)		√	
+
+13	BATCH_NUMBER	批号	VARCHAR(100)		√	
+
+14	SPEC	规格	VARCHAR(100)		√	
+
+15	DRUG_TRACEABILITY_CODE	药品追溯码	VARCHAR(100)			国家药监局药品追溯码
+
+16	MDRCN	医疗器械注册证编号	VARCHAR(100)		√	医疗器械填写
+
+17	UDI	医疗器械唯一标识	VARCHAR(100)			三类医疗器械填写
+
+18	PROD_CONVRAT	产品转换比	VARCHAR(30)		√	入库包装转化成最小计价单位的系数
+
+19	MIN_PRCUNT	最小计价单位	VARCHAR(30)		√	
+
+20	SPLER_NAME	供货商名称	VARCHAR(200)		√	
+
+21	PRODENTP_NAME	生产企业	VARCHAR(200)		√	
+
+22	MCS_TYPE	耗材分类	VARCHAR(6)		√	01=医疗器械/02=常规耗材/03=体外诊断 IVD 试剂
+
+23	HIGHVAL_MCS_FLAG	高值耗材标志	VARCHAR(6)		√	0=否/1=是
+
+24	HIGHVAL_MCS_TYPE	高值耗材分类	VARCHAR(6)		√	01=高值耗材/02=一次性耗材/03=其它耗材
+
+
+=== 出库明细表 ===
+
+10.出库明细表	Unnamed: 1	Unnamed: 2	Unnamed: 3	Unnamed: 4	Unnamed: 5	Unnamed: 6
+
+序号	程序字段名	所需字段	字段格式	主键	非空	备注
+
+1	HOSPITAL_ID	医疗机构编码	VARCHAR(100)		√	医保系统中医疗机构编码（一般取医保结算时上传的本院医疗机构编码）
+
+2	HOSPITAL_NAME	医疗机构名称	VARCHAR(100)		√	医保系统中医疗机构名称（一般取医保结算时上传的本院医疗机构编码）
+
+3	INVENTORY_NAME	库名称	VARCHAR(30)		√	医院库房名称
+
+4	INVENTORY_LEVEL	库级别	VARCHAR(30)		√	医院库房等级，比如一级库、二级库
+
+5	DEL_CODE	出库单编号	VARCHAR(100)	√	√	
+
+6	DEL_DATE	出库时间	DATE		√	
+
+7	UNT	出库单位	VARCHAR(30)		√	
+
+8	EX_CNT	出库数量	DECIMAL(16,2)		√	
+
+9	EX_PRICE	出库单价	DECIMAL(16,2)		√	
+
+10	DELIVER_OBJECT	出库部门	VARCHAR(30)		√	如门诊药房，住院药房，科室等
+
+11	ITEM_ID_STORE	物资项目编码	VARCHAR(100)		√	医院物资库系统中对该商品的编码
+
+12	ITEM_NAME_STORE	物资项目名称	VARCHAR(100)		√	医院物资库系统中对该商品的名称
+
+13	SPEC	规格	VARCHAR(100)		√	
+
+14	DRUG_TRACEABILITY_CODE	药品追溯码	VARCHAR(100)			国家药监局药品追溯码
+
+15	MDRCN	医疗器械注册证编号	VARCHAR(100)		√	医疗器械填写
+
+16	UDI	医疗器械唯一标识	VARCHAR(100)			三类医疗器械填写
+
+17	PROD_CONVRAT	产品转换比	VARCHAR(30)		√	入库包装转化成最小计价单位的系数
+
+18	MIN_PRCUNT	最小计价单位	VARCHAR(30)		√	
+
+19	SPLER_NAME	供货商名称	VARCHAR(100)		√	
+
+20	PRODENTP_NAME	生产企业	VARCHAR(100)		√	
+
+21	MCS_TYPE	耗材分类	VARCHAR(6)		√	01=医疗器械/02=常规耗材/03=体外诊断 IVD 试剂
+
+22	HIGHVAL_MCS_FLAG	高值耗材标志	VARCHAR(6)		√	0=否/1=是
+
+23	HIGHVAL_MCS_TYPE	高值耗材分类	VARCHAR(6)		√	01=高值耗材/02=一次性耗材/03=其它耗材
+
+
+=== 包材转化比表 ===
+
+11.包材转化比表	Unnamed: 1	Unnamed: 2	Unnamed: 3	Unnamed: 4	Unnamed: 5	Unnamed: 6
+
+序号	程序字段名	所需字段	字段格式	主键	非空	备注
+
+1	HOSPITAL_ID	医疗机构编码	VARCHAR(100)	√	√	医保系统中医疗机构编码（一般取医保结算时上传的本院医疗机构编码）
+
+2	HOSPITAL_NAME	医疗机构名称	VARCHAR(100)		√	医保系统中医疗机构名称（一般取医保结算时上传的本院医疗机构编码）
+
+3	ITEM_ID_STORE	物资项目编码	VARCHAR(100)	√	√	医院物资库系统中对该商品的编码
+
+4	ITEM_NAME_STORE	物资项目名称	VARCHAR(100)		√	医院物资库系统中对该商品的名称
+
+5	STORAGEHOUSE_UNIT	药库包装单位	VARCHAR(30)		√	药品在医院药品总库（一级库）时包装单位
+
+6	STORAGEHOUSE_CONVERT	药库包装转化比	VARCHAR(30)		√	
+
+7	OUTPATIENT_UNIT	门诊包装单位	VARCHAR(30)		√	药品在门诊药房时包装单位
+
+8	OUTPATIENT_CONVERT	门诊包装转化比	VARCHAR(30)		√	
+
+9	INPATIENT_UNIT	住院包装单位	VARCHAR(30)		√	药品在住院药房时包装单位
+
+10	INPATIENT_CONVERT	住院包装转化比	VARCHAR(30)		√	
+

@@ -1,0 +1,1914 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>思维导图演示 | MindFlow</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --dark-color: #2c3e50;
+            --light-color: #ecf0f1;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --info-color: #9b59b6;
+            --success-color: #27ae60;
+            --transition: all 0.3s ease;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 10px 15px rgba(0, 0, 0, 0.2);
+            --border-radius: 8px;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --dark-color: #ecf0f1;
+            --light-color: #2c3e50;
+            --shadow: 0 4px 6px rgba(255, 255, 255, 0.1);
+            --shadow-hover: 0 10px 15px rgba(255, 255, 255, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            transition: var(--transition);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .header {
+            padding: 20px;
+            background: linear-gradient(135deg, var(--primary-color), var(--info-color));
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .logo svg {
+            margin-right: 10px;
+            animation: rotate 5s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: var(--border-radius);
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .sidebar {
+            width: 250px;
+            padding: 20px;
+            background-color: rgba(var(--dark-color), 0.05);
+            border-right: 1px solid rgba(var(--dark-color), 0.1);
+            overflow-y: auto;
+            z-index: 10;
+            transition: var(--transition);
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        .themes, .node-styles {
+            margin-bottom: 20px;
+        }
+
+        .color-option {
+            display: flex;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .color-preview {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .mind-map-container {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+            cursor: grab;
+        }
+
+        .mind-map-container.grabbing {
+            cursor: grabbing;
+        }
+
+        #mind-map {
+            transform-origin: center;
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: transform 0.2s ease;
+        }
+
+        .node {
+            position: absolute;
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 8px 15px;
+            min-width: 120px;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            user-select: none;
+            transition: var(--transition);
+            border-left: 5px solid var(--primary-color);
+            z-index: 5;
+            font-weight: 500;
+        }
+
+        .node:hover {
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-2px);
+        }
+
+        .node.active {
+            box-shadow: 0 0 0 2px var(--primary-color), var(--shadow);
+        }
+
+        .node.root {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            font-weight: bold;
+            border: none;
+        }
+
+        .node-controls {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            display: flex;
+            gap: 5px;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .node:hover .node-controls {
+            opacity: 1;
+        }
+
+        .node-btn {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            background-color: white;
+            box-shadow: var(--shadow);
+        }
+
+        .node-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .add-btn {
+            color: var(--success-color);
+        }
+
+        .edit-btn {
+            color: var(--warning-color);
+        }
+
+        .delete-btn {
+            color: var(--danger-color);
+        }
+
+        .connection {
+            position: absolute;
+            pointer-events: none;
+            transition: var(--transition);
+            z-index: 1;
+        }
+
+        .mini-map {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 150px;
+            height: 100px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            z-index: 20;
+        }
+
+        .mini-map-content {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .mini-map-node {
+            position: absolute;
+            background-color: var(--primary-color);
+            border-radius: 2px;
+            transition: var(--transition);
+        }
+
+        .mini-map-viewport {
+            position: absolute;
+            border: 1px solid var(--primary-color);
+            background-color: rgba(52, 152, 219, 0.1);
+            z-index: 1;
+        }
+
+        .context-menu {
+            position: absolute;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 10px 0;
+            z-index: 50;
+            display: none;
+        }
+
+        .context-menu-item {
+            padding: 8px 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .context-menu-item:hover {
+            background-color: rgba(var(--primary-color), 0.1);
+        }
+
+        .context-menu-item svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .zoom-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            display: flex;
+            gap: 5px;
+            z-index: 20;
+        }
+
+        .zoom-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            background-color: white;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .zoom-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background-color: var(--dark-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            opacity: 0;
+            transition: var(--transition);
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            width: 400px;
+            max-width: 90%;
+            box-shadow: var(--shadow);
+            transform: scale(0.9);
+            transition: var(--transition);
+        }
+
+        .modal.show .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--dark-color);
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .form-input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .color-picker {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .color-item {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .color-item:hover {
+            transform: scale(1.2);
+        }
+
+        .color-item.selected {
+            box-shadow: 0 0 0 2px white, 0 0 0 4px var(--primary-color);
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .modal-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .modal-btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .modal-btn-secondary {
+            background-color: #e0e0e0;
+            color: var(--dark-color);
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .theme-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+
+        .theme-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.3);
+            transition: var(--transition);
+            border-radius: 30px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: var(--transition);
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+
+        .toggle-sidebar {
+            position: absolute;
+            left: 250px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+            padding: 10px 5px;
+            cursor: pointer;
+            z-index: 11;
+            transition: var(--transition);
+        }
+
+        .sidebar.collapsed {
+            transform: translateX(-250px);
+        }
+
+        .sidebar.collapsed + .toggle-sidebar {
+            left: 0;
+        }
+
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--light-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: var(--transition);
+        }
+
+        .loading.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(52, 152, 219, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .welcome-splash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-color), var(--info-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            z-index: 1001;
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.5s ease;
+        }
+
+        .welcome-splash.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .splash-logo {
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .splash-title {
+            font-size: 36px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .splash-subtitle {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 30px;
+        }
+
+        .splash-btn {
+            padding: 12px 30px;
+            background-color: white;
+            color: var(--primary-color);
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+        }
+
+        .splash-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .node {
+            animation: fadeIn 0.3s ease;
+        }
+
+        .node-enter {
+            animation: slideIn 0.3s ease;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: absolute;
+                height: 100%;
+                transform: translateX(-250px);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .toggle-sidebar {
+                left: 0;
+            }
+
+            .sidebar.active + .toggle-sidebar {
+                left: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Welcome Splash Screen -->
+    <div class="welcome-splash">
+        <div class="splash-logo">
+            <svg width="100" height="100" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="10" stroke="white" stroke-width="2"/>
+                <path d="M12 6V18" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                <path d="M7 10H17" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                <path d="M9 14H15" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+        </div>
+        <h1 class="splash-title">SeekFlaw</h1>
+        <p class="splash-subtitle">创建令人惊叹的思维导图</p>
+        <button class="splash-btn" id="start-btn">开始使用</button>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="loading hidden">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="white" stroke-width="2"/>
+                    <path d="M12 6V18" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M7 10H17" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M9 14H15" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                MindFlow
+            </div>
+            <div class="toolbar">
+                <button class="btn" id="new-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 5V19" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M5 12H19" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    新建
+                </button>
+                <button class="btn" id="save-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 21H5C3.89543 21 3 20.1046 3 19V5C3 3.89543 3.89543 3 5 3H16L21 8V19C21 20.1046 20.1046 21 19 21Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M17 21V13H7V21" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M7 3V8H15" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    保存
+                </button>
+                <button class="btn" id="export-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M7 10L12 15L17 10" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 15V3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    导出
+                </button>
+                <label class="theme-switch">
+                    <input type="checkbox" id="theme-toggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </header>
+
+        <div class="main">
+            <div class="sidebar">
+                <h3 class="sidebar-title">主题</h3>
+                <div class="themes">
+                    <div class="color-option" data-theme="default">
+                        <div class="color-preview" style="background: linear-gradient(135deg, #3498db, #9b59b6);"></div>
+                        <span>默认</span>
+                    </div>
+                    <div class="color-option" data-theme="nature">
+                        <div class="color-preview" style="background: linear-gradient(135deg, #27ae60, #2ecc71);"></div>
+                        <span>自然</span>
+                    </div>
+                    <div class="color-option" data-theme="sunset">
+                        <div class="color-preview" style="background: linear-gradient(135deg, #e74c3c, #f39c12);"></div>
+                        <span>日落</span>
+                    </div>
+                    <div class="color-option" data-theme="ocean">
+                        <div class="color-preview" style="background: linear-gradient(135deg, #1abc9c, #3498db);"></div>
+                        <span>海洋</span>
+                    </div>
+                </div>
+
+                <h3 class="sidebar-title">节点样式</h3>
+                <div class="node-styles">
+                    <div class="color-option" data-style="default">
+                        <div class="color-preview" style="background: white; border: 1px solid #ddd;"></div>
+                        <span>默认</span>
+                    </div>
+                    <div class="color-option" data-style="rounded">
+                        <div class="color-preview" style="background: white; border-radius: 20px; border: 1px solid #ddd;"></div>
+                        <span>圆角</span>
+                    </div>
+                    <div class="color-option" data-style="bordered">
+                        <div class="color-preview" style="background: white; border: 3px solid #3498db;"></div>
+                        <span>边框</span>
+                    </div>
+                    <div class="color-option" data-style="bubble">
+                        <div class="color-preview" style="background: rgba(52, 152, 219, 0.1); border: 1px solid #3498db;"></div>
+                        <span>气泡</span>
+                    </div>
+                </div>
+
+                <h3 class="sidebar-title">布局</h3>
+                <div class="layouts">
+                    <div class="color-option" data-layout="horizontal">
+                        <div class="color-preview" style="background: #ddd;">
+                            <div style="width: 60%; height: 2px; background: #666; position: relative; top: 9px; left: 20%;"></div>
+                        </div>
+                        <span>水平布局</span>
+                    </div>
+                    <div class="color-option" data-layout="vertical">
+                        <div class="color-preview" style="background: #ddd;">
+                            <div style="width: 2px; height: 60%; background: #666; position: relative; top: 4px; left: 9px;"></div>
+                        </div>
+                        <span>垂直布局</span>
+                    </div>
+                    <div class="color-option" data-layout="radial">
+                        <div class="color-preview" style="background: #ddd;">
+                            <div style="width: 10px; height: 10px; background: #666; border-radius: 50%; position: relative; top: 5px; left: 5px;"></div>
+                        </div>
+                        <span>放射布局</span>
+                    </div>
+                </div>
+            </div>
+
+            <button class="toggle-sidebar">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 6H20" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M4 12H20" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M4 18H20" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+
+            <div class="mind-map-container">
+                <div id="mind-map"></div>
+    </div>
+
+            <div class="mini-map">
+                <div class="mini-map-content">
+                    <div class="mini-map-viewport"></div>
+                </div>
+            </div>
+
+            <div class="zoom-controls">
+                <button class="zoom-btn" id="zoom-in">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 5V19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                <button class="zoom-btn" id="zoom-out">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                <button class="zoom-btn" id="zoom-reset">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 2V8H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M21 12C21 13.8565 20.3679 15.6671 19.1967 17.1112C18.0255 18.5562 16.3775 19.5836 14.5385 20.0384C12.6995 20.4932 10.7607 20.3461 9.01118 19.6173C7.26166 18.8884 5.79645 17.6179 4.81333 15.9923C3.83022 14.3666 3.37559 12.477 3.51731 10.5834C3.65902 8.68976 4.38542 6.88523 5.59469 5.43897C6.80396 3.9927 8.43387 2.98237 10.2483 2.49022C12.0628 1.99807 13.9857 2.05086 15.76 2.64" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="context-menu" id="context-menu">
+        <div class="context-menu-item" id="add-child">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 5V19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            添加子节点
+        </div>
+        <div class="context-menu-item" id="edit-node">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M18.5 2.50001C18.8978 2.10219 19.4374 1.87869 20 1.87869C20.5626 1.87869 21.1022 2.10219 21.5 2.50001C21.8978 2.89784 22.1213 3.4374 22.1213 4.00001C22.1213 4.56262 21.8978 5.10219 21.5 5.50001L12 15L8 16L9 12L18.5 2.50001Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            编辑节点
+        </div>
+        <div class="context-menu-item" id="delete-node">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 6H5H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            删除节点
+        </div>
+        <div class="context-menu-item" id="change-color">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M8 12H16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            更改颜色
+        </div>
+    </div>
+
+    <div class="modal" id="node-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">编辑节点</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" for="node-text">节点内容</label>
+                    <input type="text" id="node-text">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-primary">保存</button>
+                <button class="modal-btn modal-btn-secondary">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 欢迎页面处理
+            const welcomeSplash = document.querySelector('.welcome-splash');
+            const startBtn = document.getElementById('start-btn');
+            const loading = document.querySelector('.loading');
+
+            startBtn.addEventListener('click', () => {
+                welcomeSplash.classList.add('hidden');
+                setTimeout(() => {
+                    loading.classList.remove('hidden');
+                    setTimeout(() => {
+                        loading.classList.add('hidden');
+                        initMindMap();
+                    }, 1500);
+                }, 500);
+            });
+
+            // 主题切换
+            const themeToggle = document.getElementById('theme-toggle');
+            themeToggle.addEventListener('change', () => {
+                document.body.setAttribute('data-theme', themeToggle.checked ? 'dark' : 'light');
+            });
+
+            // 侧边栏切换
+            const toggleSidebar = document.querySelector('.toggle-sidebar');
+            const sidebar = document.querySelector('.sidebar');
+            toggleSidebar.addEventListener('click', () => {
+                sidebar.classList.toggle('collapsed');
+            });
+
+            // 初始化思维导图
+            function initMindMap() {
+                const mindMap = document.getElementById('mind-map');
+                const mindMapContainer = document.querySelector('.mind-map-container');
+                const contextMenu = document.getElementById('context-menu');
+                const nodeModal = document.getElementById('node-modal');
+                const modalClose = document.querySelector('.modal-close');
+                const modalSaveBtn = document.querySelector('.modal-btn-primary');
+                const modalCancelBtn = document.querySelector('.modal-btn-secondary');
+                const nodeTextInput = document.getElementById('node-text');
+
+                // 缩放控制
+                const zoomInBtn = document.getElementById('zoom-in');
+                const zoomOutBtn = document.getElementById('zoom-out');
+                const zoomResetBtn = document.getElementById('zoom-reset');
+                
+                let scale = 1;
+                let translateX = 0;
+                let translateY = 0;
+                let activeNode = null;
+                let isDragging = false;
+                let startX, startY;
+                
+                // 思维导图数据
+                let mindMapData = {
+                    id: 'root',
+                    text: '医保飞检专项工作',
+                    children: [
+                        {
+                            id: 'node1',
+                            text: '检前准备',
+                            color: '#3498db',
+                            children: [
+                                { id: 'node1-1', text: '成立工作组', color: '#3498db' },
+                                { id: 'node1-2', text: '制定工作方案', color: '#3498db' },
+                                { id: 'node1-3', text: '准备资料', color: '#3498db' }
+                            ]
+                        },
+                        {
+                            id: 'node2',
+                            text: '自查阶段',
+                            color: '#e74c3c',
+                            children: [
+                                { id: 'node2-1', text: '数据自查', color: '#e74c3c' },
+                                { id: 'node2-2', text: '制度自查', color: '#e74c3c' },
+                                { id: 'node2-3', text: '问题整改', color: '#e74c3c' }
+                            ]
+                        },
+                        {
+                            id: 'node3',
+                            text: '迎检阶段',
+                            color: '#2ecc71',
+                            children: [
+                                { id: 'node3-1', text: '检查安排', color: '#2ecc71' },
+                                { id: 'node3-2', text: '资料准备', color: '#2ecc71' },
+                                { id: 'node3-3', text: '问题应对', color: '#2ecc71' }
+                            ]
+                        },
+                        {
+                            id: 'node4',
+                            text: '后续跟进',
+                            color: '#f39c12',
+                            children: [
+                                { id: 'node4-1', text: '整改落实', color: '#f39c12' },
+                                { id: 'node4-2', text: '回馈总结', color: '#f39c12' },
+                                { id: 'node4-3', text: '制度完善', color: '#f39c12' }
+                            ]
+                        }
+                    ]
+                };
+
+                // 渲染思维导图
+                function renderMindMap() {
+                    mindMap.innerHTML = '';
+                    
+                    // 计算布局
+                    const containerWidth = mindMapContainer.offsetWidth;
+                    const containerHeight = mindMapContainer.offsetHeight;
+                    const centerX = containerWidth / 2;
+                    const centerY = containerHeight / 2;
+                    
+                    // 创建根节点
+                    const rootNode = createNodeElement(mindMapData, centerX, centerY, null, true);
+                    mindMap.appendChild(rootNode);
+                    
+                    // 对布局类型的处理
+                    const layout = document.querySelector('.color-option[data-layout].active')?.dataset.layout || 'horizontal';
+                    
+                    // 布局子节点
+                    layoutChildren(mindMapData, rootNode, centerX, centerY, layout);
+                    
+                    // 绘制连接线
+                    drawConnections();
+                    
+                    // 更新小地图
+                    updateMiniMap();
+                }
+                
+                // 创建节点元素
+                function createNodeElement(nodeData, x, y, parentId, isRoot = false) {
+                    const node = document.createElement('div');
+                    node.className = `node ${isRoot ? 'root' : ''}`;
+                    node.id = nodeData.id;
+                    node.textContent = nodeData.text;
+                    node.style.left = `${x - 60}px`;
+                    node.style.top = `${y - 20}px`;
+                    
+                    // 使用自定义属性存储关联的父节点
+                    node.setAttribute('data-parent', parentId || '');
+                    // 添加自定义属性来跟踪所有父节点关系
+                    if (nodeData.parents) {
+                        node.setAttribute('data-all-parents', JSON.stringify(nodeData.parents));
+                    }
+                    
+                    if (nodeData.color && !isRoot) {
+                        node.style.borderLeftColor = nodeData.color;
+                    }
+                    
+                    // 节点样式应用
+                    const nodeStyle = document.querySelector('.color-option[data-style].active')?.dataset.style;
+                    if (nodeStyle) {
+                        applyNodeStyle(node, nodeStyle, isRoot);
+                    }
+                    
+                    // 添加控制按钮
+                    const controls = document.createElement('div');
+                    controls.className = 'node-controls';
+                    
+                    const addBtn = document.createElement('button');
+                    addBtn.className = 'node-btn add-btn';
+                    addBtn.innerHTML = '+';
+                    addBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        openAddNodeModal(nodeData);
+                    });
+                    
+                    const editBtn = document.createElement('button');
+                    editBtn.className = 'node-btn edit-btn';
+                    editBtn.innerHTML = '✎';
+                    editBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        openEditNodeModal(nodeData);
+                    });
+                    
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'node-btn delete-btn';
+                    deleteBtn.innerHTML = '×';
+                    deleteBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        deleteNode(nodeData);
+                    });
+                    
+                    controls.appendChild(addBtn);
+                    controls.appendChild(editBtn);
+                    if (!isRoot) {
+                        controls.appendChild(deleteBtn);
+                    }
+                    
+                    node.appendChild(controls);
+                    
+                    // 节点点击事件
+                    node.addEventListener('click', () => {
+                        if (activeNode) {
+                            activeNode.classList.remove('active');
+                        }
+                        node.classList.add('active');
+                        activeNode = node;
+                    });
+                    
+                    // 右键菜单
+                    node.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        activeNode = node;
+                        showContextMenu(e.clientX, e.clientY, nodeData);
+                    });
+                    
+                    // 添加节点拖拽功能
+                    makeDraggable(node, nodeData);
+                    
+                    return node;
+                }
+                
+                // 添加节点拖拽功能
+                function makeDraggable(element, nodeData) {
+                    let isDragging = false;
+                    let startX, startY;
+                    let initialLeft, initialTop;
+                    
+                    element.addEventListener('mousedown', (e) => {
+                        // 确保不是点击控制按钮
+                        if (e.target.closest('.node-controls')) {
+                        return;
+                    }
+                    
+                        isDragging = true;
+                        startX = e.clientX;
+                        startY = e.clientY;
+                        initialLeft = parseInt(element.style.left);
+                        initialTop = parseInt(element.style.top);
+                        
+                        element.style.zIndex = '100';
+                        e.stopPropagation(); // 防止事件冒泡到地图容器
+                    });
+                    
+                    document.addEventListener('mousemove', (e) => {
+                        if (!isDragging) return;
+                        
+                        const dx = e.clientX - startX;
+                        const dy = e.clientY - startY;
+                        
+                        element.style.left = `${initialLeft + dx}px`;
+                        element.style.top = `${initialTop + dy}px`;
+                        
+                        // 更新节点数据中的位置信息
+                        if (nodeData) {
+                            if (!nodeData.position) nodeData.position = {};
+                            nodeData.position.x = initialLeft + dx + 60; // 加上偏移
+                            nodeData.position.y = initialTop + dy + 20; // 加上偏移
+                        }
+                        
+                        // 实时更新连接线
+                        drawConnections();
+                    });
+                    
+                    document.addEventListener('mouseup', () => {
+                        if (isDragging) {
+                            isDragging = false;
+                            element.style.zIndex = '5';
+                            // 更新小地图
+                            updateMiniMap();
+                        }
+                    });
+                }
+                
+                // 布局子节点
+                function layoutChildren(nodeData, nodeElement, parentX, parentY, layoutType) {
+                    if (!nodeData.children || nodeData.children.length === 0) return;
+                    
+                    const nodeRect = nodeElement.getBoundingClientRect();
+                    const children = nodeData.children;
+                    const childCount = children.length;
+                    
+                    let startAngle, endAngle, radius;
+                    
+                    switch (layoutType) {
+                        case 'horizontal':
+                            // 水平布局
+                            const ySpacing = 100;
+                            const xOffset = 200;
+                            
+                            children.forEach((child, index) => {
+                                const y = parentY - ((childCount - 1) * ySpacing / 2) + (index * ySpacing);
+                                const x = parentX + xOffset;
+                                
+                                const childElement = createNodeElement(child, x, y, nodeData.id);
+                                mindMap.appendChild(childElement);
+                                
+                                layoutChildren(child, childElement, x, y, layoutType);
+                            });
+                            break;
+                            
+                        case 'vertical':
+                            // 垂直布局
+                            const xSpacing = 150;
+                            const yOffset = 120;
+                            
+                            children.forEach((child, index) => {
+                                const x = parentX - ((childCount - 1) * xSpacing / 2) + (index * xSpacing);
+                                const y = parentY + yOffset;
+                                
+                                const childElement = createNodeElement(child, x, y, nodeData.id);
+                                mindMap.appendChild(childElement);
+                                
+                                layoutChildren(child, childElement, x, y, layoutType);
+                            });
+                            break;
+                            
+                        case 'radial':
+                            // 放射布局
+                            startAngle = -90;
+                            endAngle = 270;
+                            radius = 200;
+                            
+                            children.forEach((child, index) => {
+                                const angle = startAngle + (endAngle - startAngle) * (index / (childCount || 1));
+                                const radian = angle * Math.PI / 180;
+                                
+                                const x = parentX + radius * Math.cos(radian);
+                                const y = parentY + radius * Math.sin(radian);
+                                
+                                const childElement = createNodeElement(child, x, y, nodeData.id);
+                                mindMap.appendChild(childElement);
+                                
+                                layoutChildren(child, childElement, x, y, layoutType);
+                            });
+                            break;
+                    }
+                }
+
+                // 绘制连接线
+                function drawConnections() {
+                    // 首先移除所有现有的连接线
+                    const existingConnections = document.querySelectorAll('.connection');
+                    existingConnections.forEach(conn => conn.remove());
+                    
+                    // 创建一个SVG容器来包含所有连接线
+                    const svgContainer = document.createElement('div');
+                    svgContainer.className = 'connection';
+                    svgContainer.style.position = 'absolute';
+                    svgContainer.style.top = '0';
+                    svgContainer.style.left = '0';
+                    svgContainer.style.width = '100%';
+                    svgContainer.style.height = '100%';
+                    svgContainer.style.pointerEvents = 'none';
+                    svgContainer.style.zIndex = '1';
+                    
+                    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                    svg.setAttribute('width', '100%');
+                    svg.setAttribute('height', '100%');
+                    svg.style.position = 'absolute';
+                    svg.style.overflow = 'visible'; // 确保线条不会被裁剪
+                    
+                    const nodes = document.querySelectorAll('.node');
+                    
+                    // 处理标准的父子连接
+                    nodes.forEach(node => {
+                        const parentId = node.getAttribute('data-parent');
+                if (parentId) {
+                            const parent = document.getElementById(parentId);
+                            if (parent) {
+                                drawConnectionLine(node, parent, svg);
+                            }
+                        }
+                        
+                        // 处理多父节点的情况
+                        const allParentsAttr = node.getAttribute('data-all-parents');
+                        if (allParentsAttr) {
+                            try {
+                                const allParents = JSON.parse(allParentsAttr);
+                                allParents.forEach(parentId => {
+                                    const parent = document.getElementById(parentId);
+                                    if (parent && parentId !== node.getAttribute('data-parent')) {
+                                        // 使用虚线样式区分附加连接
+                                        drawConnectionLine(node, parent, svg, true);
+                                    }
+                                });
+                            } catch (e) {
+                                console.error('解析多父节点数据失败', e);
+                    }
+                }
+            });
+
+                    svgContainer.appendChild(svg);
+                    mindMap.appendChild(svgContainer);
+                }
+                
+                // 绘制连接线辅助函数
+                function drawConnectionLine(node, parent, svg, isDashed = false) {
+                    // 获取节点和父节点的位置
+                    const nodeRect = node.getBoundingClientRect();
+                    const parentRect = parent.getBoundingClientRect();
+                    const containerRect = mindMapContainer.getBoundingClientRect();
+                    
+                    // 计算相对于容器的位置
+                    const nodeX = (nodeRect.left - containerRect.left) + nodeRect.width / 2;
+                    const nodeY = (nodeRect.top - containerRect.top) + nodeRect.height / 2;
+                    const parentX = (parentRect.left - containerRect.left) + parentRect.width / 2;
+                    const parentY = (parentRect.top - containerRect.top) + parentRect.height / 2;
+                    
+                    // 创建路径
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    
+                    // 使用贝塞尔曲线
+                    const dx = nodeX - parentX;
+                    const dy = nodeY - parentY;
+                    const controlPoint1X = parentX + dx * 0.5;
+                    const controlPoint1Y = parentY;
+                    const controlPoint2X = nodeX - dx * 0.5;
+                    const controlPoint2Y = nodeY;
+                    
+                    path.setAttribute(
+                        'd',
+                        `M ${parentX} ${parentY} C ${controlPoint1X} ${controlPoint1Y}, ${controlPoint2X} ${controlPoint2Y}, ${nodeX} ${nodeY}`
+                    );
+                    
+                    path.setAttribute('fill', 'none');
+                    path.setAttribute('stroke', getComputedStyle(document.documentElement).getPropertyValue('--primary-color'));
+                    path.setAttribute('stroke-width', '2');
+                    path.setAttribute('stroke-opacity', '0.8');
+                    
+                    // 设置虚线样式
+                    if (isDashed) {
+                        path.setAttribute('stroke-dasharray', '5,5');
+                    }
+                    
+                    svg.appendChild(path);
+                }
+                
+                // 更新小地图
+                function updateMiniMap() {
+                    const miniMapContent = document.querySelector('.mini-map-content');
+                    const miniMapViewport = document.querySelector('.mini-map-viewport');
+                    miniMapContent.innerHTML = '';
+                    miniMapContent.appendChild(miniMapViewport);
+                    
+                    const mapWidth = miniMapContent.offsetWidth;
+                    const mapHeight = miniMapContent.offsetHeight;
+                    const containerWidth = mindMapContainer.offsetWidth;
+                    const containerHeight = mindMapContainer.offsetHeight;
+                    
+                    const nodes = document.querySelectorAll('.node');
+                    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+                    
+                    nodes.forEach(node => {
+                        const rect = node.getBoundingClientRect();
+                        minX = Math.min(minX, rect.left);
+                        minY = Math.min(minY, rect.top);
+                        maxX = Math.max(maxX, rect.right);
+                        maxY = Math.max(maxY, rect.bottom);
+                    });
+                    
+                    const contentWidth = maxX - minX;
+                    const contentHeight = maxY - minY;
+                    const scaleX = mapWidth / contentWidth;
+                    const scaleY = mapHeight / contentHeight;
+                    const scale = Math.min(scaleX, scaleY) * 0.9;
+                    
+                    nodes.forEach(node => {
+                        const rect = node.getBoundingClientRect();
+                        const miniNode = document.createElement('div');
+                        miniNode.className = 'mini-map-node';
+                        miniNode.style.width = `${rect.width * scale}px`;
+                        miniNode.style.height = `${rect.height * scale}px`;
+                        miniNode.style.left = `${(rect.left - minX) * scale}px`;
+                        miniNode.style.top = `${(rect.top - minY) * scale}px`;
+                        
+                        if (node.classList.contains('root')) {
+                            miniNode.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--secondary-color');
+                        } else {
+                            const borderColor = getComputedStyle(node).borderLeftColor;
+                            miniNode.style.backgroundColor = borderColor;
+                        }
+                        
+                        miniMapContent.appendChild(miniNode);
+                    });
+                    
+                    // 更新视口
+                    const viewportWidth = (containerWidth / contentWidth) * mapWidth;
+                    const viewportHeight = (containerHeight / contentHeight) * mapHeight;
+                    const viewportX = (-translateX / contentWidth) * mapWidth;
+                    const viewportY = (-translateY / contentHeight) * mapHeight;
+                    
+                    miniMapViewport.style.width = `${viewportWidth}px`;
+                    miniMapViewport.style.height = `${viewportHeight}px`;
+                    miniMapViewport.style.left = `${viewportX}px`;
+                    miniMapViewport.style.top = `${viewportY}px`;
+                }
+                
+                // 显示右键菜单
+                function showContextMenu(x, y, nodeData) {
+                    contextMenu.style.display = 'block';
+                    contextMenu.style.left = `${x}px`;
+                    contextMenu.style.top = `${y}px`;
+                    
+                    // 设置菜单项的点击事件
+                    document.getElementById('add-child').onclick = () => {
+                        closeContextMenu();
+                        openAddNodeModal(nodeData);
+                    };
+                    
+                    document.getElementById('edit-node').onclick = () => {
+                        closeContextMenu();
+                        openEditNodeModal(nodeData);
+                    };
+                    
+                    document.getElementById('delete-node').onclick = () => {
+                        closeContextMenu();
+                        deleteNode(nodeData);
+                    };
+                    
+                    document.getElementById('change-color').onclick = () => {
+                        closeContextMenu();
+                        openColorPickerModal(nodeData);
+                    };
+                    
+                    // 如果是根节点，禁用删除功能
+                    const deleteNodeItem = document.getElementById('delete-node');
+                    if (nodeData.id === 'root') {
+                        deleteNodeItem.style.opacity = '0.5';
+                        deleteNodeItem.style.pointerEvents = 'none';
+                    } else {
+                        deleteNodeItem.style.opacity = '1';
+                        deleteNodeItem.style.pointerEvents = 'auto';
+                    }
+                    
+                    // 添加连接到其他节点选项
+                    const hasLinkToNodeItem = document.querySelector('#link-to-node');
+                    if (!hasLinkToNodeItem) {
+                        const linkToNodeItem = document.createElement('div');
+                        linkToNodeItem.className = 'context-menu-item';
+                        linkToNodeItem.id = 'link-to-node';
+                        linkToNodeItem.innerHTML = `
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            连接到其他节点
+                        `;
+                        linkToNodeItem.onclick = () => {
+                            closeContextMenu();
+                            startNodeLinking(nodeData);
+                        };
+                        contextMenu.appendChild(linkToNodeItem);
+                    }
+                }
+                
+                // 关闭右键菜单
+                function closeContextMenu() {
+                    contextMenu.style.display = 'none';
+                }
+                
+                // 节点编辑模态框
+                function openAddNodeModal(parentNode) {
+                    nodeModal.querySelector('.modal-title').textContent = '添加子节点';
+                    nodeTextInput.value = '';
+                    
+                    modalSaveBtn.onclick = () => {
+                        const newNodeId = 'node-' + Date.now();
+                        const newNode = {
+                            id: newNodeId,
+                            text: nodeTextInput.value,
+                            color: getRandomColor(),
+                            children: [],
+                            parents: [parentNode.id] // 添加父节点引用
+                        };
+                        
+                        if (!parentNode.children) {
+                            parentNode.children = [];
+                        }
+                        
+                        parentNode.children.push(newNode);
+                        closeModal();
+                        renderMindMap();
+                        showToast('添加节点成功');
+                    };
+                    
+                    modalCancelBtn.onclick = closeModal;
+                    modalClose.onclick = closeModal;
+                    
+                    nodeModal.classList.add('show');
+                }
+                
+                function openEditNodeModal(node) {
+                    nodeModal.querySelector('.modal-title').textContent = '编辑节点';
+                    nodeTextInput.value = node.text;
+                    
+                    modalSaveBtn.onclick = () => {
+                        node.text = nodeTextInput.value;
+                        closeModal();
+                        renderMindMap();
+                        showToast('更新节点成功');
+                    };
+                    
+                    modalCancelBtn.onclick = closeModal;
+                    modalClose.onclick = closeModal;
+                    
+                    nodeModal.classList.add('show');
+                }
+                
+                function openColorPickerModal(node) {
+                    nodeModal.querySelector('.modal-title').textContent = '更改颜色';
+                    
+                    const modalBody = nodeModal.querySelector('.modal-body');
+                    const originalContent = modalBody.innerHTML;
+                    
+                    const colorPickerHTML = `
+                        <div class="color-picker">
+                            <div class="color-item selected" style="background-color: #3498db;" data-color="#3498db"></div>
+                            <div class="color-item" style="background-color: #2ecc71;" data-color="#2ecc71"></div>
+                            <div class="color-item" style="background-color: #e74c3c;" data-color="#e74c3c"></div>
+                            <div class="color-item" style="background-color: #f39c12;" data-color="#f39c12"></div>
+                            <div class="color-item" style="background-color: #9b59b6;" data-color="#9b59b6"></div>
+                            <div class="color-item" style="background-color: #1abc9c;" data-color="#1abc9c"></div>
+                        </div>
+                    `;
+                    
+                    modalBody.innerHTML = colorPickerHTML;
+                    
+                    const colorItems = modalBody.querySelectorAll('.color-item');
+                    colorItems.forEach(item => {
+                        item.addEventListener('click', () => {
+                            colorItems.forEach(i => i.classList.remove('selected'));
+                            item.classList.add('selected');
+                        });
+                    });
+                    
+                    modalSaveBtn.onclick = () => {
+                        const selectedColor = modalBody.querySelector('.color-item.selected').getAttribute('data-color');
+                        node.color = selectedColor;
+                        modalBody.innerHTML = originalContent;
+                        closeModal();
+                        renderMindMap();
+                    };
+                    
+                    modalCancelBtn.onclick = () => {
+                        modalBody.innerHTML = originalContent;
+                        closeModal();
+                    };
+                    
+                    modalClose.onclick = () => {
+                        modalBody.innerHTML = originalContent;
+                        closeModal();
+                    };
+                    
+                    nodeModal.classList.add('show');
+                }
+                
+                // 关闭模态框
+                function closeModal() {
+                    nodeModal.classList.remove('show');
+                }
+                
+                // 删除节点
+                function deleteNode(node) {
+                    if (node.id === 'root') return;
+                    
+                    function removeNodeFromParent(parent, nodeId) {
+                        if (!parent.children) return false;
+                        
+                        const index = parent.children.findIndex(child => child.id === nodeId);
+                        if (index !== -1) {
+                            parent.children.splice(index, 1);
+                            return true;
+                        }
+                        
+                        for (const child of parent.children) {
+                            if (removeNodeFromParent(child, nodeId)) {
+                                return true;
+                            }
+                        }
+                        
+                        return false;
+                    }
+                    
+                    removeNodeFromParent(mindMapData, node.id);
+                    renderMindMap();
+                    showToast('删除节点成功');
+                }
+                
+                // 显示提示信息
+                function showToast(message) {
+                    const toast = document.createElement('div');
+                    toast.className = 'toast';
+                    toast.textContent = message;
+                    document.body.appendChild(toast);
+                    
+                    setTimeout(() => {
+                        toast.classList.add('show');
+                        
+                        setTimeout(() => {
+                            toast.classList.remove('show');
+                            setTimeout(() => {
+                                document.body.removeChild(toast);
+                            }, 300);
+                        }, 2000);
+                    }, 0);
+                }
+                
+                // 应用节点样式
+                function applyNodeStyle(node, style, isRoot) {
+                    if (isRoot) return;
+                    
+                    switch (style) {
+                        case 'default':
+                            node.style.borderRadius = 'var(--border-radius)';
+                            node.style.backgroundColor = 'white';
+                            node.style.border = 'none';
+                            node.style.borderLeft = '5px solid var(--primary-color)';
+                            break;
+                        case 'rounded':
+                            node.style.borderRadius = '20px';
+                            node.style.backgroundColor = 'white';
+                            node.style.border = 'none';
+                            node.style.borderLeft = '5px solid var(--primary-color)';
+                            break;
+                        case 'bordered':
+                            node.style.borderRadius = 'var(--border-radius)';
+                            node.style.backgroundColor = 'white';
+                            node.style.border = `3px solid ${node.style.borderLeftColor}`;
+                            node.style.borderLeft = `3px solid ${node.style.borderLeftColor}`;
+                            break;
+                        case 'bubble':
+                            node.style.borderRadius = 'var(--border-radius)';
+                            node.style.backgroundColor = `${node.style.borderLeftColor}20`;
+                            node.style.border = `1px solid ${node.style.borderLeftColor}`;
+                            node.style.borderLeft = `1px solid ${node.style.borderLeftColor}`;
+                            break;
+                    }
+                }
+                
+                // 缩放功能
+                zoomInBtn.addEventListener('click', () => {
+                    scale = Math.min(scale + 0.1, 2);
+                    applyTransform();
+                });
+                
+                zoomOutBtn.addEventListener('click', () => {
+                    scale = Math.max(scale - 0.1, 0.5);
+                    applyTransform();
+                });
+                
+                zoomResetBtn.addEventListener('click', () => {
+                    scale = 1;
+                    translateX = 0;
+                    translateY = 0;
+                    applyTransform();
+                });
+                
+                // 应用变换
+                function applyTransform() {
+                    mindMap.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+                    updateMiniMap();
+                }
+                
+                // 拖拽功能
+                mindMapContainer.addEventListener('mousedown', (e) => {
+                    if (e.target === mindMapContainer || e.target === mindMap) {
+                        isDragging = true;
+                        startX = e.clientX - translateX;
+                        startY = e.clientY - translateY;
+                        mindMapContainer.classList.add('grabbing');
+                    }
+                });
+                
+                document.addEventListener('mousemove', (e) => {
+                    if (isDragging) {
+                        translateX = e.clientX - startX;
+                        translateY = e.clientY - startY;
+                        applyTransform();
+                    }
+                });
+                
+                document.addEventListener('mouseup', () => {
+                    isDragging = false;
+                    mindMapContainer.classList.remove('grabbing');
+                });
+                
+                // 节点连接功能
+                let linkingNode = null;
+                let isLinking = false;
+                
+                function startNodeLinking(sourceNode) {
+                    linkingNode = sourceNode;
+                    isLinking = true;
+                    mindMapContainer.style.cursor = 'crosshair';
+                    showToast('请选择要连接的目标节点');
+                    
+                    // 添加一次性点击事件
+                    const onceClick = (e) => {
+                        const target = e.target.closest('.node');
+                        if (target && target.id !== sourceNode.id) {
+                            const targetNodeData = findNodeById(target.id, mindMapData);
+                            if (targetNodeData) {
+                                linkNodes(sourceNode, targetNodeData);
+                                showToast('节点连接成功');
+                            }
+                        } else if (!target) {
+                            showToast('连接已取消');
+                        }
+                        
+                        // 清理
+                        isLinking = false;
+                        linkingNode = null;
+                        mindMapContainer.style.cursor = 'grab';
+                        document.removeEventListener('click', onceClick);
+                    };
+                    
+                    // 使用setTimeout确保当前点击不会立即触发
+                    setTimeout(() => {
+                        document.addEventListener('click', onceClick, { once: true });
+                    }, 0);
+                }
+                
+                function linkNodes(sourceNode, targetNode) {
+                    // 确保节点有parents数组
+                    if (!targetNode.parents) {
+                        targetNode.parents = [];
+                    }
+                    
+                    // 检查是否已经连接，避免重复
+                    if (!targetNode.parents.includes(sourceNode.id)) {
+                        targetNode.parents.push(sourceNode.id);
+                    }
+                    
+                    renderMindMap(); // 重新渲染以显示新连接
+                }
+                
+                // 辅助函数：根据ID查找节点
+                function findNodeById(id, rootNode) {
+                    if (rootNode.id === id) {
+                        return rootNode;
+                    }
+                    
+                    if (rootNode.children) {
+                        for (const child of rootNode.children) {
+                            const found = findNodeById(id, child);
+                            if (found) return found;
+                        }
+                    }
+                    
+                    return null;
+                }
+                
+                // 主题切换功能
+                const themeOptions = document.querySelectorAll('.themes .color-option');
+                themeOptions.forEach(option => {
+                    option.addEventListener('click', () => {
+                        themeOptions.forEach(o => o.classList.remove('active'));
+                        option.classList.add('active');
+                        
+                        const theme = option.getAttribute('data-theme');
+                        applyTheme(theme);
+                    });
+                });
+                
+                // 节点样式切换功能
+                const styleOptions = document.querySelectorAll('.node-styles .color-option');
+                styleOptions.forEach(option => {
+                    option.addEventListener('click', () => {
+                        styleOptions.forEach(o => o.classList.remove('active'));
+                        option.classList.add('active');
+                        renderMindMap();
+                    });
+                });
+                
+                // 布局切换功能
+                const layoutOptions = document.querySelectorAll('.layouts .color-option');
+                layoutOptions.forEach(option => {
+                    option.addEventListener('click', () => {
+                        layoutOptions.forEach(o => o.classList.remove('active'));
+                        option.classList.add('active');
+                        renderMindMap();
+                    });
+                });
+                
+                // 应用主题
+                function applyTheme(theme) {
+                    let primaryColor, secondaryColor;
+                    
+                    switch (theme) {
+                        case 'default':
+                            primaryColor = '#3498db';
+                            secondaryColor = '#9b59b6';
+                            break;
+                        case 'nature':
+                            primaryColor = '#27ae60';
+                            secondaryColor = '#2ecc71';
+                            break;
+                        case 'sunset':
+                            primaryColor = '#e74c3c';
+                            secondaryColor = '#f39c12';
+                            break;
+                        case 'ocean':
+                            primaryColor = '#1abc9c';
+                            secondaryColor = '#3498db';
+                            break;
+                    }
+                    
+                    document.documentElement.style.setProperty('--primary-color', primaryColor);
+                    document.documentElement.style.setProperty('--secondary-color', secondaryColor);
+                    
+                    // 更新头部渐变
+                    document.querySelector('.header').style.background = `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`;
+                    
+                    renderMindMap();
+                }
+                
+                // 获取随机颜色
+                function getRandomColor() {
+                    const colors = ['#3498db', '#2ecc71', '#e74c3c', '#f39c12', '#9b59b6', '#1abc9c'];
+                    return colors[Math.floor(Math.random() * colors.length)];
+                }
+                
+                // 点击页面任意位置关闭右键菜单
+                document.addEventListener('click', closeContextMenu);
+                
+                // 工具栏按钮功能
+                document.getElementById('new-btn').addEventListener('click', () => {
+                    if (confirm('确定要创建新的思维导图吗？当前的思维导图将被清空。')) {
+                        mindMapData = {
+                            id: 'root',
+                            text: '中心主题',
+                            children: []
+                        };
+                        renderMindMap();
+                        showToast('已创建新的思维导图');
+                    }
+                });
+                
+                document.getElementById('save-btn').addEventListener('click', () => {
+                    const json = JSON.stringify(mindMapData);
+                    localStorage.setItem('mindMap', json);
+                    showToast('思维导图已保存');
+                });
+                
+                document.getElementById('export-btn').addEventListener('click', () => {
+                    const json = JSON.stringify(mindMapData, null, 2);
+                    const blob = new Blob([json], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'mindmap.json';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    
+                    showToast('思维导图已导出');
+                });
+                
+                // 激活第一个主题和节点样式
+                themeOptions[0].classList.add('active');
+                styleOptions[0].classList.add('active');
+                layoutOptions[0].classList.add('active');
+                
+                // 尝试从本地存储加载
+                const savedMindMap = localStorage.getItem('mindMap');
+                if (savedMindMap) {
+                    try {
+                        mindMapData = JSON.parse(savedMindMap);
+                        showToast('已加载保存的思维导图');
+                    } catch (e) {
+                        console.error('加载保存的思维导图失败', e);
+                    }
+                }
+                
+                // 初始渲染
+                renderMindMap();
+            }
+        });
+    </script>
+</body>
+</html>

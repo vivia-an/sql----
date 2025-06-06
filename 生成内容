@@ -1,0 +1,180 @@
+
+
+
+-- Presto语法版本:
+select r.sam_apply_id,
+       array_join(array_agg(n.node_value order by n.id), ';') as mzfsCmc 
+from sam_emr_rec r
+left join sam_emr_rec_nv n
+    on n.sam_emr_rec_id = r.id 
+where r.rss_emr_type_id = 'sam_mzfs'
+    and n.node_name = 'S_MZFS_DM'
+group by r.sam_apply_id
+
+-- 主要改动说明:
+-- 1. Oracle的LISTAGG函数在Presto中使用array_agg + array_join替代
+-- 2. array_agg用于将多行聚合为数组
+-- 3. array_join用于将数组元素用指定分隔符连接成字符串
+-- 4. within group(order by)改为在array_agg中直接使用order by
+-- 其他查询逻辑保持不变
+
+
+-- 通过手术申请关联到手术登记表的SQL:
+select a.id as apply_id,
+       r.id as reg_id,
+       ro.id as reg_op_id
+from sam_apply a
+left join sam_reg r 
+    on r.sam_apply_id = a.id
+left join sam_reg_op ro
+    on ro.sam_reg_id = r.id
+
+-- 说明:
+-- 1. sam_apply(手术申请单) -> sam_reg(手术登记) -> sam_reg_op(手术登记-手术)
+-- 2. sam_apply.id = sam_reg.sam_apply_id 
+-- 3. sam_reg.id = sam_reg_op.sam_reg_id
+-- 4. 通过这样的关联关系可以从手术申请找到对应的手术登记信息
+
+
+-- 根据手麻表结构,患者科室相关字段如下:
+-- sam_apply表:
+-- PATIENT_DEPT_ID VARCHAR2(20) - 患者科室ID字段
+-- 关联查询SQL:
+
+select a.id as apply_id,
+       a.patient_dept_id,  -- 患者科室ID
+       d.department_name   -- 科室名称
+from sam_apply a 
+left join department d on d.id = a.patient_dept_id
+where a.id = 'xxx'  -- 手术标识
+
+-- 说明:
+-- 1. sam_apply表中直接存储了patient_dept_id(患者科室ID)字段
+-- 2. 可以通过patient_dept_id关联department表获取科室详细信息
+-- 3. 整个关联链路: sam_apply -> department
+
+
+-- 根据department表的IS_EMERGENCY_OPEN字段判断是否急诊科室
+select a.id as apply_id,
+       a.patient_dept_id,
+       d.department_name,
+       case 
+           when d.is_emergency_open = '1' then '急诊'
+           else '非急诊'
+       end as emergency_type
+from sam_apply a
+left join department d 
+    on d.id = a.patient_dept_id
+where a.id = 'xxx'
+
+-- 说明:
+-- 1. department表中IS_EMERGENCY_OPEN字段表示是否开放急诊
+-- 2. IS_EMERGENCY_OPEN='1'表示开放急诊,其他值为非急诊
+-- 3. 使用case when语句进行判断输出
+
+
+-- 这段SQL主要是统计电子病历评级中手术记录与病案首页的整合性,具体说明:
+
+-- 1. 电子病历模板表(hid0101_cache_his_dhcapp_emrinstance.icompositesimple)
+--    用于存储病案首页信息:
+--    - 模板ID=38 表示病案首页模板
+--    - I0169-I0175: 病案首页中的手术名称字段
+--    - D0153-D0160: 病案首页中的手术时间字段
+--    主要用于获取病案首页记录的手术信息
+
+-- 2. 手术相关表(hid0101_cache_his_dhcapp_userssgl库):
+--    a) aorismtoopreoparcim(手术申请表):
+--       - anemegid: 手术申请ID 
+--       - opreoaname: 手术医嘱名称
+--    b) aorismtoanemeg(手术记录单):
+--       - rowkey: 主键
+--       - opno: 手术编号
+--       - anemeg_rowid: 手术申请ID
+--       - opreanAStart: 麻醉开始时间
+--       - oprepatout: 患者出室时间
+--    用于获取实际手术执行记录
+
+-- SQL逻辑分析:
+-- 1. 数据整合性比对:
+--    - 比对病案首页记录的手术名称(I0169-I0175)
+--    - 与手术申请表中实际记录的手术医嘱名称
+--    通过这种比对可以检查病案首页与手术记录的一致性
+
+-- 2. 时间范围控制:
+--    - 病案首页手术时间: 2024-06-01 到 2024-08-31
+--    - 手术记录麻醉开始时间: 2024-06-01 到 2024-08-31
+--    确保在同一时间段内进行比对
+
+-- 3. 数据完整性要求:
+--    - 病案首页手术名称不为空
+--    - 手术医嘱名称不为空且非null
+--    - 患者出室时间不为空
+--    保证比对数据的有效性
+
+-- 4. 去重处理:
+--    - 使用row_number()对每个电子病历模板按时间排序取最新
+--    - 对每个手术编号按申请ID排序取唯一记录
+--    避免重复统计
+
+-- 此SQL用于电子病历质控评级,通过统计手术记录与病案首页信息的匹配数量,
+-- 评估病历书写的规范性和完整性。
+-- 对应手麻系统的SAM_APPLY(手术申请)和SAM_REG_OP(手术登记)表,
+-- 体现了手术全过程的信息整合要求。
+
+
+
+检查相关的表
+
+-- 1. 检查申请主表 OE_Order
+OEORD_RowId        -- 申请单ID
+OEORD_Adm_DR       -- 就诊号
+OEORD_Doctor_DR    -- 申请医生
+OEORD_Date         -- 申请日期
+OEORD_Time         -- 申请时间
+
+-- 2. 检查申请明细表 OE_OrdItem
+OEORI_RowID        -- 医嘱号
+OEORI_OEORD_ParRef -- 申请单ID
+OEORI_ItmMast_DR   -- 检查项目
+OEORI_ItemStat_DR  -- 检查状态
+OEORI_RecDep_DR    -- 执行科室
+OEORI_LabEpisodeNo -- 检查号/标本号
+
+-- 3. 检查结果主表 OE_Result
+OERES_OEORI_ParRef -- 医嘱号
+OERES_TestDate     -- 检查日期
+OERES_TestTime     -- 检查时间
+OERES_Status       -- 结果状态
+OERES_ReportDate   -- 报告日期
+OERES_ReportTime   -- 报告时间
+
+-- 4. 检查项目字典 ARC_ItmMast
+ARCIM_RowId        -- 项目ID
+ARCIM_Code         -- 项目代码
+ARCIM_Desc         -- 项目名称
+ARCIM_OrderCategory_DR -- 医嘱大类
+
+-- 5. PACS影像信息表 DHC_OEOrdImageInfo
+ImageID           -- 影像ID  
+StudyUID          -- 检查UID
+AccessionNumber   -- 检查号
+PatientID         -- 患者ID
+ExamDate          -- 检查日期
+ExamTime          -- 检查时间
+ReportStatus      -- 报告状态
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
