@@ -1,0 +1,16 @@
+电子病历评级：
+
+评价内容=》完整性：麻醉记录（麻醉事件、术中用药、麻醉开始时间、进入恢复室时间、麻醉苏醒时间）
+
+评价项目=》进入恢复室时间
+
+整体评价=》 分母总量统计sql
+
+
+SELECT COUNT(DISTINCT T.ID)   FROM hid0101_orcl_operaanesthisa_emrhis.sam_ana AN,hid0101_orcl_operaanesthisa_emrhis.sam_apply T,hid0101_orcl_operaanesthisa_emrhis.sam_apply_op P    WHERE AN.SAM_APPLY_ID = T.ID    AND T.HEALTH_SERVICE_ORG_ID = 'HXSSMZK'    AND T.OPER_TYPE = 'ROOM_OPER'    AND P.SAM_APPLY_ID = T.ID    AND P.IS_MAIN_OPERATION = '1'    AND T.IS_REJECT = '2'    AND T.S_SSSYZT_DM = '90'    AND T.SCHEDULED_DATE BETWEEN        '2024-12-01 00:00:00 00:00:00' AND        '2025-02-28 59:59:59 23:59:59'
+
+
+分子sql=》
+-- 进入恢复室时间 量的统计
+ SELECT COUNT(DISTINCT T.ID)   FROM hid0101_orcl_operaanesthisa_emrhis.sam_anar AN,hid0101_orcl_operaanesthisa_emrhis.sam_apply T,hid0101_orcl_operaanesthisa_emrhis.sam_apply_op P    WHERE AN.SAM_APPLY_ID = T.ID    AND T.HEALTH_SERVICE_ORG_ID = 'HXSSMZK'    AND T.OPER_TYPE = 'ROOM_OPER'    AND P.SAM_APPLY_ID = T.ID    AND P.IS_MAIN_OPERATION = '1'    AND T.IS_REJECT = '2'    AND T.S_SSSYZT_DM = '90'    AND AN.REC_IN_DATE IS NOT NULL    AND TRIM(AN.REC_IN_DATE) <> ' '    AND T.SCHEDULED_DATE BETWEEN        '2024-12-01 00:00:00 00:00:00' AND        '2025-02-28 59:59:59 23:59:59' 
+

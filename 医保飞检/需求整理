@@ -1,0 +1,627 @@
+当前查询数据库是 技术实现：PostgreSQL数据库查询
+
+
+收费项编码A	收费项名称A	收费项编码B	收费项名称B	提取时间段	提取规则
+331501052	脊柱椎间融合器植入植骨融合术	331501032	胸腰椎骨折切开复位内固定术	2022.1.1-2022.11.30	同一天有项目A,无项目B的明细数据
+
+任务概述
+完成医保飞检项目中"同一天有项目A无项目B"规则的SQL查询开发，基于2024国家医保飞行检查数据采集清单规范实现。
+核心需求描述
+业务规则：查找在同一天收取了特定项目A但未收取特定项目B的患者明细数据
+数据时间范围：2022年1月1日至2022年11月30日
+技术实现：PostgreSQL数据库查询
+数据来源：住院患者明细(settle_zy_detail) + 门诊患者明细(settle_mz_detail)
+具体需求清单
+本次共完成4组互斥项目组合的SQL开发：
+脊柱手术项目组合
+项目A：331501052 (脊柱椎间融合器植入植骨融合术)
+项目B：331501032 (胸腰椎骨折切开复位内固定术)
+项目组合二
+项目A：311000011
+项目B：160037BSO0270
+项目组合三
+项目A：120100010
+项目B：120100011
+项目组合四
+项目A：12010001001
+项目B：120100011
+
+
+
+
+需求sql实现：
+
+
+
+-- 医保飞检：同一天有项目A无项目B的明细数据查询（含登记号）
+-- 项目A：12010001001
+-- 项目B：120100011
+-- 时间范围：2022-01-01 到 2022-11-30
+-- 规则：同一天有项目A，无项目B的明细数据
+
+SELECT 
+    a.个人ID,
+    a.患者性别,
+    a.患者年龄,
+    a.疾病诊断,
+    a.费用明细流水号,
+    a.登记号,          -- 新增登记号字段
+    a.费用类别,
+    a.编码,
+    a.项目名称,
+    a.计价单位,
+    a.单价,
+    a.数量,
+    a.金额,
+    a.住院天数,
+    a.计费时间,
+    a.项目开始时间,
+    a.项目结束时间,
+    a.执行科室,
+    a.数据来源,
+    a.就诊科室,
+    a.就诊号,
+    a.患者标识
+FROM (
+    -- 住院患者明细
+    SELECT
+        a.zyh as 个人ID,
+        PATIENT_GENDER as 患者性别,
+        PATIENT_AGE as 患者年龄,
+        zylczd as 疾病诊断,
+        pbdstr as 费用明细流水号,
+        a.fee_billdet_persno as 登记号,    -- 新增登记号字段
+        tarsc_desc as 费用类别,
+        item_id_hosp as 编码,
+        item_name as 项目名称,
+        PACKAGE_UNIT as 计价单位,
+        cast(UNIT_PRICE as varchar) as 单价,
+        cast(NUM as varchar) as 数量,
+        cast(COST as varchar) as 金额,
+        ZYTS as 住院天数,
+        bill_date as 计费时间,
+        order_order_orderbegindttm as 项目开始时间,
+        execute_date as 项目结束时间,
+        excute_dept_name as 执行科室,
+        '住院' as 数据来源,
+        visit_ipvisitinfo_inhospdeptname as 就诊科室,
+        a.zyh as 就诊号,
+        a.patient_id as 患者标识
+    FROM flycheck_realtime.settle_zy_detail a
+    INNER JOIN flycheck_realtime.settle_zy b ON a.zyh = b.zyh AND a.hisid = b.hisid
+    LEFT JOIN flycheck_realtime.dhc_taritem taritem ON taritem.tari_code = a.item_id_hosp AND taritem.isdeleted = '0'
+    LEFT JOIN flycheck_realtime.dhc_tarsubcate tarsubcate ON tarsubcate.rowkey = taritem.tari_subcate AND tarsubcate.isdeleted = '0'
+    WHERE a.bill_date >= '2022-01-01' 
+        AND a.bill_date < '2022-12-01' 
+        AND b.bill_date >= '2022-01-01' 
+        AND b.bill_date < '2022-12-01'
+
+    UNION
+
+    -- 门诊患者明细
+    SELECT
+        b.mzh as 个人ID,
+        PATIENT_GENDER as 患者性别,
+        PATIENT_AGE as 患者年龄,
+        admission_disease_name as 疾病诊断,
+        pbd as 费用明细流水号,
+        null as 登记号,                    -- 门诊无登记号，设为null
+        tarsc_desc as 费用类别,
+        item_id_hosp as 编码,
+        item_name as 项目名称,
+        PACKAGE_UNIT as 计价单位,
+        cast(UNIT_PRICE as varchar) as 单价,
+        cast(NUM as varchar) as 数量,
+        cast(COST as varchar) as 金额,
+        null as 住院天数,
+        bill_date as 计费时间,
+        order_order_orderbegindttm as 项目开始时间,
+        execute_date as 项目结束时间,
+        excute_dept_name as 执行科室,
+        '门诊' as 数据来源,
+        b.admission_dept_name as 就诊科室,
+        b.mzh as 就诊号,
+        a.patient_id as 患者标识
+    FROM flycheck_realtime.settle_MZ_detail a
+    INNER JOIN flycheck_realtime.settle_MZ b ON a.hisid = b.hisid
+    LEFT JOIN flycheck_realtime.dhc_taritem taritem ON taritem.tari_code = a.item_id_hosp AND taritem.isdeleted = '0'
+    LEFT JOIN flycheck_realtime.dhc_tarsubcate tarsubcate ON tarsubcate.rowkey = taritem.tari_subcate AND tarsubcate.isdeleted = '0'
+    WHERE a.bill_date >= '2022-01-01' 
+        AND a.bill_date < '2022-12-01' 
+        AND b.bill_date >= '2022-01-01' 
+        AND b.bill_date < '2022-12-01'
+) a 
+WHERE a.编码 = '12010001001'  -- 项目A
+    AND NOT EXISTS (
+        -- 检查同一患者同一天是否有项目B
+        SELECT 1 
+        FROM (
+            -- 住院患者项目B检查
+            SELECT 
+                a2.zyh as 个人ID,
+                a2.bill_date as 计费时间,
+                a2.patient_id as 患者标识
+            FROM flycheck_realtime.settle_zy_detail a2
+            INNER JOIN flycheck_realtime.settle_zy b2 ON a2.zyh = b2.zyh AND a2.hisid = b2.hisid
+            WHERE a2.bill_date >= '2022-01-01' 
+                AND a2.bill_date < '2022-12-01' 
+                AND b2.bill_date >= '2022-01-01' 
+                AND b2.bill_date < '2022-12-01'
+                AND a2.item_id_hosp = '120100011'  -- 项目B
+            
+            UNION
+            
+            -- 门诊患者项目B检查
+            SELECT 
+                b2.mzh as 个人ID,
+                a2.bill_date as 计费时间,
+                a2.patient_id as 患者标识
+            FROM flycheck_realtime.settle_MZ_detail a2
+            INNER JOIN flycheck_realtime.settle_MZ b2 ON a2.hisid = b2.hisid
+            INNER JOIN flycheck_realtime.mzh_table mzhtable2 ON mzhtable2.mzh = b2.mzh
+            WHERE a2.bill_date >= '2022-01-01' 
+                AND a2.bill_date < '2022-12-01' 
+                AND b2.bill_date >= '2022-01-01' 
+                AND b2.bill_date < '2022-12-01'
+                AND a2.item_id_hosp = '120100011'  -- 项目B
+        ) b_records
+        WHERE b_records.个人ID = a.个人ID
+            AND b_records.患者标识 = a.患者标识
+            AND TO_CHAR(b_records.计费时间, 'YYYY-MM-DD') = TO_CHAR(a.计费时间, 'YYYY-MM-DD')  -- 同一天
+    )
+
+ORDER BY a.个人ID, a.计费时间;
+
+
+
+
+===========
+
+-- 医保飞检：同一天有项目A无项目B的明细数据查询（含登记号）
+-- 项目A：311000011
+-- 项目B：160037BSO0270
+-- 时间范围：2022-01-01 到 2022-11-30
+-- 规则：同一天有项目A，无项目B的明细数据
+
+SELECT 
+    a.个人ID,
+    a.患者性别,
+    a.患者年龄,
+    a.疾病诊断,
+    a.费用明细流水号,
+    a.登记号,
+    a.费用类别,
+    a.编码,
+    a.项目名称,
+    a.计价单位,
+    a.单价,
+    a.数量,
+    a.金额,
+    a.住院天数,
+    a.计费时间,
+    a.项目开始时间,
+    a.项目结束时间,
+    a.执行科室,
+    a.数据来源,
+    a.就诊科室,
+    a.就诊号,
+    a.患者标识
+FROM (
+    -- 住院患者明细
+    SELECT
+        a.zyh as 个人ID,
+        PATIENT_GENDER as 患者性别,
+        PATIENT_AGE as 患者年龄,
+        zylczd as 疾病诊断,
+        pbdstr as 费用明细流水号,
+        a.fee_billdet_persno as 登记号,
+        tarsc_desc as 费用类别,
+        item_id_hosp as 编码,
+        item_name as 项目名称,
+        PACKAGE_UNIT as 计价单位,
+        cast(UNIT_PRICE as varchar) as 单价,
+        cast(NUM as varchar) as 数量,
+        cast(COST as varchar) as 金额,
+        ZYTS as 住院天数,
+        bill_date as 计费时间,
+        order_order_orderbegindttm as 项目开始时间,
+        execute_date as 项目结束时间,
+        excute_dept_name as 执行科室,
+        '住院' as 数据来源,
+        visit_ipvisitinfo_inhospdeptname as 就诊科室,
+        a.zyh as 就诊号,
+        a.patient_id as 患者标识
+    FROM flycheck_realtime.settle_zy_detail a
+    INNER JOIN flycheck_realtime.settle_zy b ON a.zyh = b.zyh AND a.hisid = b.hisid
+    LEFT JOIN flycheck_realtime.dhc_taritem taritem ON taritem.tari_code = a.item_id_hosp AND taritem.isdeleted = '0'
+    LEFT JOIN flycheck_realtime.dhc_tarsubcate tarsubcate ON tarsubcate.rowkey = taritem.tari_subcate AND tarsubcate.isdeleted = '0'
+    WHERE a.bill_date >= '2022-01-01' 
+        AND a.bill_date < '2022-12-01' 
+        AND b.bill_date >= '2022-01-01' 
+        AND b.bill_date < '2022-12-01'
+
+    UNION
+
+    -- 门诊患者明细
+    SELECT
+        b.mzh as 个人ID,
+        PATIENT_GENDER as 患者性别,
+        PATIENT_AGE as 患者年龄,
+        admission_disease_name as 疾病诊断,
+        pbd as 费用明细流水号,
+        null as 登记号,
+        tarsc_desc as 费用类别,
+        item_id_hosp as 编码,
+        item_name as 项目名称,
+        PACKAGE_UNIT as 计价单位,
+        cast(UNIT_PRICE as varchar) as 单价,
+        cast(NUM as varchar) as 数量,
+        cast(COST as varchar) as 金额,
+        null as 住院天数,
+        bill_date as 计费时间,
+        order_order_orderbegindttm as 项目开始时间,
+        execute_date as 项目结束时间,
+        excute_dept_name as 执行科室,
+        '门诊' as 数据来源,
+        b.admission_dept_name as 就诊科室,
+        b.mzh as 就诊号,
+        a.patient_id as 患者标识
+    FROM flycheck_realtime.settle_MZ_detail a
+    INNER JOIN flycheck_realtime.settle_MZ b ON a.hisid = b.hisid
+    LEFT JOIN flycheck_realtime.dhc_taritem taritem ON taritem.tari_code = a.item_id_hosp AND taritem.isdeleted = '0'
+    LEFT JOIN flycheck_realtime.dhc_tarsubcate tarsubcate ON tarsubcate.rowkey = taritem.tari_subcate AND tarsubcate.isdeleted = '0'
+    WHERE a.bill_date >= '2022-01-01' 
+        AND a.bill_date < '2022-12-01' 
+        AND b.bill_date >= '2022-01-01' 
+        AND b.bill_date < '2022-12-01'
+) a 
+WHERE a.编码 = '311000011'  -- 项目A
+    AND NOT EXISTS (
+        -- 检查同一患者同一天是否有项目B
+        SELECT 1 
+        FROM (
+            -- 住院患者项目B检查
+            SELECT 
+                a2.zyh as 个人ID,
+                a2.bill_date as 计费时间,
+                a2.patient_id as 患者标识
+            FROM flycheck_realtime.settle_zy_detail a2
+            INNER JOIN flycheck_realtime.settle_zy b2 ON a2.zyh = b2.zyh AND a2.hisid = b2.hisid
+            WHERE a2.bill_date >= '2022-01-01' 
+                AND a2.bill_date < '2022-12-01' 
+                AND b2.bill_date >= '2022-01-01' 
+                AND b2.bill_date < '2022-12-01'
+                AND a2.item_id_hosp = '160037BSO0270'  -- 项目B
+            
+            UNION
+            
+            -- 门诊患者项目B检查
+            SELECT 
+                b2.mzh as 个人ID,
+                a2.bill_date as 计费时间,
+                a2.patient_id as 患者标识
+            FROM flycheck_realtime.settle_MZ_detail a2
+            INNER JOIN flycheck_realtime.settle_MZ b2 ON a2.hisid = b2.hisid
+            INNER JOIN flycheck_realtime.mzh_table mzhtable2 ON mzhtable2.mzh = b2.mzh
+            WHERE a2.bill_date >= '2022-01-01' 
+                AND a2.bill_date < '2022-12-01' 
+                AND b2.bill_date >= '2022-01-01' 
+                AND b2.bill_date < '2022-12-01'
+                AND a2.item_id_hosp = '160037BSO0270'  -- 项目B
+        ) b_records
+        WHERE b_records.个人ID = a.个人ID
+            AND b_records.患者标识 = a.患者标识
+            AND TO_CHAR(b_records.计费时间, 'YYYY-MM-DD') = TO_CHAR(a.计费时间, 'YYYY-MM-DD')  -- 同一天
+    )
+
+ORDER BY a.个人ID, a.计费时间;
+
+
+
+-------------- 某个编码的明细数据
+
+SELECT 
+    a.个人ID,
+    a.患者性别,
+    a.患者年龄,
+    a.疾病诊断,
+    a.费用明细流水号,
+    a.登记号,
+    a.费用类别,
+    a.编码,
+    a.项目名称,
+    a.计价单位,
+    a.单价,
+    a.数量,
+    a.金额,
+    a.住院天数,
+    a.计费时间,
+    a.项目开始时间,
+    a.项目结束时间,
+    a.执行科室,
+    a.数据来源,
+    a.就诊科室,
+    a.就诊号,
+    a.患者标识
+FROM (
+    -- 住院患者明细
+    SELECT
+        a.zyh as 个人ID,
+        PATIENT_GENDER as 患者性别,
+        PATIENT_AGE as 患者年龄,
+        zylczd as 疾病诊断,
+        pbdstr as 费用明细流水号,
+        a.fee_billdet_persno as 登记号,
+        tarsc_desc as 费用类别,
+        item_id_hosp as 编码,
+        item_name as 项目名称,
+        PACKAGE_UNIT as 计价单位,
+        cast(UNIT_PRICE as varchar) as 单价,
+        cast(NUM as varchar) as 数量,
+        cast(COST as varchar) as 金额,
+        ZYTS as 住院天数,
+        bill_date as 计费时间,
+        order_order_orderbegindttm as 项目开始时间,
+        execute_date as 项目结束时间,
+        excute_dept_name as 执行科室,
+        '住院' as 数据来源,
+        visit_ipvisitinfo_inhospdeptname as 就诊科室,
+        a.zyh as 就诊号,
+        a.patient_id as 患者标识
+    FROM flycheck_realtime.settle_zy_detail a
+    INNER JOIN flycheck_realtime.settle_zy b ON a.zyh = b.zyh AND a.hisid = b.hisid
+    LEFT JOIN flycheck_realtime.dhc_taritem taritem ON taritem.tari_code = a.item_id_hosp AND taritem.isdeleted = '0'
+    LEFT JOIN flycheck_realtime.dhc_tarsubcate tarsubcate ON tarsubcate.rowkey = taritem.tari_subcate AND tarsubcate.isdeleted = '0'
+    WHERE a.bill_date >= '2022-01-01' 
+        AND a.bill_date < '2022-12-01' 
+        AND b.bill_date >= '2022-01-01' 
+        AND b.bill_date < '2022-12-01'
+
+    UNION
+
+    -- 门诊患者明细
+    SELECT
+        b.mzh as 个人ID,
+        PATIENT_GENDER as 患者性别,
+        PATIENT_AGE as 患者年龄,
+        admission_disease_name as 疾病诊断,
+        pbd as 费用明细流水号,
+        null as 登记号,
+        tarsc_desc as 费用类别,
+        item_id_hosp as 编码,
+        item_name as 项目名称,
+        PACKAGE_UNIT as 计价单位,
+        cast(UNIT_PRICE as varchar) as 单价,
+        cast(NUM as varchar) as 数量,
+        cast(COST as varchar) as 金额,
+        null as 住院天数,
+        bill_date as 计费时间,
+        order_order_orderbegindttm as 项目开始时间,
+        execute_date as 项目结束时间,
+        excute_dept_name as 执行科室,
+        '门诊' as 数据来源,
+        b.admission_dept_name as 就诊科室,
+        b.mzh as 就诊号,
+        a.patient_id as 患者标识
+    FROM flycheck_realtime.settle_MZ_detail a
+    INNER JOIN flycheck_realtime.settle_MZ b ON a.hisid = b.hisid
+    LEFT JOIN flycheck_realtime.dhc_taritem taritem ON taritem.tari_code = a.item_id_hosp AND taritem.isdeleted = '0'
+    LEFT JOIN flycheck_realtime.dhc_tarsubcate tarsubcate ON tarsubcate.rowkey = taritem.tari_subcate AND tarsubcate.isdeleted = '0'
+    WHERE a.bill_date >= '2022-01-01' 
+        AND a.bill_date < '2022-12-01' 
+        AND b.bill_date >= '2022-01-01' 
+        AND b.bill_date < '2022-12-01'
+) a where a.编码 = '331501032'
+
+
+-------------- 一整个周期内
+
+
+-- 医保飞检：一整个住院周期有项目A无项目B的明细数据查询
+-- 项目A：311000011
+-- 项目B：160037BSO0270
+-- 时间范围：2022-01-01 到 2022-11-30
+-- 规则：一整个住院周期有项目A，没有项目B的数据
+
+SELECT 
+    a.个人ID,
+    a.患者性别,
+    a.患者年龄,
+    a.疾病诊断,
+    a.费用明细流水号,
+    a.登记号,
+    a.费用类别,
+    a.编码,
+    a.项目名称,
+    a.计价单位,
+    a.单价,
+    a.数量,
+    a.金额,
+    a.住院天数,
+    a.计费时间,
+    a.项目开始时间,
+    a.项目结束时间,
+    a.执行科室,
+    a.数据来源,
+    a.就诊科室,
+    a.就诊号,
+    a.患者标识
+FROM (
+    -- 住院患者明细（主要数据源）
+    SELECT
+        a.zyh as 个人ID,
+        b.PATIENT_GENDER as 患者性别,
+        b.PATIENT_AGE as 患者年龄,
+        zylczd as 疾病诊断,
+        a.pbdstr as 费用明细流水号,
+        a.fee_billdet_persno as 登记号,
+        tarsc_desc as 费用类别,
+        a.item_id_hosp as 编码,
+        a.item_name as 项目名称,
+        a.PACKAGE_UNIT as 计价单位,
+        cast(a.UNIT_PRICE as varchar) as 单价,
+        cast(a.NUM as varchar) as 数量,
+        cast(a.COST as varchar) as 金额,
+        b.ZYTS as 住院天数,
+        a.bill_date as 计费时间,
+        a.order_order_orderbegindttm as 项目开始时间,
+        a.execute_date as 项目结束时间,
+        a.excute_dept_name as 执行科室,
+        '住院' as 数据来源,
+        visit_ipvisitinfo_inhospdeptname as 就诊科室,
+        a.zyh as 就诊号,
+        a.patient_id as 患者标识
+    FROM flycheck_realtime.settle_zy_detail a
+    INNER JOIN flycheck_realtime.settle_zy b ON a.zyh = b.zyh AND a.hisid = b.hisid
+    LEFT JOIN flycheck_realtime.dhc_taritem taritem ON taritem.tari_code = a.item_id_hosp AND taritem.isdeleted = '0'
+    LEFT JOIN flycheck_realtime.dhc_tarsubcate tarsubcate ON tarsubcate.rowkey = taritem.tari_subcate AND tarsubcate.isdeleted = '0'
+    WHERE a.bill_date >= '2022-01-01' 
+        AND a.bill_date < '2022-12-01' 
+        AND b.bill_date >= '2022-01-01' 
+        AND b.bill_date < '2022-12-01'
+) a 
+WHERE a.编码 = '311000011'  -- 项目A
+    AND NOT EXISTS (
+        -- 检查同一住院号(zyh)的整个住院周期内是否有项目B
+        SELECT 1 
+        FROM flycheck_realtime.settle_zy_detail a2
+        INNER JOIN flycheck_realtime.settle_zy b2 ON a2.zyh = b2.zyh AND a2.hisid = b2.hisid
+        WHERE a2.bill_date >= '2022-01-01' 
+            AND a2.bill_date < '2022-12-01' 
+            AND b2.bill_date >= '2022-01-01' 
+            AND b2.bill_date < '2022-12-01'
+            AND a2.item_id_hosp = '160037BSO0270'  -- 项目B
+            AND a2.zyh = a.就诊号  -- 关键修改：同一住院号的整个住院周期
+    )
+
+ORDER BY a.就诊号, a.计费时间;
+
+
+
+
+
+
+
+
+
+
+
+
+-- 医保飞检：提取项目编码310402001且收费数量大于1的耳鼻咽喉科患者明细（完善版）
+-- 项目编码：310402001
+-- 时间范围：2022-12-01 到 2025-05-26
+-- 业务规则：收费数量大于1，住院限耳鼻咽喉出院科室，门诊限耳鼻咽喉就诊科室
+-- 新增：参保地逻辑判断和ENT科室筛选
+
+SELECT 
+    a."项目编码A",
+    a."项目名称A",
+    a."姓名",
+    a."性别", 
+    a."身份证号",
+    a."就诊类别",
+    a."入院诊断",
+    a."出院诊断",
+    a."计费时间",
+    a."计费科室",
+    a."单价",
+    a."数量",
+    a."总费用",
+    a."自费费用",
+    a."医保基金支付费用",
+    a."参保地",
+    a."参保类别",
+    a."登记号"  -- 新增登记号字段
+FROM (
+    -- 住院患者明细
+    SELECT
+        COALESCE(a.item_id_hosp::VARCHAR, '') AS "项目编码A",
+        COALESCE(a.item_name_hosp::VARCHAR, '') AS "项目名称A",
+        COALESCE(b.patient_name::VARCHAR, '') AS "姓名",
+        COALESCE(b.patient_gender::VARCHAR, '') AS "性别",
+        COALESCE(b.id_card::VARCHAR, a.sfzhm::VARCHAR, '') AS "身份证号",
+        '住院' AS "就诊类别",
+        COALESCE(zd.admission_disease_name::VARCHAR, '') AS "入院诊断",
+        COALESCE(zd.discharge_disease_name_main::VARCHAR, '') AS "出院诊断",
+        COALESCE(a.bill_date::VARCHAR, '') AS "计费时间",
+        COALESCE(a.excute_dept_name::VARCHAR, '') AS "计费科室",
+        COALESCE(a.unit_price::VARCHAR, '0') AS "单价",
+        COALESCE(a.num::VARCHAR, '0') AS "数量",
+        COALESCE(a.cost::VARCHAR, '0') AS "总费用",
+        COALESCE((a.cost::NUMERIC - COALESCE(a.bmi_convered_amount::NUMERIC, 0))::VARCHAR, '0') AS "自费费用",
+        COALESCE(a.bmi_convered_amount::VARCHAR, '0') AS "医保基金支付费用",
+        CASE 
+            WHEN b.if_local_flag = '本地' THEN '省内'
+            WHEN b.if_local_flag = '异地' THEN '省外'
+            ELSE COALESCE(b.if_local_flag::VARCHAR, '未知')
+        END AS "参保地",
+        COALESCE(b.benefit_type::VARCHAR, a.cblx::VARCHAR, '') AS "参保类别",
+        COALESCE(a.fee_billdet_persno::VARCHAR, '') AS "登记号",  -- 住院有登记号
+        a.zyh AS 就诊号,
+        a.patient_id AS 患者标识
+    FROM flycheck_realtime.settle_zy_detail a
+    INNER JOIN flycheck_realtime.settle_zy b ON a.zyh = b.zyh AND a.hisid = b.hisid
+    LEFT JOIN flycheck_realtime.settle_zy_diagnosis zd ON a.zyh = zd.zyh AND a.hisid = zd.hisid
+    LEFT JOIN flycheck_realtime.dhc_taritem taritem ON taritem.tari_code = a.item_id_hosp AND taritem.isdeleted = '0'
+    LEFT JOIN flycheck_realtime.dhc_tarsubcate tarsubcate ON tarsubcate.rowkey = taritem.tari_subcate AND tarsubcate.isdeleted = '0'
+    WHERE a.bill_date >= '2022-12-01'::DATE
+        AND a.bill_date <= '2025-05-26'::DATE
+        AND b.bill_date >= '2022-12-01'::DATE 
+        AND b.bill_date <= '2025-05-26'::DATE
+        AND a.item_id_hosp = '310402001'  
+        AND COALESCE(a.num::NUMERIC, 0) > 1.0   
+        AND ((b.discharge_dept_name::VARCHAR LIKE '%耳鼻咽喉%' OR b.discharge_dept_name::VARCHAR LIKE '%ENT%')
+             OR (COALESCE(a.visit_ipvisitinfo_inhospdeptname::VARCHAR, '') LIKE '%耳鼻咽喉%' 
+                 OR COALESCE(a.visit_ipvisitinfo_inhospdeptname::VARCHAR, '') LIKE '%ENT%'))
+        AND COALESCE(a.isdeleted, '0') = '0'
+
+    UNION ALL
+
+    -- 门诊患者明细
+    SELECT
+        COALESCE(a.item_id_hosp::VARCHAR, '') AS "项目编码A",
+        COALESCE(a.item_name_hosp::VARCHAR, '') AS "项目名称A",
+        COALESCE(b.patient_name::VARCHAR, '') AS "姓名",
+        COALESCE(b.patient_gender::VARCHAR, '') AS "性别",
+        COALESCE(b.id_card::VARCHAR, '') AS "身份证号",
+        '门诊' AS "就诊类别",
+        COALESCE(b.admission_disease_name::VARCHAR, '') AS "入院诊断",
+        '' AS "出院诊断",
+        COALESCE(a.bill_date::VARCHAR, '') AS "计费时间",
+        COALESCE(a.excute_dept_name::VARCHAR, '') AS "计费科室", 
+        COALESCE(a.unit_price::VARCHAR, '0') AS "单价",
+        COALESCE(a.num::VARCHAR, '0') AS "数量",
+        COALESCE(a.cost::VARCHAR, '0') AS "总费用",
+        COALESCE((a.cost::NUMERIC - COALESCE(a.bmi_convered_amount::NUMERIC, 0))::VARCHAR, '0') AS "自费费用",
+        COALESCE(a.bmi_convered_amount::VARCHAR, '0') AS "医保基金支付费用",
+        CASE 
+            WHEN b.if_local_flag = '本地' THEN '省内'
+            WHEN b.if_local_flag = '异地' THEN '省外'
+            ELSE COALESCE(b.if_local_flag::VARCHAR, '未知')
+        END AS "参保地",
+        COALESCE(b.benefit_type::VARCHAR, '') AS "参保类别",
+        '' AS "登记号",  -- 修正：门诊无登记号，直接返回空字符串
+        b.mzh AS 就诊号,
+        a.patient_id AS 患者标识
+    FROM flycheck_realtime.settle_mz_detail a
+    INNER JOIN flycheck_realtime.settle_mz b ON a.hisid = b.hisid  
+    LEFT JOIN flycheck_realtime.dhc_taritem taritem ON taritem.tari_code = a.item_id_hosp AND taritem.isdeleted = '0'
+    LEFT JOIN flycheck_realtime.dhc_tarsubcate tarsubcate ON tarsubcate.rowkey = taritem.tari_subcate AND tarsubcate.isdeleted = '0'
+    WHERE a.bill_date >= '2022-12-01'::DATE
+        AND a.bill_date <= '2025-05-26'::DATE
+        AND b.bill_date >= '2022-12-01'::DATE
+        AND b.bill_date <= '2025-05-26'::DATE
+        AND a.item_id_hosp = '310402001'
+        AND COALESCE(a.num::NUMERIC, 0) > 1.0
+        AND (b.admission_dept_name::VARCHAR LIKE '%耳鼻咽喉%' OR b.admission_dept_name::VARCHAR LIKE '%ENT%')
+        AND COALESCE(a.isdeleted, '0') = '0'
+) a 
+
+ORDER BY a."就诊类别", a."计费时间", a."项目编码A";
+
+# 问题补充：
+
+当前 耳鼻喉科的需求实际描述应该为 耳鼻咽喉
+
+
+

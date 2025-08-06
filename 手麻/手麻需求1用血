@@ -1,6 +1,6 @@
 -- 基于参考SQL重构的手麻需求用血查询（去掉不存在的血制品表）
 SELECT
-    dpt.department_chinese_name AS "科室",
+    ssks.department_chinese_name AS "手术科室",
     COALESCE(ieg.ipi_registration_no, opc.opc_registration_no) AS "患者住院号",
     info.patient_name AS "患者姓名",
     xb.s_xb_cmc AS "性别",
@@ -43,11 +43,13 @@ SELECT
         WHEN ae.event_text LIKE '%血小板%' OR ae.event_text LIKE '%PLT%' OR ae.event_text LIKE '%血小%' THEN '血小板'
         WHEN ae.event_text LIKE '%冷沉淀%' OR ae.event_text LIKE '%CRYO%' OR ae.event_text LIKE '%冷凝%' THEN '冷沉淀'
         WHEN ae.event_text LIKE '%全血%' OR ae.event_text LIKE '%WHOLE%' THEN '全血'
-        WHEN ae.event_text IS NOT NULL AND ae.s_mzsjlb_dm = '04' THEN ae.event_text
+        WHEN ae.event_text IS NOT NULL AND ae.s_mzsjlb_dm = '31' THEN ae.event_text
         ELSE ''
     END AS "血液制品类型",
     COALESCE(CAST(ae.single_dose AS varchar), '') AS "输血量",
-    COALESCE(ae.ordered_date, '') AS "输血时间"
+        -- 输血量单位中文名称（新增，通过字典表解析）
+    COALESCE(jldw.s_jldw_cmc, ae.single_dose_unit, '') AS "输血量单位",
+    COALESCE(ae.ordered_date, '') AS "输血时间" -- 输血时间
 
 FROM (
     SELECT 
@@ -111,12 +113,13 @@ LEFT JOIN hid0101_orcl_operaanesthisa_emrhis.ipi_registration ieg
     ON ieg.id = info.ipi_registration_id AND ieg.isdeleted = '0'
 LEFT JOIN hid0101_orcl_operaanesthisa_emrhis.opc_registration opc 
     ON opc.id = info.opc_registration_id AND opc.isdeleted = '0'
-LEFT JOIN hid0101_orcl_operaanesthisa_emrhis.hra00_department dpt 
-    ON dpt.id = info.dept_id AND dpt.isdeleted = '0'
 LEFT JOIN hid0101_orcl_operaanesthisa_emrhis.sam_room rm  
     ON rm.id = info.room_id AND rm.isdeleted = '0'
 LEFT JOIN hid0101_orcl_operaanesthisa_emrhis.hrm_employee ssem 
     ON ssem.id = info.ssdoc_id AND ssem.isdeleted = '0'
+-- 手术科室关联（通过主刀医生所属科室）
+LEFT JOIN hid0101_orcl_operaanesthisa_emrhis.hra00_department ssks 
+    ON ssks.id = ssem.department_id AND ssks.isdeleted = '0'
 LEFT JOIN hid0101_orcl_operaanesthisa_emrhis.hrm_employee mzem 
     ON mzem.id = info.mzdoc_id AND mzem.isdeleted = '0'
 LEFT JOIN hid0101_orcl_operaanesthisa_emrhis.hrm_employee mzem1 
@@ -147,6 +150,11 @@ LEFT JOIN hid0101_orcl_operaanesthisa_emrhis.sam_anar_enent ae
     ON info.apply_id = ae.sam_apply_id 
     AND ae.s_mzsjlb_dm = '31'  -- 输血事件类别代码
     AND ae.isdeleted = '0'
+
+    -- 关联计量单位字典表获取单位中文名称
+LEFT JOIN hid0101_orcl_operaanesthisa_emrhis.pub_jldw jldw 
+    ON jldw.s_jldw_dm = ae.single_dose_unit 
+    AND jldw.isdeleted = '0'
 
 ORDER BY info.scheduled_date DESC, info.apply_id, ae.exec_date
 LIMIT 100;

@@ -1,0 +1,202 @@
+输血	完整性：配血记录（患者标识、配血检验项目、检验结果、配血时间）	检验结果	"SELECT COUNT(*) AS ""配血记录总数"" FROM (SELECT MACTH_DATE AS ""配血时间"",BLOODBAG_ID AS ""入库ID"",INSPECTION_ID AS ""标本标识"",METHOD_TYPE_ID AS ""配血方法"" FROM hid0101_orcl_lis_xhbis.bis6_bloodbag_match) ""用血清单"",
+(SELECT BLOODBAG_ID AS ""入库ID"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表"",
+(SELECT INSPECTION_ID AS ""标本标识"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT) ""检验结果表""
+WHERE ""用血清单"".""入库ID""=""血库记录表"".""入库ID"" AND ""用血清单"".""标本标识""= ""检验结果表"".""标本标识"" AND ""用血清单"".""配血方法""<>'4' 
+AND ""用血清单"".""配血时间"" BETWEEN '2024-05-01'AND '2024-07-31'"	"SELECT COUNT(""检验结果表"".""检验结果"") FROM (SELECT MACTH_DATE AS ""配血时间"",BLOODBAG_ID AS ""入库ID"",INSPECTION_ID AS ""标本标识"",MATCH_STATE ""配血状态"",METHOD_TYPE_ID AS ""配血方法"" FROM hid0101_orcl_lis_xhbis.bis6_bloodbag_match) ""用血清单"",
+(SELECT BLOODBAG_ID AS ""入库ID"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表"",
+(SELECT INSPECTION_ID AS ""标本标识"",QUANTITATIVE_RESULT AS ""检验结果"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT) ""检验结果表""
+WHERE ""用血清单"".""入库ID""=""血库记录表"".""入库ID"" AND ""用血清单"".""标本标识""= ""检验结果表"".""标本标识"" AND ""用血清单"".""配血状态""<>'-1' AND ""用血清单"".""配血方法""<>'4'
+AND ""用血清单"".""配血时间"" BETWEEN '2024-05-01'AND '2024-07-31' AND ""检验结果表"".""检验结果"" IS NOT NULL"
+输血	完整性：配血记录（患者标识、配血检验项目、检验结果、配血时间）	配血检验项目	"SELECT COUNT(*) AS ""配血记录总数"" FROM (SELECT MACTH_DATE AS ""配血时间"",BLOODBAG_ID AS ""入库ID"",INSPECTION_ID AS ""标本标识"",METHOD_TYPE_ID AS ""配血方法"" FROM hid0101_orcl_lis_xhbis.bis6_bloodbag_match) ""用血清单"",
+(SELECT BLOODBAG_ID AS ""入库ID"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表"",
+(SELECT INSPECTION_ID AS ""标本标识"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT) ""检验结果表""
+WHERE ""用血清单"".""入库ID""=""血库记录表"".""入库ID"" AND ""用血清单"".""标本标识""= ""检验结果表"".""标本标识"" AND ""用血清单"".""配血方法""<>'4' 
+AND ""用血清单"".""配血时间"" BETWEEN '2024-05-01'AND '2024-07-31'"	"SELECT COUNT(""检验结果表"".""配血检验项目名称"") FROM (SELECT MACTH_DATE AS ""配血时间"",BLOODBAG_ID AS ""入库ID"",INSPECTION_ID AS ""标本标识"",MATCH_STATE ""配血状态"",METHOD_TYPE_ID AS ""配血方法"" FROM hid0101_orcl_lis_xhbis.bis6_bloodbag_match) ""用血清单"",
+(SELECT BLOODBAG_ID AS ""入库ID"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表"",
+(SELECT INSPECTION_ID AS ""标本标识"",CHINESE_NAME AS ""配血检验项目名称"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT) ""检验结果表""
+WHERE ""用血清单"".""入库ID""=""血库记录表"".""入库ID"" AND ""用血清单"".""标本标识""= ""检验结果表"".""标本标识""AND ""用血清单"".""配血状态""<>'-1' AND ""用血清单"".""配血方法""<>'4'
+AND ""用血清单"".""配血时间"" BETWEEN '2024-05-01'AND '2024-07-31' AND ""检验结果表"".""配血检验项目名称"" IS NOT NULL"
+输血	完整性：配血记录（患者标识、配血检验项目、检验结果、配血时间）	配血时间	"SELECT COUNT(*) AS ""配血记录总数"" FROM (SELECT MACTH_DATE AS ""配血时间"",BLOODBAG_ID AS ""入库ID"",INSPECTION_ID AS ""标本标识"",METHOD_TYPE_ID AS ""配血方法"" FROM hid0101_orcl_lis_xhbis.bis6_bloodbag_match) ""用血清单"",
+(SELECT BLOODBAG_ID AS ""入库ID"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表"",
+(SELECT INSPECTION_ID AS ""标本标识"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT) ""检验结果表""
+WHERE ""用血清单"".""入库ID""=""血库记录表"".""入库ID"" AND ""用血清单"".""标本标识""= ""检验结果表"".""标本标识"" AND ""用血清单"".""配血方法""<>'4' 
+AND ""用血清单"".""配血时间"" BETWEEN '2024-05-01'AND '2024-07-31'"	"SELECT COUNT(""用血清单"".""配血时间"") FROM (SELECT MACTH_DATE AS ""配血时间"",BLOODBAG_ID AS ""入库ID"",INSPECTION_ID AS ""标本标识"",MATCH_STATE ""配血状态"",METHOD_TYPE_ID AS ""配血方法"" FROM hid0101_orcl_lis_xhbis.bis6_bloodbag_match) ""用血清单"",
+(SELECT BLOODBAG_ID AS ""入库ID"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表"",
+(SELECT INSPECTION_ID AS ""标本标识"",QUANTITATIVE_RESULT AS ""检验结果"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT) ""检验结果表"" 
+WHERE ""用血清单"".""入库ID""=""血库记录表"".""入库ID"" AND ""用血清单"".""标本标识""= ""检验结果表"".""标本标识""AND ""用血清单"".""配血状态""<>'-1' AND ""用血清单"".""配血方法""<>'4'
+AND ""用血清单"".""配血时间"" BETWEEN '2024-05-01'AND '2024-07-31' AND ""用血清单"".""配血时间"" IS NOT NULL"
+输血	完整性：配血记录（患者标识、配血检验项目、检验结果、配血时间）	患者标识	"SELECT COUNT(*) AS ""配血记录总数"" FROM (SELECT MACTH_DATE AS ""配血时间"",BLOODBAG_ID AS ""入库ID"",INSPECTION_ID AS ""标本标识"",METHOD_TYPE_ID AS ""配血方法"" FROM hid0101_orcl_lis_xhbis.bis6_bloodbag_match) ""用血清单"",
+(SELECT BLOODBAG_ID AS ""入库ID"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表"",
+(SELECT INSPECTION_ID AS ""标本标识"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT) ""检验结果表""
+WHERE ""用血清单"".""入库ID""=""血库记录表"".""入库ID"" AND ""用血清单"".""标本标识""= ""检验结果表"".""标本标识"" AND ""用血清单"".""配血方法""<>'4' 
+AND ""用血清单"".""配血时间"" BETWEEN '2024-05-01'AND '2024-07-31'"	"SELECT COUNT(""检验结果表"".""标本标识"") AS ""患者标识总数""
+FROM (SELECT MACTH_DATE AS ""配血时间"",BLOODBAG_ID AS ""入库ID"",INSPECTION_ID AS ""标本标识"" ,MATCH_STATE ""配血状态"",METHOD_TYPE_ID AS ""配血方法"" FROM hid0101_orcl_lis_xhbis.bis6_bloodbag_match) ""用血清单"",
+(SELECT BLOODBAG_ID AS ""入库ID"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表"",
+(SELECT INSPECTION_ID AS ""标本标识"" , OUTPATIENT_ID ""患者标识"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT) ""检验结果表""
+WHERE ""用血清单"".""入库ID""=""血库记录表"".""入库ID"" AND ""用血清单"".""标本标识""= ""检验结果表"".""标本标识""AND ""用血清单"".""配血状态""<>'-1' AND ""用血清单"".""配血方法""<>'4'
+AND ""用血清单"".""配血时间"" BETWEEN '2024-05-01'AND '2024-07-31'"
+输血	一致性：配血记录（血型编码、配血检验项目）	血型编码	"SELECT COUNT(*)AS""总数T"" FROM (SELECT MACTH_DATE AS ""配血时间"",BLOODBAG_ID AS ""入库ID"",INSPECTION_ID AS ""标本标识"",METHOD_TYPE_ID AS ""配血方法"" FROM hid0101_orcl_lis_xhbis.bis6_bloodbag_match) ""用血清单"",
+(SELECT BLOODBAG_ID AS ""入库ID"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表"",
+(SELECT INSPECTION_ID AS ""标本标识"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT) ""检验结果表""
+WHERE ""用血清单"".""入库ID""=""血库记录表"".""入库ID"" AND ""用血清单"".""标本标识""= ""检验结果表"".""标本标识"" AND ""用血清单"".""配血方法""<>'4' 
+AND ""用血清单"".""配血时间"" BETWEEN '2024-05-01'AND '2024-07-31'"	"SELECT COUNT(""血库记录表"".""血型编码"") AS ""血型编码总数"" 
+FROM (SELECT MACTH_DATE AS ""配血时间"",BLOODBAG_ID AS ""入库ID"",INSPECTION_ID AS ""标本标识"",MATCH_STATE ""配血状态"",METHOD_TYPE_ID AS ""配血方法"" FROM hid0101_orcl_lis_xhbis.bis6_bloodbag_match) ""用血清单"",
+(SELECT BLOODBAG_ID AS ""入库ID"", ABO_BLOOD_GROUP AS ""血型编码"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表"",
+(SELECT test_item_id,INSPECTION_ID AS ""标本标识"",REMARK AS ""有效标记"",chinese_name AS ""检验结果项目名称"",group_id as ""血型编码"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT)""检验结果表""
+WHERE ""用血清单"".""入库ID""=""血库记录表"".""入库ID"" 
+AND ""用血清单"".""标本标识""= ""检验结果表"".""标本标识"" AND ""用血清单"".""配血方法""<>'4' 
+AND ""用血清单"".""配血状态""<>'-1' AND ""用血清单"".""配血时间"" BETWEEN '2024-05-01'AND '2024-07-31'"
+输血	一致性：配血记录（血型编码、配血检验项目）	配血检验项目	"SELECT COUNT(*)AS""总数T"" FROM (SELECT MACTH_DATE AS ""配血时间"",BLOODBAG_ID AS ""入库ID"",INSPECTION_ID AS ""标本标识"",METHOD_TYPE_ID AS ""配血方法"" FROM hid0101_orcl_lis_xhbis.bis6_bloodbag_match) ""用血清单"",
+(SELECT BLOODBAG_ID AS ""入库ID"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表"",
+(SELECT INSPECTION_ID AS ""标本标识"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT) ""检验结果表""
+WHERE ""用血清单"".""入库ID""=""血库记录表"".""入库ID"" AND ""用血清单"".""标本标识""= ""检验结果表"".""标本标识"" AND ""用血清单"".""配血方法""<>'4' 
+AND ""用血清单"".""配血时间"" BETWEEN '2024-05-01'AND '2024-07-31'"	"SELECT COUNT(""检验结果表"".""配血检验项目"") AS ""配血检验项目总记录数"" FROM (SELECT MACTH_DATE AS ""配血时间"",BLOODBAG_ID AS ""入库ID"",INSPECTION_ID AS ""标本标识"",MATCH_STATE ""配血状态"",METHOD_TYPE_ID AS ""配血方法"" FROM hid0101_orcl_lis_xhbis.bis6_bloodbag_match) ""用血清单"",
+(SELECT BLOODBAG_ID AS ""入库ID""  FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表"",
+(SELECT INSPECTION_ID AS ""标本标识"",CHINESE_NAME AS ""配血检验项目"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT) ""检验结果表""
+WHERE ""用血清单"".""入库ID""=""血库记录表"".""入库ID"" AND ""用血清单"".""标本标识""= ""检验结果表"".""标本标识""AND ""用血清单"".""配血状态""<>'-1' AND ""用血清单"".""配血方法""<>'4' 
+AND ""用血清单"".""配血时间"" BETWEEN '2024-05-01'AND '2024-07-31'"
+输血	整合性：血液库存记录与血液使用记录（血袋编号、血液编码）可对照	血液编码	"SELECT COUNT(""血库记录表"".""记录唯一标识"") AS ""血库记录总数"" FROM (SELECT OUT_DATE AS ""出库时间"",BLOODBAG_ID AS ""记录唯一标识"", BLOODBAG_STATE AS ""血液记录标识"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16') 
+AND ""血库记录表"".""出库时间"" BETWEEN '2024-05-01'AND '2024-07-31' "	"SELECT COUNT(""血库记录表"".""血液编码"")
+FROM (select MACTH_DATE as ""配血时间"",BLOODBAG_ID as ""入库ID"",INSPECTION_ID as ""标本标识"" from hid0101_orcl_lis_xhbis.bis6_bloodbag_match WHERE BLOOD_charge_state='charged') ""用血清单"",
+(select BLOODBAG_ID as ""入库ID"",blood_type_id as ""血液编码"",blood_bag_code as ""血袋编号"" ,bloodbag_state AS ""血液记录标识"" from hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16') 
+AND ""用血清单"".""入库ID""=""血库记录表"".""入库ID"" 
+AND ""用血清单"".""配血时间"" BETWEEN '2024-05-01'AND '2024-07-31'"
+输血	整合性：血液库存记录与血液使用记录（血袋编号、血液编码）可对照	血袋编号	"SELECT COUNT(""血库记录表"".""记录唯一标识"") AS ""血库记录总数"" FROM (SELECT OUT_DATE AS ""出库时间"",BLOODBAG_ID AS ""记录唯一标识"", BLOODBAG_STATE AS ""血液记录标识"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16') 
+AND ""血库记录表"".""出库时间"" BETWEEN '2024-05-01'AND '2024-07-31' "	"SELECT COUNT(""血库记录表"".""血袋编号"")
+FROM (select MACTH_DATE as ""配血时间"",BLOODBAG_ID as ""入库ID"",INSPECTION_ID as ""标本标识"" from hid0101_orcl_lis_xhbis.bis6_bloodbag_match WHERE BLOOD_charge_state='charged') ""用血清单"",
+(select BLOODBAG_ID as ""入库ID"",blood_type_id as ""血液编码"",blood_bag_code as ""血袋编号"" ,bloodbag_state AS ""血液记录标识"" from hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16') 
+AND ""用血清单"".""入库ID""=""血库记录表"".""入库ID"" 
+AND ""用血清单"".""配血时间"" BETWEEN '2024-05-01'AND '2024-07-31'"
+输血	完整性：1、配血记录（配血人、核对人员）	核对人员	"SELECT COUNT(""用血清单"".""记录唯一标识"") AS""配血记录总数T"" FROM (SELECT MACTH_DATE AS ""配血时间"",BLOODBAG_ID AS ""记录唯一标识"",MATCH_STATE ""配血状态"",METHOD_TYPE_ID AS ""配血方法"" FROM hid0101_orcl_lis_xhbis.bis6_bloodbag_match) ""用血清单""
+WHERE ""用血清单"".""配血状态""<>'-1' AND ""用血清单"".""配血方法""<>'4' 
+AND ""用血清单"".""配血时间"" BETWEEN '2024-05-01'AND '2024-07-31'"	"SELECT COUNT(""用血清单"".""核对人"") AS ""配血核对人N"" FROM (SELECT MACTH_DATE AS ""配血时间"",MATCH_CHECK_PERSON AS ""核对人"",MATCH_STATE ""配血状态"",METHOD_TYPE_ID AS ""配血方法"" FROM hid0101_orcl_lis_xhbis.bis6_bloodbag_match) ""用血清单""
+WHERE ""用血清单"".""配血状态""<>'-1' AND ""用血清单"".""配血方法""<>'4' 
+AND ""用血清单"".""配血时间"" BETWEEN '2024-05-01'AND '2024-07-31'"
+输血	完整性：1、配血记录（配血人、核对人员）	配血人	"SELECT COUNT(""用血清单"".""记录唯一标识"") AS""配血记录总数T"" FROM (SELECT MACTH_DATE AS ""配血时间"",BLOODBAG_ID AS ""记录唯一标识"",MATCH_STATE ""配血状态"",METHOD_TYPE_ID AS ""配血方法"" FROM hid0101_orcl_lis_xhbis.bis6_bloodbag_match) ""用血清单""
+WHERE ""用血清单"".""配血状态""<>'-1' AND ""用血清单"".""配血方法""<>'4' 
+AND ""用血清单"".""配血时间"" BETWEEN '2024-05-01'AND '2024-07-31'"	"SELECT COUNT(""用血清单"".""配血人"") AS ""配血人总数N"" FROM (SELECT MACTH_DATE AS ""配血时间"", MACTH_PERSON AS ""配血人"",BLOODBAG_ID AS ""记录唯一标识"",MATCH_STATE ""配血状态"",METHOD_TYPE_ID AS ""配血方法"" FROM hid0101_orcl_lis_xhbis.bis6_bloodbag_match) ""用血清单""
+WHERE ""用血清单"".""配血状态""<>'-1' AND ""用血清单"".""配血方法""<>'4' 
+AND ""用血清单"".""配血时间"" BETWEEN '2024-05-01'AND '2024-07-31'"
+输血	及时性：配血记录（配血时间）＜用血记录（输血时间）	配血记录（配血时间）＜用血记录（输血时间）	"SELECT COUNT(""用血清单"".""记录唯一标识"") AS ""用血清单记录总数"" FROM (SELECT BLOODBAG_ID AS ""入库ID"",MATCH_ID AS ""记录唯一标识"",METHOD_TYPE_ID AS ""配血方法"" FROM hid0101_orcl_lis_xhbis.bis6_bloodbag_match) ""用血清单"",
+(SELECT BLOODBAG_ID AS ""入库ID"", OUT_DATE AS ""出库时间"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""用血清单"".""入库ID""=""血库记录表"".""入库ID"" AND ""用血清单"".""配血方法""<>'4'
+AND ""血库记录表"".""出库时间"" BETWEEN '2024-05-01'AND '2024-07-31'"	"SELECT COUNT(*) AS ""及时性条目总数"" FROM (SELECT BLOODBAG_ID AS ""入库ID"",INSPECTION_ID AS ""标本标识"",MACTH_DATE AS ""配血时间"",MATCH_ID AS ""记录唯一标识"",METHOD_TYPE_ID AS ""配血方法"" FROM hid0101_orcl_lis_xhbis.bis6_bloodbag_match) ""用血清单"",
+(SELECT BLOODBAG_ID AS ""入库ID"", OUT_DATE AS ""出库时间"",ABO_BLOOD_GROUP AS ""血型编码"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""用血清单"".""入库ID""=""血库记录表"".""入库ID"" AND ""血库记录表"".""出库时间"">""用血清单"".""配血时间"" AND ""用血清单"".""配血方法""<>'4'
+AND ""血库记录表"".""出库时间"" BETWEEN '2024-05-01'AND '2024-07-31'"
+输血	整合性：配血记录与输血记录（患者标识、血型编码）可对照	患者标识	"SELECT COUNT(""用血清单"".""记录唯一标识"") ""用血清单记录总数"" FROM (SELECT BLOODBAG_ID AS ""入库ID"",MATCH_ID AS ""记录唯一标识"",METHOD_TYPE_ID AS ""配血方法"" FROM hid0101_orcl_lis_xhbis.bis6_bloodbag_match) ""用血清单"",
+(SELECT BLOODBAG_ID AS ""入库ID"", OUT_DATE AS ""出库时间"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""用血清单"".""入库ID""=""血库记录表"".""入库ID"" AND ""用血清单"".""配血方法""<>'4'
+AND ""血库记录表"".""出库时间"" BETWEEN '2024-05-01'AND '2024-07-31'"	"SELECT COUNT(""用血清单"".""标本标识"")
+FROM (select BLOODBAG_ID as ""入库ID"",INSPECTION_ID as ""标本标识"",METHOD_TYPE_ID AS ""配血方法"" FROM hid0101_orcl_lis_xhbis.bis6_bloodbag_match) ""用血清单"",
+(select BLOODBAG_ID as ""入库ID"", OUT_DATE as ""出库时间"",ABO_BLOOD_GROUP as ""血型编码"" from hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""用血清单"".""入库ID""=""血库记录表"".""入库ID"" AND ""用血清单"".""配血方法""<>'4' 
+AND ""血库记录表"".""出库时间"" between '2024-05-01'AND '2024-07-31'"
+输血	整合性：配血记录与输血记录（患者标识、血型编码）可对照	血型编码	"SELECT COUNT(""用血清单"".""记录唯一标识"") ""用血清单记录总数"" FROM (SELECT BLOODBAG_ID AS ""入库ID"",MATCH_ID AS ""记录唯一标识"",METHOD_TYPE_ID AS ""配血方法"" FROM hid0101_orcl_lis_xhbis.bis6_bloodbag_match) ""用血清单"",
+(SELECT BLOODBAG_ID AS ""入库ID"", OUT_DATE AS ""出库时间"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""用血清单"".""入库ID""=""血库记录表"".""入库ID"" AND ""用血清单"".""配血方法""<>'4'
+AND ""血库记录表"".""出库时间"" BETWEEN '2024-05-01'AND '2024-07-31'"	"SELECT COUNT(""血库记录表"".""血型编码"")
+FROM (select BLOODBAG_ID as ""入库ID"",INSPECTION_ID as ""标本标识"",METHOD_TYPE_ID AS ""配血方法"" FROM hid0101_orcl_lis_xhbis.bis6_bloodbag_match) ""用血清单"",
+(select BLOODBAG_ID as ""入库ID"", OUT_DATE as ""出库时间"",ABO_BLOOD_GROUP as ""血型编码"" from hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""用血清单"".""入库ID""=""血库记录表"".""入库ID"" AND ""用血清单"".""配血方法""<>'4' 
+AND ""血库记录表"".""出库时间"" between '2024-05-01'AND '2024-07-31'"
+输血	及时性：血液库存记录（入库时间）＜血液库存记录（出库时间）＜血液使用记录（输血时间）	血液库存记录（入库时间）＜血液库存记录（出库时间）＜血液使用记录（输血时间）	"SELECT COUNT(""血库记录表"".""记录唯一标识"") FROM (SELECT OUT_DATE AS ""出库时间"",BLOODBAG_ID AS ""记录唯一标识"", BLOODBAG_STATE AS ""血液记录标识"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16') AND ""血库记录表"".""出库时间"" BETWEEN '2024-05-01'AND '2024-07-31'  
+"	"SELECT COUNT(*) FROM (SELECT BLOODBAG_ID as ""入库ID"",OUT_DATE AS ""出库时间"",IN_TIME AS ""入库时间"",BLOODBAG_STATE AS ""血液记录标识"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表"",
+(select BLOODBAG_ID as ""入库ID"",R_CHECK_TIME AS ""输血时间"" from hid0101_orcl_lis_bis6.BIS6_BLOODBAG_INFUSION) ""输血记录表""
+WHERE ""输血记录表"".""入库ID""=""血库记录表"".""入库ID"" AND ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16') 
+AND ""血库记录表"".""出库时间"" BETWEEN '2024-05-01'AND '2024-07-31' 
+AND ""血库记录表"".""出库时间"">""血库记录表"".""入库时间"" AND ""输血记录表"".""输血时间"">""血库记录表"".""出库时间""  "
+输血	完整性：血液库存记录（血液编码、血袋编号、血型、数量、单位、入库时间）	血液编码	"SELECT COUNT(*) AS ""血库总记录条数"" FROM (SELECT IN_TIME AS ""入库时间"",BLOODBAG_STATE AS ""血液记录标识"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""血库记录表"".""入库时间"" BETWEEN '2024-05-01'AND '2024-07-31'
+AND ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16')"	"SELECT COUNT(""血库记录表"".""用血编码ID"") AS ""用血编码ID条数"" FROM (SELECT IN_TIME AS ""入库时间"", BLOODBAG_STATE AS ""血液记录标识"", BLOOD_TYPE_ID AS ""用血编码ID"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""血库记录表"".""入库时间"" BETWEEN '2024-05-01'AND '2024-07-31'
+AND ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16')"
+输血	完整性：血液库存记录（血液编码、血袋编号、血型、数量、单位、入库时间）	数量	"SELECT COUNT(*) AS ""血库总记录条数"" FROM (SELECT IN_TIME AS ""入库时间"",BLOODBAG_STATE AS ""血液记录标识"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""血库记录表"".""入库时间"" BETWEEN '2024-05-01'AND '2024-07-31'
+AND ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16')"	"SELECT COUNT(""血库记录表"".""数量"") AS ""用血编码ID条数"" FROM (SELECT IN_TIME AS ""入库时间"", BLOODBAG_STATE AS ""血液记录标识"", BLOOD_AMOUNT AS ""数量"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""血库记录表"".""入库时间"" BETWEEN '2024-05-01'AND '2024-07-31'
+AND ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16')"
+输血	完整性：血液库存记录（血液编码、血袋编号、血型、数量、单位、入库时间）	入库时间	"SELECT COUNT(*) AS ""血库总记录条数"" FROM (SELECT IN_TIME AS ""入库时间"",BLOODBAG_STATE AS ""血液记录标识"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""血库记录表"".""入库时间"" BETWEEN '2024-05-01'AND '2024-07-31'
+AND ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16')"	"SELECT COUNT(""血库记录表"".""入库时间"") AS ""用血编码ID条数"" FROM (SELECT IN_TIME AS ""入库时间"", BLOODBAG_STATE AS ""血液记录标识"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""血库记录表"".""入库时间"" BETWEEN '2024-05-01'AND '2024-07-31'
+AND ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16')"
+输血	完整性：血液库存记录（血液编码、血袋编号、血型、数量、单位、入库时间）	单位	"SELECT COUNT(*) AS ""血库总记录条数"" FROM (SELECT IN_TIME AS ""入库时间"",BLOODBAG_STATE AS ""血液记录标识"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""血库记录表"".""入库时间"" BETWEEN '2024-05-01'AND '2024-07-31'
+AND ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16')"	"SELECT COUNT(""血库记录表"".""用血单位"") AS ""用血编码ID条数"" FROM (SELECT IN_TIME AS ""入库时间"", BLOODBAG_STATE AS ""血液记录标识"",BLOOD_UNIT AS ""用血单位"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""血库记录表"".""入库时间"" BETWEEN '2024-05-01'AND '2024-07-31'
+AND ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16')"
+输血	完整性：血液库存记录（血液编码、血袋编号、血型、数量、单位、入库时间）	血袋编号	"SELECT COUNT(*) AS ""血库总记录条数"" FROM (SELECT IN_TIME AS ""入库时间"",BLOODBAG_STATE AS ""血液记录标识"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""血库记录表"".""入库时间"" BETWEEN '2024-05-01'AND '2024-07-31'
+AND ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16')"	"SELECT COUNT(""血库记录表"".""血袋编号"") AS ""用血编码ID条数"" FROM (SELECT IN_TIME AS ""入库时间"", BLOODBAG_STATE AS ""血液记录标识"",BLOOD_BAG_CODE AS ""血袋编号"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""血库记录表"".""入库时间"" BETWEEN '2024-05-01'AND '2024-07-31'
+AND ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16')"
+输血	完整性：血液库存记录（血液编码、血袋编号、血型、数量、单位、入库时间）	血型	"SELECT COUNT(*) AS ""血库总记录条数"" FROM (SELECT IN_TIME AS ""入库时间"",BLOODBAG_STATE AS ""血液记录标识"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""血库记录表"".""入库时间"" BETWEEN '2024-05-01'AND '2024-07-31'
+AND ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16')"	"SELECT COUNT(""血库记录表"".""血型"") AS ""用血编码ID条数"" FROM (SELECT IN_TIME AS ""入库时间"", BLOODBAG_STATE AS ""血液记录标识"",ABO_BLOOD_GROUP AS ""血型""  FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""血库记录表"".""入库时间"" BETWEEN '2024-05-01'AND '2024-07-31'
+AND ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16')"
+输血	完整性：血液库存记录（入库时间、出库时间记录、操作人员）	出库时间记录	"SELECT COUNT(""血库记录表"".""记录唯一标识"") FROM (SELECT OUT_DATE AS ""出库时间"",BLOODBAG_ID AS ""记录唯一标识"", BLOODBAG_STATE AS ""血液记录标识"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16')
+AND ""血库记录表"".""出库时间"" BETWEEN '2024-05-01'AND '2024-07-31'"	"SELECT COUNT(""血库记录表"".""出库时间"") FROM (SELECT OUT_DATE AS ""出库时间"", BLOODBAG_STATE AS ""血液记录标识"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16')
+AND ""血库记录表"".""出库时间"" BETWEEN '2024-05-01'AND '2024-07-31'"
+输血	完整性：2、用血记录（患者标识、血型编码、输血时间、血袋编号）	血型编码	"SELECT COUNT(""血库记录表"".""记录唯一标识"") FROM (SELECT OUT_DATE AS ""出库时间"",BLOODBAG_ID AS ""记录唯一标识"", BLOODBAG_STATE AS ""血液记录标识"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16')
+AND ""血库记录表"".""出库时间"" BETWEEN '2024-05-01'AND '2024-07-31'"	"SELECT COUNT(""血库记录表"".""血型编码"") AS ""血型编码总数"" FROM (SELECT OUT_DATE AS ""出库时间"",ABO_BLOOD_GROUP AS ""血型编码"", BLOODBAG_STATE AS ""血液记录标识"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16')
+AND ""血库记录表"".""出库时间"" BETWEEN '2024-05-01'AND '2024-07-31'"
+输血	完整性：血液库存记录（入库时间、出库时间记录、操作人员）	入库时间	"SELECT COUNT(""血库记录表"".""记录唯一标识"") FROM (SELECT OUT_DATE AS ""出库时间"",BLOODBAG_ID AS ""记录唯一标识"", BLOODBAG_STATE AS ""血液记录标识"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16')
+AND ""血库记录表"".""出库时间"" BETWEEN '2024-05-01'AND '2024-07-31'"	"SELECT COUNT(""血库记录表"".""入库时间"") FROM (SELECT OUT_DATE AS ""出库时间"", BLOODBAG_STATE AS ""血液记录标识"",IN_DATE AS ""入库时间"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16')
+AND ""血库记录表"".""出库时间"" BETWEEN '2024-05-01'AND '2024-07-31'"
+输血	完整性：血液库存记录（入库时间、出库时间记录、操作人员）	操作人员	"SELECT COUNT(""血库记录表"".""记录唯一标识"") FROM (SELECT OUT_DATE AS ""出库时间"",BLOODBAG_ID AS ""记录唯一标识"", BLOODBAG_STATE AS ""血液记录标识"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16')
+AND ""血库记录表"".""出库时间"" BETWEEN '2024-05-01'AND '2024-07-31'"	"SELECT COUNT(""血库记录表"".""操作人员"") FROM (SELECT OUT_DATE AS ""出库时间"", BLOODBAG_STATE AS ""血液记录标识"",OUT_PERSON AS ""操作人员"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16')
+AND ""血库记录表"".""出库时间"" BETWEEN '2024-05-01'AND '2024-07-31'"
+输血	完整性：2、用血记录（患者标识、血型编码、输血时间、血袋编号）	输血时间	"SELECT COUNT(""血库记录表"".""记录唯一标识"") FROM (SELECT OUT_DATE AS ""出库时间"",BLOODBAG_ID AS ""记录唯一标识"", BLOODBAG_STATE AS ""血液记录标识"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16')
+AND ""血库记录表"".""出库时间"" BETWEEN '2024-05-01'AND '2024-07-31'"	"SELECT COUNT(""血库记录表"".""输血时间"") AS ""血型编码总数"" FROM (SELECT OUT_DATE AS ""出库时间"",SENDBLOOD_TIME AS ""输血时间"", BLOODBAG_STATE AS ""血液记录标识"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16')
+AND ""血库记录表"".""出库时间"" BETWEEN '2024-05-01'AND '2024-07-31'"
+输血	完整性：血液记录（捐血者编码、捐血时间）	捐血时间	"SELECT COUNT(""血库记录表"".""记录唯一标识"") AS ""血液记录标识的记录总数T"" FROM (SELECT OUT_DATE AS ""出库时间"",BLOODBAG_ID AS ""记录唯一标识"", BLOODBAG_STATE AS ""血液记录标识"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16')
+AND ""血库记录表"".""出库时间"" BETWEEN '2024-05-01'AND '2024-07-31'"	"SELECT COUNT(""血库记录表"".""捐血时间"") AS ""捐血时间总记录条数"" FROM (SELECT OUT_DATE AS ""出库时间"",PREPARATION_DATE AS ""捐血时间"", BLOODBAG_STATE AS ""血液记录标识"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16') AND ""血库记录表"".""捐血时间"" IS NOT NULL 
+AND ""血库记录表"".""出库时间"" BETWEEN '2024-05-01'AND '2024-07-31'"
+输血	完整性：2、用血记录（患者标识、血型编码、输血时间、血袋编号）	患者标识	"SELECT COUNT(""血库记录表"".""记录唯一标识"") FROM (SELECT OUT_DATE AS ""出库时间"",BLOODBAG_ID AS ""记录唯一标识"", BLOODBAG_STATE AS ""血液记录标识"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16')
+AND ""血库记录表"".""出库时间"" BETWEEN '2024-05-01'AND '2024-07-31'"	"SELECT COUNT(""血库记录表"".""患者标识"") AS ""血型编码总数"" FROM (SELECT OUT_DATE AS ""出库时间"",PAT_ID AS ""患者标识"", BLOODBAG_STATE AS ""血液记录标识"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16')
+AND ""血库记录表"".""出库时间"" BETWEEN '2024-05-01'AND '2024-07-31'"
+输血	完整性：2、用血记录（患者标识、血型编码、输血时间、血袋编号）	血袋编号	"SELECT COUNT(""血库记录表"".""记录唯一标识"") FROM (SELECT OUT_DATE AS ""出库时间"",BLOODBAG_ID AS ""记录唯一标识"", BLOODBAG_STATE AS ""血液记录标识"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16')
+AND ""血库记录表"".""出库时间"" BETWEEN '2024-05-01'AND '2024-07-31'"	"SELECT COUNT(""血库记录表"".""血袋编号"") AS ""血型编码总数"" FROM (SELECT OUT_DATE AS ""出库时间"",BLOOD_BAG_CODE AS ""血袋编号"", BLOODBAG_STATE AS ""血液记录标识"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16')
+AND ""血库记录表"".""出库时间"" BETWEEN '2024-05-01'AND '2024-07-31'"
+输血	完整性：血液记录（捐血者编码、捐血时间）	捐血者编码	"SELECT COUNT(""血库记录表"".""记录唯一标识"") AS ""血液记录标识的记录总数T"" FROM (SELECT OUT_DATE AS ""出库时间"",BLOODBAG_ID AS ""记录唯一标识"", BLOODBAG_STATE AS ""血液记录标识"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16')
+AND ""血库记录表"".""出库时间"" BETWEEN '2024-05-01'AND '2024-07-31'"	"SELECT COUNT(""血库记录表"".""捐血者编码"") AS ""捐血时间总记录条数"" FROM (SELECT OUT_DATE AS ""出库时间"",BLOOD_BAG_CODE AS ""捐血者编码"", BLOODBAG_STATE AS ""血液记录标识"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表""
+WHERE ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16') AND ""血库记录表"".""捐血者编码"" IS NOT NULL 
+AND ""血库记录表"".""出库时间"" BETWEEN '2024-05-01'AND '2024-07-31'"
+输血	一致性：血液记录（血液项目名称、血液编码）	血液编码	"SELECT COUNT(*) AS ""血库记录总数"" FROM (SELECT BLOOD_TYPE_ID AS ""血液编码"", BLOODBAG_STATE AS ""血液记录标识"", OUT_DATE AS ""出库时间"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表"", 
+(SELECT BLOOD_TYPE_ID AS ""血液编码"" FROM hid0101_orcl_lis_bis6.BIS6_MATCH_BLOOD_TYPE) ""用血类型表""
+WHERE ""血库记录表"".""血液编码"" = ""用血类型表"".""血液编码"" AND ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16') 
+AND ""血库记录表"".""出库时间"" BETWEEN '2024-05-01'AND '2024-07-31'"	"SELECT COUNT(""血库记录表"".""用血编码ID"") AS ""用血编码总数"" FROM (SELECT BLOOD_TYPE_ID AS ""血液编码"", BLOODBAG_STATE AS ""血液记录标识"", OUT_DATE AS ""出库时间"",BLOOD_TYPE_ID AS ""用血编码ID"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表"", 
+(SELECT BLOOD_TYPE_ID AS ""血液编码"" FROM hid0101_orcl_lis_bis6.BIS6_MATCH_BLOOD_TYPE) ""用血类型表"" 
+WHERE ""血库记录表"".""血液编码"" = ""用血类型表"".""血液编码"" AND ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16') 
+AND ""血库记录表"".""出库时间"" BETWEEN '2024-05-01'AND '2024-07-31'"
+输血	一致性：血液记录（血液项目名称、血液编码）	血液项目名称	"SELECT COUNT(*) AS ""血库记录总数"" FROM (SELECT BLOOD_TYPE_ID AS ""血液编码"", BLOODBAG_STATE AS ""血液记录标识"", OUT_DATE AS ""出库时间"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表"", 
+(SELECT BLOOD_TYPE_ID AS ""血液编码"" FROM hid0101_orcl_lis_bis6.BIS6_MATCH_BLOOD_TYPE) ""用血类型表""
+WHERE ""血库记录表"".""血液编码"" = ""用血类型表"".""血液编码"" AND ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16') 
+AND ""血库记录表"".""出库时间"" BETWEEN '2024-05-01'AND '2024-07-31'"	"SELECT COUNT(""用血类型表"".""血液项目名称"") AS ""用血编码总数"" FROM (SELECT BLOOD_TYPE_ID AS ""血液编码"", BLOODBAG_STATE AS ""血液记录标识"", OUT_DATE AS ""出库时间"",BLOOD_TYPE_ID AS ""用血编码ID"" FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT) ""血库记录表"", 
+(SELECT BLOOD_TYPE_ID AS ""血液编码"",BLOOD_NAME AS ""血液项目名称"" FROM hid0101_orcl_lis_bis6.BIS6_MATCH_BLOOD_TYPE) ""用血类型表"" 
+WHERE ""血库记录表"".""血液编码"" = ""用血类型表"".""血液编码"" AND ""血库记录表"".""血液记录标识"" NOT IN ('1','2','14','15','16') 
+AND ""血库记录表"".""出库时间"" BETWEEN '2024-05-01'AND '2024-07-31'"

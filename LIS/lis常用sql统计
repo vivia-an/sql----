@@ -1,0 +1,702 @@
+-- =============================================
+-- LIS 亚专业组工作量统计查询
+-- 功能：按亚专业组统计检验数量、收费金额、工作量
+-- 时间范围：2025年7月1日-11日
+-- 数据来源：LIS_INSPECTION_SAMPLE (检验标本信息表)
+-- =============================================
+
+-- 说明：已将NVL函数改为Presto的COALESCE函数，且所有表均加上isdeleted='0'的逻辑删除条件
+-- hid0101_orcl_lis_dbo库名未涉及手术麻醉，无需替换
+-- 字段均为varchar类型，金额与工作量字段如为数值请确保数据源为数值字符串，否则统计会有问题
+-- 检查字段来源：SAMPLE_CHARGE、WORKLOAD、PGROUP_NAME均存在于对应表
+
+SELECT 
+    C."PGROUP_NAME" AS "亚专业组名称",                                 -- 来源：lis5_inspection_pgroup.PGROUP_NAME
+    COUNT(A."INSPECTION_ID") AS "检验单数量",                         -- 来源：lis_inspection_sample.INSPECTION_ID
+    SUM(COALESCE(CAST(A."SAMPLE_CHARGE" AS DOUBLE), 0)) AS "标本收费总金额", -- 来源：lis_inspection_sample.SAMPLE_CHARGE
+    SUM(COALESCE(CAST(A."WORKLOAD" AS DOUBLE), 0)) AS "工作量总计"         -- 来源：lis_inspection_sample.WORKLOAD
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample A
+LEFT JOIN hid0101_orcl_lis_dbo.lis_inspection_group B
+    ON A."GROUP_ID" = B."GROUP_ID" AND B."isdeleted" = '0'
+LEFT JOIN hid0101_orcl_lis_xhsystem1.lis5_inspection_pgroup C
+    ON B."INSPECTION_DEPT" = C."PGROUP_ID" AND C."isdeleted" = '0'
+WHERE 
+    A."isdeleted" = '0'
+    AND A."CHECK_TIME" IS NOT NULL
+    AND A."INSPECTION_DATE" >= '20250701'
+    AND A."INSPECTION_DATE" <= '20250711'
+GROUP BY 
+    C."PGROUP_NAME";
+
+
+
+
+-- =============================================
+-- LIS标本主表数据集成SQL - 基于血缘关系修正版本
+-- 库名: hid0101_orcl_lis_dbo
+-- 源表: lis_inspection_sample
+-- 字段存在性已验证，不存在字段用空字符串替代
+-- =============================================
+SELECT
+    cast('HID0101' as varchar) as "LIS_Sample_Main_MedOrgCode",        -- 医疗机构代码 🔄公共字段标准化
+    cast('四川大学华西医院' as varchar) as "LIS_Sample_Main_MedOrgName", -- 医疗机构名称 🔄公共字段标准化
+    cast(null as varchar) as "LIS_Sample_Main_EmpiID",                 -- 人员唯一标识ID 🔄公共字段标准化
+    cast(null as varchar) as "LIS_Sample_Main_EmpiNo",                 -- 人员唯一号 🔄公共字段标准化
+    s."inspection_id" as "LIS_Sample_Main_SampleID",                   -- 标本ID(条码号) ✅存在
+    s."inspection_date" as "LIS_Sample_Main_InspectionDate",           -- 检验日期(YYYYMMDD) ✅存在
+    s."patient_id" as "LIS_Sample_Main_PersID",                        -- 病人ID ✅存在，就是住院号关联到病人信息
+    s."outpatient_id" as "LIS_Sample_Main_VisitID",                   -- 就诊ID  ✅存在 就是就诊号关联到就诊 
+    CASE s."patient_type"
+        WHEN '1' THEN '门诊'
+        WHEN '2' THEN '住院'
+        WHEN '3' THEN '急诊'
+        WHEN '4' THEN '体检'
+        ELSE '其他'
+    END as "LIS_Sample_Main_VisitTypeName",                            -- 就诊类型名称 ✅存在
+    s."patient_dept" as "LIS_Sample_Main_DeptID",                     -- 申请科室ID ✅存在
+    s."patient_dept_name" as "LIS_Sample_Main_DeptName",              -- 申请科室名称 ✅存在
+    s."group_id" as "LIS_Sample_Main_ProfGroupCode",                  -- 亚专业组代码 ✅存在
+    -- 亚专业组名称通过表关联获取(修正为正确的实现方式)
+    COALESCE(pg."PGROUP_NAME", '其他') as "LIS_Sample_Main_ProfGroupName", -- 亚专业组名称 ✅通过表关联获取
+    s."sample_class" as "LIS_Sample_Main_SampleTypeID",               -- 标本类型ID ✅存在
+    s."sample_class" as "LIS_Sample_Main_SampleTypeCode",             -- 标本类型代码 ✅存在
+    s."sample_class_name" as "LIS_Sample_Main_SampleTypeName",        -- 标本类型名称 ✅存在
+    s."requisition_time" as "LIS_Sample_Main_RequisitionDtTm",        -- 申请时间 ✅存在
+    -- 采集人员信息 ✅血缘验证通过
+    s."sampling_person" as "LIS_Sample_Main_SamplingPersName",        -- 采集人员姓名 ✅存在
+    s."sampling_time" as "LIS_Sample_Main_SamplingDtTm",              -- 采集时间 ✅存在
+    s."test_order_name" as "LIS_Sample_Main_SamplingContent",         -- 采集内容(检验目的) ✅存在
+    -- 接收人员信息 ✅血缘验证通过
+    s."incept_person" as "LIS_Sample_Main_ReceivePersName",           -- 接收人员姓名 ✅存在
+    s."incept_time" as "LIS_Sample_Main_ReceiveDtTm",                 -- 接收时间 ✅存在
+    -- 检验人员信息 ✅血缘验证通过
+    s."inspection_person" as "LIS_Sample_Main_InspectionPersName",    -- 检验人员姓名 ✅存在
+    -- ❌报告人员信息 - 字段不存在，使用空字符串替代
+    '' as "LIS_Sample_Main_ReportPersName",                          -- 报告人员姓名 🚨字段不存在: issued_person
+    CAST(NULL AS TIMESTAMP) as "LIS_Sample_Main_ReportDtTm",          -- 报告时间 🚨字段不存在: issued_time
+    '' as "LIS_Sample_Main_ReportContent",                           -- 报告内容 🚨字段不存在: Internal_remark
+    -- 审核人员信息 ✅血缘验证通过
+    s."check_person" as "LIS_Sample_Main_CheckPersName",              -- 审核人员姓名 ✅存在
+    s."check_time" as "LIS_Sample_Main_CheckDtTm",                    -- 审核时间 ✅存在
+    s."remark" as "LIS_Sample_Main_CheckContent",                     -- 审核内容(备注) ✅存在
+    -- 其他字段 ✅血缘验证通过
+    CASE s."inspection_state"
+        WHEN 'audited' THEN '已审核'
+        WHEN 'sent' THEN '已发送'
+        WHEN 'finished' THEN '已完成'
+        WHEN 'reported' THEN '已报告'
+        WHEN 'inspecting' THEN '检验中'
+        ELSE '未知'
+    END as "LIS_Sample_Main_SampleStatusName",                        -- 标本状态名称 ✅存在
+    CASE WHEN s."charge_type" LIKE '%金卡%' OR s."charge_type" LIKE '%VIP%'
+         THEN 'Y' ELSE 'N' END as "LIS_Sample_Main_IsGoldenCard",     -- 是否金卡(Y/N) ✅存在
+    s."input_person" as "LIS_Sample_Main_InputPersName",              -- 登记人员姓名 ✅存在
+    s."input_time" as "LIS_Sample_Main_InputDtTm",                    -- 登记时间 ✅存在
+    -- 数据管理字段 🔄公共字段标准化
+    cast('8' as varchar) as "LIS_Sample_Main_DataSourceFlag",        -- 数据来源标识 🔄公共字段标准化  
+    cast('hid0101_orcl_lis_dbo.lis_inspection_sample' as varchar) as "LIS_Sample_Main_DSTable", -- 数据源表 🔄公共字段标准化
+    cast('inspection_id' as varchar) as "LIS_Sample_Main_DSTableKey", -- 数据源表主键 🔄公共字段标准化
+    cast(s."inspection_id" as varchar) as "LIS_Sample_Main_DSTableValue", -- 数据源表主键值 🔄公共字段标准化
+    cast(current_timestamp as varchar) as "LIS_Sample_Main_LastUpdateDtTm", -- 最后更新时间 🔄公共字段标准化  
+    cast(current_timestamp as varchar) as "LIS_Sample_Main_DataCreateDtTm"  -- 数据创建时间 🔄公共字段标准化
+    
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample s
+-- 添加亚专业组表关联(修正为正确的实现方式)
+LEFT JOIN hid0101_orcl_lis_dbo.lis_inspection_group g 
+    ON s."group_id" = g."GROUP_ID" 
+    AND g."isdeleted" = '0'
+LEFT JOIN hid0101_orcl_lis_xhsystem1.lis5_inspection_pgroup pg 
+    ON g."INSPECTION_DEPT" = pg."PGROUP_ID" 
+    AND pg."isdeleted" = '0'
+WHERE s."inspection_date" >= CAST(DATE_FORMAT(DATE_ADD('day', -1, NOW()), '%Y%m%d') AS VARCHAR)
+    AND s."inspection_id" IS NOT NULL
+    AND s."isdeleted" = '0';  
+
+
+
+
+
+
+-- 实验医学科各亚专业组统计（修正工作量计算并按科室汇总，包含金卡统计） 报表核对完成。
+WITH correct_workload AS (
+    -- 使用原始Oracle转Presto的逻辑计算正确的工作量（总体）
+    SELECT 
+        t."GROUP_ID" as "亚专业组代码",
+        COUNT(DISTINCT t."inspection_id") as "标本数",
+        SUM(COALESCE(CAST(b."workload" AS DOUBLE), 0)) as "工作量"
+    FROM hid0101_orcl_lis_dbo.lis_inspection_sample t
+    INNER JOIN hid0101_orcl_lis_dbo.lis_inspection_sample_charge b
+        ON t."inspection_id" = b."inspection_id"
+        AND b."isdeleted" = '0'
+    WHERE  t."inspection_date" BETWEEN '20240801' AND '20240831'
+        AND t."isdeleted" = '0'
+    GROUP BY t."GROUP_ID"
+),
+golden_card_workload AS (
+    -- 金卡类型的工作量和标本数计算
+    SELECT 
+        t."GROUP_ID" as "亚专业组代码",
+        COUNT(DISTINCT t."inspection_id") as "金卡标本数",
+        SUM(COALESCE(CAST(b."workload" AS DOUBLE), 0)) as "金卡工作量"
+    FROM hid0101_orcl_lis_dbo.lis_inspection_sample t
+    INNER JOIN hid0101_orcl_lis_dbo.lis_inspection_sample_charge b
+        ON t."inspection_id" = b."inspection_id"
+        AND b."isdeleted" = '0'
+    WHERE  t."inspection_date" BETWEEN '20240801' AND '20240831'
+        AND t."isdeleted" = '0'
+        AND (t."patient_type" = '9' OR t."charge_type" LIKE '%金卡%' OR t."charge_type" LIKE '%VIP%')  -- 金卡类型筛选
+    GROUP BY t."GROUP_ID"
+),
+dc_data AS (
+    -- DC表获取科室名称信息
+    SELECT 
+        m."LIS_Sample_Main_ProfGroupCode" as "亚专业组代码",
+        m."LIS_Sample_Main_ProfGroupName" as "科室名称"
+    FROM datacenter_db.lis_sample_main m
+    WHERE m."LIS_Sample_Main_InspectionDate" >= '20240801' 
+        AND m."LIS_Sample_Main_InspectionDate" <= '20240831'
+        AND m."LIS_Sample_Main_IsDeleted" = '0'
+       
+    GROUP BY 
+        m."LIS_Sample_Main_ProfGroupCode",
+        m."LIS_Sample_Main_ProfGroupName"
+),
+group_level AS (
+    -- 关联三个数据源，获取亚专业组级别数据
+    SELECT 
+        cw."亚专业组代码",
+        dc."科室名称",
+        cw."标本数",
+        cw."工作量" as "项目数",
+        COALESCE(gc."金卡标本数", 0) as "金卡标本数",
+        COALESCE(gc."金卡工作量", 0) as "金卡项目数"
+    FROM correct_workload cw
+    LEFT JOIN dc_data dc
+        ON cw."亚专业组代码" = dc."亚专业组代码"
+    LEFT JOIN golden_card_workload gc
+        ON cw."亚专业组代码" = gc."亚专业组代码"
+)
+-- 最终按科室名称汇总
+SELECT 
+    "科室名称",
+    SUM("标本数") as "标本数",
+    SUM("项目数") as "项目数", 
+    SUM("金卡标本数") as "金卡标本数",
+    SUM("金卡项目数") as "金卡项目数"
+FROM group_level
+WHERE "科室名称" IS NOT NULL
+GROUP BY "科室名称"
+ORDER BY "科室名称", "标本数" DESC;
+    
+# 接下来基于上边的sql，加入收入计算，收入是需要关联到收入主题的，收入主题，select orderno,totalfee  from m1.mdr_income limit 11 其中 orderno 是 datacenter_db.lis_sample_main 中的 医嘱id, 需要 dc中这个医嘱id去重后关联这个mdr_income 然后拿到 totalfee 然后计算总收入，单位跟上边科室一致
+
+
+-- 实验医学科各科室收入统计（基于DC表关联收入主题），收入
+WITH unique_orders AS (
+    -- 第一步：从DC表中按科室和医嘱ID去重，获取基础数据
+    SELECT DISTINCT
+        "LIS_Sample_Main_ProfGroupName" as "科室名称",
+        "LIS_Sample_Main_HISID" as "医嘱ID",
+        "LIS_Sample_Main_IsGoldenCard" as "是否金卡",
+        "LIS_Sample_Main_ProfGroupCode" as "亚专业组代码"
+    FROM datacenter_db.lis_sample_main
+    WHERE "LIS_Sample_Main_InspectionDate" >= '20240801' 
+        AND "LIS_Sample_Main_InspectionDate" <= '20240831'
+        AND "LIS_Sample_Main_IsDeleted" = '0'
+        AND "LIS_Sample_Main_HISID" IS NOT NULL
+        AND "LIS_Sample_Main_HISID" != ''
+        -- 筛选特定亚专业组
+        AND "LIS_Sample_Main_ProfGroupCode" 
+),
+income_data AS (
+    -- 第二步：关联收入主题表获取收入数据
+    SELECT 
+        u."科室名称",
+        u."是否金卡",
+        COALESCE(CAST(i.totalfee AS DOUBLE), 0) as "收入金额"
+    FROM unique_orders u
+    LEFT JOIN m1.mdr_income i
+        ON u."医嘱ID" = i.orderno
+)
+-- 第三步：按科室汇总收入
+SELECT 
+    "科室名称",
+    ROUND(SUM("收入金额"), 2) as "总收入",
+    ROUND(SUM(CASE WHEN "是否金卡" = 'Y' THEN "收入金额" ELSE 0 END), 2) as "金卡总收入"
+FROM income_data
+WHERE "科室名称" IS NOT NULL 
+    AND "科室名称" != ''
+GROUP BY "科室名称"
+ORDER BY "总收入" DESC
+
+####  合并版本 ，合并以上俩个sql,关联关系是 通过科室进行关联 --------- 以下是根据亚专业计算的相当于明细表，
+
+-- 实验医学科各科室综合统计（工作量+收入统计合并版）- 修改收入获取方式
+WITH correct_workload AS (
+    -- 使用原始Oracle转Presto的逻辑计算正确的工作量（总体）
+    SELECT 
+        t."GROUP_ID" as "亚专业组代码",
+        COUNT(DISTINCT t."inspection_id") as "标本数",
+        SUM(COALESCE(CAST(b."workload" AS DOUBLE), 0)) as "工作量"
+    FROM hid0101_orcl_lis_dbo.lis_inspection_sample t
+    INNER JOIN hid0101_orcl_lis_dbo.lis_inspection_sample_charge b
+        ON t."inspection_id" = b."inspection_id"
+        AND b."isdeleted" = '0'
+    WHERE t."inspection_date" BETWEEN '20240801' AND '20240831'
+        AND t."isdeleted" = '0'
+    GROUP BY t."GROUP_ID"
+),
+golden_card_workload AS (
+    -- 金卡类型的工作量和标本数计算
+    SELECT 
+        t."GROUP_ID" as "亚专业组代码",
+        COUNT(DISTINCT t."inspection_id") as "金卡标本数",
+        SUM(COALESCE(CAST(b."workload" AS DOUBLE), 0)) as "金卡工作量"
+    FROM hid0101_orcl_lis_dbo.lis_inspection_sample t
+    INNER JOIN hid0101_orcl_lis_dbo.lis_inspection_sample_charge b
+        ON t."inspection_id" = b."inspection_id"
+        AND b."isdeleted" = '0'
+    WHERE t."inspection_date" BETWEEN '20240801' AND '20240831'
+        AND t."isdeleted" = '0'
+        AND (t."patient_type" = '9' OR t."charge_type" LIKE '%金卡%' OR t."charge_type" LIKE '%VIP%')  -- 金卡类型筛选
+    GROUP BY t."GROUP_ID"
+),
+-- 修改收入获取方式：直接从lis_inspection_sample获取SAMPLE_CHARGE
+income_data AS (
+    SELECT 
+        A."GROUP_ID" as "亚专业组代码",
+        -- 总收入：直接使用SAMPLE_CHARGE字段
+        SUM(COALESCE(CAST(A."SAMPLE_CHARGE" AS DOUBLE), 0)) as "总收入",
+        -- 金卡收入：按金卡条件筛选的SAMPLE_CHARGE
+        SUM(CASE 
+            WHEN (A."patient_type" = '9' OR A."charge_type" LIKE '%金卡%' OR A."charge_type" LIKE '%VIP%') 
+            THEN COALESCE(CAST(A."SAMPLE_CHARGE" AS DOUBLE), 0) 
+            ELSE 0 
+        END) as "金卡总收入"
+    FROM hid0101_orcl_lis_dbo.lis_inspection_sample A
+    WHERE A."inspection_date" BETWEEN '20240801' AND '20240831'
+        AND A."isdeleted" = '0'
+        AND A."CHECK_TIME" IS NOT NULL
+    GROUP BY A."GROUP_ID"
+),
+dc_data AS (
+    -- DC表获取科室名称信息
+    SELECT 
+        m."LIS_Sample_Main_ProfGroupCode" as "亚专业组代码",
+        m."LIS_Sample_Main_ProfGroupName" as "科室名称"
+    FROM datacenter_db.lis_sample_main m
+    WHERE m."LIS_Sample_Main_InspectionDate" >= '20240801' 
+        AND m."LIS_Sample_Main_InspectionDate" <= '20240831'
+        AND m."LIS_Sample_Main_IsDeleted" = '0'
+    GROUP BY 
+        m."LIS_Sample_Main_ProfGroupCode",
+        m."LIS_Sample_Main_ProfGroupName"
+),
+group_level AS (
+    -- 关联三个数据源，获取亚专业组级别数据
+    SELECT 
+        cw."亚专业组代码",
+        dc."科室名称",
+        cw."标本数",
+        cw."工作量" as "项目数",
+        COALESCE(gc."金卡标本数", 0) as "金卡标本数",
+        COALESCE(gc."金卡工作量", 0) as "金卡项目数",
+        -- 添加收入字段
+        COALESCE(inc."总收入", 0) as "总收入",
+        COALESCE(inc."金卡总收入", 0) as "金卡总收入"
+    FROM correct_workload cw
+    LEFT JOIN dc_data dc
+        ON cw."亚专业组代码" = dc."亚专业组代码"
+    LEFT JOIN golden_card_workload gc
+        ON cw."亚专业组代码" = gc."亚专业组代码"
+    LEFT JOIN income_data inc
+        ON cw."亚专业组代码" = inc."亚专业组代码"
+),
+final_summary AS (
+    -- 按科室名称汇总所有数据
+    SELECT 
+        "科室名称",
+        SUM("标本数") as "标本数",
+        SUM("项目数") as "项目数", 
+        SUM("金卡标本数") as "金卡标本数",
+        SUM("金卡项目数") as "金卡项目数",
+        ROUND(SUM("总收入"), 2) as "总收入",
+        ROUND(SUM("金卡总收入"), 2) as "金卡总收入"
+    FROM group_level
+    WHERE "科室名称" IS NOT NULL
+    GROUP BY "科室名称"
+)
+-- 最终结果
+SELECT 
+    "科室名称",
+    -- 工作量相关字段
+    "标本数",
+    "项目数",
+    "金卡标本数",
+    "金卡项目数",
+    -- 收入相关字段（来源：lis_inspection_sample.SAMPLE_CHARGE）
+    "总收入",
+    "金卡总收入"
+FROM final_summary
+WHERE "科室名称" IS NOT NULL
+ORDER BY "标本数" DESC, "总收入" DESC;
+
+
+
+##### 以下是报表内容 -- 是根据亚专业来看的，组成报表分析 按照报表进行统计的过程 没有问题：
+-- 实验医学科各科室综合统计（工作量+收入统计合并版）- 修改收入获取方式  ，添加天府院区，天府院区 今年 6月份之后有数据，所以无法提供历史数据进去。
+
+
+WITH correct_workload AS (
+    -- 使用原始Oracle转Presto的逻辑计算正确的工作量（总体）
+    SELECT 
+        t."GROUP_ID" as "亚专业组代码",
+        COUNT(DISTINCT t."inspection_id") as "标本数",
+        SUM(COALESCE(CAST(b."workload" AS DOUBLE), 0)) as "工作量"
+    FROM hid0101_orcl_lis_dbo.lis_inspection_sample t
+    INNER JOIN hid0101_orcl_lis_dbo.lis_inspection_sample_charge b
+        ON t."inspection_id" = b."inspection_id"
+        AND b."isdeleted" = '0'
+    WHERE t."inspection_date" BETWEEN '20240801' AND '20240831'
+        AND t."isdeleted" = '0'
+    GROUP BY t."GROUP_ID"
+),
+golden_card_workload AS (
+    -- 金卡类型的工作量和标本数计算
+    SELECT 
+        t."GROUP_ID" as "亚专业组代码",
+        COUNT(DISTINCT t."inspection_id") as "金卡标本数",
+        SUM(COALESCE(CAST(b."workload" AS DOUBLE), 0)) as "金卡工作量"
+    FROM hid0101_orcl_lis_dbo.lis_inspection_sample t
+    INNER JOIN hid0101_orcl_lis_dbo.lis_inspection_sample_charge b
+        ON t."inspection_id" = b."inspection_id"
+        AND b."isdeleted" = '0'
+    WHERE t."inspection_date" BETWEEN '20240801' AND '20240831'
+        AND t."isdeleted" = '0'
+        AND (t."patient_type" = '9' OR t."charge_type" LIKE '%金卡%' OR t."charge_type" LIKE '%VIP%')  -- 金卡类型筛选
+    GROUP BY t."GROUP_ID"
+),
+-- 修改收入获取方式：直接从lis_inspection_sample获取SAMPLE_CHARGE
+income_data AS (
+    SELECT 
+        A."GROUP_ID" as "亚专业组代码",
+        -- 总收入：直接使用SAMPLE_CHARGE字段
+        SUM(COALESCE(CAST(A."SAMPLE_CHARGE" AS DOUBLE), 0)) as "总收入",
+        -- 金卡收入：按金卡条件筛选的SAMPLE_CHARGE
+        SUM(CASE 
+            WHEN (A."patient_type" = '9' OR A."charge_type" LIKE '%金卡%' OR A."charge_type" LIKE '%VIP%') 
+            THEN COALESCE(CAST(A."SAMPLE_CHARGE" AS DOUBLE), 0) 
+            ELSE 0 
+        END) as "金卡总收入"
+    FROM hid0101_orcl_lis_dbo.lis_inspection_sample A
+    WHERE A."inspection_date" BETWEEN '20240801' AND '20240831'
+        AND A."isdeleted" = '0'
+        AND A."CHECK_TIME" IS NOT NULL
+    GROUP BY A."GROUP_ID"
+),
+group_level AS (
+    -- 关联数据源，并根据亚专业组代码映射科室名称
+    SELECT 
+        cw."亚专业组代码",
+        -- 根据亚专业组代码映射科室名称
+        CASE 
+            WHEN cw."亚专业组代码" IN ('G003', 'G001') THEN '临床免疫实验室'
+            WHEN cw."亚专业组代码" IN ('G021', 'G017', 'G007') THEN '临床生化实验室'
+            WHEN cw."亚专业组代码" IN ('G999', 'G998', 'G014', 'G022') THEN '临床微生物实验室'
+            WHEN cw."亚专业组代码" IN ('G044', 'G009', 'G062') THEN '临床分子诊断实验室'
+            WHEN cw."亚专业组代码" IN ('G002', 'G025', 'G006', 'G004', 'G076') THEN '临检与血液实验室'
+            WHEN cw."亚专业组代码" IN ('G049', 'G051', 'G050', 'G054', 'G065') THEN '永宁院区'
+            WHEN cw."亚专业组代码" IN ('G011', 'G010', 'G072') THEN '急诊应急组'
+            WHEN cw."亚专业组代码" IN ('G112', 'G113') THEN '天府院区'
+            ELSE '其他' -- 未映射的亚专业组代码
+        END as "科室名称",
+        cw."标本数",
+        cw."工作量" as "项目数",
+        COALESCE(gc."金卡标本数", 0) as "金卡标本数",
+        COALESCE(gc."金卡工作量", 0) as "金卡项目数",
+        -- 添加收入字段
+        COALESCE(inc."总收入", 0) as "总收入",
+        COALESCE(inc."金卡总收入", 0) as "金卡总收入"
+    FROM correct_workload cw
+    LEFT JOIN golden_card_workload gc
+        ON cw."亚专业组代码" = gc."亚专业组代码"
+    LEFT JOIN income_data inc
+        ON cw."亚专业组代码" = inc."亚专业组代码"
+),
+final_summary AS (
+    -- 按科室名称汇总所有数据
+    SELECT 
+        "科室名称",
+        SUM("标本数") as "标本数",
+        SUM("项目数") as "项目数", 
+        SUM("金卡标本数") as "金卡标本数",
+        SUM("金卡项目数") as "金卡项目数",
+        ROUND(SUM("总收入"), 2) as "总收入",
+        ROUND(SUM("金卡总收入"), 2) as "金卡总收入"
+    FROM group_level
+    WHERE "科室名称" IS NOT NULL 
+        AND "科室名称" != '其他'  -- 过滤掉未映射的数据
+    GROUP BY "科室名称"
+),
+total_income AS (
+    -- 计算总收入（合计）用于计算占比
+    SELECT SUM("总收入") as total_income_sum
+    FROM final_summary
+),
+summary_totals AS (
+    -- 计算合计和本部实际量
+    SELECT 
+        '合计' as "科室名称",
+        SUM("标本数") as "标本数",
+        SUM("项目数") as "项目数",
+        SUM("金卡标本数") as "金卡标本数",
+        SUM("金卡项目数") as "金卡项目数",
+        SUM("总收入") as "总收入",
+        SUM("金卡总收入") as "金卡总收入"
+    FROM final_summary
+    
+    UNION ALL
+    
+    SELECT 
+        '本部实际量' as "科室名称",
+        SUM("标本数") as "标本数",
+        SUM("项目数") as "项目数",
+        SUM("金卡标本数") as "金卡标本数",
+        SUM("金卡项目数") as "金卡项目数",
+        SUM("总收入") as "总收入",
+        SUM("金卡总收入") as "金卡总收入"
+    FROM final_summary
+    WHERE "科室名称" != '天府院区'  -- 排除天府院区
+)
+-- 最终结果：原有科室数据 + 合计 + 本部实际量
+SELECT 
+    "科室名称",
+    -- 工作量相关字段
+    "标本数",
+    "项目数",
+    "金卡标本数",
+    "金卡项目数",
+    -- 收入相关字段（来源：lis_inspection_sample.SAMPLE_CHARGE）
+    "总收入",
+    "金卡总收入"
+FROM final_summary
+
+UNION ALL
+
+SELECT 
+    "科室名称",
+    "标本数",
+    "项目数",
+    "金卡标本数",
+    "金卡项目数",
+    "总收入",
+    "金卡总收入"
+FROM summary_totals
+
+ORDER BY 
+    CASE 
+        WHEN "科室名称" = '合计' THEN 1
+        WHEN "科室名称" = '本部实际量' THEN 2
+        ELSE 3
+    END,
+    "标本数" DESC, "总收入" DESC;
+
+## 添加总收入占比的字段  还是以上内容升级版本
+
+-- 实验医学科各科室综合统计（工作量+收入统计合并版）- 修改收入获取方式  ，添加天府院区，天府院区 今年 6月份之后有数据，所以无法提供历史数据进去。
+
+
+WITH correct_workload AS (
+    -- 使用原始Oracle转Presto的逻辑计算正确的工作量（总体）
+    SELECT 
+        t."GROUP_ID" as "亚专业组代码",
+        COUNT(DISTINCT t."inspection_id") as "标本数",
+        SUM(COALESCE(CAST(b."workload" AS DOUBLE), 0)) as "工作量"
+    FROM hid0101_orcl_lis_dbo.lis_inspection_sample t
+    INNER JOIN hid0101_orcl_lis_dbo.lis_inspection_sample_charge b
+        ON t."inspection_id" = b."inspection_id"
+        AND b."isdeleted" = '0'
+    WHERE t."inspection_date" BETWEEN '20240801' AND '20240831'
+        AND t."isdeleted" = '0'
+    GROUP BY t."GROUP_ID"
+),
+golden_card_workload AS (
+    -- 金卡类型的工作量和标本数计算
+    SELECT 
+        t."GROUP_ID" as "亚专业组代码",
+        COUNT(DISTINCT t."inspection_id") as "金卡标本数",
+        SUM(COALESCE(CAST(b."workload" AS DOUBLE), 0)) as "金卡工作量"
+    FROM hid0101_orcl_lis_dbo.lis_inspection_sample t
+    INNER JOIN hid0101_orcl_lis_dbo.lis_inspection_sample_charge b
+        ON t."inspection_id" = b."inspection_id"
+        AND b."isdeleted" = '0'
+    WHERE t."inspection_date" BETWEEN '20240801' AND '20240831'
+        AND t."isdeleted" = '0'
+        AND (t."patient_type" = '9' OR t."charge_type" LIKE '%金卡%' OR t."charge_type" LIKE '%VIP%')  -- 金卡类型筛选
+    GROUP BY t."GROUP_ID"
+),
+-- 修改收入获取方式：直接从lis_inspection_sample获取SAMPLE_CHARGE
+income_data AS (
+    SELECT 
+        A."GROUP_ID" as "亚专业组代码",
+        -- 总收入：直接使用SAMPLE_CHARGE字段
+        SUM(COALESCE(CAST(A."SAMPLE_CHARGE" AS DOUBLE), 0)) as "总收入",
+        -- 金卡收入：按金卡条件筛选的SAMPLE_CHARGE
+        SUM(CASE 
+            WHEN (A."patient_type" = '9' OR A."charge_type" LIKE '%金卡%' OR A."charge_type" LIKE '%VIP%') 
+            THEN COALESCE(CAST(A."SAMPLE_CHARGE" AS DOUBLE), 0) 
+            ELSE 0 
+        END) as "金卡总收入"
+    FROM hid0101_orcl_lis_dbo.lis_inspection_sample A
+    WHERE A."inspection_date" BETWEEN '20240801' AND '20240831'
+        AND A."isdeleted" = '0'
+        AND A."CHECK_TIME" IS NOT NULL
+    GROUP BY A."GROUP_ID"
+),
+group_level AS (
+    -- 关联数据源，并根据亚专业组代码映射科室名称
+    SELECT 
+        cw."亚专业组代码",
+        -- 根据亚专业组代码映射科室名称
+        CASE 
+            WHEN cw."亚专业组代码" IN ('G003', 'G001') THEN '临床免疫实验室'
+            WHEN cw."亚专业组代码" IN ('G021', 'G017', 'G007') THEN '临床生化实验室'
+            WHEN cw."亚专业组代码" IN ('G999', 'G998', 'G014', 'G022') THEN '临床微生物实验室'
+            WHEN cw."亚专业组代码" IN ('G044', 'G009', 'G062') THEN '临床分子诊断实验室'
+            WHEN cw."亚专业组代码" IN ('G002', 'G025', 'G006', 'G004', 'G076') THEN '临检与血液实验室'
+            WHEN cw."亚专业组代码" IN ('G049', 'G051', 'G050', 'G054', 'G065') THEN '永宁院区'
+            WHEN cw."亚专业组代码" IN ('G011', 'G010', 'G072') THEN '急诊应急组'
+            WHEN cw."亚专业组代码" IN ('G112', 'G113') THEN '天府院区'
+            ELSE '其他' -- 未映射的亚专业组代码
+        END as "科室名称",
+        cw."标本数",
+        cw."工作量" as "项目数",
+        COALESCE(gc."金卡标本数", 0) as "金卡标本数",
+        COALESCE(gc."金卡工作量", 0) as "金卡项目数",
+        -- 添加收入字段
+        COALESCE(inc."总收入", 0) as "总收入",
+        COALESCE(inc."金卡总收入", 0) as "金卡总收入"
+    FROM correct_workload cw
+    LEFT JOIN golden_card_workload gc
+        ON cw."亚专业组代码" = gc."亚专业组代码"
+    LEFT JOIN income_data inc
+        ON cw."亚专业组代码" = inc."亚专业组代码"
+),
+final_summary AS (
+    -- 按科室名称汇总所有数据
+    SELECT 
+        "科室名称",
+        SUM("标本数") as "标本数",
+        SUM("项目数") as "项目数", 
+        SUM("金卡标本数") as "金卡标本数",
+        SUM("金卡项目数") as "金卡项目数",
+        ROUND(SUM("总收入"), 2) as "总收入",
+        ROUND(SUM("金卡总收入"), 2) as "金卡总收入"
+    FROM group_level
+    WHERE "科室名称" IS NOT NULL 
+        AND "科室名称" != '其他'  -- 过滤掉未映射的数据
+    GROUP BY "科室名称"
+),
+total_income AS (
+    -- 计算总收入（合计）用于计算占比
+    SELECT SUM("总收入") as total_income_sum
+    FROM final_summary
+),
+summary_totals AS (
+    -- 计算合计和本部实际量
+    SELECT 
+        '合计' as "科室名称",
+        SUM("标本数") as "标本数",
+        SUM("项目数") as "项目数",
+        SUM("金卡标本数") as "金卡标本数",
+        SUM("金卡项目数") as "金卡项目数",
+        SUM("总收入") as "总收入",
+        100.00 as "收入占比%",  -- 合计行显示100%
+        SUM("金卡总收入") as "金卡总收入"
+    FROM final_summary
+    
+    UNION ALL
+    
+    SELECT 
+        '本部实际量' as "科室名称",
+        SUM("标本数") as "标本数",
+        SUM("项目数") as "项目数",
+        SUM("金卡标本数") as "金卡标本数",
+        SUM("金卡项目数") as "金卡项目数",
+        SUM("总收入") as "总收入",
+        ROUND(SUM("总收入") * 100.0 / (SELECT total_income_sum FROM total_income), 2) as "收入占比%",
+        SUM("金卡总收入") as "金卡总收入"
+    FROM final_summary
+    WHERE "科室名称" != '天府院区'  -- 排除天府院区
+)
+-- 最终结果：原有科室数据 + 合计 + 本部实际量
+SELECT 
+    fs."科室名称",
+    fs."标本数",
+    fs."项目数",
+    fs."金卡标本数",
+    fs."金卡项目数",
+    fs."总收入",
+    -- 计算收入占比
+    ROUND(fs."总收入" * 100.0 / (SELECT total_income_sum FROM total_income), 2) as "收入占比%",
+    fs."金卡总收入"
+FROM final_summary fs
+
+UNION ALL
+
+SELECT 
+    "科室名称",
+    "标本数",
+    "项目数",
+    "金卡标本数",
+    "金卡项目数",
+    "总收入",
+    "收入占比%",
+    "金卡总收入"
+FROM summary_totals
+
+ORDER BY 
+    CASE 
+        WHEN "科室名称" = '合计' THEN 1
+        WHEN "科室名称" = '本部实际量' THEN 2
+        ELSE 3
+    END,
+    "标本数" DESC, "总收入" DESC;
+
+
+
+
+
+
+
+
+##### lis 需求结束
+
+当前开始进行下一步需求，
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+----------明天是输血科和收入计算，看怎么算,
+
+输血计算逻辑，先把检验的统计了，其他的再说吧。
+
+检验内容统计，当前逻辑，按照给出的需求进行统计就行了。
+
+矫正一下。当前哪些没有 包含在内
+
+按照需求来整就没问题了
+
+
+
+

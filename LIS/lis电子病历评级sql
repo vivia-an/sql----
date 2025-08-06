@@ -1,0 +1,1468 @@
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.3.5	LIS	完整性：1、检验报告记录（报告检验科室、审核医师）	审核医师	1018570	1004461	0.986	"SELECT COUNT(*) AS ""检验申请记录总数T1-T2"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表""
+INNER JOIN (SELECT REQUISITION_ID FROM hid0101_orcl_lis_dbo.LIS_REQUISITION_INFO WHERE isdeleted = '0' ) ""标签信息表"" ON ""检验标本信息表"".REQUISITION_ID = ""标签信息表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ( '1' ) AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND isdeleted = '0'
+"	"SELECT COUNT(*) AS ""审核医师符合数N2"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表""
+INNER JOIN (SELECT REQUISITION_ID FROM hid0101_orcl_lis_dbo.LIS_REQUISITION_INFO WHERE isdeleted = '0') ""标签信息表"" ON ""检验标本信息表"".REQUISITION_ID = ""标签信息表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ( '1' ) AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".CHECK_PERSON IS NOT NULL AND TRIM(""检验标本信息表"".CHECK_PERSON) <> '' AND isdeleted = '0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.2.5	LIS	整合性：检验申请记录（检验申请单号、检验申请项目编码、标本状态）与检验科室的检验登记记录（检验申请单号、检验申请项目编码、标本状态）	检验申请单号	1018570	1018570	1	"SELECT COUNT(*) AS ""检验申请记录总数 T"" FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+INNER JOIN (SELECT REQUISITION_ID AS ""检验申请单号"" FROM hid0101_orcl_lis_dbo.lis_requisition_info) AS ""标签信息表"" ON ""检验标本信息表"".REQUISITION_ID=""标签信息表"".""检验申请单号""
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('1') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"" .isdeleted = '0'
+
+"	"SELECT COUNT(""标签信息表"".""检验申请单号"") AS ""检验申请单号L"" FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+INNER JOIN (SELECT REQUISITION_ID AS ""检验申请单号"" FROM hid0101_orcl_lis_dbo.lis_requisition_info) AS ""标签信息表"" ON ""检验标本信息表"".REQUISITION_ID=""标签信息表"".""检验申请单号"" 
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('1') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"" .isdeleted = '0' 
+
+
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.3.5	LIS	完整性：1、检验报告记录（报告检验科室、审核医师）	报告检验科室	1018570	1018570	1	"SELECT COUNT(*) AS ""检验申请记录总数T1-T2"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表""
+INNER JOIN (SELECT REQUISITION_ID FROM hid0101_orcl_lis_dbo.LIS_REQUISITION_INFO WHERE isdeleted = '0' ) ""标签信息表"" ON ""检验标本信息表"".REQUISITION_ID = ""标签信息表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ( '1' ) AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND isdeleted = '0'
+"	"SELECT COUNT(*) AS ""报告检验科室符合数N1"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表""
+INNER JOIN (SELECT REQUISITION_ID FROM hid0101_orcl_lis_dbo.LIS_REQUISITION_INFO WHERE isdeleted = '0') ""标签信息表"" ON ""检验标本信息表"".REQUISITION_ID = ""标签信息表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('1') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".GROUP_ID IS NOT NULL AND TRIM( ""检验标本信息表"".GROUP_ID )<> '' AND isdeleted = '0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.2.5	LIS	整合性：检验申请记录（检验申请单号、检验申请项目编码、标本状态）与检验科室的检验登记记录（检验申请单号、检验申请项目编码、标本状态）	标本状态	1018570	1018570	1	"SELECT COUNT(*) AS ""检验申请记录总数 T"" FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+INNER JOIN (SELECT REQUISITION_ID AS ""检验申请单号"" FROM hid0101_orcl_lis_dbo.lis_requisition_info) AS ""标签信息表"" ON ""检验标本信息表"".REQUISITION_ID=""标签信息表"".""检验申请单号""
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('1') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"" .isdeleted = '0'
+
+"	"SELECT COUNT(""标签信息表"".""标本状态"") AS ""标本状态L"" FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+INNER JOIN (SELECT REQUISITION_ID AS ""检验申请单号"", REQUISITION_STATE AS ""标本状态"" FROM hid0101_orcl_lis_dbo.lis_requisition_info) AS ""标签信息表"" ON ""检验标本信息表"".REQUISITION_ID=""标签信息表"".""检验申请单号"" 
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('1') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"" .isdeleted = '0' 
+
+
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.3.5	LIS	整合性：1、检验科室报告记录与标本记录（标本号）的对照。	标本号	1018570	1018570	1	"SELECT COUNT(*) AS ""检验申请记录总数T1"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表""
+INNER JOIN (SELECT REQUISITION_ID FROM hid0101_orcl_lis_dbo.LIS_REQUISITION_INFO WHERE isdeleted = '0') ""标签信息表"" ON ""检验标本信息表"".REQUISITION_ID = ""标签信息表"".REQUISITION_ID 
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ( '1' ) AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND isdeleted = '0'
+"	"SELECT COUNT(*) AS ""标本号符合数L1"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表""
+INNER JOIN (SELECT REQUISITION_ID FROM hid0101_orcl_lis_dbo.LIS_REQUISITION_INFO WHERE isdeleted = '0') ""标签信息表"" ON ""检验标本信息表"".REQUISITION_ID = ""标签信息表"".REQUISITION_ID 
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ( '1' ) AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND isdeleted = '0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.2.5	LIS	整合性：检验申请记录（检验申请单号、检验申请项目编码、标本状态）与检验科室的检验登记记录（检验申请单号、检验申请项目编码、标本状态）	检验申请项目编码	1018570	1018570	1	"SELECT COUNT(*) AS ""检验申请记录总数 T"" FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+INNER JOIN (SELECT REQUISITION_ID AS ""检验申请单号"" FROM hid0101_orcl_lis_dbo.lis_requisition_info) AS ""标签信息表"" ON ""检验标本信息表"".REQUISITION_ID=""标签信息表"".""检验申请单号""
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('1') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"" .isdeleted = '0'
+
+"	"SELECT COUNT(""标签信息表"".""检验申请项目编码"") as ""检验申请项目编码L""
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+inner join (select REQUISITION_ID as ""检验申请单号"", TEST_ORDER_NAME as ""检验申请项目编码"" from hid0101_orcl_lis_dbo.lis_requisition_info) as ""标签信息表"" on ""检验标本信息表"".REQUISITION_ID=""标签信息表"".""检验申请单号"" 
+WHERE ""检验标本信息表"".PATIENT_TYPE in ('1') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630'
+And ""检验标本信息表"" .isdeleted = '0'
+
+
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.3.5	LIS	整合性：2、检验科室报告记录与医师工作站中医师查看的检验项目编码、名称、参考值可对照	参考值	10810773	10219562	0.945	"SELECT COUNT(*) AS ""住院患者检验报告记录与医师工作站的记录总数T1-T3"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表""
+INNER JOIN (SELECT INSPECTION_ID, REMARK FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0') ""检验结果信息表"" ON ""检验标本信息表"".INSPECTION_ID = ""检验结果信息表"".INSPECTION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ( '1' ) AND ""检验结果信息表"".REMARK = '1' AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'
+AND '20240630' AND isdeleted = '0'
+"	"SELECT COUNT(*) AS ""住院检验报告 检验科室报告记录与医师工作站中医师查看的检验项目参考值L3"" FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+LEFT JOIN (SELECT INSPECTION_ID,TEST_ITEM_REFERENCE,Remark, TEST_ITEM_ID, CHINESE_NAME FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0') ""检验结果表"" ON ""检验标本信息表"".INSPECTION_ID = ""检验结果表"".INSPECTION_ID
+LEFT JOIN (SELECT TEST_ITEM_REFERENCE,TEST_ITEM_ID,INSPECTION_ID, CHINESE_NAME FROM hid0101_orcl_lis_dbo.VIEW_INSPECTION_RESULT) ""结果视图表"" ON ""结果视图表"".TEST_ITEM_ID = ""检验结果表"".TEST_ITEM_ID AND ""结果视图表"".TEST_ITEM_REFERENCE = ""检验结果表"".TEST_ITEM_REFERENCE AND ""结果视图表"".INSPECTION_ID = ""检验结果表"".INSPECTION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ( '1' ) AND ( ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' ) AND ""检验结果表"".REMARK = '1'
+AND ""检验结果表"".TEST_ITEM_REFERENCE IS NOT NULL AND isdeleted = '0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.2.6	LIS	及时性：检验标本记录（标本签收时间）≤检验结果记录（结果报告时间）	检验标本记录（标本签收时间）≤检验结果记录（结果报告时间）	1065087	1042669	0.979	"SELECT COUNT(*) AS ""记录总数N1"" FROM (SELECT test_order_name AS ""检验项目"", REQUISITION_ID AS ""申请单号"", INSPECTION_ID AS ""标本标识"",patient_type AS ""患者标识"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"",INSPECTION_DATE AS ""检查日期"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample WHERE isdeleted = '0') ""检验项目表"",
+(SELECT test_order_name AS ""检验项目"", REQUISITION_ID AS ""申请单号"" FROM hid0101_orcl_lis_dbo.LIS_REQUISITION_INFO WHERE isdeleted = '0')""检验申请信息表""
+WHERE ""检验项目表"".""申请单号"" = ""检验申请信息表"".""申请单号"" AND ""检验项目表"".""检验项目"" = ""检验申请信息表"".""检验项目"" AND ""检验项目表"".""患者标识"" IS NOT NULL AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') AND ""检验项目表"".""检查日期"" BETWEEN '20240401' AND '20240630'
+
+
+
+
+"	"SELECT COUNT(*) AS ""及时性条件符合的总数N"" FROM (SELECT test_order_name AS ""检验项目"", REQUISITION_ID AS ""申请单号"", INSPECTION_ID AS ""标本标识"",patient_type AS ""患者标识"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"",INSPECTION_DATE AS ""检查日期"", INPUT_TIME AS ""样本签收时间"", CHECK_TIME AS ""结果报告时间"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample WHERE isdeleted = '0' ) ""检验项目表"",
+(SELECT test_order_name AS ""检验项目"", REQUISITION_ID AS ""申请单号"" FROM hid0101_orcl_lis_dbo.LIS_REQUISITION_INFO WHERE isdeleted = '0')""检验申请信息表""
+WHERE ""检验项目表"".""申请单号"" = ""检验申请信息表"".""申请单号"" AND ""检验项目表"".""检验项目"" = ""检验申请信息表"".""检验项目"" AND ""检验项目表"".""患者标识"" IS NOT NULL AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') AND ""检验项目表"".""检查日期"" BETWEEN '20240401' AND '20240630' AND ""检验项目表"".""结果报告时间"" >""检验项目表"".""样本签收时间"" 
+
+
+
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.3.3	LIS	一致性：检验报告记录（项目名称、正常参考值）	正常参考值	10679542	10567302	0.989	"SELECT COUNT(*)
+FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE A 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT B 
+ON  A.INSPECTION_ID = B.INSPECTION_ID
+WHERE  B.REMARK='1'
+AND A.OUTPATIENT_ID IS NOT NULL
+AND A.PATIENT_TYPE = '1'
+AND A.CHECK_TIME IS NOT NULL
+AND A.INSPECTION_DATE BETWEEN '20240401'AND '20240630'
+AND A.isdeleted = '0'
+AND B.isdeleted = '0'"	"SELECT COUNT(*)
+FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE A 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT B  ON  A.INSPECTION_ID = B.INSPECTION_ID
+LEFT JOIN hid0101_orcl_lis_xhsystem1.lis_item_reference_group C ON B.TEST_ITEM_ID=C.TEST_ITEM_ID 
+AND B.GROUP_ID=C.GROUP_ID
+AND B.TEST_ITEM_REFERENCE=C.ITEM_REFERENCE
+WHERE  B.REMARK='1'
+AND A.OUTPATIENT_ID IS NOT NULL
+AND A.PATIENT_TYPE = '1'
+AND A.CHECK_TIME IS NOT NULL
+AND A.INSPECTION_DATE BETWEEN '20240401'AND '20240630'
+AND A.isdeleted = '0'
+AND B.isdeleted = '0'
+AND C.isdeleted = '0'"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.2.6	LIS	完整性：检验申请记录（申请开立时间、标本采集人、标本采样时间）	标本采集人	1268013	1061238	0.837	"SELECT COUNT( DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验申请总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630'AND ""检验标本信息表"" .isdeleted = '0'
+"	"SELECT COUNT(DISTINCT ""检验标本信息表"".REQUISITION_ID) as ""标本采集人N""
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" 
+ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID 
+AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".sampling_person is not null 
+AND ""检验标本信息表"".PATIENT_TYPE in ('2','3','4') 
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630'
+And ""检验标本信息表"" .isdeleted = '0'
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.2.5	LIS	整合性：2、检验申请记录与检验结果记录（检验申请项目、检验报告项目）可对照	检验报告项目	2312594	1065087	0.461	"SELECT COUNT(*) AS ""记录总数T"" FROM (SELECT _hoodie_record_key AS ""数据唯一标识"", REQUISITION_ID AS ""申请单号"", INSPECTION_ID AS ""标本标识"",patient_type AS ""患者标识"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"", PATIENT_TYPE AS ""检验结果记录数据表患者标识"", inspection_date ""检查日期"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample WHERE isdeleted = '0') ""检验项目表"",
+(SELECT REQUISITION_ID AS ""申请单号"" FROM hid0101_orcl_lis_dbo.LIS_REQUISITION_INFO WHERE isdeleted = '0')""检验申请信息表""
+WHERE ""检验项目表"".""申请单号"" = ""检验申请信息表"".""申请单号"" AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') AND ""检验项目表"".""检查日期"" BETWEEN '20240401' AND '20240630'
+
+
+"	"SELECT COUNT(*) AS ""检验报告项目总数N"" FROM (SELECT _hoodie_record_key AS ""数据唯一标识"", test_order_name AS ""检验申请记录数据表检验申请项目"",REQUISITION_ID AS ""申请单号"", INSPECTION_ID AS ""标本标识"",patient_type AS ""患者标识"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"", PATIENT_TYPE AS ""检验结果记录数据表患者标识"", inspection_date ""检查日期"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample WHERE isdeleted = '0') ""检验项目表"",
+(SELECT REQUISITION_ID AS ""申请单号"", test_order_name AS ""检验申请记录数据表检验申请项目"" FROM hid0101_orcl_lis_dbo.LIS_REQUISITION_INFO WHERE isdeleted = '0')""检验申请信息表""
+WHERE ""检验项目表"".""申请单号"" = ""检验申请信息表"".""申请单号"" AND ""检验项目表"".""检验申请记录数据表检验申请项目"" = ""检验申请信息表"".""检验申请记录数据表检验申请项目"" AND ""检验项目表"".""患者标识"" IS NOT NULL AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') AND ""检验项目表"".""检查日期"" BETWEEN '20240401' AND '20240630'
+
+
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.2.5	LIS	整合性：2、检验申请记录与检验结果记录（检验申请项目、检验报告项目）可对照	检验申请项目	2312594	1065087	0.461	"SELECT COUNT(*) AS ""记录总数T"" FROM (SELECT _hoodie_record_key AS ""数据唯一标识"", REQUISITION_ID AS ""申请单号"", INSPECTION_ID AS ""标本标识"",patient_type AS ""患者标识"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"", PATIENT_TYPE AS ""检验结果记录数据表患者标识"", inspection_date ""检查日期"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample WHERE isdeleted = '0') ""检验项目表"",
+(SELECT REQUISITION_ID AS ""申请单号"" FROM hid0101_orcl_lis_dbo.LIS_REQUISITION_INFO WHERE isdeleted = '0')""检验申请信息表""
+WHERE ""检验项目表"".""申请单号"" = ""检验申请信息表"".""申请单号"" AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') AND ""检验项目表"".""检查日期"" BETWEEN '20240401' AND '20240630'
+
+
+"	"SELECT COUNT(*) AS ""申请项目总数N"" FROM (SELECT _hoodie_record_key AS ""数据唯一标识"", test_order_name AS ""检验申请记录数据表检验申请项目"",REQUISITION_ID AS ""申请单号"", INSPECTION_ID AS ""标本标识"",patient_type AS ""患者标识"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"", PATIENT_TYPE AS ""检验结果记录数据表患者标识"", inspection_date ""检查日期"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample WHERE isdeleted = '0') ""检验项目表"",
+(SELECT REQUISITION_ID AS ""申请单号"", test_order_name AS ""检验申请记录数据表检验申请项目"" FROM hid0101_orcl_lis_dbo.LIS_REQUISITION_INFO WHERE isdeleted = '0')""检验申请信息表""
+WHERE ""检验项目表"".""申请单号"" = ""检验申请信息表"".""申请单号"" AND ""检验项目表"".""检验申请记录数据表检验申请项目"" = ""检验申请信息表"".""检验申请记录数据表检验申请项目"" AND ""检验申请信息表"".""申请单号"" IS NOT NULL AND ""检验项目表"".""患者标识"" IS NOT NULL AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') AND ""检验项目表"".""检查日期"" BETWEEN '20240401' AND '20240630' 
+
+
+
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.3.5	LIS	整合性：2、检验科室报告记录与医师工作站中医师查看的检验项目编码、名称、参考值可对照	名称	10810773	10810767	1	"SELECT COUNT(*) AS ""住院患者检验报告记录与医师工作站的记录总数T1-T3"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表""
+INNER JOIN (SELECT INSPECTION_ID, REMARK FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0') ""检验结果信息表"" ON ""检验标本信息表"".INSPECTION_ID = ""检验结果信息表"".INSPECTION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ( '1' ) AND ""检验结果信息表"".REMARK = '1' AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'
+AND '20240630' AND isdeleted = '0'
+"	"SELECT COUNT(*) AS ""住院检验报告 检验科室报告记录与医师工作站中医师查看的检验项目名称可对照数L2"" FROM (SELECT INSPECTION_ID,OUTPATIENT_ID, PATIENT_TYPE,CHECK_TIME,INSPECTION_DATE,isdeleted FROM hid0101_orcl_lis_dbo.lis_inspection_sample WHERE isdeleted = '0') ""检验标本信息表""
+LEFT JOIN (SELECT INSPECTION_ID,TEST_ITEM_REFERENCE,Remark, TEST_ITEM_ID, CHINESE_NAME FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0') ""检验结果表"" ON ""检验标本信息表"".INSPECTION_ID = ""检验结果表"".INSPECTION_ID
+LEFT JOIN (SELECT TEST_ITEM_REFERENCE,TEST_ITEM_ID,INSPECTION_ID, CHINESE_NAME FROM hid0101_orcl_lis_dbo.VIEW_INSPECTION_RESULT) ""结果视图表"" ON ""结果视图表"".TEST_ITEM_ID = ""检验结果表"".TEST_ITEM_ID AND ""结果视图表"".CHINESE_NAME = ""检验结果表"".CHINESE_NAME AND ""结果视图表"".INSPECTION_ID = ""检验结果表"".INSPECTION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ( '1' ) AND ( ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' ) AND ""检验结果表"".REMARK = '1' AND ""检验结果表"".CHINESE_NAME IS NOT NULL AND ""检验标本信息表"".isdeleted='0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.3.5	LIS	整合性：2、检验科室报告记录与医师工作站中医师查看的检验项目编码、名称、参考值可对照	检验项目编码	10810773	10810773	1	"SELECT COUNT(*) AS ""住院患者检验报告记录与医师工作站的记录总数T1-T3"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表""
+INNER JOIN (SELECT INSPECTION_ID, REMARK FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0') ""检验结果信息表"" ON ""检验标本信息表"".INSPECTION_ID = ""检验结果信息表"".INSPECTION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ( '1' ) AND ""检验结果信息表"".REMARK = '1' AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'
+AND '20240630' AND isdeleted = '0'
+"	"SELECT COUNT(*) AS ""医生工作站可关联对照记录 检验项目编码符合数L1"" FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+LEFT JOIN (SELECT INSPECTION_ID,TEST_ITEM_REFERENCE,Remark, TEST_ITEM_ID FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0') ""检验结果表"" ON ""检验标本信息表"".INSPECTION_ID = ""检验结果表"".INSPECTION_ID
+LEFT JOIN (SELECT TEST_ITEM_REFERENCE,TEST_ITEM_ID,INSPECTION_ID FROM hid0101_orcl_lis_dbo.VIEW_INSPECTION_RESULT ) ""结果视图表"" ON ""结果视图表"".TEST_ITEM_ID = ""检验结果表"".TEST_ITEM_ID AND ""结果视图表"".INSPECTION_ID = ""检验结果表"".INSPECTION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ( '1' ) AND ( ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' )
+AND ""检验结果表"".REMARK = '1' AND ""检验结果表"".TEST_ITEM_ID IS NOT NULL AND isdeleted = '0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.2.6	LIS	及时性：检验申请记录（申请开立时间）<标本采集记录（采样时间）	检验申请记录（申请开立时间）<标本采集记录（采样时间）	1268013	1102355	0.869	"SELECT COUNT( DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验申请总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630'AND ""检验标本信息表"" .isdeleted = '0'
+"	"SELECT COUNT(*) as ""及时性：检验申请记录（申请开立时间）<标本采集记录（采样时间）S""
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+inner join (select REQUISITION_ID as ""检验申请单号"" ,print_time as ""申请时间"", sampling_time as ""采样时间"" from hid0101_orcl_lis_dbo.lis_requisition_info) as ""标签信息表"" on ""检验标本信息表"".REQUISITION_ID=""标签信息表"".""检验申请单号"" 
+WHERE ""检验标本信息表"".PATIENT_TYPE in ('2','3','4') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' and ""标签信息表"".""申请时间""< ""标签信息表"".""采样时间"" And ""检验标本信息表"" .isdeleted = '0'
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.3.4	LIS	完整性：检验报告记录（患者标识、检验结果项目名称、检验结果、正常参考值）	正常参考值	1176651	1105144	0.939	"SELECT COUNT( DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验报告总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT ""检验结果信息表"" ON ""检验标本信息表"".INSPECTION_ID = ""检验结果信息表"".INSPECTION_ID
+WHERE ""检验结果信息表"".REMARK='1' AND ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630' AND ""检验标本信息表"" .isdeleted = '0'
+"	"SELECT COUNT(DISTINCT ""检验标本信息表"".REQUISITION_ID) as ""参考值N""
+FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT ""检验结果信息表""
+ON ""检验标本信息表"".INSPECTION_ID = ""检验结果信息表"".INSPECTION_ID
+WHERE ""检验结果信息表"".REMARK='1'
+and ""检验结果信息表"".TEST_ITEM_REFERENCE is not null
+AND ""检验标本信息表"".PATIENT_TYPE in ('2','3','4')
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630'
+And ""检验标本信息表"" .isdeleted = '0'
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.3.6	LIS	完整性：检验报告记录（报告时间、审核时间）	报告时间	1176651	1161827	0.987	"SELECT COUNT( DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验报告总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT ""检验结果信息表"" ON ""检验标本信息表"".INSPECTION_ID = ""检验结果信息表"".INSPECTION_ID
+WHERE ""检验结果信息表"".REMARK='1' AND ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630' AND ""检验标本信息表"" .isdeleted = '0'
+"	"SELECT COUNT(DISTINCT ""检验标本信息表"".REQUISITION_ID) as ""报告时间N""
+FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT ""检验结果信息表""
+ON ""检验标本信息表"".INSPECTION_ID = ""检验结果信息表"".INSPECTION_ID
+WHERE ""检验结果信息表"".REMARK='1'
+AND ""检验标本信息表"".PATIENT_TYPE in ('2','3','4')
+AND ""检验标本信息表"".CHECK_TIME IS NOT NULL
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630' 
+And ""检验标本信息表"" .isdeleted = '0'
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.3.6	LIS	完整性：检验报告记录（报告时间、审核时间）	审核时间	1176651	1161827	0.987	"SELECT COUNT( DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验报告总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT ""检验结果信息表"" ON ""检验标本信息表"".INSPECTION_ID = ""检验结果信息表"".INSPECTION_ID
+WHERE ""检验结果信息表"".REMARK='1' AND ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630' AND ""检验标本信息表"" .isdeleted = '0'
+"	"SELECT COUNT(DISTINCT ""检验标本信息表"".REQUISITION_ID) as ""审核时间N""
+FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT ""检验结果信息表""
+ON ""检验标本信息表"".INSPECTION_ID = ""检验结果信息表"".INSPECTION_ID
+WHERE ""检验结果信息表"".REMARK='1'
+AND ""检验标本信息表"".PATIENT_TYPE in ('2','3','4')
+AND ""检验标本信息表"".CHECK_TIME IS NOT NULL
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630' 
+And ""检验标本信息表"" .isdeleted = '0'
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.3.4	LIS	完整性：检验报告记录（患者标识、检验结果项目名称、检验结果、正常参考值）	患者标识	1176651	1172666	0.997	"SELECT COUNT( DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验报告总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT ""检验结果信息表"" ON ""检验标本信息表"".INSPECTION_ID = ""检验结果信息表"".INSPECTION_ID
+WHERE ""检验结果信息表"".REMARK='1' AND ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630' AND ""检验标本信息表"" .isdeleted = '0'
+"	"SELECT COUNT(DISTINCT ""检验标本信息表"".REQUISITION_ID) as ""患者标识N""
+FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT ""检验结果信息表""
+ON ""检验标本信息表"".INSPECTION_ID = ""检验结果信息表"".INSPECTION_ID
+WHERE ""检验结果信息表"".REMARK='1'
+and ""检验标本信息表"".OUTPATIENT_ID IS NOT NULL
+AND ""检验标本信息表"".PATIENT_TYPE in ('2','3','4')
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630'
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.3.4	LIS	完整性：检验报告记录（患者标识、检验结果项目名称、检验结果、正常参考值）	检验结果	1176651	1175114	0.999	"SELECT COUNT( DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验报告总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT ""检验结果信息表"" ON ""检验标本信息表"".INSPECTION_ID = ""检验结果信息表"".INSPECTION_ID
+WHERE ""检验结果信息表"".REMARK='1' AND ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630' AND ""检验标本信息表"" .isdeleted = '0'
+"	"SELECT COUNT(DISTINCT ""检验标本信息表"".REQUISITION_ID) as ""检验结果N""
+FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT ""检验结果信息表""
+ON ""检验标本信息表"".INSPECTION_ID = ""检验结果信息表"".INSPECTION_ID
+WHERE ""检验结果信息表"".REMARK='1'
+and ""检验结果信息表"".QUANTITATIVE_RESULT is not null
+AND ""检验标本信息表"".PATIENT_TYPE in ('2','3','4')
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630'
+And ""检验标本信息表"" .isdeleted = '0'
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.3.4	LIS	完整性：检验报告记录（患者标识、检验结果项目名称、检验结果、正常参考值）	检验结果项目名称	1176651	1176651	1	"SELECT COUNT( DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验报告总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT ""检验结果信息表"" ON ""检验标本信息表"".INSPECTION_ID = ""检验结果信息表"".INSPECTION_ID
+WHERE ""检验结果信息表"".REMARK='1' AND ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630' AND ""检验标本信息表"" .isdeleted = '0'
+"	"SELECT COUNT(DISTINCT ""检验标本信息表"".REQUISITION_ID) as ""检验结果项目名称N""
+FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT ""检验结果信息表""
+ON ""检验标本信息表"".INSPECTION_ID = ""检验结果信息表"".INSPECTION_ID
+WHERE ""检验结果信息表"".REMARK='1'
+and ""检验结果信息表"".chinese_name is not null
+AND ""检验标本信息表"".PATIENT_TYPE in ('2','3','4')
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630'
+And ""检验标本信息表"" .isdeleted = '0'
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.3.3	LIS	一致性：检验报告记录（项目编码，项目名称）	项目名称	1176651	1176651	1	"SELECT COUNT( DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验报告总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT ""检验结果信息表"" ON ""检验标本信息表"".INSPECTION_ID = ""检验结果信息表"".INSPECTION_ID
+WHERE ""检验结果信息表"".REMARK='1' AND ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630' AND ""检验标本信息表"" .isdeleted = '0'
+"	"SELECT COUNT(DISTINCT ""检验标本信息表"".REQUISITION_ID) as ""项目名称C""
+FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT ""检验结果信息表""
+ON ""检验标本信息表"".INSPECTION_ID = ""检验结果信息表"".INSPECTION_ID
+LEFT JOIN HID0101_ORCL_LIS_XHSYSTEM1.LIS_CHARGE_ITEM ""字典表""
+ON ""检验结果信息表"".CHINESE_NAME=""字典表"".CHINESE_NAME
+WHERE ""检验结果信息表"".REMARK='1'
+AND ""检验标本信息表"".PATIENT_TYPE in ('2','3','4')
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630'
+And ""检验标本信息表"" .isdeleted = '0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.3.3	LIS	一致性：检验报告记录（项目编码，项目名称）	项目编码	1176651	1176651	1	"SELECT COUNT( DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验报告总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT ""检验结果信息表"" ON ""检验标本信息表"".INSPECTION_ID = ""检验结果信息表"".INSPECTION_ID
+WHERE ""检验结果信息表"".REMARK='1' AND ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630' AND ""检验标本信息表"" .isdeleted = '0'
+"	"SELECT COUNT(DISTINCT ""检验标本信息表"" .REQUISITION_ID) as ""项目编码""
+FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT ""检验结果信息表""
+ON ""检验标本信息表"".INSPECTION_ID = ""检验结果信息表"".INSPECTION_ID
+LEFT JOIN HID0101_ORCL_LIS_XHSYSTEM1.LIS_CHARGE_ITEM ""字典表""
+ON ""检验结果信息表"".TEST_ORDER=""字典表"".CHARGE_ITEM_ID
+WHERE ""检验结果信息表"".REMARK='1'
+AND ""检验标本信息表"".PATIENT_TYPE in ('2','3','4')
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630'
+And ""检验标本信息表"" .isdeleted = '0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.2.6	LIS	完整性：检验申请记录（申请开立时间、标本采集人、标本采样时间）	标本采样时间	1268013	1194710	0.942	"SELECT COUNT( DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验申请总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630'AND ""检验标本信息表"" .isdeleted = '0'
+"	"SELECT COUNT(DISTINCT ""检验标本信息表"".REQUISITION_ID) as ""标本采集时间N""
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" 
+ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID 
+AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".sampling_time is not null 
+AND ""检验标本信息表"".PATIENT_TYPE in ('2','3','4') 
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630'
+And ""检验标本信息表"" .isdeleted = '0'
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.3.3	LIS	一致性：检验结果项目名称	检验结果项目名称	12199198	12199198	1	"SELECT COUNT(*) AS ""检验报告总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT ""检验结果信息表"" ON ""检验标本信息表"".INSPECTION_ID = ""检验结果信息表"".INSPECTION_ID
+WHERE ""检验结果信息表"".REMARK='1' AND ""检验标本信息表"".PATIENT_TYPE = '1' AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630' AND ""检验标本信息表"" .isdeleted = '0'
+"	"SELECT COUNT(*) as ""检验结果项目名称C""
+FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT ""检验结果信息表""
+ON ""检验标本信息表"".INSPECTION_ID = ""检验结果信息表"".INSPECTION_ID
+LEFT JOIN HID0101_ORCL_LIS_XHSYSTEM1.LIS_TEST_ITEM ""字典表""
+ON ""检验结果信息表"".TEST_ITEM_ID=""字典表"".TEST_ITEM_ID AND ""检验结果信息表"".CHINESE_NAME=""字典表"".CHINESE_NAME
+WHERE ""检验结果信息表"".REMARK='1'
+AND ""检验标本信息表"".PATIENT_TYPE = '1'
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630'
+And ""检验标本信息表"" .isdeleted = '0'
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.3.5	LIS	整合性：2、检验科室报告记录与医师工作站中医师查看检验报告记录（检验项目编码、名称、参考值）可对照	参考值	20766983	12464845	0.6	"SELECT COUNT(*) AS ""门诊检验报告 检验科室报告记录与标本记录(标本号)可对照 总数T1-T3 "" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表""
+LEFT JOIN (SELECT INSPECTION_ID, REMARK FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0') ""检验结果信息表"" ON ""检验标本信息表"".INSPECTION_ID = ""检验结果信息表"".INSPECTION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".isdeleted = '0'
+
+"	"SELECT COUNT(*) AS ""门诊检验报告 检验科室报告记录与医师工作站中医师查看的检验项目参考值可对照数L3""
+FROM
+hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表""
+LEFT JOIN (SELECT INSPECTION_ID,TEST_ITEM_REFERENCE,Remark, TEST_ITEM_ID, CHINESE_NAME FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0' ) ""检验结果表"" ON ""检验标本信息表"".INSPECTION_ID = ""检验结果表"".INSPECTION_ID
+LEFT JOIN (SELECT TEST_ITEM_REFERENCE,TEST_ITEM_ID,INSPECTION_ID, CHINESE_NAME FROM hid0101_orcl_lis_dbo.VIEW_INSPECTION_RESULT) ""结果视图表"" ON ""结果视图表"".TEST_ITEM_ID = ""检验结果表"".TEST_ITEM_ID AND ""结果视图表"".TEST_ITEM_REFERENCE = ""检验结果表"".TEST_ITEM_REFERENCE
+AND ""结果视图表"".INSPECTION_ID = ""检验结果表"".INSPECTION_ID
+WHERE
+""检验标本信息表"".OUTPATIENT_ID IS NOT NULL
+AND ""检验标本信息表"".PATIENT_TYPE IN ( '2', '3', '4' )
+AND ""检验标本信息表"".CHECK_TIME IS NOT NULL
+AND ( ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' )
+AND ""检验结果表"".REMARK = '1'
+AND ""检验结果表"".TEST_ITEM_REFERENCE IS NOT NULL AND ""检验标本信息表"".isdeleted = '0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.2.5	LIS	完整性：检验申请记录（检验申请医师编码、申请医师姓名、临床情况说明或检验目的）	临床情况说明或检验目的	1268013	1257106	0.991	"SELECT COUNT( DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验申请总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630'AND ""检验标本信息表"" .isdeleted = '0'
+"	"SELECT COUNT(DISTINCT ""检验标本信息表"".REQUISITION_ID) as ""临床诊断N""
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" 
+ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID 
+AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".CLINICAL_DIAGNOSES is not null 
+AND ""检验标本信息表"".PATIENT_TYPE in ('2','3','4') 
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630'
+And ""检验标本信息表"" .isdeleted = '0'
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.2.4	LIS	完整性：检验申请记录（检验申请单号、患者标识、患者性别、项目编码、项目名称、标本名称）	患者性别	1268013	1262585	0.996	"SELECT COUNT( DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验申请总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630'AND ""检验标本信息表"" .isdeleted = '0'
+"	"SELECT COUNT(DISTINCT ""检验标本信息表"".REQUISITION_ID) as ""患者性别N""
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" 
+ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID 
+AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".OUTPATIENT_ID IS NOT NULL 
+and ""检验标本信息表"".patient_sex is not null 
+AND ""检验标本信息表"".PATIENT_TYPE in ('2','3','4') 
+AND ""检验标本信息表"".CHECK_TIME IS NOT NULL 
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630'
+And ""检验标本信息表"" .isdeleted = '0'
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.2.3	LIS	一致性：检验申请记录（检验项目名称、检验项目编码、标本名称）	检验项目编码	1268013	1262585	0.996	"SELECT COUNT( DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验申请总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630'AND ""检验标本信息表"" .isdeleted = '0'
+"	"SELECT COUNT(DISTINCT ""检验标本信息表"".REQUISITION_ID) as ""检验项目编码""
+FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" 
+ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID 
+AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+LEFT JOIN HID0101_ORCL_LIS_XHSYSTEM1.LIS_CHARGE_ITEM ""字典表"" 
+ON ""检验明细表"".CHARGE_ITEM_ID=""字典表"".CHARGE_ITEM_ID
+WHERE ""检验标本信息表"".OUTPATIENT_ID IS NOT NULL
+AND ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4')
+AND ""检验标本信息表"".CHECK_TIME IS NOT NULL
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630'
+And ""检验标本信息表"" .isdeleted = '0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.2.4	LIS	完整性：检验申请记录（检验申请单号、患者标识、患者性别、项目编码、项目名称、标本名称）	患者标识	1268013	1263304	0.996	"SELECT COUNT( DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验申请总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630'AND ""检验标本信息表"" .isdeleted = '0'
+"	"SELECT COUNT(DISTINCT ""检验标本信息表"".REQUISITION_ID) as ""患者标识C""
+FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" 
+ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID 
+AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".OUTPATIENT_ID IS NOT NULL
+AND ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4')
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630'
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.2.5	LIS	完整性：检验申请记录（检验申请医师编码、申请医师姓名、临床情况说明或检验目的）	申请医师姓名	1268013	1267686	1	"SELECT COUNT( DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验申请总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630'AND ""检验标本信息表"" .isdeleted = '0'
+"	"SELECT COUNT(DISTINCT ""检验标本信息表"".REQUISITION_ID) as ""申请医生名称N""
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" 
+ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID 
+AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".REQUISITION_person is not null 
+AND ""检验标本信息表"".PATIENT_TYPE in ('2','3','4') 
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630'
+And ""检验标本信息表"" .isdeleted = '0'
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.2.5	LIS	完整性：检验申请记录（检验申请医师编码、申请医师姓名、临床情况说明或检验目的）	检验申请医师编码	1268013	1267686	1	"SELECT COUNT( DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验申请总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630'AND ""检验标本信息表"" .isdeleted = '0'
+"	"SELECT COUNT(DISTINCT ""检验标本信息表"".REQUISITION_ID) as ""申请医生编码N""
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" 
+ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID 
+AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".REQUISITION_person is not null 
+AND ""检验标本信息表"".PATIENT_TYPE in ('2','3','4') 
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630'
+And ""检验标本信息表"" .isdeleted = '0'
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.2.4	LIS	完整性：检验申请记录（检验申请单号、患者标识、患者性别、项目编码、项目名称、标本名称）	标本名称	1268013	1267979	1	"SELECT COUNT( DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验申请总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630'AND ""检验标本信息表"" .isdeleted = '0'
+"	"SELECT COUNT(DISTINCT ""检验标本信息表"".REQUISITION_ID) as ""标本名称N""
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" 
+ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID 
+AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".sample_class is not null 
+AND ""检验标本信息表"".PATIENT_TYPE in ('2','3','4') 
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630'
+And ""检验标本信息表"" .isdeleted = '0'
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.2.4	LIS	完整性：检验申请记录（检验申请单号、患者标识、患者性别、项目编码、项目名称、标本名称）	项目编码	1268013	1268013	1	"SELECT COUNT( DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验申请总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630'AND ""检验标本信息表"" .isdeleted = '0'
+"	"SELECT COUNT(DISTINCT ""检验标本信息表"".REQUISITION_ID) as ""项目编码N""
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" 
+ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID 
+AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验明细表"".charge_item_id is not null 
+AND ""检验标本信息表"".PATIENT_TYPE in ('2','3','4') 
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630'
+And ""检验标本信息表"" .isdeleted = '0'
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.2.3	LIS	一致性：检验申请记录（检验项目名称、检验项目编码、标本名称）	标本名称	1268013	1268013	1	"SELECT COUNT( DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验申请总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630'AND ""检验标本信息表"" .isdeleted = '0'
+"	"SELECT COUNT(DISTINCT ""检验标本信息表"".REQUISITION_ID) 
+FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" 
+ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID 
+AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+LEFT JOIN HID0101_ORCL_LIS_XHSYSTEM1.LIS_CHARGE_ITEM ""字典表"" 
+ON ""检验标本信息表"".SAMPLE_CLASS=""字典表"".SAMPLE_CLASS
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4')
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630'
+And ""检验标本信息表"" .isdeleted = '0'
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.2.3	LIS	一致性：检验申请记录（检验项目名称、检验项目编码、标本名称）	检验项目名称	1268013	1268013	1	"SELECT COUNT( DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验申请总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630'AND ""检验标本信息表"" .isdeleted = '0'
+"	"SELECT COUNT(DISTINCT ""检验标本信息表"".REQUISITION_ID) ""检验项目名称C""
+FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" 
+ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID 
+AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+LEFT JOIN HID0101_ORCL_LIS_XHSYSTEM1.LIS_CHARGE_ITEM ""字典表"" 
+ON ""检验明细表"".CHINESE_NAME_SHORT=""字典表"".CHINESE_NAME_SHORT
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4')
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630'
+And ""检验标本信息表"" .isdeleted = '0'
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.2.4	LIS	完整性：检验申请记录（检验申请单号、患者标识、患者性别、项目编码、项目名称、标本名称）	检验申请单号	1268013	1268013	1	"SELECT COUNT( DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验申请总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630'AND ""检验标本信息表"" .isdeleted = '0'
+"	"SELECT COUNT(DISTINCT ""检验标本信息表"".REQUISITION_ID) as ""检验申请单号C""
+FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" 
+ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID 
+AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4')
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630'
+And ""检验标本信息表"" .isdeleted = '0'
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.2.4	LIS	完整性：检验申请记录（检验申请单号、患者标识、患者性别、项目编码、项目名称、标本名称）	项目名称	1268013	1268019	1	"SELECT COUNT( DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验申请总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630'AND ""检验标本信息表"" .isdeleted = '0'
+"	"SELECT COUNT(DISTINCT ""检验标本信息表"".REQUISITION_ID) as ""项目名称N""
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" 
+ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID 
+AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".test_order_name is not null 
+AND ""检验标本信息表"".PATIENT_TYPE in ('2','3','4') 
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630'
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.3.5	LIS	完整性：1、检验报告记录（报告检验科室、审核医师）	审核医师	1294024	1273199	0.984	"SELECT COUNT(*) AS ""门诊检验报告 检验总数T1~T2"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表""
+INNER JOIN (SELECT REQUISITION_ID FROM hid0101_orcl_lis_dbo.LIS_REQUISITION_INFO WHERE isdeleted = '0') ""标签信息表"" ON ""检验标本信息表"".REQUISITION_ID = ""标签信息表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ( '2','3','4' ) AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND isdeleted = '0'
+"	"SELECT COUNT(*) AS ""门诊检验报告 审核医师符合数N2"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表""
+INNER JOIN (SELECT REQUISITION_ID FROM hid0101_orcl_lis_dbo.LIS_REQUISITION_INFO WHERE isdeleted = '0' ) ""标签信息表"" ON ""检验标本信息表"".REQUISITION_ID = ""标签信息表"".REQUISITION_ID
+WHERE ""检验标本信息表"".OUTPATIENT_ID IS NOT NULL AND ""检验标本信息表"".PATIENT_TYPE IN ( '2','3','4' ) AND ""检验标本信息表"".CHECK_TIME IS NOT NULL
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".CHECK_PERSON IS NOT NULL AND isdeleted = '0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.3.5	LIS	完整性：1、检验报告记录（报告检验科室、审核医师）	报告检验科室	1294024	1273199	0.984	"SELECT COUNT(*) AS ""门诊检验报告 检验总数T1~T2"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表""
+INNER JOIN (SELECT REQUISITION_ID FROM hid0101_orcl_lis_dbo.LIS_REQUISITION_INFO WHERE isdeleted = '0') ""标签信息表"" ON ""检验标本信息表"".REQUISITION_ID = ""标签信息表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ( '2','3','4' ) AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND isdeleted = '0'
+"	"SELECT COUNT(*) AS ""门诊检验报告 检验科室符合数N1"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表""
+INNER JOIN (SELECT REQUISITION_ID FROM hid0101_orcl_lis_dbo.LIS_REQUISITION_INFO WHERE isdeleted = '0') ""标签信息表"" ON ""检验标本信息表"".REQUISITION_ID = ""标签信息表"".REQUISITION_ID
+WHERE ""检验标本信息表"".OUTPATIENT_ID IS NOT NULL AND ""检验标本信息表"".PATIENT_TYPE IN ( '2','3','4' ) AND ""检验标本信息表"".CHECK_TIME IS NOT NULL
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".GROUP_ID IS NOT NULL AND isdeleted = '0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.3.5	LIS	整合性：2、检验科室报告记录与医师工作站中医师查看检验报告记录（检验项目编码、名称、参考值）可对照	名称	20766983	12888569	0.621	"SELECT COUNT(*) AS ""门诊检验报告 检验科室报告记录与标本记录(标本号)可对照 总数T1-T3 "" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表""
+LEFT JOIN (SELECT INSPECTION_ID, REMARK FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0') ""检验结果信息表"" ON ""检验标本信息表"".INSPECTION_ID = ""检验结果信息表"".INSPECTION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".isdeleted = '0'
+
+"	"SELECT COUNT(*) AS ""门诊检验报告 检验科室报告记录与医师工作站中医师查看的检验项目名称可对照数L2"" FROM (SELECT INSPECTION_ID,OUTPATIENT_ID, PATIENT_TYPE,CHECK_TIME,INSPECTION_DATE,isdeleted FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample WHERE isdeleted = '0') ""检验标本信息表""
+LEFT JOIN (SELECT INSPECTION_ID,TEST_ITEM_REFERENCE,Remark, TEST_ITEM_ID, CHINESE_NAME FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0') ""检验结果表"" ON ""检验标本信息表"".INSPECTION_ID = ""检验结果表"".INSPECTION_ID
+LEFT JOIN (SELECT TEST_ITEM_REFERENCE,TEST_ITEM_ID,INSPECTION_ID, CHINESE_NAME FROM hid0101_orcl_lis_dbo.VIEW_INSPECTION_RESULT) ""结果视图表"" ON ""结果视图表"".TEST_ITEM_ID = ""检验结果表"".TEST_ITEM_ID AND ""结果视图表"".CHINESE_NAME = ""检验结果表"".CHINESE_NAME AND ""结果视图表"".INSPECTION_ID = ""检验结果表"".INSPECTION_ID
+WHERE ""检验标本信息表"".OUTPATIENT_ID IS NOT NULL AND ""检验标本信息表"".PATIENT_TYPE IN ( '2', '3', '4' ) AND ""检验标本信息表"".CHECK_TIME IS NOT NULL
+AND ( ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' ) AND ""检验结果表"".REMARK = '1' AND ""检验结果表"".CHINESE_NAME IS NOT NULL
+AND ""检验标本信息表"".isdeleted = '0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.3.5	LIS	整合性：2、检验科室报告记录与医师工作站中医师查看检验报告记录（检验项目编码、名称、参考值）可对照	检验项目编码	20766983	12888569	0.621	"SELECT COUNT(*) AS ""门诊检验报告 检验科室报告记录与标本记录(标本号)可对照 总数T1-T3 "" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表""
+LEFT JOIN (SELECT INSPECTION_ID, REMARK FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0') ""检验结果信息表"" ON ""检验标本信息表"".INSPECTION_ID = ""检验结果信息表"".INSPECTION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".isdeleted = '0'
+
+"	"SELECT COUNT(*) AS ""门诊检验报告 检验科室报告记录与医师工作站中医师查看的检验项目编码可对照 符合数L1"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表""
+LEFT JOIN (SELECT INSPECTION_ID,TEST_ITEM_REFERENCE,Remark, TEST_ITEM_ID FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0') ""检验结果表"" ON ""检验标本信息表"".INSPECTION_ID = ""检验结果表"".INSPECTION_ID
+LEFT JOIN (SELECT TEST_ITEM_REFERENCE,TEST_ITEM_ID,INSPECTION_ID FROM hid0101_orcl_lis_dbo.VIEW_INSPECTION_RESULT) ""结果视图表"" ON ""结果视图表"".TEST_ITEM_ID = ""检验结果表"".TEST_ITEM_ID AND ""结果视图表"".INSPECTION_ID = ""检验结果表"".INSPECTION_ID
+WHERE ""检验标本信息表"".OUTPATIENT_ID IS NOT NULL AND ""检验标本信息表"".PATIENT_TYPE IN ( '2', '3', '4' ) AND ""检验标本信息表"".CHECK_TIME IS NOT NULL
+AND ( ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' ) AND ""检验结果表"".REMARK = '1' AND ""检验结果表"".TEST_ITEM_ID IS NOT NULL AND ""检验标本信息表"".isdeleted = '0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.3.5	LIS	整合性：1、检验科室报告记录与标本记录（标本号）的对照。	标本号	12909714	12909714	1	"SELECT COUNT(*) AS ""门诊检验报告 检验科室报告记录与标本记录(标本号)可对照 总数T1 "" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表""
+INNER JOIN (SELECT INSPECTION_ID AS ""检验ID"",REMARK FROM hid0101_orcl_lis_dbo.lis_inspectiON_result WHERE isdeleted = '0' ) AS ""检验结果信息表"" ON ""检验标本信息表"".INSPECTION_ID = ""检验结果信息表"".""检验ID""
+WHERE ""检验标本信息表"".OUTPATIENT_ID IS NOT NULL AND ""检验标本信息表"".INSPECTION_STATE <> 'inspecting' AND ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4')
+AND ""检验结果信息表"".REMARK = '1' AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".isdeleted = '0'
+
+"	"SELECT COUNT(*) AS ""门诊检验报告 检验科室报告记录与标本记录(标本号)可对照 符合数L1 "" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表""
+INNER JOIN (SELECT INSPECTION_ID AS ""检验ID"",REMARK FROM hid0101_orcl_lis_dbo.lis_inspectiON_result WHERE isdeleted = '0' ) AS ""检验结果信息表"" ON ""检验标本信息表"".INSPECTION_ID = ""检验结果信息表"".""检验ID""
+WHERE ""检验标本信息表"".OUTPATIENT_ID IS NOT NULL AND ""检验标本信息表"".INSPECTION_STATE <> 'inspecting' AND ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4')
+AND ""检验结果信息表"".REMARK = '1' AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".INSPECTION_ID <>'' AND ""检验标本信息表"".isdeleted = '0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.2.5	LIS	整合性：检验申请记录（检验申请单号、检验申请项目编码、标本状态）与检验科室的检验登记记录（检验申请单号、检验申请项目编码、标本状态）可对照	检验申请项目编码	1294024	1294023	1	"SELECT COUNT(*) AS ""检验申请总数T"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表""
+INNER JOIN (SELECT REQUISITION_ID AS ""检验申请单号"" FROM hid0101_orcl_lis_dbo.lis_requisitiON_info) AS ""标签信息表"" ON ""检验标本信息表"".REQUISITION_ID=""标签信息表"".""检验申请单号"" 
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"" .isdeleted = '0'
+
+"	"SELECT COUNT(""标签信息表"".""检验申请项目编码"") AS ""检验申请项目编码L"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表""
+INNER JOIN (SELECT REQUISITION_ID AS ""检验申请单号"" ,TEST_ORDER_NAME AS ""检验申请项目编码"" FROM hid0101_orcl_lis_dbo.lis_requisitiON_info) AS ""标签信息表"" ON ""检验标本信息表"".REQUISITION_ID=""标签信息表"".""检验申请单号"" 
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"" .isdeleted = '0'
+
+
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.2.5	LIS	整合性：检验申请记录（检验申请单号、检验申请项目编码、标本状态）与检验科室的检验登记记录（检验申请单号、检验申请项目编码、标本状态）可对照	检验申请单号	1294024	1294024	1	"SELECT COUNT(*) AS ""检验申请总数T"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表""
+INNER JOIN (SELECT REQUISITION_ID AS ""检验申请单号"" FROM hid0101_orcl_lis_dbo.lis_requisitiON_info) AS ""标签信息表"" ON ""检验标本信息表"".REQUISITION_ID=""标签信息表"".""检验申请单号"" 
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"" .isdeleted = '0'
+
+"	"SELECT COUNT(""标签信息表"".""检验申请单号"") AS ""检验申请单号L"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表""
+INNER JOIN (SELECT REQUISITION_ID AS ""检验申请单号"" FROM hid0101_orcl_lis_dbo.lis_requisitiON_info) AS ""标签信息表"" ON ""检验标本信息表"".REQUISITION_ID=""标签信息表"".""检验申请单号"" 
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"" .isdeleted = '0'
+
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.2.5	LIS	整合性：检验申请记录（检验申请单号、检验申请项目编码、标本状态）与检验科室的检验登记记录（检验申请单号、检验申请项目编码、标本状态）可对照	标本状态	1294024	1294024	1	"SELECT COUNT(*) AS ""检验申请总数T"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表""
+INNER JOIN (SELECT REQUISITION_ID AS ""检验申请单号"" FROM hid0101_orcl_lis_dbo.lis_requisitiON_info) AS ""标签信息表"" ON ""检验标本信息表"".REQUISITION_ID=""标签信息表"".""检验申请单号"" 
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"" .isdeleted = '0'
+
+"	"SELECT COUNT(""标签信息表"".""标本状态"") AS ""标本状态L"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表""
+INNER JOIN (SELECT REQUISITION_ID AS ""检验申请单号"" ,REQUISITION_STATE AS ""标本状态"" FROM hid0101_orcl_lis_dbo.lis_requisitiON_info) AS ""标签信息表"" ON ""检验标本信息表"".REQUISITION_ID=""标签信息表"".""检验申请单号"" 
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"" .isdeleted = '0'
+
+
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.3.6	LIS	及时性：检验报告记录（审核时间）<检验危急值处理记录（医师处理时间）	检验报告记录（审核时间）<检验危急值处理记录（医师处理时间）	15703	14750	0.939	"SELECT COUNT(*) AS ""检验报告总数T"" FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+INNER JOIN (SELECT REQUISITION_ID AS ""检验申请单号"" FROM hid0101_orcl_lis_dbo.lis5_inspection_result_alarm) AS ""检验结果危急值信息表"" ON 
+""检验标本信息表"".REQUISITION_ID=""检验结果危急值信息表"".""检验申请单号"" 
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('1') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"" .isdeleted = '0'
+"	"SELECT COUNT(""检验标本信息表"".CHECK_TIME) as ""检验报告记录（审核时间）<检验危急值处理记录（医师处理时间）N""
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+inner join (select REQUISITION_ID as ""检验申请单号"", feedback_time as ""医生处理时间"", alarm_state as ""危急状态"" from hid0101_orcl_lis_dbo.lis5_inspection_result_alarm) as ""检验结果危急值信息表"" on 
+""检验标本信息表"".REQUISITION_ID=""检验结果危急值信息表"".""检验申请单号"" 
+WHERE ""检验标本信息表"".PATIENT_TYPE in ('1') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' and ""检验标本信息表"".check_time < ""检验结果危急值信息表"".""医生处理时间"" And ""检验标本信息表"" .isdeleted = '0'
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.3.5	LIS	完整性：2、检验危急值记录（项目编码、危急值、通知时间、医师接收时间、处理医师、处理记录）	通知时间	14833	14789	0.997	"SELECT COUNT(*) AS ""检验危急值记录总数T1-T6"" FROM hid0101_orcl_lis_dbo.LIS5_INSPECTIoN_RESULT_ALARM ""检验结果危急值信息表""
+WHERE ""检验结果危急值信息表"".PATIENT_TYPE IN ( '1' ) AND ""检验结果危急值信息表"".ALARM_STATE IN ('2', '3' )
+AND ( ""检验结果危急值信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' ) AND isdeleted = '0'
+"	"SELECT COUNT(*) AS ""检验危急值记录 危急值通知符合数N3"" FROM hid0101_orcl_lis_dbo.LIS5_INSPECTIoN_RESULT_ALARM ""检验结果危急值信息表""
+WHERE ""检验结果危急值信息表"".PATIENT_TYPE IN ( '1' ) AND ""检验结果危急值信息表"".ALARM_STATE IN ( '2', '3' )
+AND ( ""检验结果危急值信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' ) AND ""检验结果危急值信息表"".SEND_TIME IS NOT NULL
+AND TRIM(""检验结果危急值信息表"".SEND_TIME )<> '' AND isdeleted = '0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.3.5	LIS	完整性：2、检验危急值记录（项目编码、危急值、通知时间、医师接收时间、处理医师、处理记录）	处理记录	14833	14821	0.999	"SELECT COUNT(*) AS ""检验危急值记录总数T1-T6"" FROM hid0101_orcl_lis_dbo.LIS5_INSPECTIoN_RESULT_ALARM ""检验结果危急值信息表""
+WHERE ""检验结果危急值信息表"".PATIENT_TYPE IN ( '1' ) AND ""检验结果危急值信息表"".ALARM_STATE IN ('2', '3' )
+AND ( ""检验结果危急值信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' ) AND isdeleted = '0'
+"	"SELECT COUNT(*) AS ""检验危急值记录 处理记录符合数N6"" FROM hid0101_orcl_lis_dbo.LIS5_INSPECTIoN_RESULT_ALARM ""检验结果危急值信息表""
+WHERE ""检验结果危急值信息表"".PATIENT_TYPE IN ( '1' ) AND ""检验结果危急值信息表"".ALARM_STATE IN ( '2', '3' )
+AND ( ""检验结果危急值信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' ) AND ""检验结果危急值信息表"".Feedback_situatiON IS NOT NULL
+AND TRIM(""检验结果危急值信息表"".Feedback_situatiON )<> '' AND isdeleted = '0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.3.5	LIS	完整性：2、检验危急值记录（项目编码、危急值、通知时间、医师接收时间、处理医师、处理记录）	处理医师	14833	14821	0.999	"SELECT COUNT(*) AS ""检验危急值记录总数T1-T6"" FROM hid0101_orcl_lis_dbo.LIS5_INSPECTIoN_RESULT_ALARM ""检验结果危急值信息表""
+WHERE ""检验结果危急值信息表"".PATIENT_TYPE IN ( '1' ) AND ""检验结果危急值信息表"".ALARM_STATE IN ('2', '3' )
+AND ( ""检验结果危急值信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' ) AND isdeleted = '0'
+"	"SELECT COUNT(*) AS ""检验危急值记录 处理医师符合数N5"" FROM hid0101_orcl_lis_dbo.LIS5_INSPECTIoN_RESULT_ALARM ""检验结果危急值信息表""
+WHERE ""检验结果危急值信息表"".PATIENT_TYPE IN ( '1' ) AND ""检验结果危急值信息表"".ALARM_STATE IN ( '2', '3' )
+AND (""检验结果危急值信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' ) AND ""检验结果危急值信息表"".feedback_PERSON IS NOT NULL AND isdeleted = '0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.3.5	LIS	完整性：2、检验危急值记录（项目编码、危急值、通知时间、医师接收时间、处理医师、处理记录）	医师接收时间	14833	14821	0.999	"SELECT COUNT(*) AS ""检验危急值记录总数T1-T6"" FROM hid0101_orcl_lis_dbo.LIS5_INSPECTIoN_RESULT_ALARM ""检验结果危急值信息表""
+WHERE ""检验结果危急值信息表"".PATIENT_TYPE IN ( '1' ) AND ""检验结果危急值信息表"".ALARM_STATE IN ('2', '3' )
+AND ( ""检验结果危急值信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' ) AND isdeleted = '0'
+"	"SELECT COUNT(*) AS ""检验危急值记录 医师接收符合数N4""FROM hid0101_orcl_lis_dbo.LIS5_INSPECTIoN_RESULT_ALARM ""检验结果危急值信息表""
+WHERE ""检验结果危急值信息表"".PATIENT_TYPE IN ( '1' ) AND ""检验结果危急值信息表"".ALARM_STATE IN ( '2', '3' )
+AND ( ""检验结果危急值信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' ) AND ""检验结果危急值信息表"".feedback_time IS NOT NULL
+AND TRIM(""检验结果危急值信息表"".feedback_time )<> '' AND isdeleted = '0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.3.5	LIS	完整性：2、检验危急值记录（项目编码、危急值、通知时间、医师接收时间、处理医师、处理记录）	项目编码	14833	14833	1	"SELECT COUNT(*) AS ""检验危急值记录总数T1-T6"" FROM hid0101_orcl_lis_dbo.LIS5_INSPECTIoN_RESULT_ALARM ""检验结果危急值信息表""
+WHERE ""检验结果危急值信息表"".PATIENT_TYPE IN ( '1' ) AND ""检验结果危急值信息表"".ALARM_STATE IN ('2', '3' )
+AND ( ""检验结果危急值信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' ) AND isdeleted = '0'
+"	"SELECT COUNT(*) AS ""检验危急值记录 项目编码符合数N1"" FROM hid0101_orcl_lis_dbo.LIS5_INSPECTIoN_RESULT_ALARM ""检验结果危急值信息表""
+WHERE ""检验结果危急值信息表"".PATIENT_TYPE IN ( '1' ) AND ""检验结果危急值信息表"".ALARM_STATE IN ( '2', '3' )
+AND ( ""检验结果危急值信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' ) AND ""检验结果危急值信息表"".TEST_ITEM_ID IS NOT NULL
+AND TRIM( ""检验结果危急值信息表"".TEST_ITEM_ID )<> '' AND isdeleted = '0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.3.5	LIS	完整性：2、检验危急值记录（项目编码、危急值、通知时间、医师接收时间、处理医师、处理记录）	危急值	14833	14833	1	"SELECT COUNT(*) AS ""检验危急值记录总数T1-T6"" FROM hid0101_orcl_lis_dbo.LIS5_INSPECTIoN_RESULT_ALARM ""检验结果危急值信息表""
+WHERE ""检验结果危急值信息表"".PATIENT_TYPE IN ( '1' ) AND ""检验结果危急值信息表"".ALARM_STATE IN ('2', '3' )
+AND ( ""检验结果危急值信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' ) AND isdeleted = '0'
+"	"SELECT COUNT(*) AS ""检验危急值记录 危急值结果符合数N2"" FROM hid0101_orcl_lis_dbo.LIS5_INSPECTIoN_RESULT_ALARM ""检验结果危急值信息表""
+WHERE ""检验结果危急值信息表"".PATIENT_TYPE IN ( '1' ) AND ""检验结果危急值信息表"".ALARM_STATE IN ( '2', '3' )
+AND ( ""检验结果危急值信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' ) AND ""检验结果危急值信息表"".QUANTITATIVE_RESULT IS NOT NULL
+AND TRIM(""检验结果危急值信息表"".QUANTITATIVE_RESULT )<> '' AND isdeleted = '0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.1.5	LIS	完整性：标本记录（标本类别、容器类别、患者标识、标本采集时间、采集人）	采集人	2288587	1709909	0.747	"SELECT COUNT(*) AS ""检验标本记录数T1-T5"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表"" 
+WHERE ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".inspectiON_state IN ('audited','sent','finished','reported') AND ""检验标本信息表"".PATIENT_TYPE IN ('1','2','3','4') AND ""检验标本信息表"".isdeleted='0'
+
+"	"SELECT COUNT(*) AS ""检验标本的标本采集人N5"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表"" 
+INNER JOIN (SELECT REQUISITION_ID AS ""检验申请单号"",REQUISITION_state AS ""标本状态"" FROM hid0101_orcl_lis_dbo.lis_requisitiON_info) AS ""标签信息表""  ON ""检验标本信息表"".REQUISITION_ID=""标签信息表"".""检验申请单号""
+WHERE ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".inspectiON_state IN ('audited','sent','finished','reported') AND ""检验标本信息表"".PATIENT_TYPE IN ('1','2','3','4') AND ""检验标本信息表"".sampling_persON IS NOT NULL AND ""检验标本信息表"".isdeleted='0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.1.6	LIS	完整性：标本传送记录（标本标识、标本位置、状态改变时间）	标本位置	2288587	1774129	0.775	"SELECT COUNT(*) AS ""检验标本记录数T1-T3"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表"" 
+WHERE ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".inspectiON_state IN ('audited','sent','finished','reported') AND ""检验标本信息表"".PATIENT_TYPE IN('1','2','3','4') AND ""检验标本信息表"".isdeleted='0'
+
+"	"SELECT COUNT(*) AS ""检验标本位置N2"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表"" 
+INNER JOIN (SELECT REQUISITION_ID AS ""检验申请单号"",REQUISITION_state AS ""标本状态"", positiON2 AS ""标本位置"" FROM hid0101_orcl_lis_dbo.lis_requisitiON_info) AS ""标签信息表""  ON ""检验标本信息表"".REQUISITION_ID=""标签信息表"".""检验申请单号""
+WHERE ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".inspectiON_state IN ('audited','sent','finished','reported') AND ""检验标本信息表"".PATIENT_TYPE IN ('1','2','3','4') AND ""标签信息表"".""标本位置"" IS NOT NULL AND ""检验标本信息表"".isdeleted='0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.2.5	LIS	完整性：3、质控记录（质控时间、项目、结果、靶值）	靶值	202436	188038	0.929	"SELECT COUNT(*) AS ""质控记录条数总数T"" FROM hid0101_orcl_lis_xhlisdb_qc.QC5_RESULT AS ""检验结果表"" ,hid0101_orcl_lis_xhlisdb_qc.QC5_BATCH AS ""质控表"" 
+WHERE ""检验结果表"".BATCH_ID = ""质控表"".BATCH_ID AND ""检验结果表"".DISPOSE_STATE='1' AND ""质控表"".QC_DATE BETWEEN '2024-04-01'AND '2024-06-30' AND ""检验结果表"".Isdeleted = '0'
+"	"SELECT COUNT(*) AS ""靶值条目总数N"" FROM hid0101_orcl_lis_xhlisdb_qc.QC5_RESULT AS ""检验结果表"" ,hid0101_orcl_lis_xhlisdb_qc.QC5_BATCH AS ""质控表""
+WHERE ""检验结果表"".BATCH_ID = ""质控表"".BATCH_ID AND ""检验结果表"".DISPOSE_STATE='1' AND ""检验结果表"".STANDARD_X IS NOT NULL AND ""质控表"".QC_DATE BETWEEN '2024-04-01'AND '2024-06-30' AND ""检验结果表"".Isdeleted = '0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.1.6	LIS	及时性：检验申请记录（申请时间）<标本记录（标本采集时间）	检验申请记录（申请时间）<标本记录（标本采集时间）	2288587	1926162	0.842	"SELECT COUNT(*) AS ""检验申请记录数T1"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表"" 
+WHERE ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".inspectiON_state IN ('audited','sent','finished','reported') AND ""检验标本信息表"".PATIENT_TYPE IN ('1','2','3','4') AND ""检验标本信息表"".isdeleted='0'
+
+"	"SELECT COUNT(*) AS ""检验申请记录数<标本记录S1"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表"" 
+WHERE ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".inspectiON_state IN ('audited','sent','finished','reported') AND ""检验标本信息表"".PATIENT_TYPE IN ('1','2','3','4') AND ""检验标本信息表"".REQUISITION_time<""检验标本信息表"".sampling_time AND ""检验标本信息表"".isdeleted='0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.3.6	LIS	及时性：标本记录（标本采集时间）<检验结果记录（检验时间）＜检验报告记录（报告发布时间）	标本记录（标本采集时间）≤检验结果记录（检验时间）＜检验报告记录（报告发布时间）	2288587	1945331	0.85	"SELECT COUNT(*) AS ""检验记录数T1"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表"" 
+WHERE ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".inspectiON_state IN ('audited','sent','finished','reported') AND ""检验标本信息表"".PATIENT_TYPE IN('1','2','3','4') AND ""检验标本信息表"".isdeleted='0'
+
+"	"SELECT COUNT(*) AS ""标本记录（标本采集时间）<检验结果记录（检验时间）＜检验报告记录（报告发布时间）S1"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.lis_requisitiON_info AS ""标签信息表""  ON ""检验标本信息表"".REQUISITION_ID=""标签信息表"".""REQUISITION_ID""
+WHERE ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".inspectiON_state IN ('audited','sent','finished','reported') AND ""检验标本信息表"".PATIENT_TYPE IN ('1','2','3','4') AND ""检验标本信息表"".isdeleted='0' AND (""检验标本信息表"".sampling_time < ""检验标本信息表"".input_time AND ""检验标本信息表"".input_time <""检验标本信息表"".check_time) 
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.1.5	LIS	完整性：标本记录（标本类别、容器类别、患者标识、标本采集时间、采集人）	标本采集时间	2288587	1964854	0.859	"SELECT COUNT(*) AS ""检验标本记录数T1-T5"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表"" 
+WHERE ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".inspectiON_state IN ('audited','sent','finished','reported') AND ""检验标本信息表"".PATIENT_TYPE IN ('1','2','3','4') AND ""检验标本信息表"".isdeleted='0'
+
+"	"SELECT COUNT(*) AS ""检验标本的标本采集时间N4"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表"" 
+INNER JOIN (SELECT REQUISITION_ID AS ""检验申请单号"",REQUISITION_state AS ""标本状态"" FROM hid0101_orcl_lis_dbo.lis_requisitiON_info)
+AS ""标签信息表""  ON ""检验标本信息表"".REQUISITION_ID=""标签信息表"".""检验申请单号""
+WHERE ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".inspectiON_state IN ('audited','sent','finished','reported') AND ""检验标本信息表"".PATIENT_TYPE IN ('1','2','3','4') AND ""检验标本信息表"".sampling_time IS NOT NULL AND ""检验标本信息表"".isdeleted='0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.2.5	LIS	完整性：3、质控记录（质控时间、项目、结果、靶值）	结果	202436	202415	1	"SELECT COUNT(*) AS ""质控记录条数总数T"" FROM hid0101_orcl_lis_xhlisdb_qc.QC5_RESULT AS ""检验结果表"" ,hid0101_orcl_lis_xhlisdb_qc.QC5_BATCH AS ""质控表"" 
+WHERE ""检验结果表"".BATCH_ID = ""质控表"".BATCH_ID AND ""检验结果表"".DISPOSE_STATE='1' AND ""质控表"".QC_DATE BETWEEN '2024-04-01'AND '2024-06-30' AND ""检验结果表"".Isdeleted = '0'
+"	"SELECT COUNT(*) AS ""质控结果总数N"" FROM hid0101_orcl_lis_xhlisdb_qc.QC5_RESULT AS ""检验结果表"" ,hid0101_orcl_lis_xhlisdb_qc.QC5_BATCH AS ""质控表"" 
+WHERE ""检验结果表"".BATCH_ID = ""质控表"".BATCH_ID AND ""检验结果表"".DISPOSE_STATE='1' AND ""检验结果表"".QC_RESULT IS NOT NULL AND ""质控表"".QC_DATE BETWEEN '2024-04-01'AND '2024-06-30' AND ""检验结果表"".Isdeleted = '0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.2.5	LIS	完整性：3、质控记录（质控时间、项目、结果、靶值）	质控时间	202436	202436	1	"SELECT COUNT(*) AS ""质控记录条数总数T"" FROM hid0101_orcl_lis_xhlisdb_qc.QC5_RESULT AS ""检验结果表"" ,hid0101_orcl_lis_xhlisdb_qc.QC5_BATCH AS ""质控表"" 
+WHERE ""检验结果表"".BATCH_ID = ""质控表"".BATCH_ID AND ""检验结果表"".DISPOSE_STATE='1' AND ""质控表"".QC_DATE BETWEEN '2024-04-01'AND '2024-06-30' AND ""检验结果表"".Isdeleted = '0'
+"	"SELECT COUNT(*) AS ""检验结果表N"" FROM hid0101_orcl_lis_xhlisdb_qc.QC5_RESULT AS ""检验结果表"" ,hid0101_orcl_lis_xhlisdb_qc.QC5_BATCH AS ""质控表"" 
+WHERE ""检验结果表"".BATCH_ID = ""质控表"".BATCH_ID AND ""检验结果表"".DISPOSE_STATE='1' AND ""质控表"".QC_TIME IS NOT NULL AND ""质控表"".QC_DATE BETWEEN '2024-04-01'AND '2024-06-30' AND ""检验结果表"".Isdeleted = '0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.2.5	LIS	完整性：3、质控记录（质控时间、项目、结果、靶值）	项目	202436	202436	1	"SELECT COUNT(*) AS ""质控记录条数总数T"" FROM hid0101_orcl_lis_xhlisdb_qc.QC5_RESULT AS ""检验结果表"" ,hid0101_orcl_lis_xhlisdb_qc.QC5_BATCH AS ""质控表"" 
+WHERE ""检验结果表"".BATCH_ID = ""质控表"".BATCH_ID AND ""检验结果表"".DISPOSE_STATE='1' AND ""质控表"".QC_DATE BETWEEN '2024-04-01'AND '2024-06-30' AND ""检验结果表"".Isdeleted = '0'
+"	"SELECT COUNT(*) AS ""质控项目条目数N"" FROM hid0101_orcl_lis_xhlisdb_qc.QC5_RESULT AS ""检验结果表"" ,hid0101_orcl_lis_xhlisdb_qc.QC5_BATCH AS ""质控表"" 
+WHERE ""检验结果表"".BATCH_ID = ""质控表"".BATCH_ID AND ""检验结果表"".DISPOSE_STATE='1' AND ""质控表"".ITEM_ID IS NOT NULL AND ""质控表"".QC_DATE BETWEEN '2024-04-01'AND '2024-06-30' AND ""检验结果表"".Isdeleted = '0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.1.3	LIS	一致性：检验标本记录（标本编码、标本名称）	标本名称	2288587	2240540	0.979	"SELECT COUNT(*) AS ""检验标本记录数T1-T3"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表"" 
+WHERE ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".inspectiON_state IN ('audited','sent','finished','reported') AND ""检验标本信息表"".PATIENT_TYPE IN('1','2','3','4') AND ""检验标本信息表"".isdeleted='0'"	"SELECT COUNT(*) AS ""检验标本的标本数C2"" FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表"" 
+INNER JOIN (SELECT REQUISITION_ID AS ""检验申请单号"", sample_class_name FROM hid0101_orcl_lis_dbo.lis_requisition_info) AS ""标签信息表""  ON ""检验标本信息表"".REQUISITION_ID=""标签信息表"".""检验申请单号""
+WHERE ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".inspection_state IN ('audited','sent','finished','reported') AND ""检验标本信息表"".PATIENT_TYPE IN ('1','2','3','4') AND ""检验标本信息表"".sample_class_name =""标签信息表"".sample_class_name AND ""检验标本信息表"".isdeleted ='0'
+
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.1.5	LIS	完整性：标本记录（标本类别、容器类别、患者标识、标本采集时间、采集人）	容器类别	2288587	2252379	0.984	"SELECT COUNT(*) AS ""检验标本记录数T1-T5"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表"" 
+WHERE ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".inspectiON_state IN ('audited','sent','finished','reported') AND ""检验标本信息表"".PATIENT_TYPE IN ('1','2','3','4') AND ""检验标本信息表"".isdeleted='0'
+
+"	"SELECT COUNT(*) AS ""检验标本的容器类别数N2"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表""
+LEFT JOIN (SELECT REQUISITION_ID AS ""检验申请单号"",REQUISITION_state AS ""标本状态"",unite_flag AS ""容器类别"" FROM hid0101_orcl_lis_dbo.lis_requisitiON_info) AS ""标签信息表""  ON ""检验标本信息表"".REQUISITION_ID=""标签信息表"".""检验申请单号""
+WHERE ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".inspectiON_state IN ('audited','sent','finished','reported') AND ""检验标本信息表"".PATIENT_TYPE IN ('1','2','3','4') AND ""标签信息表"".""容器类别"" IS NOT NULL AND ""检验标本信息表"".isdeleted='0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.2.5	LIS	完整性：1、检验结果记录（患者标识、正常参考值）	正常参考值	23576087	22568462	0.957	"SELECT COUNT(*) AS ""检验结果项目名称总数T"" FROM (SELECT INSPECTION_ID AS ""标本标识"",OUTPATIENT_ID AS ""患者就诊ID"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"",INSPECTION_DATE AS ""检查日期"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample WHERE isdeleted = '0') ""检验项目表"", (SELECT INSPECTION_ID AS ""标本标识"",REMARK AS ""有效标记"",chinese_name AS ""检验结果项目名称"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0')""检验结果表""
+WHERE ""检验项目表"".""标本标识"" = ""检验结果表"".""标本标识"" AND ""检验项目表"".""检查状态"" IN ('audited','sent','finished','reported') AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') AND ""检验结果表"".""有效标记""='1' AND ""检验项目表"".""检查日期"" BETWEEN '20240401' AND '20240630'
+"	"SELECT COUNT(""检验结果表"".""正常参考值"") AS ""正常参考值总数N"" FROM (SELECT INSPECTION_ID AS ""标本标识"",patient_type AS ""患者标识"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"",INSPECTION_DATE AS ""检查日期"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample WHERE isdeleted = '0') ""检验项目表"",
+(SELECT INSPECTION_ID AS ""标本标识"",REMARK AS ""有效标记"",test_item_reference AS ""正常参考值"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0')""检验结果表""
+WHERE ""检验项目表"".""标本标识"" = ""检验结果表"".""标本标识"" AND ""检验结果表"".""正常参考值"" IS NOT NULL AND ""检验项目表"".""检查状态"" IN ('audited','sent','finished','reported') AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') AND ""检验结果表"".""有效标记""='1' AND ""检验项目表"".""检查日期"" BETWEEN '20240401' AND '20240630'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.1.3	LIS	一致性：检验标本记录（标本编码、标本名称）	标本编码	2288587	2260560	0.988	"SELECT COUNT(*) AS ""检验标本记录数T1-T3"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表"" 
+WHERE ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".inspectiON_state IN ('audited','sent','finished','reported') AND ""检验标本信息表"".PATIENT_TYPE IN('1','2','3','4') AND ""检验标本信息表"".isdeleted='0'"	"SELECT COUNT(*) AS ""检验标本的标本编码数C1"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表"" 
+INNER JOIN (SELECT REQUISITION_ID AS ""检验申请单号"",sample_class FROM hid0101_orcl_lis_dbo.lis_requisitiON_info) AS ""标签信息表""  ON ""检验标本信息表"".REQUISITION_ID=""标签信息表"".""检验申请单号""
+WHERE ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".inspectiON_state IN ('audited','sent','finished','reported') AND ""检验标本信息表"".PATIENT_TYPE IN ('1','2','3','4') 
+AND ""检验标本信息表"".sample_class =""标签信息表"".sample_class 
+AND ""检验标本信息表"".isdeleted ='0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.2.3	LIS	一致性：检验结果记录（检验报告项目、正常参考值）	正常参考值	23626837	22610300	0.957	"SELECT COUNT(*) AS ""检验结果总数T"" FROM (SELECT INSPECTION_ID AS ""标本标识"",OUTPATIENT_ID AS ""患者就诊ID"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"",INSPECTION_DATE AS ""检查日期"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample WHERE isdeleted = '0') ""检验项目表"",
+(SELECT INSPECTION_ID AS ""标本标识"",chinese_name AS ""项目名称"",REMARK AS ""有效标记"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0')""检验结果表""
+WHERE ""检验项目表"".""标本标识"" = ""检验结果表"".""标本标识"" AND ""检验结果表"".""项目名称"" IS NOT NULL AND ""检验项目表"".""检查状态"" <> 'inspecting' AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') AND ""检验结果表"".""有效标记""='1' AND ""检验项目表"".""检查日期"" BETWEEN '20240401' AND '20240630'
+"	"SELECT COUNT( ""检验结果表"".""参考值"") AS ""参考值总数N"" FROM (SELECT INSPECTION_ID AS ""标本标识"",OUTPATIENT_ID AS ""患者就诊ID"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"",INSPECTION_DATE AS ""检查日期"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample WHERE isdeleted = '0') ""检验项目表"",
+(SELECT Test_item_reference AS ""参考值"",INSPECTION_ID AS ""标本标识"",REMARK AS ""有效标记"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0')""检验结果表""
+WHERE ""检验项目表"".""标本标识"" = ""检验结果表"".""标本标识"" AND ""检验结果表"".""参考值"" IS NOT NULL AND ""检验项目表"".""检查状态"" <> 'inspecting' AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') AND ""检验结果表"".""有效标记""='1' AND ""检验项目表"".""检查日期"" BETWEEN '20240401' AND '20240630'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.1.5	LIS	完整性：标本记录（标本类别、容器类别、患者标识、标本采集时间、采集人）	标本类别	2288587	2263611	0.989	"SELECT COUNT(*) AS ""检验标本记录数T1-T5"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表"" 
+WHERE ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".inspectiON_state IN ('audited','sent','finished','reported') AND ""检验标本信息表"".PATIENT_TYPE IN ('1','2','3','4') AND ""检验标本信息表"".isdeleted='0'
+
+"	"SELECT COUNT(*) AS ""检验标本的标本类别数N1"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表"" 
+LEFT JOIN (SELECT REQUISITION_ID AS ""检验申请单号"",REQUISITION_state AS ""标本状态"" FROM hid0101_orcl_lis_dbo.lis_requisitiON_info) AS ""标签信息表""  ON ""检验标本信息表"".REQUISITION_ID=""标签信息表"".""检验申请单号""
+WHERE ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".inspectiON_state IN ('audited','sent','finished','reported') AND ""检验标本信息表"".PATIENT_TYPE IN ('1','2','3','4') AND ""检验标本信息表"".sample_clASs IS NOT NULL AND ""检验标本信息表"".isdeleted='0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.1.6	LIS	完整性：标本传送记录（标本标识、标本位置、状态改变时间）	标本标识	2288587	2277388	0.995	"SELECT COUNT(*) AS ""检验标本记录数T1-T3"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表"" 
+WHERE ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".inspectiON_state IN ('audited','sent','finished','reported') AND ""检验标本信息表"".PATIENT_TYPE IN('1','2','3','4') AND ""检验标本信息表"".isdeleted='0'
+
+"	"SELECT COUNT(""检验标本信息表"".inpatient_id)AS ""检验标本记录患者标识N1"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表"" 
+INNER JOIN (SELECT REQUISITION_ID AS ""检验申请单号"" FROM hid0101_orcl_lis_dbo.lis_requisitiON_info) AS ""标签信息表""  ON ""检验标本信息表"".REQUISITION_ID=""标签信息表"".""检验申请单号""
+WHERE ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".inspectiON_state IN ('audited','sent','finished','reported') AND ""检验标本信息表"".PATIENT_TYPE IN('1','2','3','4') AND ""检验标本信息表"".inpatient_id IS NOT NULL AND ""检验标本信息表"".isdeleted='0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.1.4	LIS	完整性：标本记录（标本标识、标本编码、标本状态）	标本标识	2288587	2277388	0.995	"SELECT COUNT(*) AS ""检验标本记录数T1-T3"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表"" 
+WHERE ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".inspectiON_state IN ('audited','sent','finished','reported') AND ""检验标本信息表"".PATIENT_TYPE IN('1','2','3','4') AND ""检验标本信息表"".isdeleted='0'
+
+"	"SELECT COUNT(""检验标本信息表"".inpatient_id)AS ""检验标本标识数N1"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表"" 
+INNER JOIN (SELECT REQUISITION_ID AS ""检验申请单号"" FROM hid0101_orcl_lis_dbo.lis_requisitiON_info) AS ""标签信息表""  ON ""检验标本信息表"".REQUISITION_ID=""标签信息表"".""检验申请单号""
+WHERE ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".inspectiON_state IN ('audited','sent','finished','reported') AND ""检验标本信息表"".PATIENT_TYPE IN ('1','2','3','4') AND ""检验标本信息表"".inpatient_id IS NOT NULL AND ""检验标本信息表"".isdeleted='0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.1.4	LIS	完整性：标本记录（标本标识、标本编码、标本状态）	标本编码	2288587	2282369	0.997	"SELECT COUNT(*) AS ""检验标本记录数T1-T3"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表"" 
+WHERE ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".inspectiON_state IN ('audited','sent','finished','reported') AND ""检验标本信息表"".PATIENT_TYPE IN('1','2','3','4') AND ""检验标本信息表"".isdeleted='0'
+
+"	"SELECT COUNT(*) AS ""检验标本编码数N2"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表"" 
+INNER JOIN (SELECT REQUISITION_ID AS ""检验申请单号"" FROM hid0101_orcl_lis_dbo.lis_requisitiON_info) AS ""标签信息表""  ON ""检验标本信息表"".REQUISITION_ID=""标签信息表"".""检验申请单号""
+WHERE ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".inspectiON_state IN ('audited','sent','finished','reported') AND ""检验标本信息表"".PATIENT_TYPE IN ('1','2','3','4') AND ""检验标本信息表"".sample_number IS NOT NULL AND ""检验标本信息表"".isdeleted='0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.1.6	LIS	完整性：标本传送记录（标本标识、标本位置、状态改变时间）	状态改变时间	2288587	2282369	0.997	"SELECT COUNT(*) AS ""检验标本记录数T1-T3"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表"" 
+WHERE ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".inspectiON_state IN ('audited','sent','finished','reported') AND ""检验标本信息表"".PATIENT_TYPE IN('1','2','3','4') AND ""检验标本信息表"".isdeleted='0'
+
+"	"SELECT COUNT(*) AS ""检验标本状态改变时间N3"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表"" 
+INNER JOIN (SELECT REQUISITION_ID AS ""检验申请单号"",REQUISITION_state AS ""标本状态""FROM hid0101_orcl_lis_dbo.lis_requisitiON_info) AS ""标签信息表""  ON ""检验标本信息表"".REQUISITION_ID=""标签信息表"".""检验申请单号""
+WHERE ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".inspectiON_state IN ('audited','sent','finished','reported') AND ""检验标本信息表"".PATIENT_TYPE IN ('1','2','3','4') AND ""检验标本信息表"".input_time IS NOT NULL AND ""检验标本信息表"".isdeleted='0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.1.4	LIS	完整性：标本记录（标本标识、标本编码、标本状态）	标本状态	2288587	2282369	0.997	"SELECT COUNT(*) AS ""检验标本记录数T1-T3"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表"" 
+WHERE ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".inspectiON_state IN ('audited','sent','finished','reported') AND ""检验标本信息表"".PATIENT_TYPE IN('1','2','3','4') AND ""检验标本信息表"".isdeleted='0'
+
+"	"SELECT COUNT(*) AS ""检验标本状态N3"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表"" 
+INNER JOIN (SELECT REQUISITION_ID AS ""检验申请单号"",REQUISITION_state AS ""标本状态"" FROM hid0101_orcl_lis_dbo.lis_requisitiON_info) AS ""标签信息表""  ON ""检验标本信息表"".REQUISITION_ID=""标签信息表"".""检验申请单号""
+WHERE ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".inspectiON_state IN ('audited','sent','finished','reported') AND ""检验标本信息表"".PATIENT_TYPE IN ('1','2','3','4') AND ""检验标本信息表"".inspectiON_state IS NOT NULL AND ""检验标本信息表"".isdeleted='0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.1.5	LIS	整合性：标本记录与检验申请记录（检验申请单号）可对照	检验申请单号	2288587	2282369	0.997	"SELECT COUNT(*) AS ""检验标本记录数T1"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表"" 
+WHERE ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".inspectiON_state IN ('audited','sent','finished','reported') AND ""检验标本信息表"".PATIENT_TYPE IN ('1','2','3','4') AND ""检验标本信息表"".isdeleted='0'
+
+"	"SELECT COUNT(*) AS ""检验申请总数"" FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表"" 
+INNER JOIN (SELECT REQUISITION_ID AS ""检验申请单号"",REQUISITION_state AS ""标本状态""  FROM hid0101_orcl_lis_dbo.lis_requisition_info) AS ""标签信息表""  ON ""检验标本信息表"".REQUISITION_ID=""标签信息表"".""检验申请单号""
+WHERE ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".inspection_state IN ('audited','sent','finished','reported') AND ""检验标本信息表"".PATIENT_TYPE IN ('1','2','3','4') AND ""检验标本信息表"".isdeleted='0' AND ""检验标本信息表"".REQUISITION_ID= ""标签信息表"".""检验申请单号""
+
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.1.5	LIS	完整性：标本记录（标本类别、容器类别、患者标识、标本采集时间、采集人）	患者标识	2288587	2283590	0.998	"SELECT COUNT(*) AS ""检验标本记录数T1-T5"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表"" 
+WHERE ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".inspectiON_state IN ('audited','sent','finished','reported') AND ""检验标本信息表"".PATIENT_TYPE IN ('1','2','3','4') AND ""检验标本信息表"".isdeleted='0'
+
+"	"SELECT COUNT(*) AS ""检验标本的患者数N3"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表"" 
+LEFT JOIN (SELECT REQUISITION_ID AS ""检验申请单号"",REQUISITION_state AS ""标本状态"" FROM hid0101_orcl_lis_dbo.lis_requisitiON_info) AS ""标签信息表""  ON ""检验标本信息表"".REQUISITION_ID=""标签信息表"".""检验申请单号""
+WHERE ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".inspectiON_state IN ('audited','sent','finished','reported') AND ""检验标本信息表"".PATIENT_TYPE IN ('1','2','3','4') AND ""检验标本信息表"".inpatient_id IS NOT NULL AND ""检验标本信息表"".isdeleted='0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.2.5	LIS	整合性：1、检验结果记录与检验申请记录（患者标识、检验单号）可对照	患者标识	2312697	2307719	0.998	"SELECT COUNT(*) AS ""记录总数T"" FROM (SELECT _hoodie_record_key AS ""数据唯一标识"", REQUISITION_ID AS ""申请单号"", INSPECTION_ID AS ""标本标识"",patient_type AS ""患者标识"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"",INSPECTION_DATE AS ""检查日期"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample) ""检验项目表"",
+(SELECT REQUISITION_ID AS ""申请单号"" FROM hid0101_orcl_lis_dbo.LIS_REQUISITION_INFO)""检验申请信息表""
+WHERE ""检验项目表"".""申请单号"" = ""检验申请信息表"".""申请单号"" AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') AND ""检验项目表"".""检查日期"" BETWEEN '20240401' AND '20240630'
+"	"SELECT COUNT(*) AS ""患者标识总数"" FROM (SELECT _hoodie_record_key AS ""数据唯一标识"", REQUISITION_ID AS ""申请单号"", INSPECTION_ID AS ""标本标识"",OUTPATIENT_ID AS ""患者标识"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"", PATIENT_TYPE AS ""检验结果记录数据表患者标识"", inspection_date ""检查日期"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample) ""检验项目表"",
+(SELECT OUTPATIENT_ID AS ""患者标识"",REQUISITION_ID AS ""申请单号"" FROM hid0101_orcl_lis_dbo.LIS_REQUISITION_INFO)""检验申请信息表"" 
+WHERE ""检验项目表"".""申请单号"" = ""检验申请信息表"".""申请单号"" AND ""检验项目表"".""患者标识"" = ""检验申请信息表"".""患者标识"" AND ""检验项目表"".""患者标识"" IS NOT NULL AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') AND ""检验项目表"".""检查日期"" BETWEEN '20240401' AND '20240630'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.2.5	LIS	整合性：1、检验结果记录与检验申请记录（患者标识、检验单号）可对照	检验单号	2312697	2312594	1	"SELECT COUNT(*) AS ""记录总数T"" FROM (SELECT _hoodie_record_key AS ""数据唯一标识"", REQUISITION_ID AS ""申请单号"", INSPECTION_ID AS ""标本标识"",patient_type AS ""患者标识"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"",INSPECTION_DATE AS ""检查日期"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample) ""检验项目表"",
+(SELECT REQUISITION_ID AS ""申请单号"" FROM hid0101_orcl_lis_dbo.LIS_REQUISITION_INFO)""检验申请信息表""
+WHERE ""检验项目表"".""申请单号"" = ""检验申请信息表"".""申请单号"" AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') AND ""检验项目表"".""检查日期"" BETWEEN '20240401' AND '20240630'
+"	"SELECT COUNT(*) AS ""检验单号记录总数N"" FROM (SELECT _hoodie_record_key AS ""数据唯一标识"", REQUISITION_ID AS ""申请单号"", INSPECTION_ID AS ""标本标识"",patient_type AS ""患者标识"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"",INSPECTION_DATE AS ""检查日期"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample WHERE isdeleted = '0') ""检验项目表"",
+(SELECT REQUISITION_ID AS ""申请单号"" FROM hid0101_orcl_lis_dbo.LIS_REQUISITION_INFO WHERE isdeleted = '0')""检验申请信息表""
+WHERE ""检验项目表"".""申请单号"" = ""检验申请信息表"".""申请单号"" AND ""检验项目表"".""患者标识"" IS NOT NULL AND ""检验申请信息表"".""申请单号"" IS NOT NULL AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') AND ""检验项目表"".""检查日期"" BETWEEN '20240401' AND '20240630'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.3.4	LIS	完整性：检验报告记录（检验申请单号、患者标识、检验报告项目、检验结果、报告时间、报告科室）	检验结果	23576087	23418398	0.993	"SELECT COUNT(*) AS ""检验项目总数"" FROM (SELECT INSPECTION_ID AS ""标本标识"",OUTPATIENT_ID AS ""患者就诊ID"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"",INSPECTION_DATE AS ""检查日期"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample WHERE isdeleted = '0') ""检验项目表"",
+(SELECT INSPECTION_ID AS ""标本标识"",REMARK AS ""有效标记"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0')""检验结果表""
+WHERE ""检验项目表"".""标本标识"" = ""检验结果表"".""标本标识"" AND ""检验项目表"".""检查状态"" IN ('audited','sent','finished','reported') AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') AND ""检验结果表"".""有效标记""='1' AND ""检验项目表"".""检查日期"" BETWEEN '20240401' AND '20240630'"	"SELECT COUNT(""检验结果表"".""项目结果"") AS ""检验项目总数"" FROM (SELECT INSPECTION_ID AS ""标本标识"",OUTPATIENT_ID AS ""患者就诊ID"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"",INSPECTION_DATE AS ""检查日期"",requisitiON_id AS ""申请ID"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample WHERE isdeleted = '0') ""检验项目表"",
+(SELECT INSPECTION_ID AS ""标本标识"",QUANTITATIVE_RESULT AS ""项目结果"",REMARK AS ""有效标记"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0')""检验结果表""
+WHERE ""检验项目表"".""标本标识"" = ""检验结果表"".""标本标识"" AND ""检验项目表"".""患者就诊ID"" IS NOT NULL AND ""检验结果表"".""项目结果"" IS NOT NULL AND ""检验项目表"".""检查状态"" IN ('audited','sent','finished','reported') AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') AND ""检验结果表"".""有效标记""='1' AND ""检验项目表"".""检查日期"" BETWEEN '20240401' AND '20240630' 
+
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.2.4	LIS	完整性：检验结果记录（检验申请单号、检验时间、检验项目、项目结果）	项目结果	23576087	23426284	0.994	"SELECT COUNT(*) AS ""检验结果总数T"" FROM (SELECT INSPECTION_ID AS ""标本标识"",OUTPATIENT_ID AS ""患者就诊ID"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"",INSPECTION_DATE AS ""检查日期"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample WHERE isdeleted = '0') ""检验项目表"",
+(SELECT INSPECTION_ID AS ""标本标识"",REMARK AS ""有效标记"",chinese_name AS ""检验结果项目名称"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0')""检验结果表""
+WHERE ""检验项目表"".""标本标识"" = ""检验结果表"".""标本标识"" AND ""检验项目表"".""检查状态"" IN ('audited','sent','finished','reported') AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') AND ""检验结果表"".""有效标记""='1' AND ""检验项目表"".""检查日期"" BETWEEN '20240401' AND '20240630'
+
+"	"SELECT COUNT(""检验结果表"".""项目结果"") AS ""检验结果项目结果总数N"" FROM (SELECT INSPECTION_ID AS ""标本标识"", REQUISITION_ID AS ""检验申请单号"", test_order_name AS ""项目名称"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"",INSPECTION_DATE AS ""检查日期"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample WHERE isdeleted = '0') ""检验项目表"",
+(SELECT INSPECTION_ID AS ""标本标识"",REMARK AS ""有效标记"",chinese_name AS ""检验结果项目名称"", QUANTITATIVE_RESULT AS ""项目结果"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0')""检验结果表""
+WHERE ""检验项目表"".""标本标识"" = ""检验结果表"".""标本标识"" AND ""检验结果表"".""项目结果"" IS NOT NULL AND ""检验项目表"".""检查状态"" IN ('audited','sent','finished','reported') AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') AND ""检验结果表"".""有效标记""='1' AND ""检验项目表"".""检查日期"" BETWEEN '20240401' AND '20240630'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.3.4	LIS	完整性：检验报告记录（检验申请单号、患者标识、检验报告项目、检验结果、报告时间、报告科室）	检验报告项目	23576087	23568108	1	"SELECT COUNT(*) AS ""检验项目总数"" FROM (SELECT INSPECTION_ID AS ""标本标识"",OUTPATIENT_ID AS ""患者就诊ID"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"",INSPECTION_DATE AS ""检查日期"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample WHERE isdeleted = '0') ""检验项目表"",
+(SELECT INSPECTION_ID AS ""标本标识"",REMARK AS ""有效标记"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0')""检验结果表""
+WHERE ""检验项目表"".""标本标识"" = ""检验结果表"".""标本标识"" AND ""检验项目表"".""检查状态"" IN ('audited','sent','finished','reported') AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') AND ""检验结果表"".""有效标记""='1' AND ""检验项目表"".""检查日期"" BETWEEN '20240401' AND '20240630'"	"SELECT COUNT(""检验结果表"".""检验项目报告"") AS ""检验报告项目"" FROM (SELECT INSPECTION_ID AS ""标本标识"",OUTPATIENT_ID AS ""患者就诊ID"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"",INSPECTION_DATE AS ""检查日期"",requisitiON_id AS ""申请ID"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample WHERE isdeleted = '0') ""检验项目表"", (SELECT INSPECTION_ID AS ""标本标识"",CHINESE_NAME AS ""检验项目报告"",REMARK AS ""有效标记"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0')""检验结果表""
+WHERE ""检验项目表"".""标本标识"" = ""检验结果表"".""标本标识"" AND ""检验项目表"".""患者就诊ID"" IS NOT NULL AND ""检验结果表"".""检验项目报告"" IS NOT NULL AND ""检验项目表"".""检查状态"" IN ('audited','sent','finished','reported') AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') AND ""检验结果表"".""有效标记""='1' AND ""检验项目表"".""检查日期"" BETWEEN '20240401' AND '20240630' 
+
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.2.5	LIS	完整性：1、检验结果记录（患者标识、正常参考值）	患者标识	23576087	23568111	1	"SELECT COUNT(*) AS ""检验结果项目名称总数T"" FROM (SELECT INSPECTION_ID AS ""标本标识"",OUTPATIENT_ID AS ""患者就诊ID"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"",INSPECTION_DATE AS ""检查日期"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample WHERE isdeleted = '0') ""检验项目表"", (SELECT INSPECTION_ID AS ""标本标识"",REMARK AS ""有效标记"",chinese_name AS ""检验结果项目名称"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0')""检验结果表""
+WHERE ""检验项目表"".""标本标识"" = ""检验结果表"".""标本标识"" AND ""检验项目表"".""检查状态"" IN ('audited','sent','finished','reported') AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') AND ""检验结果表"".""有效标记""='1' AND ""检验项目表"".""检查日期"" BETWEEN '20240401' AND '20240630'
+"	"SELECT COUNT(""检验项目表"".""患者标识"") AS ""患者标识总数N"" FROM (SELECT INSPECTION_ID AS ""标本标识"",outpatient_ID AS ""患者标识"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"",INSPECTION_DATE AS ""检查日期"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample WHERE isdeleted = '0') ""检验项目表"",
+(SELECT INSPECTION_ID AS ""标本标识"",REMARK AS ""有效标记"",chinese_name AS ""检验结果项目名称"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0')""检验结果表""
+WHERE ""检验项目表"".""标本标识"" = ""检验结果表"".""标本标识"" AND ""检验项目表"".""患者标识"" IS NOT NULL AND ""检验项目表"".""检查状态"" IN ('audited','sent','finished','reported') AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') AND ""检验结果表"".""有效标记""='1' AND ""检验项目表"".""检查日期"" BETWEEN '20240401' AND '20240630'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.3.4	LIS	完整性：检验报告记录（检验申请单号、患者标识、检验报告项目、检验结果、报告时间、报告科室）	患者标识	23576087	23568111	1	"SELECT COUNT(*) AS ""检验项目总数"" FROM (SELECT INSPECTION_ID AS ""标本标识"",OUTPATIENT_ID AS ""患者就诊ID"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"",INSPECTION_DATE AS ""检查日期"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample WHERE isdeleted = '0') ""检验项目表"",
+(SELECT INSPECTION_ID AS ""标本标识"",REMARK AS ""有效标记"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0')""检验结果表""
+WHERE ""检验项目表"".""标本标识"" = ""检验结果表"".""标本标识"" AND ""检验项目表"".""检查状态"" IN ('audited','sent','finished','reported') AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') AND ""检验结果表"".""有效标记""='1' AND ""检验项目表"".""检查日期"" BETWEEN '20240401' AND '20240630'"	"SELECT COUNT(""检验项目表"".""患者就诊ID"") AS ""患者标识总数N"" FROM (SELECT INSPECTION_ID AS ""标本标识"",OUTPATIENT_ID AS ""患者就诊ID"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"",INSPECTION_DATE AS ""检查日期"",requisitiON_id AS ""申请ID"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample WHERE isdeleted = '0') ""检验项目表"", 
+(SELECT INSPECTION_ID AS ""标本标识"",REMARK AS ""有效标记"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0')""检验结果表"" 
+WHERE ""检验项目表"".""标本标识"" = ""检验结果表"".""标本标识"" AND ""检验项目表"".""患者就诊ID"" IS NOT NULL AND ""检验项目表"".""检查状态"" IN ('audited','sent','finished','reported') AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') AND ""检验结果表"".""有效标记""='1' AND ""检验项目表"".""检查日期"" BETWEEN '20240401' AND '20240630'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.3.4	LIS	完整性：检验报告记录（检验申请单号、患者标识、检验报告项目、检验结果、报告时间、报告科室）	报告科室	23576087	23568111	1	"SELECT COUNT(*) AS ""检验项目总数"" FROM (SELECT INSPECTION_ID AS ""标本标识"",OUTPATIENT_ID AS ""患者就诊ID"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"",INSPECTION_DATE AS ""检查日期"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample WHERE isdeleted = '0') ""检验项目表"",
+(SELECT INSPECTION_ID AS ""标本标识"",REMARK AS ""有效标记"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0')""检验结果表""
+WHERE ""检验项目表"".""标本标识"" = ""检验结果表"".""标本标识"" AND ""检验项目表"".""检查状态"" IN ('audited','sent','finished','reported') AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') AND ""检验结果表"".""有效标记""='1' AND ""检验项目表"".""检查日期"" BETWEEN '20240401' AND '20240630'"	"SELECT COUNT(""检验结果表"".""报告科室"") AS ""报告科室总数"" FROM (SELECT INSPECTION_ID AS ""标本标识"",group_id ""报告科室"",OUTPATIENT_ID AS ""患者就诊ID"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"",INSPECTION_DATE AS ""检查日期"",requisitiON_id AS ""申请ID"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample WHERE isdeleted = '0') ""检验项目表"", (SELECT group_id ""报告科室"",INSPECTION_ID AS ""标本标识"",REMARK AS ""有效标记"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0')""检验结果表""
+WHERE ""检验项目表"".""标本标识"" = ""检验结果表"".""标本标识"" AND ""检验项目表"".""患者就诊ID"" IS NOT NULL AND ""检验项目表"".""检查状态"" IN ('audited','sent','finished','reported') AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') AND ""检验结果表"".""有效标记""='1' AND ""检验项目表"".""检查日期"" BETWEEN '20240401' AND '20240630'
+
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.3.4	LIS	完整性：检验报告记录（检验申请单号、患者标识、检验报告项目、检验结果、报告时间、报告科室）	检验申请单号	23576087	23576031	1	"SELECT COUNT(*) AS ""检验项目总数"" FROM (SELECT INSPECTION_ID AS ""标本标识"",OUTPATIENT_ID AS ""患者就诊ID"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"",INSPECTION_DATE AS ""检查日期"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample WHERE isdeleted = '0') ""检验项目表"",
+(SELECT INSPECTION_ID AS ""标本标识"",REMARK AS ""有效标记"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0')""检验结果表""
+WHERE ""检验项目表"".""标本标识"" = ""检验结果表"".""标本标识"" AND ""检验项目表"".""检查状态"" IN ('audited','sent','finished','reported') AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') AND ""检验结果表"".""有效标记""='1' AND ""检验项目表"".""检查日期"" BETWEEN '20240401' AND '20240630'"	"SELECT COUNT(""检验项目表"".""申请ID"") AS ""检验项目总数N"" FROM (SELECT INSPECTION_ID AS ""标本标识"",OUTPATIENT_ID AS ""患者就诊ID"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"",INSPECTION_DATE AS ""检查日期"",requisitiON_id AS ""申请ID"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample WHERE isdeleted = '0') ""检验项目表"",
+(SELECT INSPECTION_ID AS ""标本标识"",REMARK AS ""有效标记"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0')""检验结果表""
+WHERE ""检验项目表"".""标本标识"" = ""检验结果表"".""标本标识"" AND ""检验项目表"".""检查状态"" IN ('audited','sent','finished','reported') AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') AND ""检验结果表"".""有效标记""='1' AND ""检验项目表"".""申请ID"" IS NOT NULL AND ""检验项目表"".""检查日期"" BETWEEN '20240401' AND '20240630'
+
+
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.2.4	LIS	完整性：检验结果记录（检验申请单号、检验时间、检验项目、项目结果）	检验申请单号	23576087	23576031	1	"SELECT COUNT(*) AS ""检验结果总数T"" FROM (SELECT INSPECTION_ID AS ""标本标识"",OUTPATIENT_ID AS ""患者就诊ID"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"",INSPECTION_DATE AS ""检查日期"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample WHERE isdeleted = '0') ""检验项目表"",
+(SELECT INSPECTION_ID AS ""标本标识"",REMARK AS ""有效标记"",chinese_name AS ""检验结果项目名称"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0')""检验结果表""
+WHERE ""检验项目表"".""标本标识"" = ""检验结果表"".""标本标识"" AND ""检验项目表"".""检查状态"" IN ('audited','sent','finished','reported') AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') AND ""检验结果表"".""有效标记""='1' AND ""检验项目表"".""检查日期"" BETWEEN '20240401' AND '20240630'
+
+"	"SELECT COUNT(""检验项目表"".""检验申请单号"") AS ""检验项目中检验申请单号总数T"" FROM (SELECT REQUISITION_ID AS ""检验申请单号"",INSPECTION_ID AS ""标本标识"",OUTPATIENT_ID AS ""患者就诊ID"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"",INSPECTION_DATE AS ""检查日期"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample WHERE isdeleted = '0') ""检验项目表"",
+(SELECT INSPECTION_ID AS ""标本标识"",REMARK AS ""有效标记"",chinese_name AS ""检验结果项目名称"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0')""检验结果表""
+WHERE ""检验项目表"".""标本标识"" = ""检验结果表"".""标本标识"" AND ""检验项目表"".""检验申请单号"" IS NOT NULL AND ""检验项目表"".""检查状态"" IN ('audited','sent','finished','reported') AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') AND ""检验结果表"".""有效标记""='1' AND ""检验项目表"".""检查日期"" BETWEEN '20240401' AND '20240630'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.2.4	LIS	完整性：检验结果记录（检验申请单号、检验时间、检验项目、项目结果）	检验项目	23576087	23576084	1	"SELECT COUNT(*) AS ""检验结果总数T"" FROM (SELECT INSPECTION_ID AS ""标本标识"",OUTPATIENT_ID AS ""患者就诊ID"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"",INSPECTION_DATE AS ""检查日期"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample WHERE isdeleted = '0') ""检验项目表"",
+(SELECT INSPECTION_ID AS ""标本标识"",REMARK AS ""有效标记"",chinese_name AS ""检验结果项目名称"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0')""检验结果表""
+WHERE ""检验项目表"".""标本标识"" = ""检验结果表"".""标本标识"" AND ""检验项目表"".""检查状态"" IN ('audited','sent','finished','reported') AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') AND ""检验结果表"".""有效标记""='1' AND ""检验项目表"".""检查日期"" BETWEEN '20240401' AND '20240630'
+
+"	"SELECT COUNT(""检验结果表"".""项目名称"") AS ""项目名称总数N"" FROM (SELECT INSPECTION_ID AS ""标本标识"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"",INSPECTION_DATE AS ""检查日期"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample WHERE isdeleted = '0') ""检验项目表"",
+(SELECT INSPECTION_ID AS ""标本标识"",chinese_name AS ""项目名称"",REMARK AS ""有效标记"",chinese_name AS ""检验结果项目名称"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0')""检验结果表""
+WHERE ""检验项目表"".""标本标识"" = ""检验结果表"".""标本标识"" AND ""检验结果表"".""项目名称"" IS NOT NULL AND ""检验项目表"".""检查状态"" IN ('audited','sent','finished','reported') AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') AND ""检验结果表"".""有效标记""='1' AND ""检验项目表"".""检查日期"" BETWEEN '20240401' AND '20240630'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.2.4	LIS	完整性：检验结果记录（检验申请单号、检验时间、检验项目、项目结果）	检验时间	23576087	23576087	1	"SELECT COUNT(*) AS ""检验结果总数T"" FROM (SELECT INSPECTION_ID AS ""标本标识"",OUTPATIENT_ID AS ""患者就诊ID"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"",INSPECTION_DATE AS ""检查日期"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample WHERE isdeleted = '0') ""检验项目表"",
+(SELECT INSPECTION_ID AS ""标本标识"",REMARK AS ""有效标记"",chinese_name AS ""检验结果项目名称"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0')""检验结果表""
+WHERE ""检验项目表"".""标本标识"" = ""检验结果表"".""标本标识"" AND ""检验项目表"".""检查状态"" IN ('audited','sent','finished','reported') AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') AND ""检验结果表"".""有效标记""='1' AND ""检验项目表"".""检查日期"" BETWEEN '20240401' AND '20240630'
+
+"	"SELECT COUNT(""检验项目表"".""检验日期"") AS ""检验日期总数N"" 
+FROM (SELECT INSPECTION_ID AS ""标本标识"",inspectiON_time AS ""检查时间"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"",INSPECTION_DATE AS ""检验日期"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample WHERE isdeleted = '0') ""检验项目表"",
+(SELECT INSPECTION_ID AS ""标本标识"",REMARK AS ""有效标记"",chinese_name AS ""检验结果项目名称"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0')""检验结果表""
+WHERE ""检验项目表"".""标本标识"" = ""检验结果表"".""标本标识"" AND ""检验项目表"".""检验日期"" IS NOT NULL AND ""检验项目表"".""检查状态"" IN ('audited','sent','finished','reported') AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') AND ""检验结果表"".""有效标记""='1' AND ""检验项目表"".""检验日期"" BETWEEN '20240401' AND '20240630'
+
+
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.3.4	LIS	完整性：检验报告记录（检验申请单号、患者标识、检验报告项目、检验结果、报告时间、报告科室）	报告时间	23576087	23576087	1	"SELECT COUNT(*) AS ""检验项目总数"" FROM (SELECT INSPECTION_ID AS ""标本标识"",OUTPATIENT_ID AS ""患者就诊ID"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"",INSPECTION_DATE AS ""检查日期"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample WHERE isdeleted = '0') ""检验项目表"",
+(SELECT INSPECTION_ID AS ""标本标识"",REMARK AS ""有效标记"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0')""检验结果表""
+WHERE ""检验项目表"".""标本标识"" = ""检验结果表"".""标本标识"" AND ""检验项目表"".""检查状态"" IN ('audited','sent','finished','reported') AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') AND ""检验结果表"".""有效标记""='1' AND ""检验项目表"".""检查日期"" BETWEEN '20240401' AND '20240630'"	"SELECT COUNT(""检验结果表"".""报告时间"") AS ""报告时间总数"" FROM
+(SELECT INSPECTION_ID AS ""标本标识"",OUTPATIENT_ID AS ""患者就诊ID"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"",INSPECTION_DATE AS ""检查日期"",requisitiON_id AS ""申请ID"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample WHERE isdeleted = '0') ""检验项目表"",
+(SELECT INSPECTION_ID AS ""标本标识"",REMARK AS ""有效标记"", inspection_date_p ""报告时间"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0') ""检验结果表""
+WHERE 
+""检验项目表"".""标本标识"" = ""检验结果表"".""标本标识"" 
+AND ""检验项目表"".""检查状态"" IN ('audited','sent','finished','reported') 
+AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') 
+AND ""检验结果表"".""有效标记""='1' 
+AND ""检验项目表"".""检查日期"" BETWEEN '20240401' AND '20240630'
+
+
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.2.5	LIS	完整性：2、检验危急值记录（检验项目、危急结果值、报告人、报告内容、报告时间）	报告人	23713	23590	0.995	"SELECT COUNT(*) AS ""危急值条目总数T"" FROM (SELECT _hoodie_record_key AS ""数据唯一标识"", PATIENT_TYPE AS ""患者类型"",outpatient_id AS ""患者就诊ID"",alarm_state AS ""危急值状态"",inspectiON_date AS ""检查日期"" FROM hid0101_orcl_lis_dbo.lis5_inspectiON_result_alarm WHERE isdeleted = '0') ""危急值表""
+WHERE ""危急值表"".""患者类型"" IN ('1','2','3','4') AND ""危急值表"".""危急值状态"" IN ('2','3') AND ""危急值表"".""检查日期"" BETWEEN '20240401' AND '20240630'
+
+
+"	"SELECT COUNT(""危急值表"".""报告人"") AS ""报告人条目总数N"" FROM (SELECT _hoodie_record_key AS ""数据唯一标识"",SEND_PERSON AS ""报告人"", PATIENT_TYPE AS ""患者标识"",outpatient_id AS ""患者就诊ID"",alarm_state AS ""危急值状态"",inspectiON_date AS ""检查日期"",QUANTITATIVE_RESULT AS ""危机结果值"" FROM hid0101_orcl_lis_dbo.lis5_inspectiON_result_alarm WHERE isdeleted = '0') ""危急值表""
+WHERE ""危急值表"".""患者标识"" IN ('1','2','3','4') AND ""危急值表"".""患者就诊ID"" IS NOT NULL AND ""危急值表"".""报告人"" IS NOT NULL AND ""危急值表"".""危急值状态"" IN ('2','3') AND ""危急值表"".""检查日期"" BETWEEN '20240401' AND '20240630'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.2.3	LIS	一致性：检验结果记录（检验报告项目、正常参考值）	检验报告项目	23626837	23618861	1	"SELECT COUNT(*) AS ""检验结果总数T"" FROM (SELECT INSPECTION_ID AS ""标本标识"",OUTPATIENT_ID AS ""患者就诊ID"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"",INSPECTION_DATE AS ""检查日期"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample WHERE isdeleted = '0') ""检验项目表"",
+(SELECT INSPECTION_ID AS ""标本标识"",chinese_name AS ""项目名称"",REMARK AS ""有效标记"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0')""检验结果表""
+WHERE ""检验项目表"".""标本标识"" = ""检验结果表"".""标本标识"" AND ""检验结果表"".""项目名称"" IS NOT NULL AND ""检验项目表"".""检查状态"" <> 'inspecting' AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') AND ""检验结果表"".""有效标记""='1' AND ""检验项目表"".""检查日期"" BETWEEN '20240401' AND '20240630'
+"	"SELECT COUNT(""检验结果表"".""项目名称"") AS ""检验项目总数N"" FROM (SELECT INSPECTION_ID AS ""标本标识"",OUTPATIENT_ID AS ""患者就诊ID"",INSPECTION_STATE AS ""检查状态"",PATIENT_TYPE AS ""患者类型"",INSPECTION_DATE AS ""检查日期"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample WHERE isdeleted = '0') ""检验项目表"",
+(SELECT INSPECTION_ID AS ""标本标识"",chinese_name AS ""项目名称"",REMARK AS ""有效标记"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT WHERE isdeleted = '0')""检验结果表""
+WHERE ""检验项目表"".""标本标识"" = ""检验结果表"".""标本标识"" AND ""检验项目表"".""患者就诊ID"" IS NOT NULL AND ""检验项目表"".""检查状态"" <> 'inspecting' AND ""检验项目表"".""患者类型"" IN ('1','2','3','4') AND ""检验结果表"".""有效标记""='1' AND ""检验项目表"".""检查日期"" BETWEEN '20240401' AND '20240630'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.2.5	LIS	完整性：2、检验危急值记录（检验项目、危急结果值、报告人、报告内容、报告时间）	危急结果值	23713	23657	0.998	"SELECT COUNT(*) AS ""危急值条目总数T"" FROM (SELECT _hoodie_record_key AS ""数据唯一标识"", PATIENT_TYPE AS ""患者类型"",outpatient_id AS ""患者就诊ID"",alarm_state AS ""危急值状态"",inspectiON_date AS ""检查日期"" FROM hid0101_orcl_lis_dbo.lis5_inspectiON_result_alarm WHERE isdeleted = '0') ""危急值表""
+WHERE ""危急值表"".""患者类型"" IN ('1','2','3','4') AND ""危急值表"".""危急值状态"" IN ('2','3') AND ""危急值表"".""检查日期"" BETWEEN '20240401' AND '20240630'
+
+
+"	"SELECT COUNT(""危急值表"".""危机结果值"") AS ""危机结果值总条数N"" FROM (SELECT _hoodie_record_key AS ""数据唯一标识"", PATIENT_TYPE AS ""患者标识"",outpatient_id AS ""患者就诊ID"",alarm_state AS ""危急值状态"",inspectiON_date AS ""检查日期"",QUANTITATIVE_RESULT AS ""危机结果值"" FROM hid0101_orcl_lis_dbo.lis5_inspectiON_result_alarm WHERE isdeleted = '0') ""危急值表""
+WHERE ""危急值表"".""患者标识"" IN ('1','2','3','4') AND ""危急值表"".""患者就诊ID"" IS NOT NULL AND ""危急值表"".""危急值状态"" IN ('2','3') AND ""危急值表"".""检查日期"" BETWEEN '20240401' AND '20240630'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.2.5	LIS	完整性：2、检验危急值记录（检验项目、危急结果值、报告人、报告内容、报告时间）	报告时间	23713	23657	0.998	"SELECT COUNT(*) AS ""危急值条目总数T"" FROM (SELECT _hoodie_record_key AS ""数据唯一标识"", PATIENT_TYPE AS ""患者类型"",outpatient_id AS ""患者就诊ID"",alarm_state AS ""危急值状态"",inspectiON_date AS ""检查日期"" FROM hid0101_orcl_lis_dbo.lis5_inspectiON_result_alarm WHERE isdeleted = '0') ""危急值表""
+WHERE ""危急值表"".""患者类型"" IN ('1','2','3','4') AND ""危急值表"".""危急值状态"" IN ('2','3') AND ""危急值表"".""检查日期"" BETWEEN '20240401' AND '20240630'
+
+
+"	"SELECT COUNT(""危急值表"".""报告时间"") AS ""危急值表报告时间条目数N"" FROM (SELECT _hoodie_record_key AS ""数据唯一标识"",doctor_read AS ""报告人"", PATIENT_TYPE AS ""患者标识"",outpatient_id AS ""患者就诊ID"",alarm_state AS ""危急值状态"",inspectiON_date AS ""检查日期"",QUANTITATIVE_RESULT AS ""危机结果值"", PERCEPTION_TIME AS ""报告时间"" FROM hid0101_orcl_lis_dbo.lis5_inspectiON_result_alarm WHERE isdeleted = '0') ""危急值表""
+WHERE ""危急值表"".""患者标识"" IN ('1','2','3','4') AND ""危急值表"".""患者就诊ID"" IS NOT NULL AND ""危急值表"".""报告时间"" IS NOT NULL AND ""危急值表"".""危急值状态"" IN ('2','3') AND ""危急值表"".""检查日期"" BETWEEN '20240401' AND '20240630'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.2.5	LIS	完整性：2、检验危急值记录（检验项目、危急结果值、报告人、报告内容、报告时间）	检验项目	23713	23657	0.998	"SELECT COUNT(*) AS ""危急值条目总数T"" FROM (SELECT _hoodie_record_key AS ""数据唯一标识"", PATIENT_TYPE AS ""患者类型"",outpatient_id AS ""患者就诊ID"",alarm_state AS ""危急值状态"",inspectiON_date AS ""检查日期"" FROM hid0101_orcl_lis_dbo.lis5_inspectiON_result_alarm WHERE isdeleted = '0') ""危急值表""
+WHERE ""危急值表"".""患者类型"" IN ('1','2','3','4') AND ""危急值表"".""危急值状态"" IN ('2','3') AND ""危急值表"".""检查日期"" BETWEEN '20240401' AND '20240630'
+
+
+"	"SELECT COUNT(""危急值表"".""危急值项目ID"") AS ""危急值项目总数T"" FROM (SELECT _hoodie_record_key AS ""数据唯一标识"", PATIENT_TYPE AS ""患者标识"",outpatient_id AS ""患者就诊ID"",alarm_state AS ""危急值状态"",inspectiON_date AS ""检查日期"",TEST_ITEM_ID AS ""危急值项目ID"" FROM hid0101_orcl_lis_dbo.lis5_inspectiON_result_alarm WHERE isdeleted = '0') ""危急值表""
+WHERE ""危急值表"".""患者标识"" IN ('1','2','3','4') AND ""危急值表"".""患者就诊ID"" IS NOT NULL AND ""危急值表"".""危急值状态"" IN ('2','3') AND ""危急值表"".""检查日期"" BETWEEN '20240401' AND '20240630'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.2.5	LIS	完整性：2、检验危急值记录（检验项目、危急结果值、报告人、报告内容、报告时间）	报告内容	23713	23657	0.998	"SELECT COUNT(*) AS ""危急值条目总数T"" FROM (SELECT _hoodie_record_key AS ""数据唯一标识"", PATIENT_TYPE AS ""患者类型"",outpatient_id AS ""患者就诊ID"",alarm_state AS ""危急值状态"",inspectiON_date AS ""检查日期"" FROM hid0101_orcl_lis_dbo.lis5_inspectiON_result_alarm WHERE isdeleted = '0') ""危急值表""
+WHERE ""危急值表"".""患者类型"" IN ('1','2','3','4') AND ""危急值表"".""危急值状态"" IN ('2','3') AND ""危急值表"".""检查日期"" BETWEEN '20240401' AND '20240630'
+
+
+"	"SELECT COUNT(""危急值表"".""报告内容"") AS ""报告内容总数N"" FROM (SELECT _hoodie_record_key AS ""数据唯一标识"",doctor_read AS ""报告人"", PATIENT_TYPE AS ""患者标识"",outpatient_id AS ""患者就诊ID"",alarm_state AS ""危急值状态"",inspectiON_date AS ""检查日期"",QUANTITATIVE_RESULT AS ""报告内容"" FROM hid0101_orcl_lis_dbo.lis5_inspectiON_result_alarm WHERE isdeleted = '0') ""危急值表""
+WHERE ""危急值表"".""患者标识"" IN ('1','2','3','4') AND ""危急值表"".""患者就诊ID"" IS NOT NULL AND ""危急值表"".""报告内容"" IS NOT NULL AND ""危急值表"".""危急值状态"" IN ('2','3') AND ""危急值表"".""检查日期"" BETWEEN '20240401' AND '20240630'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.3.5	LIS	完整性：检验报告记录（正常参考范围、报告人、审核人）	正常参考值	27613238	25561388	0.926	"SELECT 
+count(*) as  ""检验申请总数"" 
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample as ""检验标本信息表"" 
+inner join hid0101_orcl_lis_dbo.lis_inspection_result ""检验结果信息表"" 
+on ""检验标本信息表"".inspection_id=""检验结果信息表"".inspection_id 
+where ""检验标本信息表"".inspection_date BETWEEN '20240401' AND '20240630'
+AND ""检验标本信息表"".inspection_state in ('audited','sent','finished','reported') 
+and ""检验结果信息表"".remark in ('1')
+and ""检验标本信息表"".patient_type in('1','2','3','4')
+and ""检验标本信息表"".isdeleted='0'
+
+"	"SELECT COUNT(*) AS ""检验报告正常参考值N1""  FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample AS ""检验标本信息表"" 
+LEFT JOIN hid0101_orcl_lis_dbo.lis_inspectiON_result ""检验结果信息表""  ON ""检验标本信息表"".inspectiON_id=""检验结果信息表"".inspectiON_id 
+WHERE ""检验标本信息表"".inspectiON_date BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"".inspectiON_state IN ('audited','sent','finished','reported') AND ""检验结果信息表"".remark IN ('1') 
+AND ""检验标本信息表"".patient_type IN ('1','2','3','4') AND ""检验结果信息表"".test_item_reference IS NOT NULL AND ""检验标本信息表"".isdeleted='0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.3.5	LIS	整合性：检验报告记录与检验申请记录（申请单号、患者标识）可对照	患者标识	27613238	27259590	0.987	"SELECT 
+count(*) as  ""检验申请总数"" 
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample as ""检验标本信息表"" 
+inner join hid0101_orcl_lis_dbo.lis_inspection_result ""检验结果信息表"" 
+on ""检验标本信息表"".inspection_id=""检验结果信息表"".inspection_id 
+where ""检验标本信息表"".inspection_date BETWEEN '20240401' AND '20240630'
+AND ""检验标本信息表"".inspection_state in ('audited','sent','finished','reported') 
+and ""检验结果信息表"".remark in ('1')
+and ""检验标本信息表"".patient_type in('1','2','3','4')
+and ""检验标本信息表"".isdeleted='0'"	"SELECT 
+count(*) as  ""患者标识"" 
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample as ""检验标本信息表"" 
+left join hid0101_orcl_lis_dbo.lis_inspection_result ""检验结果信息表"" 
+on ""检验标本信息表"".inspection_id=""检验结果信息表"".inspection_id 
+left join hid0101_orcl_lis_dbo.lis5_inspect_sample as ""检验标本信息附表""
+on ""检验标本信息表"".inspection_id=""检验标本信息附表"".inspection_id
+where ""检验标本信息表"".inspection_date BETWEEN '20240401' AND '20240630`'
+AND ""检验标本信息表"".inspection_state in ('audited','sent','finished','reported') 
+and ""检验结果信息表"".remark in ('1')
+and ""检验标本信息表"".patient_type in('1','2','3','4')
+and ""检验标本信息表"".isdeleted='0'
+and ""检验标本信息表"".patient_type=""检验标本信息附表"".patient_type
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.3.5	LIS	完整性：检验报告记录（正常参考范围、报告人、审核人）	报告人	27613238	27613238	1	"SELECT 
+count(*) as  ""检验申请总数"" 
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample as ""检验标本信息表"" 
+inner join hid0101_orcl_lis_dbo.lis_inspection_result ""检验结果信息表"" 
+on ""检验标本信息表"".inspection_id=""检验结果信息表"".inspection_id 
+where ""检验标本信息表"".inspection_date BETWEEN '20240401' AND '20240630'
+AND ""检验标本信息表"".inspection_state in ('audited','sent','finished','reported') 
+and ""检验结果信息表"".remark in ('1')
+and ""检验标本信息表"".patient_type in('1','2','3','4')
+and ""检验标本信息表"".isdeleted='0'
+
+"	"SELECT 
+count(*) as  ""检验申请总数"" 
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample as ""检验标本信息表"" 
+inner join hid0101_orcl_lis_dbo.lis_inspection_result ""检验结果信息表"" 
+on ""检验标本信息表"".inspection_id=""检验结果信息表"".inspection_id 
+where ""检验标本信息表"".inspection_date BETWEEN '20240401' AND '20240630'
+AND ""检验标本信息表"".inspection_state in ('audited','sent','finished','reported') 
+and ""检验结果信息表"".remark in ('1')
+and ""检验标本信息表"".patient_type in('1','2','3','4')
+and ""检验标本信息表"".isdeleted='0'
+AND ""检验标本信息表"".check_persON IS NOT NULL
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.3.5	LIS	完整性：检验报告记录（正常参考范围、报告人、审核人）	审核人	27613238	27613238	1	"SELECT 
+count(*) as  ""检验申请总数"" 
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample as ""检验标本信息表"" 
+inner join hid0101_orcl_lis_dbo.lis_inspection_result ""检验结果信息表"" 
+on ""检验标本信息表"".inspection_id=""检验结果信息表"".inspection_id 
+where ""检验标本信息表"".inspection_date BETWEEN '20240401' AND '20240630'
+AND ""检验标本信息表"".inspection_state in ('audited','sent','finished','reported') 
+and ""检验结果信息表"".remark in ('1')
+and ""检验标本信息表"".patient_type in('1','2','3','4')
+and ""检验标本信息表"".isdeleted='0'
+
+"	"SELECT 
+count(*) as  ""检验申请总数"" 
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample as ""检验标本信息表"" 
+inner join hid0101_orcl_lis_dbo.lis_inspection_result ""检验结果信息表"" 
+on ""检验标本信息表"".inspection_id=""检验结果信息表"".inspection_id 
+where ""检验标本信息表"".inspection_date BETWEEN '20240401' AND '20240630'
+AND ""检验标本信息表"".inspection_state in ('audited','sent','finished','reported') 
+and ""检验结果信息表"".remark in ('1')
+and ""检验标本信息表"".patient_type in('1','2','3','4')
+and ""检验标本信息表"".isdeleted='0'
+AND ""检验标本信息表"".check_persON IS NOT NULL
+
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.3.5	LIS	整合性：检验报告记录与检验申请记录（申请单号、患者标识）可对照	申请单号	27613238	27613238	1	"SELECT 
+count(*) as  ""检验申请总数"" 
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample as ""检验标本信息表"" 
+inner join hid0101_orcl_lis_dbo.lis_inspection_result ""检验结果信息表"" 
+on ""检验标本信息表"".inspection_id=""检验结果信息表"".inspection_id 
+where ""检验标本信息表"".inspection_date BETWEEN '20240401' AND '20240630'
+AND ""检验标本信息表"".inspection_state in ('audited','sent','finished','reported') 
+and ""检验结果信息表"".remark in ('1')
+and ""检验标本信息表"".patient_type in('1','2','3','4')
+and ""检验标本信息表"".isdeleted='0'"	"SELECT 
+count(*) as  ""检验申请总数"" 
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample as ""检验标本信息表"" 
+inner join hid0101_orcl_lis_dbo.lis_inspection_result ""检验结果信息表"" 
+on ""检验标本信息表"".inspection_id=""检验结果信息表"".inspection_id 
+where ""检验标本信息表"".inspection_date BETWEEN '20240401' AND '20240630'
+AND ""检验标本信息表"".inspection_state in ('audited','sent','finished','reported') 
+and ""检验结果信息表"".remark in ('1')
+and ""检验标本信息表"".patient_type in('1','2','3','4')
+and ""检验标本信息表"".isdeleted='0'
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.2.4	LIS	完整性：检验申请记录（检验申请单号、患者标识、患者性别、项目编码、项目名称、标本名称）	患者标识	3568144	3567888	1	"SELECT COUNT( ""检验标本信息表"".REQUISITION_ID) AS ""检验申请记录总数 T"" FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('1') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"" .isdeleted='0'
+
+
+"	"SELECT COUNT(*) as ""患者标识N""
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" 
+ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID
+and ""检验标本信息表"".REQUISITION_ID = ""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".OUTPATIENT_ID IS NOT NULL 
+AND ""检验标本信息表"".PATIENT_TYPE in ('1') 
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630'
+And ""检验标本信息表"" .isdeleted = '0'
+
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.2.4	LIS	完整性：检验申请记录（检验申请单号、患者标识、患者性别、项目编码、项目名称、标本名称）	患者性别	3568144	3567893	1	"SELECT COUNT( ""检验标本信息表"".REQUISITION_ID) AS ""检验申请记录总数 T"" FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('1') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"" .isdeleted='0'
+
+
+"	"SELECT COUNT(*) as ""患者性别N""
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" 
+ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID
+and ""检验标本信息表"".REQUISITION_ID = ""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE in ('1') 
+and ""检验标本信息表"".patient_sex is not NULL
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630'
+And ""检验标本信息表"" .isdeleted = '0'
+
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.2.4	LIS	完整性：检验申请记录（检验申请单号、患者标识、患者性别、项目编码、项目名称、标本名称）	标本名称	3568144	3567920	1	"SELECT COUNT( ""检验标本信息表"".REQUISITION_ID) AS ""检验申请记录总数 T"" FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('1') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"" .isdeleted='0'
+
+
+"	"SELECT COUNT(*) as ""标本名称N""
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" 
+ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID
+and ""检验标本信息表"".REQUISITION_ID = ""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".SAMPLE_CLASS is not NULL
+AND ""检验标本信息表"".PATIENT_TYPE in ('1') 
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630'
+And ""检验标本信息表"" .isdeleted = '0'
+
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.2.4	LIS	完整性：检验申请记录（检验申请单号、患者标识、患者性别、项目编码、项目名称、标本名称）	项目名称	3568144	3568141	1	"SELECT COUNT( ""检验标本信息表"".REQUISITION_ID) AS ""检验申请记录总数 T"" FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('1') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"" .isdeleted='0'
+
+
+"	"SELECT COUNT(*) as ""项目名称N""
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" 
+ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID
+and ""检验标本信息表"".REQUISITION_ID = ""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".test_order_name is not NULL
+AND ""检验标本信息表"".PATIENT_TYPE in ('1') 
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' 
+And ""检验标本信息表"" .isdeleted = '0'
+
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.2.4	LIS	完整性：检验申请记录（检验申请单号、患者标识、患者性别、项目编码、项目名称、标本名称）	检验申请单号	3568144	3568144	1	"SELECT COUNT( ""检验标本信息表"".REQUISITION_ID) AS ""检验申请记录总数 T"" FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('1') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"" .isdeleted='0'
+
+
+"	"SELECT COUNT(*) as ""检验申请单号N""
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" 
+ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID
+and ""检验标本信息表"".REQUISITION_ID = ""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE in ('1') 
+And ""检验标本信息表"".requisition_id is not null 
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630'
+And ""检验标本信息表"" .isdeleted = '0'
+
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.2.4	LIS	完整性：检验申请记录（检验申请单号、患者标识、患者性别、项目编码、项目名称、标本名称）	项目编码	3568144	3568144	1	"SELECT COUNT( ""检验标本信息表"".REQUISITION_ID) AS ""检验申请记录总数 T"" FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('1') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"" .isdeleted='0'
+
+
+"	"SELECT COUNT(*) as ""项目编码N""
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" 
+ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID
+and ""检验标本信息表"".REQUISITION_ID = ""检验明细表"".REQUISITION_ID
+WHERE ""检验明细表"".CHARGE_ITEM_ID is not NULL
+AND ""检验标本信息表"".PATIENT_TYPE in ('1') 
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630'
+And ""检验标本信息表"" .isdeleted = '0'
+
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	05.3.3	LIS	一致性：检验报告记录（项目名称、正常参考值）	项目名称	10679542	6132180	0.574	"SELECT COUNT(*)
+FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE A 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT B 
+ON  A.INSPECTION_ID = B.INSPECTION_ID
+WHERE  B.REMARK='1'
+AND A.OUTPATIENT_ID IS NOT NULL
+AND A.PATIENT_TYPE = '1'
+AND A.CHECK_TIME IS NOT NULL
+AND A.INSPECTION_DATE BETWEEN '20240401'AND '20240630'
+AND A.isdeleted = '0'
+AND B.isdeleted = '0'"	"SELECT COUNT(*)
+FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE A 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT B 
+ON  A.INSPECTION_ID = B.INSPECTION_ID
+LEFT JOIN hid0101_orcl_lis_xhsystem1.LIS_TEST_ITEM C
+ON B.TEST_ITEM_ID=C.TEST_ITEM_ID 
+AND B.CHINESE_NAME=C.CHINESE_NAME
+WHERE  B.REMARK='1'
+AND A.OUTPATIENT_ID IS NOT NULL
+AND A.PATIENT_TYPE = '1'
+AND A.CHECK_TIME IS NOT NULL
+AND A.INSPECTION_DATE BETWEEN '20240401'AND '20240630'
+AND A.isdeleted = '0'
+AND B.isdeleted = '0'
+AND C.isdeleted = '0'
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.2.6	LIS	完整性：检验申请记录（申请开立时间、标本采集人、标本采样时间）	标本采集人	963201	648854	0.674	"SELECT COUNT( DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验申请总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE='1' AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630' AND ""检验标本信息表"" .isdeleted = '0'
+"	"SELECT COUNT(DISTINCT""检验标本信息表"".REQUISITION_ID) as ""标本采集人N""
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" 
+ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID
+and ""检验标本信息表"".REQUISITION_ID = ""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".sampling_person is not NULL
+AND ""检验标本信息表"".PATIENT_TYPE in ('1') 
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' 
+And ""检验标本信息表"" .isdeleted = '0'
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.2.6	LIS	完整性：检验申请记录（申请开立时间、标本采集人、标本采样时间）	标本采样时间	963201	770567	0.8	"SELECT COUNT( DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验申请总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE='1' AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630' AND ""检验标本信息表"" .isdeleted = '0'
+"	"SELECT COUNT(DISTINCT""检验标本信息表"".REQUISITION_ID) as ""标本采集时间N""
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" 
+ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID
+and ""检验标本信息表"".REQUISITION_ID = ""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".sampling_time is not NULL
+AND ""检验标本信息表"".PATIENT_TYPE in ('1') 
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630'
+And ""检验标本信息表"" .isdeleted = '0'
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.3.4	LIS	完整性：检验报告记录（患者标识、检验结果项目名称、检验结果、正常参考值）	正常参考值	879092	817319	0.93	"SELECT COUNT(DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验报告总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT ""检验结果信息表"" ON ""检验标本信息表"".INSPECTION_ID = ""检验结果信息表"".INSPECTION_ID
+WHERE ""检验结果信息表"".REMARK='1' AND ""检验标本信息表"".PATIENT_TYPE IN ('1') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630' AND ""检验标本信息表"".isdeleted = '0'"	"SELECT COUNT(DISTINCT""检验标本信息表"".REQUISITION_ID) AS ""参考值N"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT ""检验结果信息表"" ON ""检验标本信息表"".INSPECTION_ID = ""检验结果信息表"".INSPECTION_ID
+WHERE ""检验结果信息表"".REMARK='1' AND ""检验结果信息表"".TEST_ITEM_REFERENCE IS NOT NULL AND ""检验标本信息表"".PATIENT_TYPE IN ('1') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630' AND ""检验标本信息表"" .isdeleted = '0'
+
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.2.6	LIS	及时性：检验申请记录（申请开立时间）<标本采集记录（采样时间）	检验申请记录（申请开立时间）<标本采集记录（采样时间）	963201	827762	0.859	"SELECT COUNT( DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验申请总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE='1' AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630' AND ""检验标本信息表"" .isdeleted = '0'
+"	"SELECT COUNT(*) as ""检验申请记录（申请开立时间）<标本采集记录（采样时间）S""
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+inner join (select REQUISITION_ID as ""检验申请单号"" , PRINT_TIME as ""申请时间"", sampling_time as ""采样时间"" from hid0101_orcl_lis_dbo.lis_requisition_info) as ""标签信息表"" on 
+""检验标本信息表"".REQUISITION_ID=""标签信息表"".""检验申请单号""
+WHERE ""检验标本信息表"".PATIENT_TYPE in ('1') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' and ""标签信息表"".""申请时间"" < ""标签信息表"".""采样时间"" And ""检验标本信息表"" .isdeleted = '0'
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.3.6	LIS	完整性：检验报告记录（报告时间、审核时间）	审核时间	1018570	867618	0.852	"SELECT COUNT(*) AS ""检验报告总数T"" FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+ INNER JOIN (SELECT REQUISITION_ID AS ""检验申请单号"" FROM hid0101_orcl_lis_dbo.lis_requisition_info) AS ""标签信息表"" ON 
+""检验标本信息表"".REQUISITION_ID=""标签信息表"".""检验申请单号"" 
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('1') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"" .isdeleted = '0'
+
+"	"SELECT COUNT(DISTINCT""检验标本信息表"".REQUISITION_ID) AS ""报告时间N"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT ""检验结果信息表"" ON ""检验标本信息表"".INSPECTION_ID = ""检验结果信息表"".INSPECTION_ID
+WHERE ""检验结果信息表"".REMARK='1' AND ""检验标本信息表"".PATIENT_TYPE IN ('1') AND ""检验标本信息表"".CHECK_TIME IS NOT NULL AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630' AND ""检验标本信息表"" .isdeleted = '0'
+
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.3.6	LIS	完整性：检验报告记录（报告时间、审核时间）	报告时间	1018570	867618	0.852	"SELECT COUNT(*) AS ""检验报告总数T"" FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+ INNER JOIN (SELECT REQUISITION_ID AS ""检验申请单号"" FROM hid0101_orcl_lis_dbo.lis_requisition_info) AS ""标签信息表"" ON 
+""检验标本信息表"".REQUISITION_ID=""标签信息表"".""检验申请单号"" 
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('1') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"" .isdeleted = '0'
+
+"	"SELECT COUNT(DISTINCT""检验标本信息表"".REQUISITION_ID) AS ""报告时间N"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT ""检验结果信息表"" ON ""检验标本信息表"".INSPECTION_ID = ""检验结果信息表"".INSPECTION_ID
+WHERE ""检验结果信息表"".REMARK='1' AND ""检验标本信息表"".PATIENT_TYPE IN ('1') AND ""检验标本信息表"".CHECK_TIME IS NOT NULL AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630' AND ""检验标本信息表"" .isdeleted = '0'
+
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.3.6	LIS	及时性：检验报告记录（审核时间）<检验危急值处理记录（医师处理时间）	检验报告记录（审核时间）<检验危急值处理记录（医师处理时间）	9413	8713	0.926	"SELECT COUNT(*) AS ""检验报告总数T"" FROM hid0101_orcl_lis_dbo.lis_inspectiON_sample ""检验标本信息表"" 
+INNER JOIN (SELECT REQUISITION_ID AS ""检验申请单号"", doctor_read_time AS ""医生处理时间"" FROM hid0101_orcl_lis_dbo.lis5_inspectiON_result_alarm) AS ""检验结果危急值信息表"" ON 
+""检验标本信息表"".REQUISITION_ID=""检验结果危急值信息表"".""检验申请单号"" 
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' AND ""检验标本信息表"" .isdeleted = '0'
+"	"SELECT COUNT(*) as ""及时性：检验报告记录（审核时间）<检验危急值处理记录（医师处理时间）S""
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表"" 
+inner join (select REQUISITION_ID as ""检验申请单号"", feedback_time as ""医生处理时间"", ALARM_STATE as ""危急值状态"" from hid0101_orcl_lis_dbo.lis5_inspection_result_alarm) as ""检验结果危急值信息表"" on 
+""检验标本信息表"".REQUISITION_ID=""检验结果危急值信息表"".""检验申请单号""
+WHERE ""检验标本信息表"".PATIENT_TYPE in ('2','3','4') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' and ""检验标本信息表"".CHECK_TIME < ""检验结果危急值信息表"".""医生处理时间"" and ""检验结果危急值信息表"".""危急值状态"" in ('2','3') And ""检验标本信息表"" .isdeleted = '0'
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.3.4	LIS	完整性：检验报告记录（患者标识、检验结果项目名称、检验结果、正常参考值）	检验结果	879092	876840	0.997	"SELECT COUNT(DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验报告总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT ""检验结果信息表"" ON ""检验标本信息表"".INSPECTION_ID = ""检验结果信息表"".INSPECTION_ID
+WHERE ""检验结果信息表"".REMARK='1' AND ""检验标本信息表"".PATIENT_TYPE IN ('1') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630' AND ""检验标本信息表"".isdeleted = '0'"	"SELECT COUNT(DISTINCT""检验标本信息表"".REQUISITION_ID) AS ""检验结果N"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT ""检验结果信息表"" ON ""检验标本信息表"".INSPECTION_ID = ""检验结果信息表"".INSPECTION_ID
+WHERE ""检验结果信息表"".REMARK='1' AND ""检验结果信息表"".QUANTITATIVE_RESULT IS NOT NULL AND ""检验标本信息表"".PATIENT_TYPE IN ('1') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630' AND ""检验标本信息表"" .isdeleted = '0'
+
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.3.5	LIS	完整性：2、检验危急值记录（项目编码、危急值、通知时间、医师接收时间、处理医师、处理记录）	处理记录	8824	8783	0.995	"SELECT COUNT(*) AS ""门诊检验报告 检验危急值记录总数T1~T6"" FROM hid0101_orcl_lis_dbo.LIS5_INSPECTION_RESULT_ALARM ""检验危急值""
+WHERE ""检验危急值"".PATIENT_TYPE IN ('2','3','4') AND ""检验危急值"".ALARM_STATE IN ('2', '3' ) AND ""检验危急值"".OUTPATIENT_ID IS NOT NULL
+AND (""检验危急值"".INSPECTION_DATE BETWEEN '20240401' AND '20240630') AND isdeleted = '0'
+
+"	"SELECT COUNT(*) AS ""门诊检验报告检验危急值记录 临床医师处理记录符合数N6"" FROM hid0101_orcl_lis_dbo.LIS5_INSPECTION_RESULT_ALARM ""检验危急值""
+WHERE ""检验危急值"".PATIENT_TYPE IN ('2','3','4') AND ""检验危急值"".ALARM_STATE IN ('2', '3' ) AND ""检验危急值"".OUTPATIENT_ID IS NOT NULL
+AND (""检验危急值"".INSPECTION_DATE BETWEEN '20240401' AND '20240630') AND feedback_situatiON IS NOT NULL AND isdeleted = '0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.3.5	LIS	完整性：2、检验危急值记录（项目编码、危急值、通知时间、医师接收时间、处理医师、处理记录）	医师接收时间	8824	8783	0.995	"SELECT COUNT(*) AS ""门诊检验报告 检验危急值记录总数T1~T6"" FROM hid0101_orcl_lis_dbo.LIS5_INSPECTION_RESULT_ALARM ""检验危急值""
+WHERE ""检验危急值"".PATIENT_TYPE IN ('2','3','4') AND ""检验危急值"".ALARM_STATE IN ('2', '3' ) AND ""检验危急值"".OUTPATIENT_ID IS NOT NULL
+AND (""检验危急值"".INSPECTION_DATE BETWEEN '20240401' AND '20240630') AND isdeleted = '0'
+
+"	"SELECT COUNT(*) AS ""门诊检验报告检验危急值记录 临床医师接收时间符合数N4"" FROM hid0101_orcl_lis_dbo.LIS5_INSPECTION_RESULT_ALARM ""检验危急值""
+WHERE ""检验危急值"".PATIENT_TYPE IN ('2','3','4') AND ""检验危急值"".ALARM_STATE IN ('2', '3' ) AND ""检验危急值"".OUTPATIENT_ID IS NOT NULL
+AND (""检验危急值"".INSPECTION_DATE BETWEEN '20240401' AND '20240630') AND feedback_time IS NOT NULL AND isdeleted = '0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.3.5	LIS	完整性：2、检验危急值记录（项目编码、危急值、通知时间、医师接收时间、处理医师、处理记录）	处理医师	8824	8783	0.995	"SELECT COUNT(*) AS ""门诊检验报告 检验危急值记录总数T1~T6"" FROM hid0101_orcl_lis_dbo.LIS5_INSPECTION_RESULT_ALARM ""检验危急值""
+WHERE ""检验危急值"".PATIENT_TYPE IN ('2','3','4') AND ""检验危急值"".ALARM_STATE IN ('2', '3' ) AND ""检验危急值"".OUTPATIENT_ID IS NOT NULL
+AND (""检验危急值"".INSPECTION_DATE BETWEEN '20240401' AND '20240630') AND isdeleted = '0'
+
+"	"SELECT COUNT(*) AS ""门诊检验报告检验危急值记录 临床处置医师符合数N5"" FROM hid0101_orcl_lis_dbo.LIS5_INSPECTION_RESULT_ALARM ""检验危急值""
+WHERE ""检验危急值"".PATIENT_TYPE IN ('2','3','4') AND ""检验危急值"".ALARM_STATE IN ('2', '3' ) AND ""检验危急值"".OUTPATIENT_ID IS NOT NULL
+AND (""检验危急值"".INSPECTION_DATE BETWEEN '20240401' AND '20240630') AND feedback_persON IS NOT NULL AND isdeleted = '0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.3.4	LIS	完整性：检验报告记录（患者标识、检验结果项目名称、检验结果、正常参考值）	患者标识	879092	878927	1	"SELECT COUNT(DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验报告总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT ""检验结果信息表"" ON ""检验标本信息表"".INSPECTION_ID = ""检验结果信息表"".INSPECTION_ID
+WHERE ""检验结果信息表"".REMARK='1' AND ""检验标本信息表"".PATIENT_TYPE IN ('1') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630' AND ""检验标本信息表"".isdeleted = '0'"	"SELECT COUNT(DISTINCT""检验标本信息表"".REQUISITION_ID) AS ""患者标识N"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT ""检验结果信息表"" ON ""检验标本信息表"".INSPECTION_ID = ""检验结果信息表"".INSPECTION_ID
+WHERE ""检验结果信息表"".REMARK='1' AND ""检验标本信息表"".outpatient_id IS NOT NULL AND ""检验标本信息表"".PATIENT_TYPE IN ('1') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630' AND ""检验标本信息表"".isdeleted = '0'
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.3.4	LIS	完整性：检验报告记录（患者标识、检验结果项目名称、检验结果、正常参考值）	检验结果项目名称	879092	879092	1	"SELECT COUNT(DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验报告总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT ""检验结果信息表"" ON ""检验标本信息表"".INSPECTION_ID = ""检验结果信息表"".INSPECTION_ID
+WHERE ""检验结果信息表"".REMARK='1' AND ""检验标本信息表"".PATIENT_TYPE IN ('1') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630' AND ""检验标本信息表"".isdeleted = '0'"	"SELECT COUNT(DISTINCT""检验标本信息表"".REQUISITION_ID) as ""检验结果项目名称N""
+FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_RESULT ""检验结果信息表""
+ON ""检验标本信息表"".INSPECTION_ID = ""检验结果信息表"".INSPECTION_ID
+WHERE ""检验结果信息表"".REMARK='1'
+and ""检验结果信息表"".CHINESE_NAME is not null
+AND ""检验标本信息表"".PATIENT_TYPE in ('1')
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630'
+And ""检验标本信息表"" .isdeleted = '0'
+
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.3.5	LIS	完整性：2、检验危急值记录（项目编码、危急值、通知时间、医师接收时间、处理医师、处理记录）	通知时间	8824	8801	0.997	"SELECT COUNT(*) AS ""门诊检验报告 检验危急值记录总数T1~T6"" FROM hid0101_orcl_lis_dbo.LIS5_INSPECTION_RESULT_ALARM ""检验危急值""
+WHERE ""检验危急值"".PATIENT_TYPE IN ('2','3','4') AND ""检验危急值"".ALARM_STATE IN ('2', '3' ) AND ""检验危急值"".OUTPATIENT_ID IS NOT NULL
+AND (""检验危急值"".INSPECTION_DATE BETWEEN '20240401' AND '20240630') AND isdeleted = '0'
+
+"	"SELECT COUNT(*) AS ""门诊检验报告检验危急值记录 危急值通知符合数N3"" FROM hid0101_orcl_lis_dbo.LIS5_INSPECTION_RESULT_ALARM ""检验危急值""
+WHERE ""检验危急值"".PATIENT_TYPE IN ('2','3','4') AND ""检验危急值"".ALARM_STATE IN ('2', '3' ) AND ""检验危急值"".OUTPATIENT_ID IS NOT NULL
+AND (""检验危急值"".INSPECTION_DATE BETWEEN '20240401' AND '20240630') AND SEND_TIME IS NOT NULL AND isdeleted = '0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.3.5	LIS	完整性：2、检验危急值记录（项目编码、危急值、通知时间、医师接收时间、处理医师、处理记录）	危急值	8824	8824	1	"SELECT COUNT(*) AS ""门诊检验报告 检验危急值记录总数T1~T6"" FROM hid0101_orcl_lis_dbo.LIS5_INSPECTION_RESULT_ALARM ""检验危急值""
+WHERE ""检验危急值"".PATIENT_TYPE IN ('2','3','4') AND ""检验危急值"".ALARM_STATE IN ('2', '3' ) AND ""检验危急值"".OUTPATIENT_ID IS NOT NULL
+AND (""检验危急值"".INSPECTION_DATE BETWEEN '20240401' AND '20240630') AND isdeleted = '0'
+
+"	"SELECT COUNT(*) AS ""门诊检验报告检验危急值记录 危急值符合数N2"" FROM hid0101_orcl_lis_dbo.LIS5_INSPECTION_RESULT_ALARM ""检验危急值""
+WHERE ""检验危急值"".PATIENT_TYPE IN ('2','3','4') AND ""检验危急值"".ALARM_STATE IN ('2', '3' ) AND ""检验危急值"".OUTPATIENT_ID IS NOT NULL
+AND (""检验危急值"".INSPECTION_DATE BETWEEN '20240401' AND '20240630') AND QUANTITATIVE_RESULT IS NOT NULL AND isdeleted = '0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.3.5	LIS	完整性：2、检验危急值记录（项目编码、危急值、通知时间、医师接收时间、处理医师、处理记录）	项目编码	8824	8824	1	"SELECT COUNT(*) AS ""门诊检验报告 检验危急值记录总数T1~T6"" FROM hid0101_orcl_lis_dbo.LIS5_INSPECTION_RESULT_ALARM ""检验危急值""
+WHERE ""检验危急值"".PATIENT_TYPE IN ('2','3','4') AND ""检验危急值"".ALARM_STATE IN ('2', '3' ) AND ""检验危急值"".OUTPATIENT_ID IS NOT NULL
+AND (""检验危急值"".INSPECTION_DATE BETWEEN '20240401' AND '20240630') AND isdeleted = '0'
+
+"	"SELECT COUNT(*) AS ""门诊检验报告检验危急值记录 项目编码符合数N1"" FROM hid0101_orcl_lis_dbo.LIS5_INSPECTION_RESULT_ALARM ""检验危急值""
+WHERE ""检验危急值"".PATIENT_TYPE IN ('2','3','4') AND ""检验危急值"".ALARM_STATE IN ('2', '3' ) AND ""检验危急值"".OUTPATIENT_ID IS NOT NULL
+AND (""检验危急值"".INSPECTION_DATE BETWEEN '20240401' AND '20240630') AND TEST_ITEM_ID IS NOT NULL AND isdeleted = '0'
+
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	03.2.6	LIS	完整性：检验申请记录（申请开立时间、标本采集人、标本采样时间）	申请开立时间	1268013	934349	0.737	"SELECT COUNT( DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验申请总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE IN ('2','3','4') AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630'AND ""检验标本信息表"" .isdeleted = '0'
+"	"SELECT COUNT(DISTINCT ""检验标本信息表"".REQUISITION_ID) as ""申请开立时间N""
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" 
+ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID 
+AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".print_time is not null 
+AND ""检验标本信息表"".PATIENT_TYPE in ('2','3','4') 
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630'
+And ""检验标本信息表"" .isdeleted = '0'
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.2.6	LIS	完整性：检验申请记录（申请开立时间、标本采集人、标本采样时间）	申请开立时间	963201	953990	0.99	"SELECT COUNT( DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验申请总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE='1' AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630' AND ""检验标本信息表"" .isdeleted = '0'
+"	"SELECT COUNT(DISTINCT""检验标本信息表"".REQUISITION_ID) as ""申请开立时间N""
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" 
+ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID
+and ""检验标本信息表"".REQUISITION_ID = ""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".REQUISITION_time is not NULL
+AND ""检验标本信息表"".PATIENT_TYPE in ('1') 
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630'
+And ""检验标本信息表"" .isdeleted = '0'
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.2.5	LIS	完整性：检验申请记录（检验申请医师编码、申请医师姓名、临床情况说明或检验目的）	检验申请医师编码	963201	963033	1	"SELECT COUNT( DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验申请总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE='1' AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630' AND ""检验标本信息表"" .isdeleted = '0'
+"	"SELECT COUNT(DISTINCT""检验标本信息表"".REQUISITION_ID) as ""检验申请医生编码N""
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" 
+ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID
+and ""检验标本信息表"".REQUISITION_ID = ""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".REQUISITION_PERSON is not NULL
+AND ""检验标本信息表"".PATIENT_TYPE in ('1') 
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630'
+And ""检验标本信息表"" .isdeleted = '0'
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.2.5	LIS	完整性：检验申请记录（检验申请医师编码、申请医师姓名、临床情况说明或检验目的）	申请医师姓名	963201	963033	1	"SELECT COUNT( DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验申请总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE='1' AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630' AND ""检验标本信息表"" .isdeleted = '0'
+"	"SELECT COUNT(DISTINCT""检验标本信息表"".REQUISITION_ID) as ""检验申请医生编码N""
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" 
+ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID
+and ""检验标本信息表"".REQUISITION_ID = ""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".REQUISITION_PERSON is not NULL
+AND ""检验标本信息表"".PATIENT_TYPE in ('1') 
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630'
+And ""检验标本信息表"" .isdeleted = '0'
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.2.5	LIS	完整性：检验申请记录（检验申请医师编码、申请医师姓名、临床情况说明或检验目的）	临床情况说明或检验目的	963201	963033	1	"SELECT COUNT( DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验申请总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE='1' AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630' AND ""检验标本信息表"" .isdeleted = '0'
+"	"SELECT COUNT(DISTINCT""检验标本信息表"".REQUISITION_ID) as ""临床情况说明或检验目的N""
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample ""检验标本信息表""
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" 
+ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID
+and ""检验标本信息表"".REQUISITION_ID = ""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".CLINICAL_DIAGNOSES is not NULL
+AND ""检验标本信息表"".PATIENT_TYPE in ('1') 
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401' AND '20240630' 
+And ""检验标本信息表"" .isdeleted = '0'
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.2.3	LIS	一致性：检验申请记录（检验项目名称、检验项目编码、标本名称）	标本名称	963201	963201	1	"SELECT COUNT( DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验申请总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE='1' AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630' AND ""检验标本信息表"" .isdeleted = '0'
+"	"SELECT COUNT(DISTINCT ""检验标本信息表"".REQUISITION_ID) as ""标本名称C""
+FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" 
+ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID 
+AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+LEFT JOIN HID0101_ORCL_LIS_XHSYSTEM1.LIS_CHARGE_ITEM ""字典表"" 
+ON ""检验标本信息表"".SAMPLE_CLASS=""字典表"".SAMPLE_CLASS
+WHERE ""检验标本信息表"".PATIENT_TYPE='1' 
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630'
+And ""检验标本信息表"" .isdeleted = '0'
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.2.3	LIS	一致性：检验申请记录（检验项目名称、检验项目编码、标本名称）	检验项目名称	963201	963201	1	"SELECT COUNT( DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验申请总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE='1' AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630' AND ""检验标本信息表"" .isdeleted = '0'
+"	"
+SELECT COUNT(DISTINCT ""检验标本信息表"".REQUISITION_ID) as ""检验项目名称C""
+FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" 
+ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID 
+AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+LEFT JOIN HID0101_ORCL_LIS_XHSYSTEM1.LIS_CHARGE_ITEM ""字典表"" 
+ON ""检验明细表"".CHINESE_NAME_SHORT=""字典表"".CHINESE_NAME_SHORT
+WHERE ""检验标本信息表"".PATIENT_TYPE='1' 
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630'
+And ""检验标本信息表"" .isdeleted = '0'
+"
+2024-04-01 00:00:00~2024-06-30 23:59:59	01.2.3	LIS	一致性：检验申请记录（检验项目名称、检验项目编码、标本名称）	检验项目编码	963201	963201	1	"SELECT COUNT( DISTINCT ""检验标本信息表"".REQUISITION_ID) AS ""检验申请总数T"" FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE='1' AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630' AND ""检验标本信息表"" .isdeleted = '0'
+"	"SELECT COUNT(DISTINCT ""检验标本信息表"".REQUISITION_ID) as ""检验项目代码C""
+FROM hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE ""检验标本信息表"" 
+INNER JOIN hid0101_orcl_lis_dbo.LIS_INSPECTION_SAMPLE_CHARGE ""检验明细表"" 
+ON ""检验标本信息表"".INSPECTION_ID=""检验明细表"".INSPECTION_ID 
+AND ""检验标本信息表"".REQUISITION_ID=""检验明细表"".REQUISITION_ID
+LEFT JOIN HID0101_ORCL_LIS_XHSYSTEM1.LIS_CHARGE_ITEM ""字典表"" 
+ON ""检验明细表"".CHARGE_ITEM_ID=""字典表"".CHARGE_ITEM_ID
+WHERE ""检验标本信息表"".PATIENT_TYPE='1' 
+AND ""检验标本信息表"".INSPECTION_DATE BETWEEN '20240401'AND '20240630'
+And ""检验标本信息表"" .isdeleted = '0'
+"

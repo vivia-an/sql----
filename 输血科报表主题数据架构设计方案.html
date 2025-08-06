@@ -1,0 +1,2321 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.30">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>quarto-inputb1e6d866245d7ba</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="输血科报表主题数据架构设计方案_files/libs/clipboard/clipboard.min.js"></script>
+<script src="输血科报表主题数据架构设计方案_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="输血科报表主题数据架构设计方案_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="输血科报表主题数据架构设计方案_files/libs/quarto-html/popper.min.js"></script>
+<script src="输血科报表主题数据架构设计方案_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="输血科报表主题数据架构设计方案_files/libs/quarto-html/anchor.min.js"></script>
+<link href="输血科报表主题数据架构设计方案_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="输血科报表主题数据架构设计方案_files/libs/quarto-html/quarto-syntax-highlighting-de070a7b0ab54f8780927367ac907214.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="输血科报表主题数据架构设计方案_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="输血科报表主题数据架构设计方案_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="输血科报表主题数据架构设计方案_files/libs/bootstrap/bootstrap-bb462d781dde1847d9e3ccf7736099dd.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+
+
+
+<section id="输血科报表主题数据架构设计方案" class="level1">
+<h1>输血科报表主题数据架构设计方案</h1>
+<section id="一总体架构概述" class="level2">
+<h2 class="anchored" data-anchor-id="一总体架构概述">一、总体架构概述</h2>
+<p>基于现有DL -&gt; DC -&gt; MDR的三层架构，针对输血科运营分析业务需求设计完整的数据流向：</p>
+<pre class="mermaid"><code>graph TB
+    subgraph "DL层 - 数据湖层"
+        DL1[BIS_REQUISITION_INFO&lt;br/&gt;申请单信息表]
+        DL2[BIS_REQUISITION_BLOOD_DETAIL&lt;br/&gt;申请血液详细表]
+        DL3[BIS_BLOOD_INPUT&lt;br/&gt;血袋表]
+        DL4[LIS_REQUISITION_INFO&lt;br/&gt;标本信息主表]
+        DL5[LIS_REQUISITION_ITEM&lt;br/&gt;标本项目明细表]
+    end
+    
+    subgraph "DC层 - 数据中心层"
+        subgraph "明细数据表"
+            DC1[BTS_Requisition_Main&lt;br/&gt;输血申请主表]
+            DC2[BTS_Blood_Detail&lt;br/&gt;血液明细表]
+            DC3[BTS_Lab_Test&lt;br/&gt;输血检验表]
+            DC4[BTS_Work_Record&lt;br/&gt;输血工作量记录表]
+        end
+        
+        subgraph "汇总数据表"
+            DC5[BTS_Daily_Summary&lt;br/&gt;输血日度汇总表]
+        end
+    end
+    
+    subgraph "MDR层 - 主题数据集市层"
+        MDR1[MDR_BTS_Monthly_Summary&lt;br/&gt;输血科月度汇总主题表]
+    end
+    
+    subgraph "应用层"
+        APP1[月度运营分析]
+        APP2[环比同比分析]
+        APP3[血液类型分析]
+        APP4[工作量统计]
+        APP5[收入成本分析]
+    end
+    
+    %% 数据流向
+    DL1 --&gt; DC1
+    DL2 --&gt; DC2
+    DL3 --&gt; DC2
+    DL4 --&gt; DC3
+    DL5 --&gt; DC3
+    
+    DC1 --&gt; DC4
+    DC2 --&gt; DC4
+    DC3 --&gt; DC4
+    
+    DC1 --&gt; DC5
+    DC2 --&gt; DC5
+    DC3 --&gt; DC5
+    DC4 --&gt; DC5
+    
+    DC5 --&gt; MDR1
+    
+    MDR1 --&gt; APP1
+    MDR1 --&gt; APP2
+    MDR1 --&gt; APP3
+    MDR1 --&gt; APP4
+    MDR1 --&gt; APP5
+    
+    %% 样式
+    classDef dlStyle fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef dcStyle fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef mdrStyle fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    classDef appStyle fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    
+    class DL1,DL2,DL3,DL4,DL5 dlStyle
+    class DC1,DC2,DC3,DC4,DC5 dcStyle
+    class MDR1 mdrStyle
+    class APP1,APP2,APP3,APP4,APP5 appStyle</code></pre>
+<section id="数据分层说明" class="level3">
+<h3 class="anchored" data-anchor-id="数据分层说明">1.1 数据分层说明</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 18%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>数据层级</th>
+<th>数据类型</th>
+<th>表名举例</th>
+<th>数据来源</th>
+<th>数据特点</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>DL层</strong></td>
+<td>贴源数据</td>
+<td>BIS_REQUISITION_INFO、BIS_BLOOD_INPUT</td>
+<td>输血管理系统直接复制</td>
+<td>保持源系统原始结构</td>
+</tr>
+<tr class="even">
+<td><strong>DC层-明细</strong></td>
+<td>明细数据</td>
+<td>BTS_Requisition_Main、BTS_Blood_Detail</td>
+<td>DL层集成处理</td>
+<td>标准化字段、多医院统一</td>
+</tr>
+<tr class="odd">
+<td><strong>DC层-汇总</strong></td>
+<td>汇总数据</td>
+<td>BTS_Daily_Summary</td>
+<td>DC明细表聚合</td>
+<td>按维度预聚合，提升查询性能</td>
+</tr>
+<tr class="even">
+<td><strong>MDR层</strong></td>
+<td>主题数据</td>
+<td>MDR_BTS_Monthly_Summary</td>
+<td>DC层数据整合</td>
+<td>面向业务分析的宽表结构</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="核心业务需求" class="level3">
+<h3 class="anchored" data-anchor-id="核心业务需求">1.2 核心业务需求</h3>
+<p><strong>目标</strong>：通过对比输血科2024-08与2024-07、本年同期（2023-08）关键指标，评估科室运营效率及成本结构 <strong>使用人群</strong>：院领导、输血科主任、运营管理组、财务分析组 <strong>时间粒度</strong>：月度对比，包括当月、环比、同比</p>
+</section>
+<section id="核心指标体系" class="level3">
+<h3 class="anchored" data-anchor-id="核心指标体系">1.3 核心指标体系</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 18%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>指标类别</th>
+<th>指标名称</th>
+<th>指标内涵</th>
+<th>最小粒度</th>
+<th>计算方式</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>标本数</strong></td>
+<td>申请标本数</td>
+<td>接收的所有要检测的标本和输血申请</td>
+<td>单个申请单</td>
+<td>按检验目的统计</td>
+</tr>
+<tr class="even">
+<td><strong>检测项目数</strong></td>
+<td>检验项目数</td>
+<td>血型检测、抗体筛查、交叉配血等</td>
+<td>单个检测项目</td>
+<td>按检验目的明细统计</td>
+</tr>
+<tr class="odd">
+<td><strong>工作量</strong></td>
+<td>标本检测工作量</td>
+<td>血型检测、抗体筛查、交叉配血等</td>
+<td>单次检测操作</td>
+<td>检测操作计数</td>
+</tr>
+<tr class="even">
+<td><strong>工作量</strong></td>
+<td>临床用血工作量</td>
+<td>血液预约、入库、出库、盘存等</td>
+<td>单次血液操作</td>
+<td>血液操作计数</td>
+</tr>
+<tr class="odd">
+<td><strong>工作量</strong></td>
+<td>输血治疗工作量</td>
+<td>全血采集、血浆置换、血液单采</td>
+<td>单次治疗操作</td>
+<td>治疗操作计数</td>
+</tr>
+<tr class="even">
+<td><strong>工作量</strong></td>
+<td>血液管理工作量</td>
+<td>输血管理、合理用血评估等</td>
+<td>单次管理操作</td>
+<td>管理操作计数</td>
+</tr>
+<tr class="odd">
+<td><strong>收入</strong></td>
+<td>配血检收入</td>
+<td>标本检测收入</td>
+<td>单笔收费记录</td>
+<td>总收入-血费收入</td>
+</tr>
+<tr class="even">
+<td><strong>收入</strong></td>
+<td>血费收入</td>
+<td>血液收入</td>
+<td>单笔血液费用</td>
+<td>血液出库总费用</td>
+</tr>
+<tr class="odd">
+<td><strong>收入</strong></td>
+<td>输血治疗收入</td>
+<td>输血治疗项目收入</td>
+<td>单笔治疗费用</td>
+<td>治疗项目费用</td>
+</tr>
+<tr class="even">
+<td><strong>支出</strong></td>
+<td>血费支出</td>
+<td>血液成本支出</td>
+<td>单笔血液成本</td>
+<td>血站结算费用</td>
+</tr>
+<tr class="odd">
+<td><strong>支出</strong></td>
+<td>试剂支出</td>
+<td>试剂支出</td>
+<td>单笔试剂费用</td>
+<td>试剂库订单费用</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="二dc层原子指标设计原则" class="level2">
+<h2 class="anchored" data-anchor-id="二dc层原子指标设计原则">二、DC层原子指标设计原则</h2>
+<section id="设计理念对标现有dc架构" class="level3">
+<h3 class="anchored" data-anchor-id="设计理念对标现有dc架构">2.1 设计理念对标现有DC架构</h3>
+<p>通过分析现有datacenter设计，输血科主题遵循以下设计风格：</p>
+<ol type="1">
+<li><strong>命名规范一致性</strong>：<code>BTS_表名_字段名</code>格式，如<code>BTS_Requisition_Main_ApplyID</code></li>
+<li><strong>字段类型标准化</strong>：ID统一使用VARCHAR(60)，金额使用FLOAT8，时间使用timestamp</li>
+<li><strong>数据完整性</strong>：每个事实表都包含完整的维度信息（机构、人员、就诊等）</li>
+<li><strong>扩展性设计</strong>：预留扩展字段(ExtStr1-6, ExtNum1-2, ExtDate1-2)</li>
+<li><strong>元数据管理</strong>：包含数据来源标识、创建时间、更新时间等字段</li>
+</ol>
+</section>
+<section id="原子指标最小粒度说明" class="level3">
+<h3 class="anchored" data-anchor-id="原子指标最小粒度说明">2.2 原子指标最小粒度说明</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 18%">
+<col style="width: 24%">
+<col style="width: 24%">
+<col style="width: 18%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>业务域</th>
+<th>原子指标</th>
+<th>最小统计粒度</th>
+<th>支持聚合维度</th>
+<th>设计原因</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>申请域</strong></td>
+<td>申请数量</td>
+<td>单个申请单(申请单ID)</td>
+<td>日期/科室/血液类型/申请状态</td>
+<td>每个申请单是输血业务的基础单元</td>
+</tr>
+<tr class="even">
+<td><strong>血液域</strong></td>
+<td>血液数量</td>
+<td>单个血袋(血袋编号)</td>
+<td>日期/血液类型/血液状态/来源机构</td>
+<td>每个血袋是血液管理的最小单位</td>
+</tr>
+<tr class="odd">
+<td><strong>检验域</strong></td>
+<td>检验项目数</td>
+<td>单个检验项目(检验ID+项目ID)</td>
+<td>日期/检验类型/检验人员/检验状态</td>
+<td>每个检验项目是独立的检测单元</td>
+</tr>
+<tr class="even">
+<td><strong>工作量域</strong></td>
+<td>操作次数</td>
+<td>单次操作行为(操作ID)</td>
+<td>日期/操作类型/操作人员/工作内容</td>
+<td>每次操作都是独立的工作量单元</td>
+</tr>
+<tr class="odd">
+<td><strong>收入域</strong></td>
+<td>收费金额</td>
+<td>单笔收费记录(Fee_BillDet_BillDetID)</td>
+<td>日期/收费项目/收费类型/科室</td>
+<td>每笔收费都是独立的会计核算单元</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="dc层设计优势" class="level3">
+<h3 class="anchored" data-anchor-id="dc层设计优势">2.3 DC层设计优势</h3>
+<ul>
+<li><strong>原子性</strong>：每个事实都可以拆解到最小业务单元，支持任意粒度聚合</li>
+<li><strong>一致性</strong>：统一的数据模型确保跨域指标计算的准确性<br>
+</li>
+<li><strong>完整性</strong>：保留完整的业务上下文信息，支持复杂分析需求</li>
+<li><strong>扩展性</strong>：标准化设计便于后续业务拓展和维护</li>
+</ul>
+</section>
+</section>
+<section id="三数据血缘关系设计" class="level2">
+<h2 class="anchored" data-anchor-id="三数据血缘关系设计">三、数据血缘关系设计</h2>
+<section id="dl层数据源已有" class="level3">
+<h3 class="anchored" data-anchor-id="dl层数据源已有">3.1 DL层数据源（已有）</h3>
+<section id="输血管理系统表" class="level4">
+<h4 class="anchored" data-anchor-id="输血管理系统表">3.1.1 输血管理系统表</h4>
+<ul>
+<li><strong>BIS_REQUISITION_INFO</strong>（申请单信息表）- 输血申请数据源</li>
+<li><strong>BIS_REQUISITION_BLOOD_DETAIL</strong>（申请血液详细表）- 血液需求数据源<br>
+</li>
+<li><strong>BIS_BLOOD_INPUT</strong>（血袋表）- 血液库存数据源</li>
+<li><strong>BIS_TAKE_BLOOD</strong>（取血表）- 血液发放数据源</li>
+<li><strong>BIS_TRANSBLOOD_PROCESS_LIST</strong>（输注记录表）- 输血执行数据源</li>
+</ul>
+</section>
+<section id="lis检验系统表" class="level4">
+<h4 class="anchored" data-anchor-id="lis检验系统表">3.1.2 LIS检验系统表</h4>
+<ul>
+<li><strong>LIS_REQUISITION_INFO</strong>（标本信息主表）- 检验申请数据源</li>
+<li><strong>LIS_REQUISITION_ITEM</strong>（标本项目明细表）- 检验项目数据源</li>
+<li><strong>LIS_INSPECTION_RESULT</strong>（样本检验结果信息表）- 检验结果数据源</li>
+</ul>
+</section>
+<section id="现有dc层表" class="level4">
+<h4 class="anchored" data-anchor-id="现有dc层表">3.1.3 现有DC层表</h4>
+<ul>
+<li><strong>Apply_BloodTrans</strong>（申请_输血表）- 已有的输血申请统一数据模型</li>
+<li><strong>Fee_BillDet</strong>（费用_账单明细表）- 已有的收费统一数据模型</li>
+</ul>
+</section>
+</section>
+<section id="dc层设计符合现有dc架构风格" class="level3">
+<h3 class="anchored" data-anchor-id="dc层设计符合现有dc架构风格">3.2 DC层设计（符合现有DC架构风格）</h3>
+<section id="明细数据表设计dl-dc直接集成" class="level4">
+<h4 class="anchored" data-anchor-id="明细数据表设计dl-dc直接集成">3.2.1 明细数据表设计（DL-&gt;DC直接集成）</h4>
+<section id="a.-bts_requisition_main输血申请主表" class="level5">
+<h5 class="anchored" data-anchor-id="a.-bts_requisition_main输血申请主表">A. BTS_Requisition_Main（输血申请主表）</h5>
+<p><strong>字段映射表</strong>：</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 18%">
+<col style="width: 11%">
+<col style="width: 15%">
+<col style="width: 18%">
+<col style="width: 18%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>DC字段名</th>
+<th>字段类型</th>
+<th>源表</th>
+<th>源字段</th>
+<th>字段说明</th>
+<th>业务规则</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>BTS_Requisition_Main_MedOrgCode</td>
+<td>VARCHAR(60)</td>
+<td>BIS_REQUISITION_INFO</td>
+<td>hospital_id</td>
+<td>医疗机构代码</td>
+<td>支持多医院统一编码</td>
+</tr>
+<tr class="even">
+<td>BTS_Requisition_Main_ApplyID</td>
+<td>VARCHAR(60)</td>
+<td>BIS_REQUISITION_INFO</td>
+<td>requisition_id</td>
+<td>申请单ID</td>
+<td>业务主键，全局唯一</td>
+</tr>
+<tr class="odd">
+<td>BTS_Requisition_Main_ApplyDate</td>
+<td>VARCHAR(10)</td>
+<td>BIS_REQUISITION_INFO</td>
+<td>apply_date</td>
+<td>申请日期</td>
+<td>格式：YYYYMMDD</td>
+</tr>
+<tr class="even">
+<td>BTS_Requisition_Main_PersID</td>
+<td>INT8</td>
+<td>BIS_REQUISITION_INFO</td>
+<td>patient_id</td>
+<td>人员ID</td>
+<td>关联患者信息</td>
+</tr>
+<tr class="odd">
+<td>BTS_Requisition_Main_VisitID</td>
+<td>INT8</td>
+<td>BIS_REQUISITION_INFO</td>
+<td>visit_id</td>
+<td>就诊ID</td>
+<td>关联就诊信息</td>
+</tr>
+<tr class="even">
+<td>BTS_Requisition_Main_VisitTypeName</td>
+<td>VARCHAR(60)</td>
+<td>BIS_REQUISITION_INFO</td>
+<td>visit_type</td>
+<td>就诊类型名称</td>
+<td>门诊/住院</td>
+</tr>
+<tr class="odd">
+<td>BTS_Requisition_Main_DeptID</td>
+<td>VARCHAR(60)</td>
+<td>BIS_REQUISITION_INFO</td>
+<td>apply_dept_id</td>
+<td>申请科室ID</td>
+<td>关联科室维度</td>
+</tr>
+<tr class="even">
+<td>BTS_Requisition_Main_DeptName</td>
+<td>VARCHAR(100)</td>
+<td>BIS_REQUISITION_INFO</td>
+<td>apply_dept_name</td>
+<td>申请科室名称</td>
+<td>用于分析统计</td>
+</tr>
+<tr class="odd">
+<td>BTS_Requisition_Main_BloodTypeABO</td>
+<td>VARCHAR(100)</td>
+<td>BIS_REQUISITION_INFO</td>
+<td>blood_type_abo</td>
+<td>ABO血型</td>
+<td>血型匹配分析</td>
+</tr>
+<tr class="even">
+<td>BTS_Requisition_Main_BloodTypeRh</td>
+<td>VARCHAR(100)</td>
+<td>BIS_REQUISITION_INFO</td>
+<td>blood_type_rh</td>
+<td>Rh血型</td>
+<td>血型匹配分析</td>
+</tr>
+<tr class="odd">
+<td>BTS_Requisition_Main_BloodPurpose</td>
+<td>VARCHAR(200)</td>
+<td>BIS_REQUISITION_INFO</td>
+<td>blood_purpose</td>
+<td>输血目的</td>
+<td>业务分析</td>
+</tr>
+<tr class="even">
+<td>BTS_Requisition_Main_ApplyPersName</td>
+<td>VARCHAR(100)</td>
+<td>BIS_REQUISITION_INFO</td>
+<td>apply_doctor</td>
+<td>申请医生姓名</td>
+<td>工作量统计</td>
+</tr>
+<tr class="odd">
+<td>BTS_Requisition_Main_ApplyDtTm</td>
+<td>timestamp</td>
+<td>BIS_REQUISITION_INFO</td>
+<td>apply_time</td>
+<td>申请时间</td>
+<td>业务时间轴</td>
+</tr>
+<tr class="even">
+<td>BTS_Requisition_Main_ApplyStatusName</td>
+<td>VARCHAR(100)</td>
+<td>BIS_REQUISITION_INFO</td>
+<td>apply_status</td>
+<td>申请状态名称</td>
+<td>业务状态跟踪</td>
+</tr>
+</tbody>
+</table>
+<p><strong>建表语句</strong>：</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- 输血申请主表 - 对标现有DC架构命名和结构</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> BTS_Requisition_Main (</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 基础标识信息</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_MedOrgCode <span class="dt">VARCHAR</span>(<span class="dv">60</span>) <span class="kw">NOT</span> <span class="kw">NULL</span>,        <span class="co">-- 医疗机构代码</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_MedOrgName <span class="dt">VARCHAR</span>(<span class="dv">100</span>),                <span class="co">-- 医疗机构名称</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_EmpiID INT8,                            <span class="co">-- 人员唯一标识ID</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_EmpiNo <span class="dt">VARCHAR</span>(<span class="dv">60</span>),                     <span class="co">-- 人员唯一号</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_PersID INT8,                            <span class="co">-- 人员ID</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_PersNo <span class="dt">VARCHAR</span>(<span class="dv">60</span>),                     <span class="co">-- 人员号</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_VisitID INT8,                           <span class="co">-- 就诊ID</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_VisitNo <span class="dt">VARCHAR</span>(<span class="dv">60</span>),                    <span class="co">-- 就诊号</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_VisitTypeID <span class="dt">VARCHAR</span>(<span class="dv">60</span>),                <span class="co">-- 就诊类型ID</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_VisitTypeCode <span class="dt">VARCHAR</span>(<span class="dv">60</span>),              <span class="co">-- 就诊类型代码</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_VisitTypeName <span class="dt">VARCHAR</span>(<span class="dv">60</span>),              <span class="co">-- 就诊类型名称</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 申请核心信息</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_ApplyID <span class="dt">VARCHAR</span>(<span class="dv">60</span>) <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,        <span class="co">-- 申请单ID</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_ApplyNo <span class="dt">VARCHAR</span>(<span class="dv">60</span>),                    <span class="co">-- 申请单号</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_ApplyTypeID <span class="dt">VARCHAR</span>(<span class="dv">60</span>),                <span class="co">-- 申请类型ID</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_ApplyTypeCode <span class="dt">VARCHAR</span>(<span class="dv">60</span>),              <span class="co">-- 申请类型代码</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_ApplyTypeName <span class="dt">VARCHAR</span>(<span class="dv">100</span>),             <span class="co">-- 申请类型名称</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_ApplyStatusID <span class="dt">VARCHAR</span>(<span class="dv">60</span>),              <span class="co">-- 申请状态ID</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_ApplyStatusCode <span class="dt">VARCHAR</span>(<span class="dv">60</span>),            <span class="co">-- 申请状态代码</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_ApplyStatusName <span class="dt">VARCHAR</span>(<span class="dv">100</span>),           <span class="co">-- 申请状态名称</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 科室信息</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_DeptID <span class="dt">VARCHAR</span>(<span class="dv">60</span>),                     <span class="co">-- 申请科室ID</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_DeptCode <span class="dt">VARCHAR</span>(<span class="dv">60</span>),                   <span class="co">-- 申请科室代码</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_DeptName <span class="dt">VARCHAR</span>(<span class="dv">100</span>),                  <span class="co">-- 申请科室名称</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 血型信息</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_BloodTypeABOID <span class="dt">VARCHAR</span>(<span class="dv">60</span>),             <span class="co">-- ABO血型ID</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_BloodTypeABOCode <span class="dt">VARCHAR</span>(<span class="dv">60</span>),           <span class="co">-- ABO血型代码</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_BloodTypeABOName <span class="dt">VARCHAR</span>(<span class="dv">100</span>),          <span class="co">-- ABO血型名称</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_BloodTypeRhID <span class="dt">VARCHAR</span>(<span class="dv">60</span>),              <span class="co">-- Rh血型ID</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_BloodTypeRhCode <span class="dt">VARCHAR</span>(<span class="dv">60</span>),            <span class="co">-- Rh血型代码</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_BloodTypeRhName <span class="dt">VARCHAR</span>(<span class="dv">100</span>),           <span class="co">-- Rh血型名称</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 输血信息</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_BloodPurpose <span class="dt">VARCHAR</span>(<span class="dv">200</span>),              <span class="co">-- 输血目的</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_BloodPastHistory <span class="dt">VARCHAR</span>(<span class="dv">200</span>),          <span class="co">-- 既往输血史</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_PregHistoryFlag <span class="dt">VARCHAR</span>(<span class="dv">10</span>),            <span class="co">-- 妊娠史标识</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_PlanBloodDtTm <span class="dt">timestamp</span>,                <span class="co">-- 预计用血时间</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_BloodTransProperty <span class="dt">VARCHAR</span>(<span class="dv">100</span>),        <span class="co">-- 输血性质</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 时间信息</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_ApplyDate <span class="dt">VARCHAR</span>(<span class="dv">10</span>),                  <span class="co">-- 申请日期(YYYYMMDD)</span></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_ApplyDtTm <span class="dt">timestamp</span>,                    <span class="co">-- 申请时间</span></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_AuditDtTm <span class="dt">timestamp</span>,                    <span class="co">-- 审核时间</span></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_ApproveDtTm <span class="dt">timestamp</span>,                  <span class="co">-- 批准时间</span></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 人员信息</span></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_ApplyPersID <span class="dt">VARCHAR</span>(<span class="dv">60</span>),                <span class="co">-- 申请人员ID</span></span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_ApplyPersCode <span class="dt">VARCHAR</span>(<span class="dv">60</span>),              <span class="co">-- 申请人员代码</span></span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_ApplyPersName <span class="dt">VARCHAR</span>(<span class="dv">100</span>),             <span class="co">-- 申请人员姓名</span></span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_AuditPersID <span class="dt">VARCHAR</span>(<span class="dv">60</span>),                <span class="co">-- 审核人员ID</span></span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_AuditPersCode <span class="dt">VARCHAR</span>(<span class="dv">60</span>),              <span class="co">-- 审核人员代码</span></span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_AuditPersName <span class="dt">VARCHAR</span>(<span class="dv">100</span>),             <span class="co">-- 审核人员姓名</span></span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 标准扩展字段</span></span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_ExtStr1 <span class="dt">VARCHAR</span>(<span class="dv">200</span>),                   <span class="co">-- 扩展1(字符类型)</span></span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_ExtStr2 <span class="dt">VARCHAR</span>(<span class="dv">200</span>),                   <span class="co">-- 扩展2(字符类型)</span></span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_ExtStr3 <span class="dt">VARCHAR</span>(<span class="dv">200</span>),                   <span class="co">-- 扩展3(字符类型)</span></span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_ExtStr4 <span class="dt">VARCHAR</span>(<span class="dv">200</span>),                   <span class="co">-- 扩展4(字符类型)</span></span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_ExtStr5 <span class="dt">VARCHAR</span>(<span class="dv">200</span>),                   <span class="co">-- 扩展5(字符类型)</span></span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_ExtStr6 <span class="dt">VARCHAR</span>(<span class="dv">200</span>),                   <span class="co">-- 扩展6(字符类型)</span></span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_ExtNum1 FLOAT8,                         <span class="co">-- 扩展7(数值类型)</span></span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_ExtNum2 FLOAT8,                         <span class="co">-- 扩展8(数值类型)</span></span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_ExtDate1 <span class="dt">timestamp</span>,                     <span class="co">-- 扩展9(时间类型)</span></span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_ExtDate2 <span class="dt">timestamp</span>,                     <span class="co">-- 扩展10(时间类型)</span></span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 数据管理字段</span></span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_DataSourceFlag <span class="dt">VARCHAR</span>(<span class="dv">10</span>),             <span class="co">-- 数据来源标识</span></span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_DSTable <span class="dt">VARCHAR</span>(<span class="dv">60</span>),                    <span class="co">-- 接入数据源的表</span></span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_DSTableKey <span class="dt">VARCHAR</span>(<span class="dv">200</span>),                <span class="co">-- 接入数据源的key</span></span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_DSTableValue <span class="dt">VARCHAR</span>(<span class="dv">200</span>),              <span class="co">-- 接入数据源的key值</span></span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_IsDeleted INT8 <span class="kw">DEFAULT</span> <span class="dv">0</span>,               <span class="co">-- 数据物理删除标识</span></span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_LastUpdateDtTm <span class="dt">timestamp</span> <span class="kw">DEFAULT</span> GETDATE(), <span class="co">-- 最后更新时间</span></span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_DataCreateDtTm <span class="dt">timestamp</span> <span class="kw">DEFAULT</span> GETDATE()  <span class="co">-- 数据创建时间</span></span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a>);</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="b.-bts_blood_detail血液明细表" class="level5">
+<h5 class="anchored" data-anchor-id="b.-bts_blood_detail血液明细表">B. BTS_Blood_Detail（血液明细表）</h5>
+<p><strong>字段映射表</strong>：</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 18%">
+<col style="width: 11%">
+<col style="width: 15%">
+<col style="width: 18%">
+<col style="width: 18%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>DC字段名</th>
+<th>字段类型</th>
+<th>源表</th>
+<th>源字段</th>
+<th>字段说明</th>
+<th>业务规则</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>BTS_Blood_Detail_MedOrgCode</td>
+<td>VARCHAR(60)</td>
+<td>BIS_BLOOD_INPUT</td>
+<td>hospital_id</td>
+<td>医疗机构代码</td>
+<td>支持多医院统一编码</td>
+</tr>
+<tr class="even">
+<td>BTS_Blood_Detail_BloodID</td>
+<td>VARCHAR(60)</td>
+<td>BIS_BLOOD_INPUT</td>
+<td>blood_id</td>
+<td>血液ID</td>
+<td>业务主键，全局唯一</td>
+</tr>
+<tr class="odd">
+<td>BTS_Blood_Detail_BloodBagNo</td>
+<td>VARCHAR(60)</td>
+<td>BIS_BLOOD_INPUT</td>
+<td>blood_bag_no</td>
+<td>血袋编号</td>
+<td>血袋唯一标识</td>
+</tr>
+<tr class="even">
+<td>BTS_Blood_Detail_BloodDate</td>
+<td>VARCHAR(10)</td>
+<td>BIS_BLOOD_INPUT</td>
+<td>blood_date</td>
+<td>血液日期</td>
+<td>格式：YYYYMMDD</td>
+</tr>
+<tr class="odd">
+<td>BTS_Blood_Detail_BloodTypeCode</td>
+<td>VARCHAR(60)</td>
+<td>BIS_BLOOD_INPUT</td>
+<td>blood_type</td>
+<td>血液类型代码</td>
+<td>红细胞、血浆等</td>
+</tr>
+<tr class="even">
+<td>BTS_Blood_Detail_BloodTypeName</td>
+<td>VARCHAR(100)</td>
+<td>BIS_BLOOD_INPUT</td>
+<td>blood_type_name</td>
+<td>血液类型名称</td>
+<td>中文描述</td>
+</tr>
+<tr class="odd">
+<td>BTS_Blood_Detail_BloodVolume</td>
+<td>FLOAT8</td>
+<td>BIS_BLOOD_INPUT</td>
+<td>blood_volume</td>
+<td>血液容量</td>
+<td>毫升</td>
+</tr>
+<tr class="even">
+<td>BTS_Blood_Detail_BloodABO</td>
+<td>VARCHAR(100)</td>
+<td>BIS_BLOOD_INPUT</td>
+<td>blood_abo</td>
+<td>ABO血型</td>
+<td>血型匹配</td>
+</tr>
+<tr class="odd">
+<td>BTS_Blood_Detail_BloodRh</td>
+<td>VARCHAR(100)</td>
+<td>BIS_BLOOD_INPUT</td>
+<td>blood_rh</td>
+<td>Rh血型</td>
+<td>血型匹配</td>
+</tr>
+<tr class="even">
+<td>BTS_Blood_Detail_BloodStatusName</td>
+<td>VARCHAR(100)</td>
+<td>BIS_BLOOD_INPUT</td>
+<td>blood_status</td>
+<td>血液状态名称</td>
+<td>在库、出库等</td>
+</tr>
+<tr class="odd">
+<td>BTS_Blood_Detail_InboundDtTm</td>
+<td>timestamp</td>
+<td>BIS_BLOOD_INPUT</td>
+<td>inbound_time</td>
+<td>入库时间</td>
+<td>业务时间轴</td>
+</tr>
+<tr class="even">
+<td>BTS_Blood_Detail_OutboundDtTm</td>
+<td>timestamp</td>
+<td>BIS_BLOOD_INPUT</td>
+<td>outbound_time</td>
+<td>出库时间</td>
+<td>业务时间轴</td>
+</tr>
+<tr class="odd">
+<td>BTS_Blood_Detail_BloodSource</td>
+<td>VARCHAR(100)</td>
+<td>BIS_BLOOD_INPUT</td>
+<td>blood_source</td>
+<td>血液来源</td>
+<td>血站机构</td>
+</tr>
+</tbody>
+</table>
+<p><strong>建表语句</strong>：</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- 血液明细表</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> BTS_Blood_Detail (</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 基础标识信息</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_MedOrgCode <span class="dt">VARCHAR</span>(<span class="dv">60</span>) <span class="kw">NOT</span> <span class="kw">NULL</span>,            <span class="co">-- 医疗机构代码</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_MedOrgName <span class="dt">VARCHAR</span>(<span class="dv">100</span>),                    <span class="co">-- 医疗机构名称</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 血液核心信息</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_BloodID <span class="dt">VARCHAR</span>(<span class="dv">60</span>) <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,            <span class="co">-- 血液ID</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_BloodBagNo <span class="dt">VARCHAR</span>(<span class="dv">60</span>),                     <span class="co">-- 血袋编号</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_BloodCode <span class="dt">VARCHAR</span>(<span class="dv">60</span>),                      <span class="co">-- 血液编码</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_BloodTypeID <span class="dt">VARCHAR</span>(<span class="dv">60</span>),                    <span class="co">-- 血液类型ID</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_BloodTypeCode <span class="dt">VARCHAR</span>(<span class="dv">60</span>),                  <span class="co">-- 血液类型代码</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_BloodTypeName <span class="dt">VARCHAR</span>(<span class="dv">100</span>),                 <span class="co">-- 血液类型名称</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_BloodStatusID <span class="dt">VARCHAR</span>(<span class="dv">60</span>),                  <span class="co">-- 血液状态ID</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_BloodStatusCode <span class="dt">VARCHAR</span>(<span class="dv">60</span>),                <span class="co">-- 血液状态代码</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_BloodStatusName <span class="dt">VARCHAR</span>(<span class="dv">100</span>),               <span class="co">-- 血液状态名称</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 血液属性信息</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_BloodABOID <span class="dt">VARCHAR</span>(<span class="dv">60</span>),                     <span class="co">-- ABO血型ID</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_BloodABOCode <span class="dt">VARCHAR</span>(<span class="dv">60</span>),                   <span class="co">-- ABO血型代码</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_BloodABOName <span class="dt">VARCHAR</span>(<span class="dv">100</span>),                  <span class="co">-- ABO血型名称</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_BloodRhID <span class="dt">VARCHAR</span>(<span class="dv">60</span>),                      <span class="co">-- Rh血型ID</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_BloodRhCode <span class="dt">VARCHAR</span>(<span class="dv">60</span>),                    <span class="co">-- Rh血型代码</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_BloodRhName <span class="dt">VARCHAR</span>(<span class="dv">100</span>),                   <span class="co">-- Rh血型名称</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_BloodVolume FLOAT8,                         <span class="co">-- 血液容量(毫升)</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_BloodVolumeUnit <span class="dt">VARCHAR</span>(<span class="dv">60</span>),                <span class="co">-- 血液容量单位</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_BloodSource <span class="dt">VARCHAR</span>(<span class="dv">100</span>),                   <span class="co">-- 血液来源</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_BloodLotNo <span class="dt">VARCHAR</span>(<span class="dv">60</span>),                     <span class="co">-- 血液批号</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_BloodExpireDtTm <span class="dt">timestamp</span>,                  <span class="co">-- 血液过期时间</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 时间信息</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_BloodDate <span class="dt">VARCHAR</span>(<span class="dv">10</span>),                      <span class="co">-- 血液日期(YYYYMMDD)</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_InboundDtTm <span class="dt">timestamp</span>,                      <span class="co">-- 入库时间</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_OutboundDtTm <span class="dt">timestamp</span>,                     <span class="co">-- 出库时间</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_TransfusionDtTm <span class="dt">timestamp</span>,                  <span class="co">-- 输注时间</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 人员信息</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_InboundPersID <span class="dt">VARCHAR</span>(<span class="dv">60</span>),                  <span class="co">-- 入库人员ID</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_InboundPersCode <span class="dt">VARCHAR</span>(<span class="dv">60</span>),                <span class="co">-- 入库人员代码</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_InboundPersName <span class="dt">VARCHAR</span>(<span class="dv">100</span>),               <span class="co">-- 入库人员姓名</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_OutboundPersID <span class="dt">VARCHAR</span>(<span class="dv">60</span>),                 <span class="co">-- 出库人员ID</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_OutboundPersCode <span class="dt">VARCHAR</span>(<span class="dv">60</span>),               <span class="co">-- 出库人员代码</span></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_OutboundPersName <span class="dt">VARCHAR</span>(<span class="dv">100</span>),              <span class="co">-- 出库人员姓名</span></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 标准扩展字段</span></span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_ExtStr1 <span class="dt">VARCHAR</span>(<span class="dv">200</span>),                       <span class="co">-- 扩展1(字符类型)</span></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_ExtStr2 <span class="dt">VARCHAR</span>(<span class="dv">200</span>),                       <span class="co">-- 扩展2(字符类型)</span></span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_ExtStr3 <span class="dt">VARCHAR</span>(<span class="dv">200</span>),                       <span class="co">-- 扩展3(字符类型)</span></span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_ExtStr4 <span class="dt">VARCHAR</span>(<span class="dv">200</span>),                       <span class="co">-- 扩展4(字符类型)</span></span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_ExtStr5 <span class="dt">VARCHAR</span>(<span class="dv">200</span>),                       <span class="co">-- 扩展5(字符类型)</span></span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_ExtStr6 <span class="dt">VARCHAR</span>(<span class="dv">200</span>),                       <span class="co">-- 扩展6(字符类型)</span></span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_ExtNum1 FLOAT8,                             <span class="co">-- 扩展7(数值类型)</span></span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_ExtNum2 FLOAT8,                             <span class="co">-- 扩展8(数值类型)</span></span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_ExtDate1 <span class="dt">timestamp</span>,                         <span class="co">-- 扩展9(时间类型)</span></span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_ExtDate2 <span class="dt">timestamp</span>,                         <span class="co">-- 扩展10(时间类型)</span></span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 数据管理字段</span></span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_DataSourceFlag <span class="dt">VARCHAR</span>(<span class="dv">10</span>),                 <span class="co">-- 数据来源标识</span></span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_DSTable <span class="dt">VARCHAR</span>(<span class="dv">60</span>),                        <span class="co">-- 接入数据源的表</span></span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_DSTableKey <span class="dt">VARCHAR</span>(<span class="dv">200</span>),                    <span class="co">-- 接入数据源的key</span></span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_DSTableValue <span class="dt">VARCHAR</span>(<span class="dv">200</span>),                  <span class="co">-- 接入数据源的key值</span></span>
+<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_IsDeleted INT8 <span class="kw">DEFAULT</span> <span class="dv">0</span>,                   <span class="co">-- 数据物理删除标识</span></span>
+<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_LastUpdateDtTm <span class="dt">timestamp</span> <span class="kw">DEFAULT</span> GETDATE(), <span class="co">-- 最后更新时间</span></span>
+<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_DataCreateDtTm <span class="dt">timestamp</span> <span class="kw">DEFAULT</span> GETDATE()  <span class="co">-- 数据创建时间</span></span>
+<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a>);</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="c.-bts_lab_test输血检验表" class="level5">
+<h5 class="anchored" data-anchor-id="c.-bts_lab_test输血检验表">C. BTS_Lab_Test（输血检验表）</h5>
+<p><strong>字段映射表</strong>：</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 18%">
+<col style="width: 11%">
+<col style="width: 15%">
+<col style="width: 18%">
+<col style="width: 18%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>DC字段名</th>
+<th>字段类型</th>
+<th>源表</th>
+<th>源字段</th>
+<th>字段说明</th>
+<th>业务规则</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>BTS_Lab_Test_MedOrgCode</td>
+<td>VARCHAR(60)</td>
+<td>LIS_REQUISITION_INFO</td>
+<td>hospital_id</td>
+<td>医疗机构代码</td>
+<td>支持多医院统一编码</td>
+</tr>
+<tr class="even">
+<td>BTS_Lab_Test_TestID</td>
+<td>VARCHAR(60)</td>
+<td>LIS_REQUISITION_INFO + LIS_REQUISITION_ITEM</td>
+<td>requisition_id + item_id</td>
+<td>检验ID</td>
+<td>主键，req_id + “_” + item_id</td>
+</tr>
+<tr class="odd">
+<td>BTS_Lab_Test_TestDate</td>
+<td>VARCHAR(10)</td>
+<td>LIS_REQUISITION_INFO</td>
+<td>test_date</td>
+<td>检验日期</td>
+<td>格式：YYYYMMDD</td>
+</tr>
+<tr class="even">
+<td>BTS_Lab_Test_TestItemCode</td>
+<td>VARCHAR(60)</td>
+<td>LIS_REQUISITION_ITEM</td>
+<td>item_code</td>
+<td>检验项目代码</td>
+<td>血型检测、抗体筛查等</td>
+</tr>
+<tr class="odd">
+<td>BTS_Lab_Test_TestItemName</td>
+<td>VARCHAR(100)</td>
+<td>LIS_REQUISITION_ITEM</td>
+<td>item_name</td>
+<td>检验项目名称</td>
+<td>中文描述</td>
+</tr>
+<tr class="even">
+<td>BTS_Lab_Test_TestTypeCode</td>
+<td>VARCHAR(60)</td>
+<td>业务分类</td>
+<td>血型检测/抗体筛查/交叉配血</td>
+<td>检验类型代码</td>
+<td>按业务分类</td>
+</tr>
+<tr class="odd">
+<td>BTS_Lab_Test_TestCount</td>
+<td>INT8</td>
+<td>固定值</td>
+<td>1</td>
+<td>检验数量</td>
+<td>每个项目计数1</td>
+</tr>
+<tr class="even">
+<td>BTS_Lab_Test_TestResult</td>
+<td>VARCHAR(200)</td>
+<td>LIS_INSPECTION_RESULT</td>
+<td>test_result</td>
+<td>检验结果</td>
+<td>结果描述</td>
+</tr>
+<tr class="odd">
+<td>BTS_Lab_Test_TestPersName</td>
+<td>VARCHAR(100)</td>
+<td>LIS_INSPECTION_RESULT</td>
+<td>test_person</td>
+<td>检验人员姓名</td>
+<td>工作量统计</td>
+</tr>
+<tr class="even">
+<td>BTS_Lab_Test_TestDtTm</td>
+<td>timestamp</td>
+<td>LIS_INSPECTION_RESULT</td>
+<td>test_time</td>
+<td>检验时间</td>
+<td>业务时间轴</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="d.-bts_work_record输血工作量记录表" class="level5">
+<h5 class="anchored" data-anchor-id="d.-bts_work_record输血工作量记录表">D. BTS_Work_Record（输血工作量记录表）</h5>
+<p><strong>字段映射表</strong>：</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 18%">
+<col style="width: 11%">
+<col style="width: 15%">
+<col style="width: 18%">
+<col style="width: 18%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>DC字段名</th>
+<th>字段类型</th>
+<th>源表</th>
+<th>源字段</th>
+<th>字段说明</th>
+<th>业务规则</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>BTS_Work_Record_MedOrgCode</td>
+<td>VARCHAR(60)</td>
+<td>多表集成</td>
+<td>hospital_id</td>
+<td>医疗机构代码</td>
+<td>支持多医院统一编码</td>
+</tr>
+<tr class="even">
+<td>BTS_Work_Record_WorkID</td>
+<td>VARCHAR(60)</td>
+<td>业务生成</td>
+<td>业务ID + 工作类型</td>
+<td>工作记录ID</td>
+<td>主键，全局唯一</td>
+</tr>
+<tr class="odd">
+<td>BTS_Work_Record_WorkDate</td>
+<td>VARCHAR(10)</td>
+<td>多表集成</td>
+<td>work_date</td>
+<td>工作日期</td>
+<td>格式：YYYYMMDD</td>
+</tr>
+<tr class="even">
+<td>BTS_Work_Record_WorkTypeCode</td>
+<td>VARCHAR(60)</td>
+<td>业务逻辑</td>
+<td>SAMPLE/BLOOD/TREATMENT/MANAGE</td>
+<td>工作类型代码</td>
+<td>4类工作量</td>
+</tr>
+<tr class="odd">
+<td>BTS_Work_Record_WorkTypeName</td>
+<td>VARCHAR(100)</td>
+<td>业务逻辑</td>
+<td>标本检测/临床用血/输血治疗/血液管理</td>
+<td>工作类型名称</td>
+<td>中文描述</td>
+</tr>
+<tr class="even">
+<td>BTS_Work_Record_WorkSubTypeCode</td>
+<td>VARCHAR(60)</td>
+<td>业务逻辑</td>
+<td>具体子类型</td>
+<td>工作子类型代码</td>
+<td>细分类型</td>
+</tr>
+<tr class="odd">
+<td>BTS_Work_Record_WorkSubTypeName</td>
+<td>VARCHAR(100)</td>
+<td>业务逻辑</td>
+<td>具体子类型名称</td>
+<td>工作子类型名称</td>
+<td>中文描述</td>
+</tr>
+<tr class="even">
+<td>BTS_Work_Record_WorkCount</td>
+<td>INT8</td>
+<td>固定值</td>
+<td>1</td>
+<td>工作量计数</td>
+<td>每次操作计数1</td>
+</tr>
+<tr class="odd">
+<td>BTS_Work_Record_OperatorName</td>
+<td>VARCHAR(100)</td>
+<td>多表集成</td>
+<td>operator_name</td>
+<td>操作人员姓名</td>
+<td>工作量统计</td>
+</tr>
+<tr class="even">
+<td>BTS_Work_Record_WorkDtTm</td>
+<td>timestamp</td>
+<td>多表集成</td>
+<td>work_time</td>
+<td>工作时间</td>
+<td>业务时间轴</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="汇总数据表设计dc明细表-dc汇总表" class="level4">
+<h4 class="anchored" data-anchor-id="汇总数据表设计dc明细表-dc汇总表">3.2.2 汇总数据表设计（DC明细表-&gt;DC汇总表）</h4>
+<section id="e.-bts_daily_summary输血日度汇总表" class="level5">
+<h5 class="anchored" data-anchor-id="e.-bts_daily_summary输血日度汇总表">E. BTS_Daily_Summary（输血日度汇总表）</h5>
+<p><strong>建表语句</strong>：</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- 输血日度汇总表</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> BTS_Daily_Summary (</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 基础标识信息</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_MedOrgCode <span class="dt">VARCHAR</span>(<span class="dv">60</span>) <span class="kw">NOT</span> <span class="kw">NULL</span>,           <span class="co">-- 医疗机构代码</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_MedOrgName <span class="dt">VARCHAR</span>(<span class="dv">100</span>),                   <span class="co">-- 医疗机构名称</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_SummaryID <span class="dt">VARCHAR</span>(<span class="dv">60</span>) <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,         <span class="co">-- 汇总ID</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 时间维度</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_SummaryDate <span class="dt">VARCHAR</span>(<span class="dv">10</span>),                   <span class="co">-- 汇总日期(YYYYMMDD)</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_SummaryYear <span class="dt">VARCHAR</span>(<span class="dv">4</span>),                    <span class="co">-- 汇总年份</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_SummaryMonth <span class="dt">VARCHAR</span>(<span class="dv">2</span>),                   <span class="co">-- 汇总月份</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_SummaryDay <span class="dt">VARCHAR</span>(<span class="dv">2</span>),                     <span class="co">-- 汇总日</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_SummaryWeekday <span class="dt">VARCHAR</span>(<span class="dv">1</span>),                 <span class="co">-- 星期几(1-7)</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 科室维度</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_DeptID <span class="dt">VARCHAR</span>(<span class="dv">60</span>),                        <span class="co">-- 科室ID</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_DeptCode <span class="dt">VARCHAR</span>(<span class="dv">60</span>),                      <span class="co">-- 科室代码</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_DeptName <span class="dt">VARCHAR</span>(<span class="dv">100</span>),                     <span class="co">-- 科室名称</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 血液类型维度</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_BloodTypeID <span class="dt">VARCHAR</span>(<span class="dv">60</span>),                   <span class="co">-- 血液类型ID</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_BloodTypeCode <span class="dt">VARCHAR</span>(<span class="dv">60</span>),                 <span class="co">-- 血液类型代码</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_BloodTypeName <span class="dt">VARCHAR</span>(<span class="dv">100</span>),                <span class="co">-- 血液类型名称</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 核心指标汇总</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_ApplyCount INT8 <span class="kw">DEFAULT</span> <span class="dv">0</span>,                 <span class="co">-- 申请数量</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_SampleCount INT8 <span class="kw">DEFAULT</span> <span class="dv">0</span>,                <span class="co">-- 标本数量</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_TestCount INT8 <span class="kw">DEFAULT</span> <span class="dv">0</span>,                  <span class="co">-- 检测项目数</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_BloodInCount INT8 <span class="kw">DEFAULT</span> <span class="dv">0</span>,               <span class="co">-- 血液入库数</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_BloodOutCount INT8 <span class="kw">DEFAULT</span> <span class="dv">0</span>,              <span class="co">-- 血液出库数</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_BloodVolume FLOAT8 <span class="kw">DEFAULT</span> <span class="dv">0</span>,              <span class="co">-- 血液容量(毫升)</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 工作量汇总</span></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_SampleWorkCount INT8 <span class="kw">DEFAULT</span> <span class="dv">0</span>,            <span class="co">-- 标本检测工作量</span></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_BloodWorkCount INT8 <span class="kw">DEFAULT</span> <span class="dv">0</span>,             <span class="co">-- 临床用血工作量</span></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_TreatmentWorkCount INT8 <span class="kw">DEFAULT</span> <span class="dv">0</span>,         <span class="co">-- 输血治疗工作量</span></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_ManageWorkCount INT8 <span class="kw">DEFAULT</span> <span class="dv">0</span>,            <span class="co">-- 血液管理工作量</span></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_TotalWorkCount INT8 <span class="kw">DEFAULT</span> <span class="dv">0</span>,             <span class="co">-- 总工作量</span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 收入汇总</span></span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_TestIncome FLOAT8 <span class="kw">DEFAULT</span> <span class="dv">0</span>,               <span class="co">-- 配血检收入</span></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_BloodIncome FLOAT8 <span class="kw">DEFAULT</span> <span class="dv">0</span>,              <span class="co">-- 血费收入</span></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_TreatmentIncome FLOAT8 <span class="kw">DEFAULT</span> <span class="dv">0</span>,          <span class="co">-- 输血治疗收入</span></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_TotalIncome FLOAT8 <span class="kw">DEFAULT</span> <span class="dv">0</span>,              <span class="co">-- 总收入</span></span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 支出汇总</span></span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_BloodCost FLOAT8 <span class="kw">DEFAULT</span> <span class="dv">0</span>,                <span class="co">-- 血费支出</span></span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_ReagentCost FLOAT8 <span class="kw">DEFAULT</span> <span class="dv">0</span>,              <span class="co">-- 试剂支出</span></span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_MaterialCost FLOAT8 <span class="kw">DEFAULT</span> <span class="dv">0</span>,             <span class="co">-- 输血治疗耗材</span></span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_TotalCost FLOAT8 <span class="kw">DEFAULT</span> <span class="dv">0</span>,                <span class="co">-- 总支出</span></span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 标准扩展字段</span></span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_ExtStr1 <span class="dt">VARCHAR</span>(<span class="dv">200</span>),                      <span class="co">-- 扩展1(字符类型)</span></span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_ExtStr2 <span class="dt">VARCHAR</span>(<span class="dv">200</span>),                      <span class="co">-- 扩展2(字符类型)</span></span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_ExtStr3 <span class="dt">VARCHAR</span>(<span class="dv">200</span>),                      <span class="co">-- 扩展3(字符类型)</span></span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_ExtNum1 FLOAT8,                            <span class="co">-- 扩展4(数值类型)</span></span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_ExtNum2 FLOAT8,                            <span class="co">-- 扩展5(数值类型)</span></span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_ExtDate1 <span class="dt">timestamp</span>,                        <span class="co">-- 扩展6(时间类型)</span></span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 数据管理字段</span></span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_DataSourceFlag <span class="dt">VARCHAR</span>(<span class="dv">10</span>),                <span class="co">-- 数据来源标识</span></span>
+<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_IsDeleted INT8 <span class="kw">DEFAULT</span> <span class="dv">0</span>,                  <span class="co">-- 数据物理删除标识</span></span>
+<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_LastUpdateDtTm <span class="dt">timestamp</span> <span class="kw">DEFAULT</span> GETDATE(), <span class="co">-- 最后更新时间</span></span>
+<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_DataCreateDtTm <span class="dt">timestamp</span> <span class="kw">DEFAULT</span> GETDATE()  <span class="co">-- 数据创建时间</span></span>
+<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a>);</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+</section>
+<section id="mdr层设计dc-mdr主题集市" class="level3">
+<h3 class="anchored" data-anchor-id="mdr层设计dc-mdr主题集市">3.3 MDR层设计（DC-&gt;MDR主题集市）</h3>
+<section id="mdr_bts_monthly_summary输血科月度汇总主题表" class="level4">
+<h4 class="anchored" data-anchor-id="mdr_bts_monthly_summary输血科月度汇总主题表">MDR_BTS_Monthly_Summary（输血科月度汇总主题表）</h4>
+<p><strong>建表语句</strong>：</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- 输血科月度汇总主题表</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> MDR_BTS_Monthly_Summary (</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 基础标识信息</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_MedOrgCode <span class="dt">VARCHAR</span>(<span class="dv">60</span>) <span class="kw">NOT</span> <span class="kw">NULL</span>,     <span class="co">-- 医疗机构代码</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_MedOrgName <span class="dt">VARCHAR</span>(<span class="dv">100</span>),             <span class="co">-- 医疗机构名称</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_SummaryID <span class="dt">VARCHAR</span>(<span class="dv">60</span>) <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,   <span class="co">-- 汇总ID</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 时间维度</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_SummaryYearMonth <span class="dt">VARCHAR</span>(<span class="dv">6</span>),         <span class="co">-- 汇总年月(YYYYMM)</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_SummaryYear <span class="dt">VARCHAR</span>(<span class="dv">4</span>),              <span class="co">-- 汇总年份</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_SummaryMonth <span class="dt">VARCHAR</span>(<span class="dv">2</span>),             <span class="co">-- 汇总月份</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 科室维度</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_DeptID <span class="dt">VARCHAR</span>(<span class="dv">60</span>),                  <span class="co">-- 科室ID</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_DeptCode <span class="dt">VARCHAR</span>(<span class="dv">60</span>),                <span class="co">-- 科室代码</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_DeptName <span class="dt">VARCHAR</span>(<span class="dv">100</span>),               <span class="co">-- 科室名称</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 血液类型维度</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_BloodTypeID <span class="dt">VARCHAR</span>(<span class="dv">60</span>),             <span class="co">-- 血液类型ID</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_BloodTypeCode <span class="dt">VARCHAR</span>(<span class="dv">60</span>),           <span class="co">-- 血液类型代码</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_BloodTypeName <span class="dt">VARCHAR</span>(<span class="dv">100</span>),          <span class="co">-- 血液类型名称</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 当月核心指标</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_CurrentSampleCount INT8,             <span class="co">-- 当月标本数</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_CurrentTestCount INT8,               <span class="co">-- 当月检测项目数</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_CurrentWorkCount INT8,               <span class="co">-- 当月工作量</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_CurrentBloodIncome FLOAT8,           <span class="co">-- 当月血液收入</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_CurrentReagentCost FLOAT8,           <span class="co">-- 当月试剂支出</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_CurrentTotalIncome FLOAT8,           <span class="co">-- 当月总收入</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 环比数据（与上月对比）</span></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_LastSampleCount INT8,                <span class="co">-- 上月标本数</span></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_LastTestCount INT8,                  <span class="co">-- 上月检测项目数</span></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_LastWorkCount INT8,                  <span class="co">-- 上月工作量</span></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_LastBloodIncome FLOAT8,              <span class="co">-- 上月血液收入</span></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_LastReagentCost FLOAT8,              <span class="co">-- 上月试剂支出</span></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_LastTotalIncome FLOAT8,              <span class="co">-- 上月总收入</span></span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 环比变化率</span></span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_SampleCountMoMRate FLOAT8,           <span class="co">-- 标本数环比变化率</span></span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_TestCountMoMRate FLOAT8,             <span class="co">-- 检测项目数环比变化率</span></span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_WorkCountMoMRate FLOAT8,             <span class="co">-- 工作量环比变化率</span></span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_BloodIncomeMoMRate FLOAT8,           <span class="co">-- 血液收入环比变化率</span></span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_ReagentCostMoMRate FLOAT8,           <span class="co">-- 试剂支出环比变化率</span></span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_TotalIncomeMoMRate FLOAT8,           <span class="co">-- 总收入环比变化率</span></span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 同比数据（与去年同期对比）</span></span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_YoYSampleCount INT8,                 <span class="co">-- 去年同期标本数</span></span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_YoYTestCount INT8,                   <span class="co">-- 去年同期检测项目数</span></span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_YoYWorkCount INT8,                   <span class="co">-- 去年同期工作量</span></span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_YoYBloodIncome FLOAT8,               <span class="co">-- 去年同期血液收入</span></span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_YoYReagentCost FLOAT8,               <span class="co">-- 去年同期试剂支出</span></span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_YoYTotalIncome FLOAT8,               <span class="co">-- 去年同期总收入</span></span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 同比变化率</span></span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_SampleCountYoYRate FLOAT8,           <span class="co">-- 标本数同比变化率</span></span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_TestCountYoYRate FLOAT8,             <span class="co">-- 检测项目数同比变化率</span></span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_WorkCountYoYRate FLOAT8,             <span class="co">-- 工作量同比变化率</span></span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_BloodIncomeYoYRate FLOAT8,           <span class="co">-- 血液收入同比变化率</span></span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_ReagentCostYoYRate FLOAT8,           <span class="co">-- 试剂支出同比变化率</span></span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_TotalIncomeYoYRate FLOAT8,           <span class="co">-- 总收入同比变化率</span></span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 细分工作量指标</span></span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_BloodTestWorkCount INT8,             <span class="co">-- 血型检测工作量</span></span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_AntibodyScreenWorkCount INT8,        <span class="co">-- 抗体筛查工作量</span></span>
+<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_CrossMatchWorkCount INT8,            <span class="co">-- 交叉配血工作量</span></span>
+<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_BloodReserveWorkCount INT8,          <span class="co">-- 血液预约工作量</span></span>
+<span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_BloodInOutWorkCount INT8,            <span class="co">-- 血液出入库工作量</span></span>
+<span id="cb5-69"><a href="#cb5-69" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_BloodInventoryWorkCount INT8,        <span class="co">-- 血液盘存工作量</span></span>
+<span id="cb5-70"><a href="#cb5-70" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_TreatmentProcedureWorkCount INT8,    <span class="co">-- 输血治疗操作工作量</span></span>
+<span id="cb5-71"><a href="#cb5-71" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_BloodManageWorkCount INT8,           <span class="co">-- 血液管理工作量</span></span>
+<span id="cb5-72"><a href="#cb5-72" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-73"><a href="#cb5-73" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 备注字段</span></span>
+<span id="cb5-74"><a href="#cb5-74" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_AnalysisNote <span class="dt">VARCHAR</span>(<span class="dv">500</span>),           <span class="co">-- 分析备注</span></span>
+<span id="cb5-75"><a href="#cb5-75" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_RemarkInfo <span class="dt">VARCHAR</span>(<span class="dv">500</span>),             <span class="co">-- 备注信息</span></span>
+<span id="cb5-76"><a href="#cb5-76" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-77"><a href="#cb5-77" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 数据管理字段</span></span>
+<span id="cb5-78"><a href="#cb5-78" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_DataSourceFlag <span class="dt">VARCHAR</span>(<span class="dv">10</span>),          <span class="co">-- 数据来源标识</span></span>
+<span id="cb5-79"><a href="#cb5-79" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_IsDeleted INT8 <span class="kw">DEFAULT</span> <span class="dv">0</span>,            <span class="co">-- 数据物理删除标识</span></span>
+<span id="cb5-80"><a href="#cb5-80" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_LastUpdateDtTm <span class="dt">timestamp</span> <span class="kw">DEFAULT</span> GETDATE(), <span class="co">-- 最后更新时间</span></span>
+<span id="cb5-81"><a href="#cb5-81" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_DataCreateDtTm <span class="dt">timestamp</span> <span class="kw">DEFAULT</span> GETDATE()  <span class="co">-- 数据创建时间</span></span>
+<span id="cb5-82"><a href="#cb5-82" aria-hidden="true" tabindex="-1"></a>);</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+</section>
+<section id="四数据处理逻辑设计" class="level2">
+<h2 class="anchored" data-anchor-id="四数据处理逻辑设计">四、数据处理逻辑设计</h2>
+<section id="dl-dc数据集成逻辑" class="level3">
+<h3 class="anchored" data-anchor-id="dl-dc数据集成逻辑">4.1 DL-&gt;DC数据集成逻辑</h3>
+<section id="输血申请数据集成bis_requisition_info---bts_requisition_main" class="level4">
+<h4 class="anchored" data-anchor-id="输血申请数据集成bis_requisition_info---bts_requisition_main">4.1.1 输血申请数据集成（BIS_REQUISITION_INFO -&gt; BTS_Requisition_Main）</h4>
+<div class="sourceCode" id="cb6"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- 输血申请数据集成示例SQL</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">INSERT</span> <span class="kw">INTO</span> BTS_Requisition_Main (</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_MedOrgCode,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_ApplyID,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_ApplyDate,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_PersID,</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_VisitID,</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_DeptName,</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_BloodTypeABOName,</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_BloodTypeRhName,</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_BloodPurpose,</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_ApplyPersName,</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_ApplyDtTm,</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_ApplyStatusName,</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_DataSourceFlag,</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    BTS_Requisition_Main_DSTable</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> </span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    hospital_id,</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    requisition_id,</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    FORMAT(apply_date, <span class="st">'yyyyMMdd'</span>),</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    patient_id,</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    visit_id,</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>    apply_dept_name,</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>    blood_type_abo,</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    blood_type_rh,</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>    blood_purpose,</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    apply_doctor,</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>    apply_time,</span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>    apply_status,</span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>    <span class="st">'BIS'</span>,</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>    <span class="st">'BIS_REQUISITION_INFO'</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> BIS_REQUISITION_INFO</span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> apply_date <span class="op">&gt;=</span> DATEADD(<span class="dt">month</span>, <span class="op">-</span><span class="dv">13</span>, GETDATE());</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="血液数据集成bis_blood_input---bts_blood_detail" class="level4">
+<h4 class="anchored" data-anchor-id="血液数据集成bis_blood_input---bts_blood_detail">4.1.2 血液数据集成（BIS_BLOOD_INPUT -&gt; BTS_Blood_Detail）</h4>
+<div class="sourceCode" id="cb7"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- 血液数据集成示例SQL  </span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="kw">INSERT</span> <span class="kw">INTO</span> BTS_Blood_Detail (</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_MedOrgCode,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_BloodID,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_BloodBagNo,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_BloodDate,</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_BloodTypeName,</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_BloodVolume,</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_BloodABOName,</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_BloodRhName,</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_BloodStatusName,</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_InboundDtTm,</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_OutboundDtTm,</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_BloodSource,</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_DataSourceFlag,</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    BTS_Blood_Detail_DSTable</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> </span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    hospital_id,</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    blood_id,</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    blood_bag_no,</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    FORMAT(blood_date, <span class="st">'yyyyMMdd'</span>),</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    blood_type_name,</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>    blood_volume,</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>    blood_abo,</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>    blood_rh,</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>    blood_status,</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>    inbound_time,</span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>    outbound_time,</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>    blood_source,</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>    <span class="st">'BIS'</span>,</span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>    <span class="st">'BIS_BLOOD_INPUT'</span></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> BIS_BLOOD_INPUT</span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> blood_date <span class="op">&gt;=</span> DATEADD(<span class="dt">month</span>, <span class="op">-</span><span class="dv">13</span>, GETDATE());</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="dc-mdr数据聚合逻辑" class="level3">
+<h3 class="anchored" data-anchor-id="dc-mdr数据聚合逻辑">4.2 DC-&gt;MDR数据聚合逻辑</h3>
+<section id="日度汇总数据生成" class="level4">
+<h4 class="anchored" data-anchor-id="日度汇总数据生成">4.2.1 日度汇总数据生成</h4>
+<div class="sourceCode" id="cb8"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- 日度汇总数据生成示例SQL</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">INSERT</span> <span class="kw">INTO</span> BTS_Daily_Summary (</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_SummaryID,</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_SummaryDate,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_DeptName,</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_BloodTypeName,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_ApplyCount,</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_SampleCount,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_TestCount,</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_BloodIncome,</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    BTS_Daily_Summary_TotalIncome</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> </span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">CONCAT</span>(req.BTS_Requisition_Main_ApplyDate, <span class="st">'_'</span>, req.BTS_Requisition_Main_DeptID, <span class="st">'_'</span>, req.BTS_Requisition_Main_BloodTypeCode),</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    req.BTS_Requisition_Main_ApplyDate,</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    req.BTS_Requisition_Main_DeptName,</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    req.BTS_Requisition_Main_BloodTypeABOName,</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">COUNT</span>(<span class="kw">DISTINCT</span> req.BTS_Requisition_Main_ApplyID) <span class="kw">as</span> apply_count,</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">COUNT</span>(<span class="kw">DISTINCT</span> blood.BTS_Blood_Detail_BloodID) <span class="kw">as</span> sample_count,</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">COUNT</span>(<span class="kw">DISTINCT</span> test.BTS_Lab_Test_TestID) <span class="kw">as</span> test_count,</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">SUM</span>(charge.血费收入) <span class="kw">as</span> blood_income,</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">SUM</span>(charge.总收入) <span class="kw">as</span> total_income</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> BTS_Requisition_Main req</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="kw">LEFT</span> <span class="kw">JOIN</span> BTS_Blood_Detail blood <span class="kw">ON</span> req.BTS_Requisition_Main_ApplyID <span class="op">=</span> blood.关联申请ID</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a><span class="kw">LEFT</span> <span class="kw">JOIN</span> BTS_Lab_Test test <span class="kw">ON</span> req.BTS_Requisition_Main_ApplyID <span class="op">=</span> test.关联申请ID  </span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a><span class="kw">LEFT</span> <span class="kw">JOIN</span> (收入汇总子查询) charge <span class="kw">ON</span> req.BTS_Requisition_Main_ApplyID <span class="op">=</span> charge.申请ID</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> req.BTS_Requisition_Main_ApplyDate <span class="op">=</span> <span class="st">'目标日期'</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> </span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>    req.BTS_Requisition_Main_ApplyDate,</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    req.BTS_Requisition_Main_DeptID,</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    req.BTS_Requisition_Main_DeptName,</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>    req.BTS_Requisition_Main_BloodTypeCode,</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>    req.BTS_Requisition_Main_BloodTypeABOName;</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="月度主题数据生成" class="level4">
+<h4 class="anchored" data-anchor-id="月度主题数据生成">4.2.2 月度主题数据生成</h4>
+<div class="sourceCode" id="cb9"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- 月度主题数据生成示例SQL</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">INSERT</span> <span class="kw">INTO</span> MDR_BTS_Monthly_Summary (</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_SummaryID,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_SummaryYearMonth,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_DeptName,</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_BloodTypeName,</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_CurrentSampleCount,</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_CurrentTestCount,</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_CurrentWorkCount,</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_CurrentBloodIncome,</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_CurrentTotalIncome,</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 环比计算</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_SampleCountMoMRate,</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_BloodIncomeMoMRate,</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 同比计算</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_SampleCountYoYRate,</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    MDR_BTS_Monthly_Summary_BloodIncomeYoYRate</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> </span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">CONCAT</span>(<span class="kw">LEFT</span>(curr.BTS_Daily_Summary_SummaryDate, <span class="dv">6</span>), <span class="st">'_'</span>, curr.BTS_Daily_Summary_DeptID),</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">LEFT</span>(curr.BTS_Daily_Summary_SummaryDate, <span class="dv">6</span>),</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    curr.BTS_Daily_Summary_DeptName,</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    curr.BTS_Daily_Summary_BloodTypeName,</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">SUM</span>(curr.BTS_Daily_Summary_SampleCount),</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">SUM</span>(curr.BTS_Daily_Summary_TestCount), </span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">SUM</span>(curr.BTS_Daily_Summary_TotalWorkCount),</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">SUM</span>(curr.BTS_Daily_Summary_BloodIncome),</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">SUM</span>(curr.BTS_Daily_Summary_TotalIncome),</span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 环比计算 (当月-上月)/上月*100</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">CASE</span> <span class="cf">WHEN</span> <span class="fu">SUM</span>(last_month.BTS_Daily_Summary_SampleCount) <span class="op">&gt;</span> <span class="dv">0</span> </span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>         <span class="cf">THEN</span> (<span class="fu">SUM</span>(curr.BTS_Daily_Summary_SampleCount) <span class="op">-</span> <span class="fu">SUM</span>(last_month.BTS_Daily_Summary_SampleCount)) <span class="op">*</span> <span class="fl">100.0</span> <span class="op">/</span> <span class="fu">SUM</span>(last_month.BTS_Daily_Summary_SampleCount)</span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>         <span class="cf">ELSE</span> <span class="dv">0</span> <span class="cf">END</span>,</span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">CASE</span> <span class="cf">WHEN</span> <span class="fu">SUM</span>(last_month.BTS_Daily_Summary_BloodIncome) <span class="op">&gt;</span> <span class="dv">0</span> </span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>         <span class="cf">THEN</span> (<span class="fu">SUM</span>(curr.BTS_Daily_Summary_BloodIncome) <span class="op">-</span> <span class="fu">SUM</span>(last_month.BTS_Daily_Summary_BloodIncome)) <span class="op">*</span> <span class="fl">100.0</span> <span class="op">/</span> <span class="fu">SUM</span>(last_month.BTS_Daily_Summary_BloodIncome)</span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>         <span class="cf">ELSE</span> <span class="dv">0</span> <span class="cf">END</span>,</span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- 同比计算 (当月-去年同期)/去年同期*100</span></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">CASE</span> <span class="cf">WHEN</span> <span class="fu">SUM</span>(last_year.BTS_Daily_Summary_SampleCount) <span class="op">&gt;</span> <span class="dv">0</span> </span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>         <span class="cf">THEN</span> (<span class="fu">SUM</span>(curr.BTS_Daily_Summary_SampleCount) <span class="op">-</span> <span class="fu">SUM</span>(last_year.BTS_Daily_Summary_SampleCount)) <span class="op">*</span> <span class="fl">100.0</span> <span class="op">/</span> <span class="fu">SUM</span>(last_year.BTS_Daily_Summary_SampleCount)</span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>         <span class="cf">ELSE</span> <span class="dv">0</span> <span class="cf">END</span>,</span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>    <span class="cf">CASE</span> <span class="cf">WHEN</span> <span class="fu">SUM</span>(last_year.BTS_Daily_Summary_BloodIncome) <span class="op">&gt;</span> <span class="dv">0</span> </span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>         <span class="cf">THEN</span> (<span class="fu">SUM</span>(curr.BTS_Daily_Summary_BloodIncome) <span class="op">-</span> <span class="fu">SUM</span>(last_year.BTS_Daily_Summary_BloodIncome)) <span class="op">*</span> <span class="fl">100.0</span> <span class="op">/</span> <span class="fu">SUM</span>(last_year.BTS_Daily_Summary_BloodIncome)</span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>         <span class="cf">ELSE</span> <span class="dv">0</span> <span class="cf">END</span></span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> BTS_Daily_Summary curr</span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a><span class="kw">LEFT</span> <span class="kw">JOIN</span> BTS_Daily_Summary last_month </span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a>    <span class="kw">ON</span> curr.BTS_Daily_Summary_DeptID <span class="op">=</span> last_month.BTS_Daily_Summary_DeptID</span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a>    <span class="kw">AND</span> curr.BTS_Daily_Summary_BloodTypeCode <span class="op">=</span> last_month.BTS_Daily_Summary_BloodTypeCode</span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a>    <span class="kw">AND</span> <span class="kw">LEFT</span>(last_month.BTS_Daily_Summary_SummaryDate, <span class="dv">6</span>) <span class="op">=</span> FORMAT(DATEADD(<span class="dt">month</span>, <span class="op">-</span><span class="dv">1</span>, <span class="fu">CAST</span>(<span class="kw">LEFT</span>(curr.BTS_Daily_Summary_SummaryDate, <span class="dv">6</span>) <span class="op">+</span> <span class="st">'01'</span> <span class="kw">AS</span> <span class="dt">DATE</span>)), <span class="st">'yyyyMM'</span>)</span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a><span class="kw">LEFT</span> <span class="kw">JOIN</span> BTS_Daily_Summary last_year</span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a>    <span class="kw">ON</span> curr.BTS_Daily_Summary_DeptID <span class="op">=</span> last_year.BTS_Daily_Summary_DeptID  </span>
+<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a>    <span class="kw">AND</span> curr.BTS_Daily_Summary_BloodTypeCode <span class="op">=</span> last_year.BTS_Daily_Summary_BloodTypeCode</span>
+<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a>    <span class="kw">AND</span> <span class="kw">LEFT</span>(last_year.BTS_Daily_Summary_SummaryDate, <span class="dv">6</span>) <span class="op">=</span> FORMAT(DATEADD(<span class="dt">year</span>, <span class="op">-</span><span class="dv">1</span>, <span class="fu">CAST</span>(<span class="kw">LEFT</span>(curr.BTS_Daily_Summary_SummaryDate, <span class="dv">6</span>) <span class="op">+</span> <span class="st">'01'</span> <span class="kw">AS</span> <span class="dt">DATE</span>)), <span class="st">'yyyyMM'</span>)</span>
+<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> <span class="kw">LEFT</span>(curr.BTS_Daily_Summary_SummaryDate, <span class="dv">6</span>) <span class="op">=</span> <span class="st">'202408'</span>  <span class="co">-- 目标月份</span></span>
+<span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> </span>
+<span id="cb9-54"><a href="#cb9-54" aria-hidden="true" tabindex="-1"></a>    <span class="kw">LEFT</span>(curr.BTS_Daily_Summary_SummaryDate, <span class="dv">6</span>),</span>
+<span id="cb9-55"><a href="#cb9-55" aria-hidden="true" tabindex="-1"></a>    curr.BTS_Daily_Summary_DeptID,</span>
+<span id="cb9-56"><a href="#cb9-56" aria-hidden="true" tabindex="-1"></a>    curr.BTS_Daily_Summary_DeptName,</span>
+<span id="cb9-57"><a href="#cb9-57" aria-hidden="true" tabindex="-1"></a>    curr.BTS_Daily_Summary_BloodTypeCode,</span>
+<span id="cb9-58"><a href="#cb9-58" aria-hidden="true" tabindex="-1"></a>    curr.BTS_Daily_Summary_BloodTypeName;</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="收入数据集成逻辑" class="level3">
+<h3 class="anchored" data-anchor-id="收入数据集成逻辑">4.3 收入数据集成逻辑</h3>
+<section id="收入数据关联方式" class="level4">
+<h4 class="anchored" data-anchor-id="收入数据关联方式">4.3.1 收入数据关联方式</h4>
+<p>根据现有DC架构，收入数据通过以下血缘关系集成：</p>
+<pre><code>Fee_BillDet → 输血系统收费表 → BTS相关表</code></pre>
+<p><strong>关联字段</strong>：<code>Fee_BillDet.Fee_BillDet_ChargeItemID = 输血收费项目ID</code></p>
+</section>
+<section id="收入数据分类统计" class="level4">
+<h4 class="anchored" data-anchor-id="收入数据分类统计">4.3.2 收入数据分类统计</h4>
+<div class="sourceCode" id="cb11"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- 收入数据集成示例SQL</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">WITH</span> BTS_Income_Summary <span class="kw">AS</span> (</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">SELECT</span> </span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>        apply.BTS_Requisition_Main_ApplyID,</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>        apply.BTS_Requisition_Main_ApplyDate,</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>        apply.BTS_Requisition_Main_DeptID,</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>        apply.BTS_Requisition_Main_DeptName,</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>        <span class="co">-- 配血检收入（总收入-血费收入）</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>        <span class="fu">SUM</span>(<span class="cf">CASE</span> <span class="cf">WHEN</span> charge.Fee_BillDet_ChargeItemName <span class="kw">NOT</span> <span class="kw">LIKE</span> <span class="st">'%血液%'</span> </span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>                 <span class="kw">AND</span> charge.Fee_BillDet_ChargeItemName <span class="kw">NOT</span> <span class="kw">LIKE</span> <span class="st">'%血袋%'</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>                 <span class="cf">THEN</span> charge.Fee_BillDet_Amount <span class="cf">ELSE</span> <span class="dv">0</span> <span class="cf">END</span>) <span class="kw">as</span> test_income,</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>        <span class="co">-- 血费收入</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>        <span class="fu">SUM</span>(<span class="cf">CASE</span> <span class="cf">WHEN</span> charge.Fee_BillDet_ChargeItemName <span class="kw">LIKE</span> <span class="st">'%血液%'</span> </span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>                 <span class="kw">OR</span> charge.Fee_BillDet_ChargeItemName <span class="kw">LIKE</span> <span class="st">'%血袋%'</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>                 <span class="cf">THEN</span> charge.Fee_BillDet_Amount <span class="cf">ELSE</span> <span class="dv">0</span> <span class="cf">END</span>) <span class="kw">as</span> blood_income,</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>        <span class="co">-- 输血治疗收入</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>        <span class="fu">SUM</span>(<span class="cf">CASE</span> <span class="cf">WHEN</span> charge.Fee_BillDet_ChargeItemName <span class="kw">LIKE</span> <span class="st">'%血浆置换%'</span> </span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>                 <span class="kw">OR</span> charge.Fee_BillDet_ChargeItemName <span class="kw">LIKE</span> <span class="st">'%红细胞单采%'</span></span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>                 <span class="kw">OR</span> charge.Fee_BillDet_ChargeItemName <span class="kw">LIKE</span> <span class="st">'%全血采集%'</span></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>                 <span class="cf">THEN</span> charge.Fee_BillDet_Amount <span class="cf">ELSE</span> <span class="dv">0</span> <span class="cf">END</span>) <span class="kw">as</span> treatment_income,</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>        <span class="co">-- 总收入</span></span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>        <span class="fu">SUM</span>(charge.Fee_BillDet_Amount) <span class="kw">as</span> total_income</span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>    <span class="kw">FROM</span> BTS_Requisition_Main apply</span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>    <span class="kw">LEFT</span> <span class="kw">JOIN</span> Fee_BillDet charge </span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>        <span class="kw">ON</span> apply.BTS_Requisition_Main_VisitID <span class="op">=</span> charge.Fee_BillDet_VisitID</span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>        <span class="kw">AND</span> charge.Fee_BillDet_ChargeDate <span class="op">=</span> apply.BTS_Requisition_Main_ApplyDate</span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>        <span class="kw">AND</span> (charge.Fee_BillDet_ExecDeptCode <span class="op">=</span> <span class="st">'输血科'</span> </span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>             <span class="kw">OR</span> charge.Fee_BillDet_ChargeItemName <span class="kw">LIKE</span> <span class="st">'%输血%'</span></span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>             <span class="kw">OR</span> charge.Fee_BillDet_ChargeItemName <span class="kw">LIKE</span> <span class="st">'%血液%'</span></span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a>             <span class="kw">OR</span> charge.Fee_BillDet_ChargeItemName <span class="kw">LIKE</span> <span class="st">'%血型%'</span></span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a>             <span class="kw">OR</span> charge.Fee_BillDet_ChargeItemName <span class="kw">LIKE</span> <span class="st">'%配血%'</span>)</span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a>    <span class="kw">WHERE</span> apply.BTS_Requisition_Main_ApplyDate <span class="op">&gt;=</span> FORMAT(DATEADD(<span class="dt">month</span>, <span class="op">-</span><span class="dv">13</span>, GETDATE()), <span class="st">'yyyyMMdd'</span>)</span>
+<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a>    <span class="kw">GROUP</span> <span class="kw">BY</span> </span>
+<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a>        apply.BTS_Requisition_Main_ApplyID,</span>
+<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a>        apply.BTS_Requisition_Main_ApplyDate,</span>
+<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a>        apply.BTS_Requisition_Main_DeptID,</span>
+<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a>        apply.BTS_Requisition_Main_DeptName</span>
+<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> BTS_Income_Summary;</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="支出数据集成逻辑" class="level3">
+<h3 class="anchored" data-anchor-id="支出数据集成逻辑">4.4 支出数据集成逻辑</h3>
+<section id="支出数据分类" class="level4">
+<h4 class="anchored" data-anchor-id="支出数据分类">4.4.1 支出数据分类</h4>
+<div class="sourceCode" id="cb12"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- 支出数据集成示例SQL</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="kw">WITH</span> BTS_Cost_Summary <span class="kw">AS</span> (</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">SELECT</span> </span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>        cost_date,</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>        <span class="co">-- 血费支出（血站结算费用）</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>        <span class="fu">SUM</span>(<span class="cf">CASE</span> <span class="cf">WHEN</span> cost_type <span class="op">=</span> <span class="st">'血液成本'</span> <span class="cf">THEN</span> cost_amount <span class="cf">ELSE</span> <span class="dv">0</span> <span class="cf">END</span>) <span class="kw">as</span> blood_cost,</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>        <span class="co">-- 试剂支出</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>        <span class="fu">SUM</span>(<span class="cf">CASE</span> <span class="cf">WHEN</span> cost_type <span class="op">=</span> <span class="st">'试剂费用'</span> <span class="cf">THEN</span> cost_amount <span class="cf">ELSE</span> <span class="dv">0</span> <span class="cf">END</span>) <span class="kw">as</span> reagent_cost,</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>        <span class="co">-- 输血治疗耗材</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>        <span class="fu">SUM</span>(<span class="cf">CASE</span> <span class="cf">WHEN</span> cost_type <span class="op">=</span> <span class="st">'治疗耗材'</span> <span class="cf">THEN</span> cost_amount <span class="cf">ELSE</span> <span class="dv">0</span> <span class="cf">END</span>) <span class="kw">as</span> material_cost,</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>        <span class="co">-- 总支出</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>        <span class="fu">SUM</span>(cost_amount) <span class="kw">as</span> total_cost</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">FROM</span> (</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>        <span class="co">-- 血液成本（血站结算清单）</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>        <span class="kw">SELECT</span> </span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>            blood_date <span class="kw">as</span> cost_date,</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>            <span class="st">'血液成本'</span> <span class="kw">as</span> cost_type,</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>            blood_cost <span class="kw">as</span> cost_amount</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>        <span class="kw">FROM</span> blood_station_settlement</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>        <span class="kw">WHERE</span> blood_date <span class="op">&gt;=</span> FORMAT(DATEADD(<span class="dt">month</span>, <span class="op">-</span><span class="dv">13</span>, GETDATE()), <span class="st">'yyyyMMdd'</span>)</span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>        <span class="kw">UNION</span> <span class="kw">ALL</span></span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>        <span class="co">-- 试剂费用（试剂库订单）</span></span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>        <span class="kw">SELECT</span> </span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>            order_date <span class="kw">as</span> cost_date,</span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>            <span class="st">'试剂费用'</span> <span class="kw">as</span> cost_type,</span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>            order_amount <span class="kw">as</span> cost_amount</span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>        <span class="kw">FROM</span> reagent_library_order</span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>        <span class="kw">WHERE</span> order_date <span class="op">&gt;=</span> FORMAT(DATEADD(<span class="dt">month</span>, <span class="op">-</span><span class="dv">13</span>, GETDATE()), <span class="st">'yyyyMMdd'</span>)</span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>        <span class="kw">AND</span> dept_name <span class="op">=</span> <span class="st">'输血科'</span></span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>        <span class="kw">UNION</span> <span class="kw">ALL</span></span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>        <span class="co">-- 治疗耗材</span></span>
+<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a>        <span class="kw">SELECT</span> </span>
+<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a>            material_date <span class="kw">as</span> cost_date,</span>
+<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a>            <span class="st">'治疗耗材'</span> <span class="kw">as</span> cost_type,</span>
+<span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a>            material_cost <span class="kw">as</span> cost_amount</span>
+<span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a>        <span class="kw">FROM</span> treatment_material_cost</span>
+<span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a>        <span class="kw">WHERE</span> material_date <span class="op">&gt;=</span> FORMAT(DATEADD(<span class="dt">month</span>, <span class="op">-</span><span class="dv">13</span>, GETDATE()), <span class="st">'yyyyMMdd'</span>)</span>
+<span id="cb12-47"><a href="#cb12-47" aria-hidden="true" tabindex="-1"></a>        <span class="kw">AND</span> dept_name <span class="op">=</span> <span class="st">'输血科'</span></span>
+<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-49"><a href="#cb12-49" aria-hidden="true" tabindex="-1"></a>    ) cost_detail</span>
+<span id="cb12-50"><a href="#cb12-50" aria-hidden="true" tabindex="-1"></a>    <span class="kw">GROUP</span> <span class="kw">BY</span> cost_date</span>
+<span id="cb12-51"><a href="#cb12-51" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-52"><a href="#cb12-52" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> BTS_Cost_Summary;</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+</section>
+<section id="五工作量统计详细设计" class="level2">
+<h2 class="anchored" data-anchor-id="五工作量统计详细设计">五、工作量统计详细设计</h2>
+<section id="标本检测工作量统计" class="level3">
+<h3 class="anchored" data-anchor-id="标本检测工作量统计">5.1 标本检测工作量统计</h3>
+<p>基于输血科业务需求，标本检测工作量包含以下子项目：</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 21%">
+<col style="width: 26%">
+<col style="width: 26%">
+<col style="width: 26%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>子项目</th>
+<th>指标内涵</th>
+<th>计算方式</th>
+<th>数据来源</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>血型检测</td>
+<td>ABO血型鉴定、Rh血型检测</td>
+<td>按检验项目代码统计</td>
+<td>LIS系统项目代码LIS07068、LIS05等</td>
+</tr>
+<tr class="even">
+<td>抗体筛查</td>
+<td>患者抗体筛查</td>
+<td>按检验项目代码统计</td>
+<td>LIS系统项目代码LIS07073</td>
+</tr>
+<tr class="odd">
+<td>交叉配血</td>
+<td>盐水介质、凝聚胺配血等</td>
+<td>按检验项目代码统计</td>
+<td>LIS系统项目代码LIS07156、LIS07157、LIS07153</td>
+</tr>
+<tr class="even">
+<td>直接抗人球蛋白试验</td>
+<td>直抗检测</td>
+<td>按检验项目代码统计</td>
+<td>LIS系统项目代码LIS07079</td>
+</tr>
+<tr class="odd">
+<td>疑难标本</td>
+<td>疑难血型及抗筛阳性鉴定</td>
+<td>按疑难登记标本数统计</td>
+<td>LIS系统疑难登记标本数</td>
+</tr>
+<tr class="even">
+<td>血小板交叉配血</td>
+<td>血小板交叉配合试验</td>
+<td>按检验项目代码统计</td>
+<td>LIS系统项目代码LIS026801</td>
+</tr>
+<tr class="odd">
+<td>血小板抗体检测</td>
+<td>HLA抗体检测</td>
+<td>按检验项目代码统计</td>
+<td>LIS系统项目代码LIS026797</td>
+</tr>
+<tr class="even">
+<td>抗体效价</td>
+<td>血型抗体效价测定</td>
+<td>按检验项目代码统计</td>
+<td>LIS系统项目代码LIS030072、LIS030073、LIS030075</td>
+</tr>
+<tr class="odd">
+<td>Rh分型</td>
+<td>Rh血型系统抗原检测</td>
+<td>按检验项目代码统计</td>
+<td>LIS系统项目代码LIS028043</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="临床用血工作量统计" class="level3">
+<h3 class="anchored" data-anchor-id="临床用血工作量统计">5.2 临床用血工作量统计</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 21%">
+<col style="width: 26%">
+<col style="width: 26%">
+<col style="width: 26%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>子项目</th>
+<th>指标内涵</th>
+<th>计算方式</th>
+<th>数据来源</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>血液预约次数</td>
+<td>血液预约</td>
+<td>血站约血系统订单记录</td>
+<td>网上订血订单记录</td>
+</tr>
+<tr class="even">
+<td>血液入库(袋)</td>
+<td>血液验收、入库、存放库位</td>
+<td>输血系统统计入库袋数</td>
+<td>输血系统入库记录</td>
+</tr>
+<tr class="odd">
+<td>血液出库(袋)</td>
+<td>血液出库、外观检测、核对</td>
+<td>输血系统统计出库袋数</td>
+<td>输血系统出库记录</td>
+</tr>
+<tr class="even">
+<td>血液盘存(袋)</td>
+<td>每周血液库存盘点</td>
+<td>每周一早上8点库存量</td>
+<td>输血系统库存统计</td>
+</tr>
+<tr class="odd">
+<td>血浆/冷沉淀融化(袋)</td>
+<td>发放前水浴融解处理</td>
+<td>血浆及冷沉淀出库数量</td>
+<td>输血系统出库记录</td>
+</tr>
+<tr class="even">
+<td>周六加班手术台次</td>
+<td>周六加班手术支持</td>
+<td>手术台次统计</td>
+<td>手术排程系统</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="输血治疗工作量统计" class="level3">
+<h3 class="anchored" data-anchor-id="输血治疗工作量统计">5.3 输血治疗工作量统计</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 21%">
+<col style="width: 26%">
+<col style="width: 26%">
+<col style="width: 26%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>子项目</th>
+<th>指标内涵</th>
+<th>计算方式</th>
+<th>数据来源</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>全血采集</td>
+<td>血液稀释疗法及自体全血储存</td>
+<td>收费项目666600613、666000570、666000571</td>
+<td>HIS系统医嘱记录</td>
+</tr>
+<tr class="even">
+<td>血浆置换</td>
+<td>全血置换、淋巴血浆置换等</td>
+<td>收费项目666600598</td>
+<td>HIS系统医嘱记录</td>
+</tr>
+<tr class="odd">
+<td>血液单采</td>
+<td>PRP采集、红细胞单采、血小板单采</td>
+<td>收费项目666000510</td>
+<td>HIS系统医嘱记录</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="血液管理工作量统计" class="level3">
+<h3 class="anchored" data-anchor-id="血液管理工作量统计">5.4 血液管理工作量统计</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 21%">
+<col style="width: 26%">
+<col style="width: 26%">
+<col style="width: 26%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>子项目</th>
+<th>指标内涵</th>
+<th>计算方式</th>
+<th>数据来源</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>输血管理</td>
+<td>全院合理用血评估</td>
+<td>质控岗考核指标</td>
+<td>质控记录系统</td>
+</tr>
+<tr class="even">
+<td>输血病历抽查</td>
+<td>全院输血病历抽查</td>
+<td>抽查病历数量</td>
+<td>质控记录系统</td>
+</tr>
+<tr class="odd">
+<td>输血不良反应调查</td>
+<td>输血不良反应调查处理</td>
+<td>不良反应案例数</td>
+<td>不良反应系统</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="六数据质量监控设计" class="level2">
+<h2 class="anchored" data-anchor-id="六数据质量监控设计">六、数据质量监控设计</h2>
+<section id="数据完整性监控" class="level3">
+<h3 class="anchored" data-anchor-id="数据完整性监控">6.1 数据完整性监控</h3>
+<div class="sourceCode" id="cb13"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- 数据完整性监控SQL示例</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> </span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'输血申请数据'</span> <span class="kw">as</span> table_name,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">COUNT</span>(<span class="op">*</span>) <span class="kw">as</span> total_count,</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">COUNT</span>(BTS_Requisition_Main_ApplyID) <span class="kw">as</span> id_count,</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">COUNT</span>(BTS_Requisition_Main_PersID) <span class="kw">as</span> person_count,</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">COUNT</span>(BTS_Requisition_Main_DeptID) <span class="kw">as</span> dept_count,</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    (<span class="fu">COUNT</span>(BTS_Requisition_Main_ApplyID) <span class="op">*</span> <span class="fl">100.0</span> <span class="op">/</span> <span class="fu">COUNT</span>(<span class="op">*</span>)) <span class="kw">as</span> id_completeness_rate,</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    (<span class="fu">COUNT</span>(BTS_Requisition_Main_PersID) <span class="op">*</span> <span class="fl">100.0</span> <span class="op">/</span> <span class="fu">COUNT</span>(<span class="op">*</span>)) <span class="kw">as</span> person_completeness_rate,</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    (<span class="fu">COUNT</span>(BTS_Requisition_Main_DeptID) <span class="op">*</span> <span class="fl">100.0</span> <span class="op">/</span> <span class="fu">COUNT</span>(<span class="op">*</span>)) <span class="kw">as</span> dept_completeness_rate</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> BTS_Requisition_Main</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> BTS_Requisition_Main_ApplyDate <span class="op">&gt;=</span> FORMAT(DATEADD(<span class="dt">day</span>, <span class="op">-</span><span class="dv">7</span>, GETDATE()), <span class="st">'yyyyMMdd'</span>)</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="kw">UNION</span> <span class="kw">ALL</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> </span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">'血液明细数据'</span> <span class="kw">as</span> table_name,</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">COUNT</span>(<span class="op">*</span>) <span class="kw">as</span> total_count,</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">COUNT</span>(BTS_Blood_Detail_BloodID) <span class="kw">as</span> id_count,</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">COUNT</span>(BTS_Blood_Detail_BloodBagNo) <span class="kw">as</span> bag_count,</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">COUNT</span>(BTS_Blood_Detail_BloodTypeName) <span class="kw">as</span> type_count,</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>    (<span class="fu">COUNT</span>(BTS_Blood_Detail_BloodID) <span class="op">*</span> <span class="fl">100.0</span> <span class="op">/</span> <span class="fu">COUNT</span>(<span class="op">*</span>)) <span class="kw">as</span> id_completeness_rate,</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>    (<span class="fu">COUNT</span>(BTS_Blood_Detail_BloodBagNo) <span class="op">*</span> <span class="fl">100.0</span> <span class="op">/</span> <span class="fu">COUNT</span>(<span class="op">*</span>)) <span class="kw">as</span> bag_completeness_rate,</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>    (<span class="fu">COUNT</span>(BTS_Blood_Detail_BloodTypeName) <span class="op">*</span> <span class="fl">100.0</span> <span class="op">/</span> <span class="fu">COUNT</span>(<span class="op">*</span>)) <span class="kw">as</span> type_completeness_rate</span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> BTS_Blood_Detail</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> BTS_Blood_Detail_BloodDate <span class="op">&gt;=</span> FORMAT(DATEADD(<span class="dt">day</span>, <span class="op">-</span><span class="dv">7</span>, GETDATE()), <span class="st">'yyyyMMdd'</span>);</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="数据一致性监控" class="level3">
+<h3 class="anchored" data-anchor-id="数据一致性监控">6.2 数据一致性监控</h3>
+<div class="sourceCode" id="cb14"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- 数据一致性监控SQL示例</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> </span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'DC-MDR数据一致性检查'</span> <span class="kw">as</span> check_type,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    dc_summary.summary_date,</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    dc_summary.dept_name,</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    dc_summary.dc_sample_count,</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    mdr_summary.mdr_sample_count,</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ABS</span>(dc_summary.dc_sample_count <span class="op">-</span> mdr_summary.mdr_sample_count) <span class="kw">as</span> diff_count,</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">CASE</span> <span class="cf">WHEN</span> dc_summary.dc_sample_count <span class="op">=</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="dv">0</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>         <span class="cf">ELSE</span> <span class="fu">ABS</span>(dc_summary.dc_sample_count <span class="op">-</span> mdr_summary.mdr_sample_count) <span class="op">*</span> <span class="fl">100.0</span> <span class="op">/</span> dc_summary.dc_sample_count </span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span> <span class="kw">as</span> diff_rate</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> (</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">SELECT</span> </span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>        <span class="kw">LEFT</span>(BTS_Daily_Summary_SummaryDate, <span class="dv">6</span>) <span class="kw">as</span> summary_date,</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>        BTS_Daily_Summary_DeptName <span class="kw">as</span> dept_name,</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>        <span class="fu">SUM</span>(BTS_Daily_Summary_SampleCount) <span class="kw">as</span> dc_sample_count</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">FROM</span> BTS_Daily_Summary</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">WHERE</span> <span class="kw">LEFT</span>(BTS_Daily_Summary_SummaryDate, <span class="dv">6</span>) <span class="op">=</span> FORMAT(DATEADD(<span class="dt">month</span>, <span class="op">-</span><span class="dv">1</span>, GETDATE()), <span class="st">'yyyyMM'</span>)</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">GROUP</span> <span class="kw">BY</span> <span class="kw">LEFT</span>(BTS_Daily_Summary_SummaryDate, <span class="dv">6</span>), BTS_Daily_Summary_DeptName</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>) dc_summary</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a><span class="kw">FULL</span> <span class="kw">OUTER</span> <span class="kw">JOIN</span> (</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">SELECT</span> </span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>        MDR_BTS_Monthly_Summary_SummaryYearMonth <span class="kw">as</span> summary_date,</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>        MDR_BTS_Monthly_Summary_DeptName <span class="kw">as</span> dept_name,</span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>        MDR_BTS_Monthly_Summary_CurrentSampleCount <span class="kw">as</span> mdr_sample_count</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>    <span class="kw">FROM</span> MDR_BTS_Monthly_Summary</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>    <span class="kw">WHERE</span> MDR_BTS_Monthly_Summary_SummaryYearMonth <span class="op">=</span> FORMAT(DATEADD(<span class="dt">month</span>, <span class="op">-</span><span class="dv">1</span>, GETDATE()), <span class="st">'yyyyMM'</span>)</span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>) mdr_summary <span class="kw">ON</span> dc_summary.summary_date <span class="op">=</span> mdr_summary.summary_date <span class="kw">AND</span> dc_summary.dept_name <span class="op">=</span> mdr_summary.dept_name</span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> <span class="fu">ABS</span>(ISNULL(dc_summary.dc_sample_count, <span class="dv">0</span>) <span class="op">-</span> ISNULL(mdr_summary.mdr_sample_count, <span class="dv">0</span>)) <span class="op">&gt;</span> <span class="dv">0</span>;</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="七实施计划与里程碑" class="level2">
+<h2 class="anchored" data-anchor-id="七实施计划与里程碑">七、实施计划与里程碑</h2>
+<section id="实施阶段规划" class="level3">
+<h3 class="anchored" data-anchor-id="实施阶段规划">7.1 实施阶段规划</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 13%">
+<col style="width: 22%">
+<col style="width: 22%">
+<col style="width: 18%">
+<col style="width: 22%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>阶段</th>
+<th>主要任务</th>
+<th>预计工期</th>
+<th>交付物</th>
+<th>成功标准</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>第一阶段</strong></td>
+<td>DC层核心明细表建设</td>
+<td>2周</td>
+<td>BTS_Requisition_Main、BTS_Blood_Detail</td>
+<td>数据完整性&gt;95%，关键字段覆盖率100%</td>
+</tr>
+<tr class="even">
+<td><strong>第二阶段</strong></td>
+<td>检验和工作量表建设</td>
+<td>2周</td>
+<td>BTS_Lab_Test、BTS_Work_Record</td>
+<td>工作量统计准确率&gt;98%，检验数据完整性&gt;95%</td>
+</tr>
+<tr class="odd">
+<td><strong>第三阶段</strong></td>
+<td>汇总表和MDR主题表</td>
+<td>2周</td>
+<td>BTS_Daily_Summary、MDR_BTS_Monthly_Summary</td>
+<td>汇总数据与明细数据一致性&gt;99%</td>
+</tr>
+<tr class="even">
+<td><strong>第四阶段</strong></td>
+<td>收入集成和报表应用</td>
+<td>1周</td>
+<td>收入数据集成、报表原型</td>
+<td>收入数据准确性&gt;99%，报表响应时间&lt;5秒</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="关键里程碑" class="level3">
+<h3 class="anchored" data-anchor-id="关键里程碑">7.2 关键里程碑</h3>
+<ul>
+<li><strong>里程碑1</strong>：DC层明细数据表上线，支持基础数据查询</li>
+<li><strong>里程碑2</strong>：工作量统计功能完成，支持4类工作量统计</li>
+<li><strong>里程碑3</strong>：月度汇总主题表上线，支持环比同比分析</li>
+<li><strong>里程碑4</strong>：完整报表系统上线，支持输血科运营分析</li>
+</ul>
+</section>
+<section id="风险控制" class="level3">
+<h3 class="anchored" data-anchor-id="风险控制">7.3 风险控制</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 23%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>风险类型</th>
+<th>风险描述</th>
+<th>影响程度</th>
+<th>应对措施</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>数据质量风险</strong></td>
+<td>源系统数据质量问题导致统计偏差</td>
+<td>高</td>
+<td>建立数据质量监控机制，设置数据异常告警</td>
+</tr>
+<tr class="even">
+<td><strong>性能风险</strong></td>
+<td>大数据量查询导致系统响应慢</td>
+<td>中</td>
+<td>合理设计索引，采用分批处理和增量更新</td>
+</tr>
+<tr class="odd">
+<td><strong>业务理解风险</strong></td>
+<td>工作量统计逻辑理解偏差</td>
+<td>中</td>
+<td>与业务方深度沟通，制定详细测试用例</td>
+</tr>
+<tr class="even">
+<td><strong>技术风险</strong></td>
+<td>多系统集成复杂度高</td>
+<td>中</td>
+<td>采用标准化接口，建立完善的错误处理机制</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="成功验收标准" class="level3">
+<h3 class="anchored" data-anchor-id="成功验收标准">7.4 成功验收标准</h3>
+<ol type="1">
+<li><strong>数据准确性</strong>：与财务系统核对误差&lt;±0.5%</li>
+<li><strong>系统性能</strong>：完整页面加载&lt;5秒，明细筛选&lt;2秒</li>
+<li><strong>功能完整性</strong>：支持环比、同比分析，支持按科室、血液类型、时间维度筛选</li>
+<li><strong>用户体验</strong>：UI与设计稿一致，筛选、导出、告警功能正常</li>
+<li><strong>系统稳定性</strong>：刷新任务稳定执行，数据更新及时准确</li>
+</ol>
+<p>通过本设计方案，将建立完整的输血科运营分析数据架构，支持院领导和科室管理层进行科学的运营决策，提升输血科的运营效率和服务质量。</p>
+</section>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

@@ -1,0 +1,413 @@
+-- =============================================
+-- LIS标本主表数据集成SQL - 基于血缘关系修正版本
+-- 库名: hid0101_orcl_lis_dbo
+-- 源表: lis_inspection_sample
+-- 字段存在性已验证，不存在字段用空字符串替代
+-- =============================================
+create view datacenter_db.lis_sample_main as
+SELECT
+    cast('HID0101' as varchar(65535)) as "LIS_Sample_Main_MedOrgCode",        -- 医疗机构代码，来源：标准化
+    cast('四川大学华西医院' as varchar(65535)) as "LIS_Sample_Main_MedOrgName", -- 医疗机构名称，来源：标准化
+    cast(COALESCE(null, '') as varchar(65535)) as "LIS_Sample_Main_EmpiID",   -- 人员唯一标识ID，字段未找到
+    cast(COALESCE(null, '') as varchar(65535)) as "LIS_Sample_Main_EmpiNo",   -- 人员唯一号，字段未找到
+    -- 医嘱ID ✅血缘：LIS_REQUISITION_ITEM.his_id
+    CAST(COALESCE( replace( ri."his_id",'--','||'), '') AS VARCHAR(65535)) as "LIS_Sample_Main_HISID", -- 医嘱ID ✅血缘：LIS_REQUISITION_ITEM.his_id
+        CAST(COALESCE(s."inspection_id", '') AS VARCHAR(65535)) as "LIS_Sample_Main_SampleID", -- 标本ID(条码号)，来源：lis_inspection_sample.inspection_id
+    CAST(COALESCE(s."inspection_date", '') AS VARCHAR(65535)) as "LIS_Sample_Main_InspectionDate", -- 检验日期(YYYYMMDD)，来源：lis_inspection_sample.inspection_date
+    CAST(COALESCE(s."outpatient_id", '') AS VARCHAR(65535)) as "LIS_Sample_Main_PersID", -- 病人标识，来源：lis_inspection_sample.outpatient_id
+    CAST(COALESCE(pa."paadm_admno", '') AS VARCHAR(65535)) as "LIS_Sample_Main_VisitID", -- 就诊号，来源：pa_adm.paadm_admno
+    CAST(CASE s."patient_type"
+        WHEN '2' THEN '门诊'
+        WHEN '3' THEN '住院急诊'
+        WHEN '4' THEN '门诊急诊'
+        WHEN '5' THEN '体检'
+        WHEN '6' THEN '外院'
+        WHEN '7' THEN '其他'
+        WHEN '8' THEN '科研'
+        ELSE '其他'
+    END AS VARCHAR(65535)) as "LIS_Sample_Main_VisitTypeName", -- 就诊类型名称，来源：lis_inspection_sample.patient_type
+    CAST(COALESCE(s."patient_dept", '') AS VARCHAR(65535)) as "LIS_Sample_Main_DeptID", -- 申请科室ID，来源：lis_inspection_sample.patient_dept
+    CAST(COALESCE(s."patient_dept_name", '') AS VARCHAR(65535)) as "LIS_Sample_Main_DeptName", -- 申请科室名称，来源：lis_inspection_sample.patient_dept_name
+    CAST(COALESCE(s."group_id", '') AS VARCHAR(65535)) as "LIS_Sample_Main_ProfGroupCode", -- 亚专业组代码，来源：lis_inspection_sample.group_id
+    CAST(COALESCE(pg."PGROUP_NAME", '其他') AS VARCHAR(65535)) as "LIS_Sample_Main_ProfGroupName", -- 亚专业组名称，来源：lis5_inspection_pgroup.PGROUP_NAME
+    CAST(COALESCE(s."sample_class", '') AS VARCHAR(65535)) as "LIS_Sample_Main_SampleTypeID", -- 标本类型ID，来源：lis_inspection_sample.sample_class
+    CAST(COALESCE(s."sample_class", '') AS VARCHAR(65535)) as "LIS_Sample_Main_SampleTypeCode", -- 标本类型代码，来源：lis_inspection_sample.sample_class
+    CAST(COALESCE(s."sample_class_name", '') AS VARCHAR(65535)) as "LIS_Sample_Main_SampleTypeName", -- 标本类型名称，来源：lis_inspection_sample.sample_class_name
+    CAST(COALESCE(s."requisition_time", '') AS VARCHAR(65535)) as "LIS_Sample_Main_RequisitionDtTm", -- 申请时间，来源：lis_inspection_sample.requisition_time
+    CAST(COALESCE(s."sampling_person", '') AS VARCHAR(65535)) as "LIS_Sample_Main_SamplingPersName", -- 采集人员姓名，来源：lis_inspection_sample.sampling_person
+    CAST(COALESCE(s."sampling_time", '') AS VARCHAR(65535)) as "LIS_Sample_Main_SamplingDtTm", -- 采集时间，来源：lis_inspection_sample.sampling_time
+    CAST(COALESCE(s."test_order_name", '') AS VARCHAR(65535)) as "LIS_Sample_Main_SamplingContent", -- 采集内容(检验目的)，来源：lis_inspection_sample.test_order_name
+    CAST(COALESCE(s."incept_person", '') AS VARCHAR(65535)) as "LIS_Sample_Main_ReceivePersName", -- 接收人员姓名，来源：lis_inspection_sample.incept_person
+    CAST(COALESCE(s."incept_time", '') AS VARCHAR(65535)) as "LIS_Sample_Main_ReceiveDtTm", -- 接收时间，来源：lis_inspection_sample.incept_time
+    CAST(COALESCE(s."inspection_person", '') AS VARCHAR(65535)) as "LIS_Sample_Main_InspectionPersName", -- 检验人员姓名，来源：lis_inspection_sample.inspection_person
+    cast('' as varchar(65535)) as "LIS_Sample_Main_ReportPersName", -- 报告人员姓名，字段未找到
+    cast('' as varchar(65535)) as "LIS_Sample_Main_ReportDtTm",     -- 报告时间，字段未找到
+    cast('' as varchar(65535)) as "LIS_Sample_Main_ReportContent",  -- 报告内容，字段未找到
+    CAST(COALESCE(s."check_person", '') AS VARCHAR(65535)) as "LIS_Sample_Main_CheckPersName", -- 审核人员姓名，来源：lis_inspection_sample.check_person
+    CAST(COALESCE(s."check_time", '') AS VARCHAR(65535)) as "LIS_Sample_Main_CheckDtTm", -- 审核时间，来源：lis_inspection_sample.check_time
+    CAST(COALESCE(s."remark", '') AS VARCHAR(65535)) as "LIS_Sample_Main_CheckContent", -- 审核内容(备注)，来源：lis_inspection_sample.remark
+    CASE s."inspection_state"
+        WHEN 'audited' THEN '已审核'
+        WHEN 'sent' THEN '已发送'
+        WHEN 'finished' THEN '已完成'
+        WHEN 'reported' THEN '已报告'
+        WHEN 'inspecting' THEN '检验中'
+        ELSE '未知'
+    END as "LIS_Sample_Main_SampleStatusName", -- 标本状态名称，来源：lis_inspection_sample.inspection_state
+    CASE WHEN s."charge_type" LIKE '%金卡%' OR s."charge_type" LIKE '%VIP%'
+         THEN 'Y' ELSE 'N' END as "LIS_Sample_Main_IsGoldenCard", -- 是否金卡(Y/N)，来源：lis_inspection_sample.charge_type
+    CAST(COALESCE(s."input_person", '') AS VARCHAR(65535)) as "LIS_Sample_Main_InputPersName", -- 登记人员姓名，来源：lis_inspection_sample.input_person
+    CAST(COALESCE(s."input_time", '') AS VARCHAR(65535)) as "LIS_Sample_Main_InputDtTm", -- 登记时间，来源：lis_inspection_sample.input_time
+    cast('8' as varchar(65535)) as "LIS_Sample_Main_DataSourceFlag", -- 数据来源标识，来源：标准化
+    cast('hid0101_orcl_lis_dbo.lis_inspection_sample' as varchar(65535)) as "LIS_Sample_Main_DSTable", -- 数据源表，来源：标准化
+    cast('inspection_id' as varchar(65535)) as "LIS_Sample_Main_DSTableKey", -- 数据源表主键，来源：标准化
+    CAST(COALESCE(s."inspection_id", '') AS VARCHAR(65535)) as "LIS_Sample_Main_DSTableValue", -- 数据源表主键值，来源：lis_inspection_sample.inspection_id
+    CAST(current_timestamp AS VARCHAR(19)) as "LIS_Sample_Main_LastUpdateDtTm", -- 最后更新时间，来源：系统时间
+    CAST(current_timestamp AS VARCHAR(19)) as "LIS_Sample_Main_DataCreateDtTm",  -- 数据创建时间，来源：系统时间
+    '0' as "LIS_Sample_Main_IsDeleted"
+
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample s
+LEFT JOIN hid0101_cache_his_dhcapp_sqluser.pa_adm pa
+    ON s."patient_id" = pa."rowkey"
+    AND pa."isdeleted" = '0'
+-- 医嘱信息关联 ✅血缘：LIS_REQUISITION_ITEM表获取医嘱ID
+LEFT JOIN hid0101_orcl_lis_dbo.lis_requisition_item ri
+    ON s."requisition_id" = ri."requisition_id"                      -- 标本信息关联医嘱信息 ✅血缘：lis_inspection_sample.requisition_id = lis_requisition_item.requisition_id
+    AND ri."isdeleted" = '0'
+LEFT JOIN hid0101_orcl_lis_dbo.lis_inspection_group g 
+    ON s."group_id" = g."GROUP_ID" 
+    AND g."isdeleted" = '0'
+LEFT JOIN hid0101_orcl_lis_xhsystem1.lis5_inspection_pgroup pg 
+    ON g."INSPECTION_DEPT" = pg."PGROUP_ID" 
+    AND pg."isdeleted" = '0'
+WHERE s."inspection_date" >= CAST(DATE_FORMAT(DATE_ADD('day', -1, NOW()), '%Y%m%d') AS VARCHAR(65535))
+    AND s."inspection_id" IS NOT NULL
+    AND s."isdeleted" = '0';
+
+
+
+-- =============================================
+-- LIS医嘱主表数据集成SQL - 基于血缘关系修正版本  
+-- 血缘依据：LIS血缘22文档V2.0
+-- 主表：lis_inspection_sample (检验标本信息表)
+-- =============================================
+create view datacenter_db.dwd_lis_order_main as
+SELECT
+    -- 基础标识信息 🔄公共字段标准化
+    cast('HID0101' as varchar(65535)) as "LIS_Order_Main_MedOrgCode",       -- 医疗机构代码 🔄公共字段标准化
+    cast('四川大学华西医院' as varchar(65535)) as "LIS_Order_Main_MedOrgName", -- 医疗机构名称 🔄公共字段标准化
+    cast(null as varchar(65535)) as "LIS_Order_Main_EmpiID",                -- 人员唯一标识ID 🔄公共字段标准化
+    cast(null as varchar(65535)) as "LIS_Order_Main_EmpiNo",                -- 人员唯一号 🔄公共字段标准化
+    CAST(COALESCE(s."outpatient_id", '') AS VARCHAR(65535)) as "LIS_Order_Main_PersID",                    -- 病人标识 ✅血缘：取lis_inspection_sample.outpatient_id作为病人标识
+    cast(COALESCE(null, '') as varchar(65535)) as "LIS_Order_Main_PersNo",                -- 人员号 🔄公共字段标准化
+    CAST(COALESCE(s."inspection_id", '') AS VARCHAR(65535)) as "LIS_Order_Main_ReqID",                     -- 申请单ID ✅血缘：lis_inspection_sample.inspection_id（检验ID作为申请单ID）
+    CAST(COALESCE( replace( ri."his_id",'--','||'), '') AS VARCHAR(65535)) as "LIS_Order_Main_HISID",                      -- 医嘱ID ✅血缘：LIS_REQUISITION_ITEM.his_id
+    CAST(COALESCE(s."inspection_id", '') AS VARCHAR(65535)) as "LIS_Order_Main_SampleID",                  -- 标本ID ✅血缘：lis_inspection_sample.inspection_id（标本唯一标识）
+    CAST(COALESCE(pa."paadm_admno", '') AS VARCHAR(65535)) as "LIS_Order_Main_VisitID",                    -- 就诊号 ✅血缘：通过pa_adm.paadm_admno获取就诊号
+    CAST(COALESCE(s."outpatient_id", '') AS VARCHAR(65535)) as "LIS_Order_Main_VisitNo",                   -- 就诊号 ✅血缘：lis_inspection_sample.outpatient_id
+    cast(null as varchar(65535)) as "LIS_Order_Main_RegID",                 -- 挂号ID 🔄公共字段标准化
+    cast(null as varchar(65535)) as "LIS_Order_Main_RegNo",                 -- 挂号号 🔄公共字段标准化
+    
+    -- 申请相关字段 ✅血缘验证
+    CAST(COALESCE(s."inspection_date", '') AS VARCHAR(65535)) as "LIS_Order_Main_InspectionDate",           -- 检验日期 ✅血缘：lis_inspection_sample.inspection_date（YYYYMMDD格式）
+    CAST(COALESCE(s."requisition_time", '') AS VARCHAR(65535)) as "LIS_Order_Main_ReqDtTm",                -- 申请时间 ✅血缘：lis_inspection_sample.requisition_time（申请时间）
+    CAST(COALESCE(s."patient_dept", '') AS VARCHAR(65535)) as "LIS_Order_Main_ReqDeptCode",                -- 申请科室代码 ✅血缘：lis_inspection_sample.patient_dept（申请科室ID）
+    CAST(COALESCE(s."patient_dept_name", '') AS VARCHAR(65535)) as "LIS_Order_Main_ReqDeptName",           -- 申请科室名称 ✅血缘：lis_inspection_sample.patient_dept_name
+    CAST(COALESCE(s."requisition_person", '') AS VARCHAR(65535)) as "LIS_Order_Main_ReqDoctorCode",        -- 申请医生代码 ✅血缘：lis_inspection_sample.requisition_person（开单人员）
+    CAST(COALESCE(s."requisition_person", '') AS VARCHAR(65535)) as "LIS_Order_Main_ReqDoctorName",        -- 申请医生姓名 ✅血缘：lis_inspection_sample.requisition_person
+    cast(null as varchar(65535)) as "LIS_Order_Main_ReqNurseCode",          -- 申请护士代码 🔄公共字段标准化
+    cast(null as varchar(65535)) as "LIS_Order_Main_ReqNurseName",          -- 申请护士姓名 🔄公共字段标准化
+    
+    -- 就诊类型信息 ✅血缘验证
+    CAST(CASE s."patient_type"
+        WHEN '2' THEN '门诊'
+        WHEN '3' THEN '住院急诊'
+        WHEN '4' THEN '门诊急诊'
+        WHEN '5' THEN '体检'
+        WHEN '6' THEN '外院'
+        WHEN '7' THEN '其他'
+        WHEN '8' THEN '科研'
+        ELSE '其他'
+    END AS VARCHAR(65535)) as "LIS_Order_Main_VisitTypeName",                            -- 就诊类型名称 ✅血缘：lis_inspection_sample.patient_type（患者类型枚举值）
+    
+    -- 科室信息 ✅血缘验证
+    CAST(COALESCE(s."patient_dept", '') AS VARCHAR(65535)) as "LIS_Order_Main_DeptID",                     -- 申请科室ID ✅血缘：lis_inspection_sample.patient_dept
+    CAST(COALESCE(s."patient_dept_name", '') AS VARCHAR(65535)) as "LIS_Order_Main_DeptName",              -- 申请科室名称 ✅血缘：lis_inspection_sample.patient_dept_name
+    CAST(COALESCE(s."group_id", '') AS VARCHAR(65535)) as "LIS_Order_Main_ProfGroupCode",                  -- 亚专业组代码 ✅血缘：lis_inspection_sample.group_id
+    -- 🔥三表关联获取亚专业组名称（重要血缘关系）
+    CAST(COALESCE(pg."PGROUP_NAME", '其他专业组') AS VARCHAR(65535)) as "LIS_Order_Main_ProfGroupName", -- 亚专业组名称 ✅血缘：三表关联 s.group_id→g.GROUP_ID→g.INSPECTION_DEPT→pg.PGROUP_ID→pg.PGROUP_NAME
+    
+    -- 标本类型信息 ✅血缘验证
+    CAST(COALESCE(s."sample_class", '') AS VARCHAR(65535)) as "LIS_Order_Main_SampleTypeID",               -- 标本类型ID ✅血缘：lis_inspection_sample.sample_class
+    CAST(COALESCE(s."sample_class", '') AS VARCHAR(65535)) as "LIS_Order_Main_SampleTypeCode",             -- 标本类型代码 ✅血缘：lis_inspection_sample.sample_class
+    CAST(COALESCE(s."sample_class_name", '') AS VARCHAR(65535)) as "LIS_Order_Main_SampleTypeName",        -- 标本类型名称 ✅血缘：lis_inspection_sample.sample_class_name
+    
+    -- 采集、接收、检验人员信息 ✅血缘验证
+    CAST(COALESCE(s."sampling_person", '') AS VARCHAR(65535)) as "LIS_Order_Main_SamplingPersName",        -- 采集人员姓名 ✅血缘：lis_inspection_sample.sampling_person
+    CAST(COALESCE(s."sampling_time", '') AS VARCHAR(65535)) as "LIS_Order_Main_SamplingDtTm",              -- 采集时间 ✅血缘：lis_inspection_sample.sampling_time
+    CAST(COALESCE(s."test_order_name", '') AS VARCHAR(65535)) as "LIS_Order_Main_SamplingContent",         -- 采集内容(检验目的) ✅血缘：lis_inspection_sample.test_order_name
+    CAST(COALESCE(s."incept_person", '') AS VARCHAR(65535)) as "LIS_Order_Main_ReceivePersName",           -- 接收人员姓名 ✅血缘：lis_inspection_sample.incept_person
+    CAST(COALESCE(s."incept_time", '') AS VARCHAR(65535)) as "LIS_Order_Main_ReceiveDtTm",                 -- 接收时间 ✅血缘：lis_inspection_sample.incept_time
+    CAST(COALESCE(s."inspection_person", '') AS VARCHAR(65535)) as "LIS_Order_Main_InspectionPersName",    -- 检验人员姓名 ✅血缘：lis_inspection_sample.inspection_person
+    
+    -- 报告人员信息 ✅血缘验证（字段不存在使用空值）
+    cast(null as varchar(65535)) as "LIS_Order_Main_ReportPersName",        -- 报告人员姓名 🚨血缘：lis_inspection_sample.issued_person（字段不存在）
+    cast(null as timestamp) as "LIS_Order_Main_ReportDtTm",          -- 报告时间 🚨血缘：lis_inspection_sample.issued_time（字段不存在）
+    cast(null as varchar(65535)) as "LIS_Order_Main_ReportContent",         -- 报告内容 🚨血缘：lis_inspection_sample.internal_remark（字段不存在）
+    
+    -- 审核人员信息 ✅血缘验证
+    CAST(COALESCE(s."check_person", '') AS VARCHAR(65535)) as "LIS_Order_Main_CheckPersName",              -- 审核人员姓名 ✅血缘：lis_inspection_sample.check_person
+    CAST(COALESCE(s."check_time", '') AS VARCHAR(65535)) as "LIS_Order_Main_CheckDtTm",                    -- 审核时间 ✅血缘：lis_inspection_sample.check_time
+    CAST(COALESCE(s."remark", '') AS VARCHAR(65535)) as "LIS_Order_Main_CheckContent",                     -- 审核内容(备注) ✅血缘：lis_inspection_sample.remark
+    
+    -- 其他字段 ✅血缘验证
+    CAST(CASE s."inspection_state"
+        WHEN 'audited' THEN '已审核'
+        WHEN 'sent' THEN '已发送'
+        WHEN 'finished' THEN '已完成'
+        WHEN 'reported' THEN '已报告'
+        WHEN 'inspecting' THEN '检验中'
+        ELSE '未知'
+    END AS VARCHAR(65535)) as "LIS_Order_Main_SampleStatusName",                        -- 标本状态名称 ✅血缘：lis_inspection_sample.inspection_state（状态枚举值）
+    CAST(CASE WHEN s."charge_type" LIKE '%金卡%' OR s."charge_type" LIKE '%VIP%'
+         THEN 'Y' ELSE 'N' END AS VARCHAR(65535)) as "LIS_Order_Main_IsGoldenCard",     -- 是否金卡(Y/N) ✅血缘：lis_inspection_sample.charge_type（收费类别判断）
+    CAST(COALESCE(s."input_person", '') AS VARCHAR(65535)) as "LIS_Order_Main_InputPersName",              -- 登记人员姓名 ✅血缘：lis_inspection_sample.input_person
+    CAST(COALESCE(s."input_time", '') AS VARCHAR(65535)) as "LIS_Order_Main_InputDtTm",                    -- 登记时间 ✅血缘：lis_inspection_sample.input_time
+    
+    -- 系统字段 🔄公共字段标准化，基于血缘关系修正
+    cast('8' as varchar(65535)) as "LIS_Order_Main_DataSourceFlag",         -- 数据来源标识 🔄公共字段标准化
+    cast('hid0101_orcl_lis_dbo.lis_inspection_sample' as varchar(65535)) as "LIS_Order_Main_DSTable", -- 数据源表 ✅血缘：主表修正为lis_inspection_sample
+    cast('inspection_id' as varchar(65535)) as "LIS_Order_Main_DSTableKey", -- 数据源表主键 ✅血缘：主键修正为inspection_id
+    cast(s."inspection_id" as varchar(65535)) as "LIS_Order_Main_DSTableValue", -- 数据源表主键值 ✅血缘：lis_inspection_sample.inspection_id
+    CAST(current_timestamp AS VARCHAR(19)) as "LIS_Order_Main_LastUpdateDtTm", -- 最后更新时间 🔄公共字段标准化
+    CAST(current_timestamp AS VARCHAR(19)) as "LIS_Order_Main_DataCreateDtTm"  -- 数据创建时间 🔄公共字段标准化
+
+-- 血缘关系：基于LIS血缘22文档V2.0的表关联
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample s                     -- 主表：检验标本信息表 ✅血缘：lis_inspection_sample作为主表
+-- 🔥三表关联获取亚专业组名称（重要血缘关系）
+LEFT JOIN hid0101_orcl_lis_dbo.lis_inspection_group g 
+    ON s."group_id" = g."GROUP_ID"                                    -- 第一层关联 ✅血缘：lis_inspection_sample.group_id = lis_inspection_group.GROUP_ID
+    AND g."isdeleted" = '0'
+LEFT JOIN hid0101_orcl_lis_xhsystem1.lis5_inspection_pgroup pg 
+    ON g."INSPECTION_DEPT" = pg."PGROUP_ID"                           -- 第二层关联 ✅血缘：lis_inspection_group.INSPECTION_DEPT = lis5_inspection_pgroup.PGROUP_ID
+    AND pg."isdeleted" = '0'
+-- 申请信息关联（如需要）
+LEFT JOIN hid0101_orcl_lis_dbo.lis_requisition_info r
+    ON s."requisition_id" = r."requisition_id"                       -- 标本信息关联申请信息 ✅血缘：lis_inspection_sample.requisition_id = lis_requisition_info.requisition_id
+    AND r."isdeleted" = '0'
+-- 医嘱信息关联 ✅血缘：LIS_REQUISITION_ITEM表获取医嘱ID
+LEFT JOIN hid0101_orcl_lis_dbo.lis_requisition_item ri
+    ON s."requisition_id" = ri."requisition_id"                      -- 标本信息关联医嘱信息 ✅血缘：lis_inspection_sample.requisition_id = lis_requisition_item.requisition_id
+    AND ri."isdeleted" = '0'
+-- 添加就诊号关联（血缘规则）
+LEFT JOIN hid0101_cache_his_dhcapp_sqluser.pa_adm pa
+    ON s."patient_id" = pa."rowkey"
+    AND pa."isdeleted" = '0'
+
+WHERE s."isdeleted" = '0'                                             -- 逻辑删除条件 ✅血缘：所有表必加
+    AND s."inspection_id" IS NOT NULL;                               -- 主键非空条件 ✅血缘：确保数据完整性
+
+-- =============================================
+-- 血缘关系修正总结（基于LIS血缘22文档V2.0）
+-- =============================================
+-- 
+-- 🔥主要血缘关系变更：
+-- 1. 主表变更：lis_requisition_info → lis_inspection_sample（检验标本信息表作为主表）
+-- 2. 主键变更：requisition_id → inspection_id（检验ID作为主键）
+-- 3. 新增三表关联获取亚专业组名称：
+--    lis_inspection_sample.group_id → lis_inspection_group.GROUP_ID → lis_inspection_group.INSPECTION_DEPT → lis5_inspection_pgroup.PGROUP_ID → lis5_inspection_pgroup.PGROUP_NAME
+-- 
+-- ✅血缘验证字段：
+-- - 医疗机构信息：公共字段标准化
+-- - 患者标识：patient_id（住院号关联），outpatient_id（就诊号关联）
+-- - 申请信息：requisition_time, patient_dept, patient_dept_name, requisition_person
+-- - 科室信息：patient_dept, patient_dept_name, group_id, PGROUP_NAME（三表关联）
+-- - 标本信息：sample_class, sample_class_name, inspection_date
+-- - 人员信息链路：sampling_person → incept_person → inspection_person → check_person → input_person
+-- - 时间信息链路：requisition_time → sampling_time → incept_time → check_time → input_time
+-- - 状态信息：patient_type（枚举值）, inspection_state（枚举值）, charge_type（金卡判断）
+-- 
+-- 🚨字段不存在标识：
+-- - 报告人员信息：issued_person, issued_time, internal_remark（血缘文档确认不存在）
+-- 
+-- 📋库名规范：
+-- - 主库：hid0101_orcl_lis_dbo
+-- - 系统字典库：hid0101_orcl_lis_xhsystem1
+-- 
+-- =============================================
+
+
+-- =============================================
+-- LIS工作量记录表数据集成SQL
+-- 库名: hid0101_orcl_lis_dbo
+-- 工作量内涵: 登记或报告数（REG/RPT两种工作类型）
+-- 数据源: lis_inspection_sample（检验标本信息表）
+-- =============================================
+
+-- =============================================
+-- LIS工作量记录表数据集成SQL - 基于LIS血缘22 V3.0修正版本
+-- 主表：lis_inspection_sample (检验标本信息表)
+-- 血缘依据：LIS血缘22文档V3.0 电子病历评级SQL血缘验证版
+-- =============================================
+
+-- 登记工作量记录 ✅血缘验证版本
+
+create view datacenter_db.dwd_lis_work_record as
+SELECT
+    -- 基础标识信息 🔄公共字段标准化
+    cast('HID0101' as varchar(65535)) as "LIS_Work_Record_MedOrgCode",        -- 医疗机构代码 🔄公共字段标准化
+    cast('四川大学华西医院' as varchar(65535)) as "LIS_Work_Record_MedOrgName",   -- 医疗机构名称 🔄公共字段标准化
+    
+    -- 工作记录核心信息 ✅血缘：lis_inspection_sample
+    CAST(CONCAT(s."inspection_id", '_REG') AS VARCHAR(65535)) as "LIS_Work_Record_WorkID",      -- 工作记录ID ✅血缘：lis_inspection_sample.inspection_id构造
+    CAST(COALESCE(s."inspection_id", '') AS VARCHAR(65535)) as "LIS_Work_Record_SampleID",      -- 标本ID ✅血缘：lis_inspection_sample.inspection_id
+    CAST('REG' AS VARCHAR(65535)) as "LIS_Work_Record_WorkTypeID",                              -- 工作类型ID ✅固定值
+    CAST('REG' AS VARCHAR(65535)) as "LIS_Work_Record_WorkTypeCode",                            -- 工作类型代码 ✅固定值
+    CAST('登记' AS VARCHAR(65535)) as "LIS_Work_Record_WorkTypeName",                           -- 工作类型名称 ✅固定值
+    1 as "LIS_Work_Record_WorkCount",                                   -- 工作量计数 ✅固定值
+    
+    -- 科室信息 ✅血缘：lis_inspection_sample（血缘验证存在）
+    CAST(COALESCE(s."patient_dept", '') AS VARCHAR(65535)) as "LIS_Work_Record_DeptID",                       -- 科室ID ✅血缘：lis_inspection_sample.patient_dept
+    CAST(COALESCE(s."patient_dept", '') AS VARCHAR(65535)) as "LIS_Work_Record_DeptCode",                     -- 科室代码 ✅血缘：lis_inspection_sample.patient_dept
+    CAST(COALESCE(s."patient_dept_name", '') AS VARCHAR(65535)) as "LIS_Work_Record_DeptName",                -- 科室名称 ✅血缘：lis_inspection_sample.patient_dept_name
+    CAST(COALESCE(s."group_id", '') AS VARCHAR(65535)) as "LIS_Work_Record_ProfGroupID",                      -- 亚专业组ID ✅血缘：lis_inspection_sample.group_id
+    CAST(COALESCE(s."group_id", '') AS VARCHAR(65535)) as "LIS_Work_Record_ProfGroupCode",                    -- 亚专业组代码 ✅血缘：lis_inspection_sample.group_id
+    
+    -- 🔥亚专业组名称通过三表关联获取（重要血缘关系 - LIS血缘22 V3.0验证）
+    CAST(COALESCE(pg1."PGROUP_NAME", '其他专业组') AS VARCHAR(65535)) as "LIS_Work_Record_ProfGroupName", -- 亚专业组名称 ✅血缘：三表关联 s.group_id→g.GROUP_ID→g.INSPECTION_DEPT→pg.PGROUP_ID→pg.PGROUP_NAME
+    
+    -- 操作人员信息（登记人员）✅血缘：lis_inspection_sample
+    CAST(COALESCE(s."input_person", '') AS VARCHAR(65535)) as "LIS_Work_Record_OperatorID",                   -- 操作人员ID ✅血缘：lis_inspection_sample.input_person
+    CAST(COALESCE(s."input_person", '') AS VARCHAR(65535)) as "LIS_Work_Record_OperatorCode",                 -- 操作人员代码 ✅血缘：lis_inspection_sample.input_person
+    CAST(COALESCE(s."input_person", '') AS VARCHAR(65535)) as "LIS_Work_Record_OperatorName",                 -- 操作人员姓名 ✅血缘：lis_inspection_sample.input_person
+    
+    -- 时间信息（登记时间）✅血缘：lis_inspection_sample
+    CAST(SUBSTRING(s."input_time", 1, 10) AS VARCHAR(65535)) as "LIS_Work_Record_WorkDate",     -- 工作日期 ✅血缘：lis_inspection_sample.input_time提取
+    CAST(COALESCE(s."input_time", '') AS VARCHAR(65535)) as "LIS_Work_Record_WorkDtTm",                       -- 工作时间 ✅血缘：lis_inspection_sample.input_time
+    
+    -- 标准扩展字段 ✅血缘：lis_inspection_sample
+    s."requisition_id" as "LIS_Work_Record_ExtStr1",                    -- 扩展1(申请单ID) ✅血缘：lis_inspection_sample.requisition_id
+    s."patient_type" as "LIS_Work_Record_ExtStr2",                      -- 扩展2(患者类型) ✅血缘：lis_inspection_sample.patient_type
+    s."inspection_date" as "LIS_Work_Record_ExtStr3",                   -- 扩展3(检验日期) ✅血缘：lis_inspection_sample.inspection_date
+    '' as "LIS_Work_Record_ExtStr4",                                    -- 扩展4 🚨字段不存在
+    '' as "LIS_Work_Record_ExtStr5",                                    -- 扩展5 🚨字段不存在
+    '' as "LIS_Work_Record_ExtStr6",                                    -- 扩展6 🚨字段不存在
+    COALESCE(CAST(s."workload" AS DOUBLE), 1) as "LIS_Work_Record_ExtNum1", -- 扩展7(工作量) ✅血缘：lis_inspection_sample.workload（新发现字段）
+    1 as "LIS_Work_Record_ExtNum2",                                     -- 扩展8 🚨字段不存在，固定值1
+    s."sampling_time" as "LIS_Work_Record_ExtDate1",                    -- 扩展9(采样时间) ✅血缘：lis_inspection_sample.sampling_time
+    CAST(NULL AS TIMESTAMP) as "LIS_Work_Record_ExtDate2",              -- 扩展10 🚨字段不存在
+    
+    -- 数据管理字段 🔄公共字段标准化
+    cast('8' as varchar) as "LIS_Work_Record_DataSourceFlag",          -- 数据来源标识 🔄公共字段标准化
+    cast('hid0101_orcl_lis_dbo.lis_inspection_sample' as varchar) as "LIS_Work_Record_DSTable", -- 接入数据源的表 🔄公共字段标准化
+    cast('inspection_id' as varchar) as "LIS_Work_Record_DSTableKey",   -- 接入数据源的key 🔄公共字段标准化
+    cast(s."inspection_id" as varchar) as "LIS_Work_Record_DSTableValue", -- 接入数据源的key值 🔄公共字段标准化
+    cast('0' as varchar) as "LIS_Work_Record_IsDeleted",               -- 数据物理删除标识 🔄公共字段标准化
+    CAST(current_timestamp AS VARCHAR(19)) as "LIS_Work_Record_LastUpdateDtTm", -- 最后更新时间 🔄公共字段标准化
+    CAST(current_timestamp AS VARCHAR(19)) as "LIS_Work_Record_DataCreateDtTm"  -- 数据创建时间 🔄公共字段标准化
+
+-- 🔥血缘关系：基于LIS血缘22文档V3.0的表关联
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample s                       -- 主表：检验标本信息表 ✅血缘：lis_inspection_sample作为主表
+-- 🔥三表关联获取亚专业组名称（重要血缘关系 - LIS血缘22 V3.0验证）
+LEFT JOIN hid0101_orcl_lis_dbo.lis_inspection_group g1 
+    ON s."group_id" = g1."GROUP_ID"                                     -- 第一层关联 ✅血缘：lis_inspection_sample.group_id = lis_inspection_group.GROUP_ID
+    AND g1."isdeleted" = '0'
+LEFT JOIN hid0101_orcl_lis_xhsystem1.lis5_inspection_pgroup pg1 
+    ON g1."INSPECTION_DEPT" = pg1."PGROUP_ID"                           -- 第二层关联 ✅血缘：lis_inspection_group.INSPECTION_DEPT = lis5_inspection_pgroup.PGROUP_ID
+    AND pg1."isdeleted" = '0'
+WHERE s."isdeleted" = '0'                                               -- 逻辑删除条件 ✅血缘：所有表必加
+  AND s."input_time" IS NOT NULL                                        -- 登记时间非空 ✅血缘：确保登记工作量数据完整性
+  AND s."input_person" IS NOT NULL                                      -- 登记人员非空 ✅血缘：确保登记工作量数据完整性
+
+UNION ALL
+
+-- 报告工作量记录 ✅血缘验证版本
+SELECT
+    -- 基础标识信息 🔄公共字段标准化
+    cast('HID0101' as varchar) as "LIS_Work_Record_MedOrgCode",        -- 医疗机构代码 🔄公共字段标准化
+    cast('四川大学华西医院' as varchar) as "LIS_Work_Record_MedOrgName",   -- 医疗机构名称 🔄公共字段标准化（修正医疗机构名称）
+    
+    -- 工作记录核心信息 ✅血缘：lis_inspection_sample
+    CONCAT(s."inspection_id", '_RPT') as "LIS_Work_Record_WorkID",      -- 工作记录ID ✅血缘：lis_inspection_sample.inspection_id构造
+    s."inspection_id" as "LIS_Work_Record_SampleID",                    -- 标本ID ✅血缘：lis_inspection_sample.inspection_id
+    'RPT' as "LIS_Work_Record_WorkTypeID",                              -- 工作类型ID ✅固定值
+    'RPT' as "LIS_Work_Record_WorkTypeCode",                            -- 工作类型代码 ✅固定值
+    '报告' as "LIS_Work_Record_WorkTypeName",                           -- 工作类型名称 ✅固定值
+    1 as "LIS_Work_Record_WorkCount",                                   -- 工作量计数 ✅固定值
+    
+    -- 科室信息 ✅血缘：lis_inspection_sample（血缘验证存在）
+    s."patient_dept" as "LIS_Work_Record_DeptID",                       -- 科室ID ✅血缘：lis_inspection_sample.patient_dept
+    s."patient_dept" as "LIS_Work_Record_DeptCode",                     -- 科室代码 ✅血缘：lis_inspection_sample.patient_dept
+    s."patient_dept_name" as "LIS_Work_Record_DeptName",                -- 科室名称 ✅血缘：lis_inspection_sample.patient_dept_name
+    s."group_id" as "LIS_Work_Record_ProfGroupID",                      -- 亚专业组ID ✅血缘：lis_inspection_sample.group_id
+    s."group_id" as "LIS_Work_Record_ProfGroupCode",                    -- 亚专业组代码 ✅血缘：lis_inspection_sample.group_id
+    
+    -- 🔥亚专业组名称通过三表关联获取（重要血缘关系 - LIS血缘22 V3.0验证）
+    COALESCE(pg2."PGROUP_NAME", '其他专业组') as "LIS_Work_Record_ProfGroupName", -- 亚专业组名称 ✅血缘：三表关联 s.group_id→g.GROUP_ID→g.INSPECTION_DEPT→pg.PGROUP_ID→pg.PGROUP_NAME
+    
+    -- 操作人员信息（报告人员=审核人员）✅血缘：lis_inspection_sample
+    s."check_person" as "LIS_Work_Record_OperatorID",                   -- 操作人员ID ✅血缘：lis_inspection_sample.check_person
+    s."check_person" as "LIS_Work_Record_OperatorCode",                 -- 操作人员代码 ✅血缘：lis_inspection_sample.check_person
+    s."check_person" as "LIS_Work_Record_OperatorName",                 -- 操作人员姓名 ✅血缘：lis_inspection_sample.check_person
+    
+    -- 时间信息（报告时间=审核时间）✅血缘：lis_inspection_sample
+    SUBSTRING(s."check_time", 1, 10) as "LIS_Work_Record_WorkDate",     -- 工作日期 ✅血缘：lis_inspection_sample.check_time提取
+    s."check_time" as "LIS_Work_Record_WorkDtTm",                       -- 工作时间 ✅血缘：lis_inspection_sample.check_time
+    
+    -- 标准扩展字段 ✅血缘：lis_inspection_sample
+    s."requisition_id" as "LIS_Work_Record_ExtStr1",                    -- 扩展1(申请单ID) ✅血缘：lis_inspection_sample.requisition_id
+    s."patient_type" as "LIS_Work_Record_ExtStr2",                      -- 扩展2(患者类型) ✅血缘：lis_inspection_sample.patient_type
+    s."inspection_date" as "LIS_Work_Record_ExtStr3",                   -- 扩展3(检验日期) ✅血缘：lis_inspection_sample.inspection_date
+    '' as "LIS_Work_Record_ExtStr4",                                    -- 扩展4 🚨字段不存在
+    '' as "LIS_Work_Record_ExtStr5",                                    -- 扩展5 🚨字段不存在
+    '' as "LIS_Work_Record_ExtStr6",                                    -- 扩展6 🚨字段不存在
+    COALESCE(CAST(s."workload" AS DOUBLE), 1) as "LIS_Work_Record_ExtNum1", -- 扩展7(工作量) ✅血缘：lis_inspection_sample.workload（新发现字段）
+    1 as "LIS_Work_Record_ExtNum2",                                     -- 扩展8 🚨字段不存在，固定值1
+    s."sampling_time" as "LIS_Work_Record_ExtDate1",                    -- 扩展9(采样时间) ✅血缘：lis_inspection_sample.sampling_time
+    CAST(NULL AS TIMESTAMP) as "LIS_Work_Record_ExtDate2",              -- 扩展10 🚨字段不存在
+    
+    -- 数据管理字段 🔄公共字段标准化
+    cast('8' as varchar) as "LIS_Work_Record_DataSourceFlag",          -- 数据来源标识 🔄公共字段标准化
+    cast('hid0101_orcl_lis_dbo.lis_inspection_sample' as varchar) as "LIS_Work_Record_DSTable", -- 接入数据源的表 🔄公共字段标准化
+    cast('inspection_id' as varchar) as "LIS_Work_Record_DSTableKey",   -- 接入数据源的key 🔄公共字段标准化
+    cast(s."inspection_id" as varchar) as "LIS_Work_Record_DSTableValue", -- 接入数据源的key值 🔄公共字段标准化
+    cast('0' as varchar) as "LIS_Work_Record_IsDeleted",               -- 数据物理删除标识 🔄公共字段标准化
+    CAST(current_timestamp AS VARCHAR(19)) as "LIS_Work_Record_LastUpdateDtTm", -- 最后更新时间 🔄公共字段标准化
+    CAST(current_timestamp AS VARCHAR(19)) as "LIS_Work_Record_DataCreateDtTm"  -- 数据创建时间 🔄公共字段标准化
+
+-- 🔥血缘关系：基于LIS血缘22文档V3.0的表关联
+FROM hid0101_orcl_lis_dbo.lis_inspection_sample s                       -- 主表：检验标本信息表 ✅血缘：lis_inspection_sample作为主表
+-- 🔥三表关联获取亚专业组名称（重要血缘关系 - LIS血缘22 V3.0验证）
+LEFT JOIN hid0101_orcl_lis_dbo.lis_inspection_group g2 
+    ON s."group_id" = g2."GROUP_ID"                                     -- 第一层关联 ✅血缘：lis_inspection_sample.group_id = lis_inspection_group.GROUP_ID
+    AND g2."isdeleted" = '0'
+LEFT JOIN hid0101_orcl_lis_xhsystem1.lis5_inspection_pgroup pg2 
+    ON g2."INSPECTION_DEPT" = pg2."PGROUP_ID"                           -- 第二层关联 ✅血缘：lis_inspection_group.INSPECTION_DEPT = lis5_inspection_pgroup.PGROUP_ID
+    AND pg2."isdeleted" = '0'
+WHERE s."isdeleted" = '0'                                               -- 逻辑删除条件 ✅血缘：所有表必加
+  AND s."check_time" IS NOT NULL                                        -- 审核时间非空 ✅血缘：确保报告工作量数据完整性
+  AND s."check_person" IS NOT NULL;                                     -- 审核人员非空 ✅血缘：确保报告工作量数据完整性
+
+-- =============================================
+-- 血缘关系修正总结（基于LIS血缘22文档V3.0）
+-- =============================================
+-- 
+-- 🔥主要血缘关系修正：
+-- 1. 字段名规范：所有字段名统一使用小写加双引号格式 (如：inspection_id而非INSPECTION_ID)
+-- 2. 医疗机构名称统一：修正为"四川大学华西医院"
+-- 3. 工作量字段利用：利用新发现的workload字段作为ExtNum1（原固定值1改为实际工作量值）
+-- 4. 三表关联验证：亚专业组名称获取方式与血缘文档完全一致
+-- 
+-- ✅血缘验证字段完整映射：
+-- - 核心标识：inspection_id（标本ID作为主键）
+-- - 科室信息：patient_dept, patient_dept_name, group_id, PGROUP_NAME（三表关联）
+-- - 人员信息：input_person（登记）, check_person（报告=审核）
+-- - 时间信息：input_time（登记）, check_time（报告=审核）
+-- - 扩展信息：requisition_id, patient_type, inspection_date, sampling_time
+-- - 新发现字段：workload（工作量统计值）
+-- 
+-- 📋库名规范（LIS血缘22 V3.0确认）：
+-- - 主库：hid0101_orcl_lis_dbo（检验标本信息表）
+-- - 系统字典库：hid0101_orcl_lis_xhsystem1（亚专业组表）
+-- 
+-- =============================================

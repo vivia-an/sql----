@@ -1,0 +1,1136 @@
+LIS检验主题数据架构设计方案
+一、总体架构概述
+基于现有DL -> DC -> MDR的三层架构，针对LIS检验业务需求设计完整的数据流向：
+
+DL层(ODS贴源) → DC层(数据中心) → MDR层(主题层)
+     ↓              ↓            ↓
+   LIS源表        明细+汇总表     主题宽表
+
+1.1 数据分层说明
+数据层级	数据类型	表名举例	数据来源	数据特点
+DL层	贴源数据	LIS5_REQ_INFO、LIS5_INSPECT_SAMPLE	业务系统直接复制	保持源系统原始结构
+DC层-明细	明细数据	LIS_Sample_Main、LIS_Order_Main	DL层集成处理	标准化字段、多医院统一
+DC层-汇总	汇总数据	LIS_Daily_Summary	DC明细表聚合	按维度预聚合，提升查询性能
+MDR层	主题数据	MDR_LIS_Monthly_Summary	DC层数据整合	面向业务分析的宽表结构
+1.2 明细数据vs汇总数据设计原则
+明细数据表设计原则： - 基于业务最小粒度设计（单个标本、单个医嘱、单次操作） - 直接从DL层集成，支持多医院多院区统一管理 - 包含完整业务上下文信息，支持任意维度聚合 - 遵循现有DC架构的命名和字段标准
+汇总数据表设计原则： - 基于DC明细数据按维度预聚合 - 提升查询性能，减少实时计算压力 - 支持常见分析场景的快速响应 - 数据源完全来自DC层，不直接依赖DL层
+二、DC层原子指标设计原则
+2.1 设计理念对标现有DC架构
+通过分析现有datacenter设计，我们发现以下设计风格：
+1.命名规范一致性：表名_字段名格式，如Fee_BillDet_ChargeItemID
+2.字段类型标准化：ID统一使用VARCHAR(60)，金额使用FLOAT8，时间使用timestamp
+3.数据完整性：每个事实表都包含完整的维度信息（机构、人员、就诊等）
+4.扩展性设计：预留扩展字段(ExtStr1-6, ExtNum1-2, ExtDate1-2)
+5.元数据管理：包含数据来源标识、创建时间、更新时间等字段
+2.2 原子指标最小粒度说明
+业务域	原子指标	最小统计粒度	支持聚合维度	设计原因
+标本域	标本数量	单个标本(inspection_id)	日期/科室/亚专业组/金卡类型	每个条码对应一个独立标本，是LIS最基础的业务单元
+医嘱域	项目数量	单个检验项目(req_id+item_id)	日期/科室/亚专业组/项目类型	每个医嘱项目是收费和执行的最小单位
+工作量域	操作次数	单次操作行为(登记/报告)	日期/科室/亚专业组/操作类型/人员	每次登记或报告都是独立的工作量单元
+收入域	收费金额	单笔收费记录(Fee_BillDet_BillDetID)	日期/科室/亚专业组/收费项目/金卡类型	每笔收费都是独立的会计核算单元
+2.3 DC层设计优势
+●原子性：每个事实都可以拆解到最小业务单元，支持任意粒度聚合
+●一致性：统一的数据模型确保跨域指标计算的准确性
+●完整性：保留完整的业务上下文信息，支持复杂分析需求
+●扩展性：标准化设计便于后续业务拓展和维护
+三、数据血缘关系设计
+3.1 DL层数据源（已有）
+●LIS5_REQ_INFO（申请单信息表）- 医嘱数据源
+●LIS5_INSPECT_SAMPLE（检验标本信息表）- 标本数据源
+●LIS_INSPECTION_SAMPLE_charge（检验标本收费表）- 收费数据源,废弃，收费使用收入主题
+●LIS5_INSPECTION_RESULT（检验结果信息表）- 工作量数据源
+●LIS5_inspection_report（检验报告信息表）- 报告数据源
+3.2 DC层设计（符合现有DC架构风格）
+3.2.1 明细数据表设计（DL->DC直接集成）
+明细数据表基于业务最小粒度设计，从DL层直接集成，支持多医院多院区统一管理。
+A. LIS_Sample_Main（检验标本主表）
+字段映射表：
+DC字段名	字段类型	源表	源字段	字段说明	业务规则
+LIS_Sample_Main_MedOrgCode	VARCHAR(60)	LIS5_INSPECT_SAMPLE	hospital_ID	医疗机构代码	支持多医院统一编码
+LIS_Sample_Main_SampleID	VARCHAR(60)	LIS5_INSPECT_SAMPLE	inspection_id	标本ID（条码号）	业务主键，全局唯一
+LIS_Sample_Main_InspectionDate	VARCHAR(10)	LIS5_INSPECT_SAMPLE	inspection_date	检验日期	格式：YYYYMMDD
+LIS_Sample_Main_PersID	INT8	LIS5_INSPECT_SAMPLE	patient_id	人员ID	关联患者信息
+LIS_Sample_Main_VisitID	INT8	LIS5_INSPECT_SAMPLE	outpatient_id	就诊ID	关联就诊信息
+LIS_Sample_Main_VisitTypeName	VARCHAR(60)	LIS5_INSPECT_SAMPLE	patient_type	就诊类型名称	1=门诊，2=住院
+LIS_Sample_Main_DeptID	VARCHAR(60)	LIS5_INSPECT_SAMPLE	patient_dept	申请科室ID	关联科室维度
+LIS_Sample_Main_DeptName	VARCHAR(100)	LIS5_INSPECT_SAMPLE	patient_dept_name	申请科室名称	用于分析统计
+LIS_Sample_Main_ProfGroupCode	VARCHAR(60)	LIS5_INSPECT_SAMPLE	GROUP_ID	亚专业组代码	01-09编码
+LIS_Sample_Main_ProfGroupName	VARCHAR(100)	LIS5_INSPECT_SAMPLE	GROUP_ID	亚专业组名称	采血、生化、免疫等
+LIS_Sample_Main_SampleTypeName	VARCHAR(100)	LIS5_INSPECT_SAMPLE	sample_class	标本类型名称	血液、尿液等
+LIS_Sample_Main_RequisitionDtTm	timestamp	LIS5_INSPECT_SAMPLE	Requisition_time	申请时间	业务时间轴
+LIS_Sample_Main_SamplingDtTm	timestamp	LIS5_INSPECT_SAMPLE	sampling_time	采集时间	业务时间轴
+LIS_Sample_Main_ReceiveDtTm	timestamp	LIS5_INSPECT_SAMPLE	incept_time	接收时间	业务时间轴
+LIS_Sample_Main_ReportDtTm	timestamp	LIS5_INSPECT_SAMPLE	check_time	报告时间	业务时间轴
+LIS_Sample_Main_SampleStatusName	VARCHAR(100)	LIS5_INSPECT_SAMPLE	inspection_state	标本状态名称	业务状态跟踪
+LIS_Sample_Main_IsGoldenCard	VARCHAR(1)	LIS5_INSPECT_SAMPLE	charge_type	是否金卡	Y/N，用于金卡分析
+LIS_Sample_Main_InputPersName	VARCHAR(100)	LIS5_INSPECT_SAMPLE	input_person	登记人员姓名	工作量统计
+LIS_Sample_Main_InputDtTm	timestamp	LIS5_INSPECT_SAMPLE	input_time	登记时间	工作量统计
+LIS_Sample_Main_SamplingPersName	VARCHAR(100)	LIS5_INSPECT_SAMPLE	sampling_person	采集人员姓名	工作量统计
+LIS_Sample_Main_SamplingContent	VARCHAR(500)	LIS5_INSPECT_SAMPLE	test_order_name	采集内容	检验目的说明
+LIS_Sample_Main_ReceivePersName	VARCHAR(100)	LIS5_INSPECT_SAMPLE	incept_person	接收人员姓名	工作量统计
+LIS_Sample_Main_InspectionPersName	VARCHAR(100)	LIS5_INSPECT_SAMPLE	inspection_person	检验人员姓名	工作量统计
+LIS_Sample_Main_ReportPersName	VARCHAR(100)	LIS5_INSPECT_SAMPLE	issued_person	报告人员姓名	工作量统计
+LIS_Sample_Main_ReportContent	VARCHAR(500)	LIS5_INSPECT_SAMPLE	Internal_remark	报告内容	内部说明信息
+LIS_Sample_Main_CheckPersName	VARCHAR(100)	LIS5_INSPECT_SAMPLE	check_person	审核人员姓名	工作量统计
+LIS_Sample_Main_CheckDtTm	timestamp	LIS5_INSPECT_SAMPLE	check_time	审核时间	工作量统计
+LIS_Sample_Main_CheckContent	VARCHAR(500)	LIS5_INSPECT_SAMPLE	remark	审核内容	审核备注信息
+建表语句：
+
+-- 检验标本主表 - 对标现有DC架构命名和结构
+CREATE TABLE LIS_Sample_Main (
+    -- 基础标识信息
+    LIS_Sample_Main_MedOrgCode VARCHAR(60) NOT NULL,        -- 医疗机构代码
+    LIS_Sample_Main_MedOrgName VARCHAR(100),                -- 医疗机构名称
+    LIS_Sample_Main_EmpiID INT8,                            -- 人员唯一标识ID
+    LIS_Sample_Main_EmpiNo VARCHAR(60),                     -- 人员唯一号
+    LIS_Sample_Main_PersID INT8,                            -- 人员ID
+    LIS_Sample_Main_PersNo VARCHAR(60),                     -- 人员号
+    LIS_Sample_Main_VisitID INT8,                           -- 就诊ID
+    LIS_Sample_Main_VisitNo VARCHAR(60),                    -- 就诊号
+    LIS_Sample_Main_VisitTypeID VARCHAR(60),                -- 就诊类型ID
+    LIS_Sample_Main_VisitTypeCode VARCHAR(60),              -- 就诊类型代码
+    LIS_Sample_Main_VisitTypeName VARCHAR(60),              -- 就诊类型名称
+    
+    -- 标本核心信息
+    LIS_Sample_Main_SampleID VARCHAR(60) PRIMARY KEY,       -- 标本ID（条码号）
+    LIS_Sample_Main_SampleCode VARCHAR(60),                 -- 标本编码
+    LIS_Sample_Main_SampleTypeID VARCHAR(60),               -- 标本类型ID
+    LIS_Sample_Main_SampleTypeCode VARCHAR(60),             -- 标本类型代码  
+    LIS_Sample_Main_SampleTypeName VARCHAR(100),            -- 标本类型名称
+    LIS_Sample_Main_SampleStatusID VARCHAR(60),             -- 标本状态ID
+    LIS_Sample_Main_SampleStatusCode VARCHAR(60),           -- 标本状态代码
+    LIS_Sample_Main_SampleStatusName VARCHAR(100),          -- 标本状态名称
+    
+    -- 科室信息
+    LIS_Sample_Main_DeptID VARCHAR(60),                     -- 申请科室ID
+    LIS_Sample_Main_DeptCode VARCHAR(60),                   -- 申请科室代码
+    LIS_Sample_Main_DeptName VARCHAR(100),                  -- 申请科室名称
+    LIS_Sample_Main_ProfGroupID VARCHAR(60),                -- 亚专业组ID
+    LIS_Sample_Main_ProfGroupCode VARCHAR(60),              -- 亚专业组代码
+    LIS_Sample_Main_ProfGroupName VARCHAR(100),             -- 亚专业组名称
+    
+    -- 时间信息
+    LIS_Sample_Main_InspectionDate VARCHAR(10),             -- 检验日期(YYYYMMDD)
+    LIS_Sample_Main_RequisitionDtTm timestamp,              -- 申请时间
+    LIS_Sample_Main_SamplingDtTm timestamp,                 -- 采集时间
+    LIS_Sample_Main_ReceiveDtTm timestamp,                  -- 接收时间
+    LIS_Sample_Main_ReportDtTm timestamp,                   -- 报告时间
+    
+    -- 业务标识
+    LIS_Sample_Main_IsGoldenCard VARCHAR(1),                -- 是否金卡(Y/N)
+    LIS_Sample_Main_ChargeTypeID VARCHAR(60),               -- 收费类型ID
+    LIS_Sample_Main_ChargeTypeCode VARCHAR(60),             -- 收费类型代码
+    LIS_Sample_Main_ChargeTypeName VARCHAR(100),            -- 收费类型名称
+    
+    -- 操作人员信息
+    LIS_Sample_Main_InputPersID VARCHAR(60),                -- 登记人员ID
+    LIS_Sample_Main_InputPersCode VARCHAR(60),              -- 登记人员代码
+    LIS_Sample_Main_InputPersName VARCHAR(100),             -- 登记人员姓名
+    LIS_Sample_Main_InputDtTm timestamp,                    -- 登记时间
+    
+    -- 采集人员信息
+    LIS_Sample_Main_SamplingPersID VARCHAR(60),             -- 采集人员ID
+    LIS_Sample_Main_SamplingPersCode VARCHAR(60),           -- 采集人员代码
+    LIS_Sample_Main_SamplingPersName VARCHAR(100),          -- 采集人员姓名
+    LIS_Sample_Main_SamplingContent VARCHAR(500),           -- 采集内容(检验目的)
+    
+    -- 接收人员信息
+    LIS_Sample_Main_ReceivePersID VARCHAR(60),              -- 接收人员ID
+    LIS_Sample_Main_ReceivePersCode VARCHAR(60),            -- 接收人员代码
+    LIS_Sample_Main_ReceivePersName VARCHAR(100),           -- 接收人员姓名
+    
+    -- 检验人员信息
+    LIS_Sample_Main_InspectionPersID VARCHAR(60),           -- 检验人员ID
+    LIS_Sample_Main_InspectionPersCode VARCHAR(60),         -- 检验人员代码
+    LIS_Sample_Main_InspectionPersName VARCHAR(100),        -- 检验人员姓名
+    
+    -- 报告人员信息
+    LIS_Sample_Main_ReportPersID VARCHAR(60),               -- 报告人员ID
+    LIS_Sample_Main_ReportPersCode VARCHAR(60),             -- 报告人员代码
+    LIS_Sample_Main_ReportPersName VARCHAR(100),            -- 报告人员姓名
+    LIS_Sample_Main_ReportContent VARCHAR(500),             -- 报告内容(内部说明)
+    
+    -- 审核人员信息
+    LIS_Sample_Main_CheckPersID VARCHAR(60),                -- 审核人员ID
+    LIS_Sample_Main_CheckPersCode VARCHAR(60),              -- 审核人员代码
+    LIS_Sample_Main_CheckPersName VARCHAR(100),             -- 审核人员姓名
+    LIS_Sample_Main_CheckDtTm timestamp,                    -- 审核时间
+    LIS_Sample_Main_CheckContent VARCHAR(500),              -- 审核内容(审核备注)
+    
+    -- 标准扩展字段
+    LIS_Sample_Main_ExtStr1 VARCHAR(200),                   -- 扩展1(字符类型)
+    LIS_Sample_Main_ExtStr2 VARCHAR(200),                   -- 扩展2(字符类型)
+    LIS_Sample_Main_ExtStr3 VARCHAR(200),                   -- 扩展3(字符类型)
+    LIS_Sample_Main_ExtStr4 VARCHAR(200),                   -- 扩展4(字符类型)
+    LIS_Sample_Main_ExtStr5 VARCHAR(200),                   -- 扩展5(字符类型)
+    LIS_Sample_Main_ExtStr6 VARCHAR(200),                   -- 扩展6(字符类型)
+    LIS_Sample_Main_ExtNum1 FLOAT8,                         -- 扩展7(数值类型)
+    LIS_Sample_Main_ExtNum2 FLOAT8,                         -- 扩展8(数值类型)
+    LIS_Sample_Main_ExtDate1 timestamp,                     -- 扩展9(时间类型)
+    LIS_Sample_Main_ExtDate2 timestamp,                     -- 扩展10(时间类型)
+    
+    -- 数据管理字段
+    LIS_Sample_Main_DataSourceFlag VARCHAR(10),             -- 数据来源标识
+    LIS_Sample_Main_DSTable VARCHAR(60),                    -- 接入数据源的表
+    LIS_Sample_Main_DSTableKey VARCHAR(200),                -- 接入数据源的key
+    LIS_Sample_Main_DSTableValue VARCHAR(200),              -- 接入数据源的key值
+    LIS_Sample_Main_IsDeleted INT8 DEFAULT 0,               -- 数据物理删除标识
+    LIS_Sample_Main_LastUpdateDtTm timestamp DEFAULT GETDATE(), -- 最后更新时间
+    LIS_Sample_Main_DataCreateDtTm timestamp DEFAULT GETDATE()  -- 数据创建时间
+);
+
+
+B. LIS_Order_Main（检验医嘱主表）
+字段映射表：
+DC字段名	字段类型	源表	源字段	字段说明	业务规则
+LIS_Order_Main_MedOrgCode	VARCHAR(60)	LIS5_REQ_INFO	hospital_ID	医疗机构代码	支持多医院统一编码
+LIS_Order_Main_OrderID	VARCHAR(60)	LIS5_REQ_INFO + LIS5_REQ_ITEM	req_id + ITEM_ID	医嘱ID	主键，req_id + “_” + ITEM_ID
+LIS_Order_Main_SampleID	VARCHAR(60)	LIS5_REQ_INFO	req_id	标本ID	关联标本信息
+LIS_Order_Main_ReqID	VARCHAR(60)	LIS5_REQ_INFO	req_id	申请单ID	业务关联
+LIS_Order_Main_ItemID	VARCHAR(60)	LIS5_REQ_ITEM	ITEM_ID	检验项目ID	项目维度
+LIS_Order_Main_ItemName	VARCHAR(100)	LIS5_REQ_ITEM	item_cname	检验项目名称	项目分析
+LIS_Order_Main_OrderDate	VARCHAR(10)	LIS5_REQ_INFO	req_DATE	医嘱日期	格式：YYYY-MM-DD
+LIS_Order_Main_OrderStatusName	VARCHAR(100)	LIS5_REQ_INFO	req_state	医嘱状态名称	状态跟踪
+LIS_Order_Main_ProfGroupName	VARCHAR(100)	LIS5_REQ_INFO	inspect_dept	亚专业组名称	科室映射转换
+LIS_Order_Main_DeptID	VARCHAR(60)	LIS5_REQ_INFO	dept_LIS_ID	科室ID	申请科室
+LIS_Order_Main_OrderCount	INT8	固定值	1	医嘱数量	每个项目计数1
+建表语句：
+
+-- 检验医嘱主表
+CREATE TABLE LIS_Order_Main (
+    -- 基础标识信息
+    LIS_Order_Main_MedOrgCode VARCHAR(60) NOT NULL,         -- 医疗机构代码
+    LIS_Order_Main_MedOrgName VARCHAR(100),                 -- 医疗机构名称
+    LIS_Order_Main_EmpiID INT8,                             -- 人员唯一标识ID
+    LIS_Order_Main_EmpiNo VARCHAR(60),                      -- 人员唯一号
+    LIS_Order_Main_PersID INT8,                             -- 人员ID
+    LIS_Order_Main_PersNo VARCHAR(60),                      -- 人员号
+    LIS_Order_Main_VisitID INT8,                            -- 就诊ID
+    LIS_Order_Main_VisitNo VARCHAR(60),                     -- 就诊号
+    LIS_Order_Main_VisitTypeID VARCHAR(60),                 -- 就诊类型ID
+    LIS_Order_Main_VisitTypeCode VARCHAR(60),               -- 就诊类型代码
+    LIS_Order_Main_VisitTypeName VARCHAR(60),               -- 就诊类型名称
+    
+    -- 医嘱核心信息
+    LIS_Order_Main_OrderID VARCHAR(60) PRIMARY KEY,         -- 医嘱ID(req_id+item_id)
+    LIS_Order_Main_SampleID VARCHAR(60),                    -- 标本ID
+    LIS_Order_Main_ReqID VARCHAR(60),                       -- 申请单ID
+    LIS_Order_Main_ItemID VARCHAR(60),                      -- 检验项目ID
+    LIS_Order_Main_ItemCode VARCHAR(60),                    -- 检验项目代码
+    LIS_Order_Main_ItemName VARCHAR(100),                   -- 检验项目名称
+    LIS_Order_Main_ItemClassID VARCHAR(60),                 -- 项目分类ID
+    LIS_Order_Main_ItemClassName VARCHAR(100),              -- 项目分类名称
+    
+    -- 医嘱状态信息
+    LIS_Order_Main_OrderStatusID VARCHAR(60),               -- 医嘱状态ID
+    LIS_Order_Main_OrderStatusCode VARCHAR(60),             -- 医嘱状态代码
+    LIS_Order_Main_OrderStatusName VARCHAR(100),            -- 医嘱状态名称
+    LIS_Order_Main_OrderCount INT8 DEFAULT 1,               -- 医嘱数量
+    
+    -- 科室信息
+    LIS_Order_Main_DeptID VARCHAR(60),                      -- 申请科室ID
+    LIS_Order_Main_DeptCode VARCHAR(60),                    -- 申请科室代码
+    LIS_Order_Main_DeptName VARCHAR(100),                   -- 申请科室名称
+    LIS_Order_Main_ProfGroupID VARCHAR(60),                 -- 亚专业组ID
+    LIS_Order_Main_ProfGroupCode VARCHAR(60),               -- 亚专业组代码
+    LIS_Order_Main_ProfGroupName VARCHAR(100),              -- 亚专业组名称
+    
+    -- 时间信息
+    LIS_Order_Main_OrderDate VARCHAR(10),                   -- 医嘱日期
+    LIS_Order_Main_OrderDtTm timestamp,                     -- 医嘱时间
+    LIS_Order_Main_ExecDtTm timestamp,                      -- 执行时间
+    
+    -- 标准扩展字段
+    LIS_Order_Main_ExtStr1 VARCHAR(200),                    -- 扩展1(字符类型)
+    LIS_Order_Main_ExtStr2 VARCHAR(200),                    -- 扩展2(字符类型)
+    LIS_Order_Main_ExtStr3 VARCHAR(200),                    -- 扩展3(字符类型)
+    LIS_Order_Main_ExtStr4 VARCHAR(200),                    -- 扩展4(字符类型)
+    LIS_Order_Main_ExtStr5 VARCHAR(200),                    -- 扩展5(字符类型)
+    LIS_Order_Main_ExtStr6 VARCHAR(200),                    -- 扩展6(字符类型)
+    LIS_Order_Main_ExtNum1 FLOAT8,                          -- 扩展7(数值类型)
+    LIS_Order_Main_ExtNum2 FLOAT8,                          -- 扩展8(数值类型)
+    LIS_Order_Main_ExtDate1 timestamp,                      -- 扩展9(时间类型)
+    LIS_Order_Main_ExtDate2 timestamp,                      -- 扩展10(时间类型)
+    
+    -- 数据管理字段
+    LIS_Order_Main_DataSourceFlag VARCHAR(10),              -- 数据来源标识
+    LIS_Order_Main_DSTable VARCHAR(60),                     -- 接入数据源的表
+    LIS_Order_Main_DSTableKey VARCHAR(200),                 -- 接入数据源的key
+    LIS_Order_Main_DSTableValue VARCHAR(200),               -- 接入数据源的key值
+    LIS_Order_Main_IsDeleted INT8 DEFAULT 0,                -- 数据物理删除标识
+    LIS_Order_Main_LastUpdateDtTm timestamp DEFAULT GETDATE(), -- 最后更新时间
+    LIS_Order_Main_DataCreateDtTm timestamp DEFAULT GETDATE()  -- 数据创建时间
+);
+
+
+C. LIS_Work_Record（检验工作量记录表）
+字段映射表：
+DC字段名	字段类型	源表	源字段	字段说明	业务规则
+LIS_Work_Record_MedOrgCode	VARCHAR(60)	LIS5_INSPECT_SAMPLE	hospital_ID	医疗机构代码	支持多医院统一编码
+LIS_Work_Record_WorkID	VARCHAR(60)	LIS5_INSPECT_SAMPLE	inspection_id + 操作类型	工作记录ID	主键，inspection_id + “_REG/RPT”
+LIS_Work_Record_SampleID	VARCHAR(60)	LIS5_INSPECT_SAMPLE	inspection_id	标本ID	关联标本信息
+LIS_Work_Record_WorkDate	VARCHAR(10)	LIS5_INSPECT_SAMPLE	inspection_date	工作日期	格式：YYYYMMDD
+LIS_Work_Record_WorkTypeCode	VARCHAR(60)	业务逻辑	REG/RPT	工作类型代码	REG=登记，RPT=报告
+LIS_Work_Record_WorkTypeName	VARCHAR(100)	业务逻辑	登记/报告	工作类型名称	中文描述
+LIS_Work_Record_ProfGroupName	VARCHAR(100)	LIS5_INSPECT_SAMPLE	GROUP_ID	亚专业组名称	科室映射转换
+LIS_Work_Record_DeptID	VARCHAR(60)	LIS5_INSPECT_SAMPLE	patient_dept	科室ID	申请科室
+LIS_Work_Record_WorkCount	INT8	固定值	1	工作量计数	每次操作计数1
+LIS_Work_Record_OperatorName	VARCHAR(100)	LIS5_INSPECT_SAMPLE	input_person/check_person	操作人员姓名	登记人或审核人
+LIS_Work_Record_WorkDtTm	timestamp	LIS5_INSPECT_SAMPLE	input_time/check_time	工作时间	登记时间或审核时间
+建表语句：
+
+-- 检验工作量记录表
+CREATE TABLE LIS_Work_Record (
+    -- 基础标识信息
+    LIS_Work_Record_MedOrgCode VARCHAR(60) NOT NULL,        -- 医疗机构代码
+    LIS_Work_Record_MedOrgName VARCHAR(100),                -- 医疗机构名称
+    
+    -- 工作记录核心信息
+    LIS_Work_Record_WorkID VARCHAR(60) PRIMARY KEY,         -- 工作记录ID
+    LIS_Work_Record_SampleID VARCHAR(60),                   -- 标本ID
+    LIS_Work_Record_WorkTypeID VARCHAR(60),                 -- 工作类型ID
+    LIS_Work_Record_WorkTypeCode VARCHAR(60),               -- 工作类型代码(REG/RPT)
+    LIS_Work_Record_WorkTypeName VARCHAR(100),              -- 工作类型名称(登记/报告)
+    LIS_Work_Record_WorkCount INT8 DEFAULT 1,               -- 工作量计数
+    
+    -- 科室信息
+    LIS_Work_Record_DeptID VARCHAR(60),                     -- 科室ID
+    LIS_Work_Record_DeptCode VARCHAR(60),                   -- 科室代码
+    LIS_Work_Record_DeptName VARCHAR(100),                  -- 科室名称
+    LIS_Work_Record_ProfGroupID VARCHAR(60),                -- 亚专业组ID
+    LIS_Work_Record_ProfGroupCode VARCHAR(60),              -- 亚专业组代码
+    LIS_Work_Record_ProfGroupName VARCHAR(100),             -- 亚专业组名称
+    
+    -- 操作人员信息
+    LIS_Work_Record_OperatorID VARCHAR(60),                 -- 操作人员ID
+    LIS_Work_Record_OperatorCode VARCHAR(60),               -- 操作人员代码
+    LIS_Work_Record_OperatorName VARCHAR(100),              -- 操作人员姓名
+    
+    -- 时间信息
+    LIS_Work_Record_WorkDate VARCHAR(10),                   -- 工作日期
+    LIS_Work_Record_WorkDtTm timestamp,                     -- 工作时间
+    
+    -- 标准扩展字段
+    LIS_Work_Record_ExtStr1 VARCHAR(200),                   -- 扩展1(字符类型)
+    LIS_Work_Record_ExtStr2 VARCHAR(200),                   -- 扩展2(字符类型)
+    LIS_Work_Record_ExtStr3 VARCHAR(200),                   -- 扩展3(字符类型)
+    LIS_Work_Record_ExtStr4 VARCHAR(200),                   -- 扩展4(字符类型)
+    LIS_Work_Record_ExtStr5 VARCHAR(200),                   -- 扩展5(字符类型)
+    LIS_Work_Record_ExtStr6 VARCHAR(200),                   -- 扩展6(字符类型)
+    LIS_Work_Record_ExtNum1 FLOAT8,                         -- 扩展7(数值类型)
+    LIS_Work_Record_ExtNum2 FLOAT8,                         -- 扩展8(数值类型)
+    LIS_Work_Record_ExtDate1 timestamp,                     -- 扩展9(时间类型)
+    LIS_Work_Record_ExtDate2 timestamp,                     -- 扩展10(时间类型)
+    
+    -- 数据管理字段
+    LIS_Work_Record_DataSourceFlag VARCHAR(10),             -- 数据来源标识
+    LIS_Work_Record_DSTable VARCHAR(60),                    -- 接入数据源的表
+    LIS_Work_Record_DSTableKey VARCHAR(200),                -- 接入数据源的key
+    LIS_Work_Record_DSTableValue VARCHAR(200),              -- 接入数据源的key值
+    LIS_Work_Record_IsDeleted INT8 DEFAULT 0,               -- 数据物理删除标识
+    LIS_Work_Record_LastUpdateDtTm timestamp DEFAULT GETDATE(), -- 最后更新时间
+    LIS_Work_Record_DataCreateDtTm timestamp DEFAULT GETDATE()  -- 数据创建时间
+);
+
+
+3.2.2 汇总数据表设计（DC明细->DC汇总）
+汇总数据表基于DC明细数据按维度预聚合，提升查询性能，数据源完全来自DC层。
+A. LIS_Daily_Summary（LIS日度汇总表）
+字段映射表：
+DC字段名	字段类型	数据来源	聚合逻辑	字段说明	业务规则
+LIS_Daily_Summary_SummaryID	VARCHAR(60)	计算生成	医院+日期+科室+亚专业组	汇总记录ID	主键，保证唯一性
+LIS_Daily_Summary_MedOrgCode	VARCHAR(60)	LIS_Sample_Main	取值	医疗机构代码	支持多医院分析
+LIS_Daily_Summary_SummaryDate	VARCHAR(10)	LIS_Sample_Main	按日期分组	汇总日期	格式：YYYYMMDD
+LIS_Daily_Summary_DeptID	VARCHAR(60)	LIS_Sample_Main	按科室分组	科室ID	科室维度
+LIS_Daily_Summary_DeptName	VARCHAR(100)	LIS_Sample_Main	取值	科室名称	科室维度
+LIS_Daily_Summary_ProfGroupCode	VARCHAR(60)	LIS_Sample_Main	按亚专业组分组	亚专业组代码	亚专业组维度
+LIS_Daily_Summary_ProfGroupName	VARCHAR(100)	LIS_Sample_Main	取值	亚专业组名称	亚专业组维度
+LIS_Daily_Summary_SampleCount	INT8	LIS_Sample_Main	COUNT(DISTINCT SampleID)	标本数	条码数统计
+LIS_Daily_Summary_OrderCount	INT8	LIS_Order_Main	SUM(OrderCount)	项目数	医嘱数统计
+LIS_Daily_Summary_WorkCount	INT8	LIS_Work_Record	SUM(WorkCount)	工作量	登记+报告数统计
+LIS_Daily_Summary_RegisterCount	INT8	LIS_Work_Record	SUM(WorkCount) WHERE TypeCode=‘REG’	登记数	登记工作量
+LIS_Daily_Summary_ReportCount	INT8	LIS_Work_Record	SUM(WorkCount) WHERE TypeCode=‘RPT’	报告数	报告工作量
+LIS_Daily_Summary_GoldenCardSampleCount	INT8	LIS_Sample_Main	COUNT WHERE IsGoldenCard=‘Y’	金卡标本数	金卡业务分析
+建表语句：
+
+-- LIS日度汇总表
+CREATE TABLE LIS_Daily_Summary (
+    LIS_Daily_Summary_SummaryID VARCHAR(60) PRIMARY KEY,          -- 汇总记录ID
+    LIS_Daily_Summary_MedOrgCode VARCHAR(60) NOT NULL,            -- 医疗机构代码
+    LIS_Daily_Summary_SummaryDate VARCHAR(10) NOT NULL,           -- 汇总日期
+    LIS_Daily_Summary_DeptID VARCHAR(60),                         -- 科室ID
+    LIS_Daily_Summary_DeptName VARCHAR(100),                      -- 科室名称
+    LIS_Daily_Summary_ProfGroupCode VARCHAR(60),                  -- 亚专业组代码
+    LIS_Daily_Summary_ProfGroupName VARCHAR(100),                 -- 亚专业组名称
+    
+    -- 核心指标
+    LIS_Daily_Summary_SampleCount INT8 DEFAULT 0,                 -- 标本数
+    LIS_Daily_Summary_OrderCount INT8 DEFAULT 0,                  -- 项目数
+    LIS_Daily_Summary_WorkCount INT8 DEFAULT 0,                   -- 工作量
+    LIS_Daily_Summary_RegisterCount INT8 DEFAULT 0,               -- 登记数
+    LIS_Daily_Summary_ReportCount INT8 DEFAULT 0,                 -- 报告数
+    LIS_Daily_Summary_GoldenCardSampleCount INT8 DEFAULT 0,       -- 金卡标本数
+    
+    -- 数据管理字段
+    LIS_Daily_Summary_DataSourceFlag VARCHAR(10),                 -- 数据来源标识
+    LIS_Daily_Summary_IsDeleted INT8 DEFAULT 0,                   -- 数据物理删除标识
+    LIS_Daily_Summary_LastUpdateDtTm timestamp DEFAULT GETDATE(), -- 最后更新时间
+    LIS_Daily_Summary_DataCreateDtTm timestamp DEFAULT GETDATE()  -- 数据创建时间
+);
+
+
+3.3 收入数据说明
+收入数据单独管理，不在LIS检验主题中重复设计。收入指标通过现有收入主题Fee_BillDet表获取，按收费项目ID关联LIS业务。具体收入主题设计可单独文档说明。
+四、数据处理逻辑（分层处理）
+4.1 明细数据处理逻辑（DL -> DC明细）
+明细数据直接从DL层集成到DC层，保持业务最小粒度，支持多医院多院区统一管理。
+4.1.1 标本数据集成
+
+-- 标本信息集成到DC层，严格按照DC字段命名规范
+INSERT INTO LIS_Sample_Main (
+    LIS_Sample_Main_MedOrgCode,
+    LIS_Sample_Main_MedOrgName,
+    LIS_Sample_Main_SampleID,
+    LIS_Sample_Main_InspectionDate,
+    LIS_Sample_Main_PersID,
+    LIS_Sample_Main_VisitID,
+    LIS_Sample_Main_VisitNo,
+    LIS_Sample_Main_VisitTypeName,
+    LIS_Sample_Main_DeptID,
+    LIS_Sample_Main_DeptName,
+    LIS_Sample_Main_ProfGroupCode,
+    LIS_Sample_Main_ProfGroupName,
+    LIS_Sample_Main_SampleTypeName,
+    LIS_Sample_Main_RequisitionDtTm,
+    LIS_Sample_Main_SamplingDtTm,
+    LIS_Sample_Main_ReceiveDtTm,
+    LIS_Sample_Main_ReportDtTm,
+    LIS_Sample_Main_SampleStatusName,
+    LIS_Sample_Main_IsGoldenCard,
+    LIS_Sample_Main_InputPersName,
+    LIS_Sample_Main_InputDtTm,
+    LIS_Sample_Main_CheckPersName,
+    LIS_Sample_Main_CheckDtTm,
+    LIS_Sample_Main_DataSourceFlag
+)
+SELECT 
+    s.hospital_ID as LIS_Sample_Main_MedOrgCode,
+    s.hospital_ID as LIS_Sample_Main_MedOrgName,
+    s.inspection_id as LIS_Sample_Main_SampleID,
+    s.inspection_date as LIS_Sample_Main_InspectionDate,
+    s.patient_id as LIS_Sample_Main_PersID,
+    s.outpatient_id as LIS_Sample_Main_VisitID,
+    s.outpatient_id as LIS_Sample_Main_VisitNo,
+    CASE s.patient_type 
+        WHEN '1' THEN '门诊' 
+        WHEN '2' THEN '住院' 
+        ELSE '其他' END as LIS_Sample_Main_VisitTypeName,
+    s.patient_dept as LIS_Sample_Main_DeptID,
+    s.patient_dept_name as LIS_Sample_Main_DeptName,
+    s.GROUP_ID as LIS_Sample_Main_ProfGroupCode,
+    CASE s.GROUP_ID
+        WHEN '01' THEN '采血'
+        WHEN '02' THEN '生化'
+        WHEN '03' THEN '免疫'
+        WHEN '04' THEN '临检'
+        WHEN '05' THEN '微生物'
+        WHEN '06' THEN '分子'
+        WHEN '07' THEN '血库'
+        WHEN '08' THEN '永宁'
+        WHEN '09' THEN '精准医疗'
+        ELSE '其他' END as LIS_Sample_Main_ProfGroupName,
+    s.sample_class as LIS_Sample_Main_SampleTypeName,
+    s.Requisition_time as LIS_Sample_Main_RequisitionDtTm,
+    s.sampling_time as LIS_Sample_Main_SamplingDtTm,
+    s.incept_time as LIS_Sample_Main_ReceiveDtTm,
+    s.check_time as LIS_Sample_Main_ReportDtTm,
+    s.inspection_state as LIS_Sample_Main_SampleStatusName,
+    CASE WHEN s.charge_type LIKE '%金卡%' THEN 'Y' ELSE 'N' END as LIS_Sample_Main_IsGoldenCard,
+    s.input_person as LIS_Sample_Main_InputPersName,
+    s.input_time as LIS_Sample_Main_InputDtTm,
+    s.check_person as LIS_Sample_Main_CheckPersName,
+    s.check_time as LIS_Sample_Main_CheckDtTm,
+    'LIS' as LIS_Sample_Main_DataSourceFlag
+FROM LIS5_INSPECT_SAMPLE s
+WHERE s.inspection_date >= FORMAT(DATEADD(MONTH, -13, GETDATE()), 'yyyyMMdd');
+
+
+4.1.2 医嘱数据集成
+
+-- 医嘱项目集成到DC层
+INSERT INTO LIS_Order_Main (
+    LIS_Order_Main_MedOrgCode,
+    LIS_Order_Main_OrderID,
+    LIS_Order_Main_SampleID,
+    LIS_Order_Main_ReqID,
+    LIS_Order_Main_ItemID,
+    LIS_Order_Main_ItemName,
+    LIS_Order_Main_OrderDate,
+    LIS_Order_Main_OrderStatusName,
+    LIS_Order_Main_ProfGroupName,
+    LIS_Order_Main_DeptID,
+    LIS_Order_Main_OrderCount,
+    LIS_Order_Main_DataSourceFlag
+)
+SELECT 
+    r.hospital_ID as LIS_Order_Main_MedOrgCode,
+    CONCAT(r.req_id, '_', ri.ITEM_ID) as LIS_Order_Main_OrderID,
+    r.req_id as LIS_Order_Main_SampleID,
+    r.req_id as LIS_Order_Main_ReqID,
+    ri.ITEM_ID as LIS_Order_Main_ItemID,
+    ri.item_cname as LIS_Order_Main_ItemName,
+    r.req_DATE as LIS_Order_Main_OrderDate,
+    r.req_state as LIS_Order_Main_OrderStatusName,
+    CASE r.inspect_dept
+        WHEN '临床免疫实验室' THEN '免疫'
+        WHEN '临床生化实验室' THEN '生化'
+        WHEN '临床微生物实验室' THEN '微生物'
+        WHEN '临床分子诊断实验室' THEN '分子'
+        WHEN '临床与流式实验室' THEN '临检'
+        WHEN '永宁院区' THEN '永宁'
+        WHEN '急诊应急组' THEN '采血'
+        WHEN '天府院区' THEN '天府'
+        ELSE '其他' END as LIS_Order_Main_ProfGroupName,
+    r.dept_LIS_ID as LIS_Order_Main_DeptID,
+    1 as LIS_Order_Main_OrderCount,
+    'LIS' as LIS_Order_Main_DataSourceFlag
+FROM LIS5_REQ_INFO r
+INNER JOIN LIS5_REQ_ITEM ri ON r.req_id = ri.req_id
+WHERE r.req_DATE >= FORMAT(DATEADD(MONTH, -13, GETDATE()), 'yyyy-MM-dd');
+
+
+4.1.3 工作量数据集成
+
+-- 工作量数据集成（登记+报告）
+INSERT INTO LIS_Work_Record (
+    LIS_Work_Record_MedOrgCode,
+    LIS_Work_Record_WorkID,
+    LIS_Work_Record_SampleID,
+    LIS_Work_Record_WorkDate,
+    LIS_Work_Record_WorkTypeCode,
+    LIS_Work_Record_WorkTypeName,
+    LIS_Work_Record_ProfGroupName,
+    LIS_Work_Record_DeptID,
+    LIS_Work_Record_WorkCount,
+    LIS_Work_Record_OperatorName,
+    LIS_Work_Record_WorkDtTm,
+    LIS_Work_Record_DataSourceFlag
+)
+SELECT 
+    s.hospital_ID as LIS_Work_Record_MedOrgCode,
+    CONCAT(s.inspection_id, '_REG') as LIS_Work_Record_WorkID,
+    s.inspection_id as LIS_Work_Record_SampleID,
+    s.inspection_date as LIS_Work_Record_WorkDate,
+    'REG' as LIS_Work_Record_WorkTypeCode,
+    '登记' as LIS_Work_Record_WorkTypeName,
+    CASE s.GROUP_ID
+        WHEN '01' THEN '采血'
+        WHEN '02' THEN '生化'
+        WHEN '03' THEN '免疫'
+        WHEN '04' THEN '临检'
+        WHEN '05' THEN '微生物'
+        WHEN '06' THEN '分子'
+        WHEN '07' THEN '血库'
+        WHEN '08' THEN '永宁'
+        WHEN '09' THEN '精准医疗'
+        ELSE '其他' END as LIS_Work_Record_ProfGroupName,
+    s.patient_dept as LIS_Work_Record_DeptID,
+    1 as LIS_Work_Record_WorkCount,
+    s.input_person as LIS_Work_Record_OperatorName,
+    s.input_time as LIS_Work_Record_WorkDtTm,
+    'LIS' as LIS_Work_Record_DataSourceFlag
+FROM LIS5_INSPECT_SAMPLE s
+WHERE s.input_time IS NOT NULL
+  AND s.inspection_date >= FORMAT(DATEADD(MONTH, -13, GETDATE()), 'yyyyMMdd')
+
+UNION ALL
+
+-- 报告工作量
+SELECT 
+    s.hospital_ID as LIS_Work_Record_MedOrgCode,
+    CONCAT(s.inspection_id, '_RPT') as LIS_Work_Record_WorkID,
+    s.inspection_id as LIS_Work_Record_SampleID,
+    s.inspection_date as LIS_Work_Record_WorkDate,
+    'RPT' as LIS_Work_Record_WorkTypeCode,
+    '报告' as LIS_Work_Record_WorkTypeName,
+    CASE s.GROUP_ID
+        WHEN '01' THEN '采血'
+        WHEN '02' THEN '生化'
+        WHEN '03' THEN '免疫'
+        WHEN '04' THEN '临检'
+        WHEN '05' THEN '微生物'
+        WHEN '06' THEN '分子'
+        WHEN '07' THEN '血库'
+        WHEN '08' THEN '永宁'
+        WHEN '09' THEN '精准医疗'
+        ELSE '其他' END as LIS_Work_Record_ProfGroupName,
+    s.patient_dept as LIS_Work_Record_DeptID,
+    1 as LIS_Work_Record_WorkCount,
+    s.check_person as LIS_Work_Record_OperatorName,
+    s.check_time as LIS_Work_Record_WorkDtTm,
+    'LIS' as LIS_Work_Record_DataSourceFlag
+FROM LIS5_INSPECT_SAMPLE s
+WHERE s.check_time IS NOT NULL
+  AND s.inspection_date >= FORMAT(DATEADD(MONTH, -13, GETDATE()), 'yyyyMMdd');
+
+
+4.2 汇总数据处理逻辑（DC明细 -> DC汇总）
+汇总数据基于DC明细数据按维度聚合生成，数据源完全来自DC层，提升查询性能。
+4.2.1 日度汇总数据生成
+
+-- LIS日度汇总数据生成（基于DC明细表聚合）
+INSERT INTO LIS_Daily_Summary (
+    LIS_Daily_Summary_SummaryID,
+    LIS_Daily_Summary_MedOrgCode,
+    LIS_Daily_Summary_SummaryDate,
+    LIS_Daily_Summary_DeptID,
+    LIS_Daily_Summary_DeptName,
+    LIS_Daily_Summary_ProfGroupCode,
+    LIS_Daily_Summary_ProfGroupName,
+    LIS_Daily_Summary_SampleCount,
+    LIS_Daily_Summary_OrderCount,
+    LIS_Daily_Summary_WorkCount,
+    LIS_Daily_Summary_RegisterCount,
+    LIS_Daily_Summary_ReportCount,
+    LIS_Daily_Summary_GoldenCardSampleCount,
+    LIS_Daily_Summary_DataSourceFlag
+)
+SELECT 
+    CONCAT(
+        COALESCE(s.LIS_Sample_Main_MedOrgCode, ''), '_',
+        COALESCE(s.LIS_Sample_Main_InspectionDate, ''), '_',
+        COALESCE(s.LIS_Sample_Main_DeptID, ''), '_',
+        COALESCE(s.LIS_Sample_Main_ProfGroupCode, '')
+    ) as LIS_Daily_Summary_SummaryID,
+    s.LIS_Sample_Main_MedOrgCode as LIS_Daily_Summary_MedOrgCode,
+    s.LIS_Sample_Main_InspectionDate as LIS_Daily_Summary_SummaryDate,
+    s.LIS_Sample_Main_DeptID as LIS_Daily_Summary_DeptID,
+    s.LIS_Sample_Main_DeptName as LIS_Daily_Summary_DeptName,
+    s.LIS_Sample_Main_ProfGroupCode as LIS_Daily_Summary_ProfGroupCode,
+    s.LIS_Sample_Main_ProfGroupName as LIS_Daily_Summary_ProfGroupName,
+    COUNT(DISTINCT s.LIS_Sample_Main_SampleID) as LIS_Daily_Summary_SampleCount,
+    COALESCE(o.order_count, 0) as LIS_Daily_Summary_OrderCount,
+    COALESCE(w.work_count, 0) as LIS_Daily_Summary_WorkCount,
+    COALESCE(w.register_count, 0) as LIS_Daily_Summary_RegisterCount,
+    COALESCE(w.report_count, 0) as LIS_Daily_Summary_ReportCount,
+    SUM(CASE WHEN s.LIS_Sample_Main_IsGoldenCard = 'Y' THEN 1 ELSE 0 END) as LIS_Daily_Summary_GoldenCardSampleCount,
+    'DC_AGG' as LIS_Daily_Summary_DataSourceFlag
+FROM LIS_Sample_Main s
+LEFT JOIN (
+    -- 医嘱数汇总
+    SELECT 
+        LIS_Order_Main_SampleID,
+        SUM(LIS_Order_Main_OrderCount) as order_count
+    FROM LIS_Order_Main
+    GROUP BY LIS_Order_Main_SampleID
+) o ON s.LIS_Sample_Main_SampleID = o.LIS_Order_Main_SampleID
+LEFT JOIN (
+    -- 工作量汇总
+    SELECT 
+        LIS_Work_Record_SampleID,
+        SUM(LIS_Work_Record_WorkCount) as work_count,
+        SUM(CASE WHEN LIS_Work_Record_WorkTypeCode = 'REG' THEN LIS_Work_Record_WorkCount ELSE 0 END) as register_count,
+        SUM(CASE WHEN LIS_Work_Record_WorkTypeCode = 'RPT' THEN LIS_Work_Record_WorkCount ELSE 0 END) as report_count
+    FROM LIS_Work_Record
+    GROUP BY LIS_Work_Record_SampleID
+) w ON s.LIS_Sample_Main_SampleID = w.LIS_Work_Record_SampleID
+WHERE s.LIS_Sample_Main_InspectionDate >= FORMAT(DATEADD(DAY, -1, GETDATE()), 'yyyyMMdd')
+GROUP BY 
+    s.LIS_Sample_Main_MedOrgCode,
+    s.LIS_Sample_Main_InspectionDate,
+    s.LIS_Sample_Main_DeptID,
+    s.LIS_Sample_Main_DeptName,
+    s.LIS_Sample_Main_ProfGroupCode,
+    s.LIS_Sample_Main_ProfGroupName,
+    o.order_count,
+    w.work_count,
+    w.register_count,
+    w.report_count;
+
+
+4.3 主题数据处理逻辑（DC -> MDR）
+4.3.1 MDR_LIS_Monthly_Summary（LIS月度汇总主题表）
+字段映射表：
+MDR字段名	字段类型	数据来源	聚合逻辑	字段说明	业务规则
+Summary_ID	VARCHAR(50)	计算生成	医院+月份+科室+亚专业组	汇总记录ID	主键，月度维度
+Hospital_ID	VARCHAR(20)	LIS_Daily_Summary	取值	医疗机构ID	支持多医院对比
+Summary_Date	VARCHAR(7)	LIS_Daily_Summary	按月份分组	汇总月份	格式：YYYY-MM
+Dept_ID	VARCHAR(20)	LIS_Daily_Summary	按科室分组	科室ID	科室对比维度
+Dept_Name	VARCHAR(50)	LIS_Daily_Summary	取值	科室名称	科室对比维度
+Professional_Group	VARCHAR(20)	LIS_Daily_Summary	按亚专业组分组	亚专业组	亚专业组对比维度
+Sample_Count	INT	LIS_Daily_Summary	SUM(SampleCount)	标本数	月度条码数汇总
+Order_Count	INT	LIS_Daily_Summary	SUM(OrderCount)	项目数	月度医嘱数汇总
+Work_Count	INT	LIS_Daily_Summary	SUM(WorkCount)	工作量	月度工作量汇总
+Register_Count	INT	LIS_Daily_Summary	SUM(RegisterCount)	登记数	月度登记量汇总
+Report_Count	INT	LIS_Daily_Summary	SUM(ReportCount)	报告数	月度报告量汇总
+Golden_Card_Sample_Count	INT	LIS_Daily_Summary	SUM(GoldenCardSampleCount)	金卡标本数	月度金卡标本汇总
+建表语句：
+
+-- LIS月度汇总主题表
+CREATE TABLE MDR_LIS_Monthly_Summary (
+    Summary_ID VARCHAR(50) PRIMARY KEY,                     -- 汇总记录ID
+    Hospital_ID VARCHAR(20),                                -- 医疗机构ID
+    Summary_Date VARCHAR(7),                                -- 汇总月份(YYYY-MM)
+    Dept_ID VARCHAR(20),                                    -- 科室ID
+    Dept_Name VARCHAR(50),                                  -- 科室名称
+    Professional_Group VARCHAR(20),                         -- 亚专业组
+    
+    -- 核心指标（基于DC汇总表聚合）
+    Sample_Count INT DEFAULT 0,                             -- 标本数（条码数）
+    Order_Count INT DEFAULT 0,                              -- 项目数（医嘱数）
+    Work_Count INT DEFAULT 0,                               -- 工作量（登记+报告数）
+    
+    -- 扩展指标
+    Register_Count INT DEFAULT 0,                           -- 登记数
+    Report_Count INT DEFAULT 0,                             -- 报告数
+    Golden_Card_Sample_Count INT DEFAULT 0,                 -- 金卡标本数
+    
+    -- 时间维度
+    Last_Year_Same_Month VARCHAR(7),                        -- 去年同期月份
+    Last_Month VARCHAR(7),                                  -- 上月
+    
+    Create_Time DATETIME DEFAULT GETDATE(),
+    Update_Time DATETIME DEFAULT GETDATE()
+);
+
+
+数据生成逻辑：
+
+-- MDR月度主题数据生成（基于DC汇总表）
+INSERT INTO MDR_LIS_Monthly_Summary (
+    Summary_ID,
+    Hospital_ID,
+    Summary_Date,
+    Dept_ID,
+    Dept_Name,
+    Professional_Group,
+    Sample_Count,
+    Order_Count,
+    Work_Count,
+    Register_Count,
+    Report_Count,
+    Golden_Card_Sample_Count
+)
+SELECT 
+    CONCAT(
+        LIS_Daily_Summary_MedOrgCode, '_',
+        LEFT(LIS_Daily_Summary_SummaryDate, 6), '_',  -- YYYYMM
+        COALESCE(LIS_Daily_Summary_DeptID, ''), '_',
+        COALESCE(LIS_Daily_Summary_ProfGroupCode, '')
+    ) as Summary_ID,
+    LIS_Daily_Summary_MedOrgCode as Hospital_ID,
+    CONCAT(LEFT(LIS_Daily_Summary_SummaryDate, 4), '-', SUBSTRING(LIS_Daily_Summary_SummaryDate, 5, 2)) as Summary_Date,
+    LIS_Daily_Summary_DeptID as Dept_ID,
+    LIS_Daily_Summary_DeptName as Dept_Name,
+    LIS_Daily_Summary_ProfGroupName as Professional_Group,
+    SUM(LIS_Daily_Summary_SampleCount) as Sample_Count,
+    SUM(LIS_Daily_Summary_OrderCount) as Order_Count,
+    SUM(LIS_Daily_Summary_WorkCount) as Work_Count,
+    SUM(LIS_Daily_Summary_RegisterCount) as Register_Count,
+    SUM(LIS_Daily_Summary_ReportCount) as Report_Count,
+    SUM(LIS_Daily_Summary_GoldenCardSampleCount) as Golden_Card_Sample_Count
+FROM LIS_Daily_Summary
+WHERE LIS_Daily_Summary_SummaryDate >= FORMAT(DATEADD(MONTH, -13, GETDATE()), 'yyyyMMdd')
+GROUP BY 
+    LIS_Daily_Summary_MedOrgCode,
+    LEFT(LIS_Daily_Summary_SummaryDate, 6),
+    LIS_Daily_Summary_DeptID,
+    LIS_Daily_Summary_DeptName,
+    LIS_Daily_Summary_ProfGroupCode,
+    LIS_Daily_Summary_ProfGroupName;
+
+
+五、指标计算口径说明
+5.1 核心指标定义（基于分层聚合）
+5.1.1 明细层指标（DC明细表）
+指标名称	指标内涵	最小粒度	数据来源表	计算逻辑
+标本数	条码数量	单个标本(inspection_id)	LIS_Sample_Main	按标本ID去重计数
+项目数	医嘱数量	单个项目(req_id+item_id)	LIS_Order_Main	按医嘱计数，每个项目=1
+工作量	登记+报告数	单次操作(登记/报告)	LIS_Work_Record	登记次数+报告次数
+5.1.2 汇总层指标（DC汇总表）
+指标名称	聚合维度	聚合方式	数据来源表	计算逻辑
+日度标本数	日期+科室+亚专业组	COUNT(DISTINCT SampleID)	LIS_Sample_Main	按维度聚合标本数
+日度项目数	日期+科室+亚专业组	SUM(OrderCount)	LIS_Order_Main	按维度聚合项目数
+日度工作量	日期+科室+亚专业组	SUM(WorkCount)	LIS_Work_Record	按维度聚合工作量
+5.1.3 主题层指标（MDR主题表）
+指标名称	聚合维度	聚合方式	数据来源表	计算逻辑
+月度标本数	月份+科室+亚专业组	SUM(SampleCount)	LIS_Daily_Summary	基于日度汇总按月聚合
+月度项目数	月份+科室+亚专业组	SUM(OrderCount)	LIS_Daily_Summary	基于日度汇总按月聚合
+月度工作量	月份+科室+亚专业组	SUM(WorkCount)	LIS_Daily_Summary	基于日度汇总按月聚合
+5.2 多医院多院区支持医院维度：通过MedOrgCode字段统一管理多医院数据
+●院区维度：通过科室和亚专业组字段区分不同院区
+●数据隔离：支持按医院和院区进行数据权限控制
+六、数据更新策略
+6.1 分层更新机制
+●DL -> DC明细: 每日凌晨2点增量同步前一日数据到明细表
+●DC明细 -> DC汇总: 每日凌晨3点基于明细数据生成日度汇总
+●DC汇总 -> MDR: 每日凌晨4点基于汇总数据生成月度主题
+●历史数据: 保留13个月数据，支持同比和环比分析
+6.2 多医院数据更新
+●数据源识别: 通过MedOrgCode区分不同医院数据源
+●并行处理: 支持多医院数据并行处理，提升更新效率
+●异常隔离: 单个医院数据异常不影响其他医院数据处理
+6.3 数据质量监控
+●明细数据监控: 标本、医嘱、工作量数据完整性验证
+●汇总数据监控: 日度汇总与明细数据一致性检查
+●主题数据监控: 月度主题与汇总数据一致性检查
+●及时性监控: 各层数据更新时效性告警
+七、设计优势总结
+7.1 符合现有DC架构风格
+1.命名规范统一：严格按照表名_字段名格式命名
+2.字段类型标准：ID用VARCHAR(60)，计数用INT8，时间用timestamp
+3.扩展字段完整：预留6个字符扩展+2个数值扩展+2个时间扩展
+4.元数据完善：包含数据来源、创建时间、删除标识等管理字段
+7.2 分层设计合理
+1.明细数据层：保持业务最小粒度，支持灵活聚合分析
+2.汇总数据层：预聚合常用维度，提升查询性能
+3.主题数据层：面向业务分析，支持多维度对比
+4.层次清晰：每层职责明确，数据血缘关系清晰
+7.3 多医院多院区支持
+1.统一编码体系：通过MedOrgCode支持多医院统一管理
+2.并行处理能力：支持多医院数据并行处理
+3.权限控制：支持按医院和院区进行数据权限控制
+4.扩展性良好：便于后续新增医院和院区
+7.4 数据质量保障
+1.完整字段映射：详细的源表源字段映射关系
+2.分层数据校验：明细、汇总、主题三层数据一致性校验
+3.异常隔离机制：单点异常不影响整体数据处理
+4.全程可追溯：从DL到MDR全程数据血缘可追溯
+此设计方案完全对标现有datacenter架构风格，通过明细和汇总数据分层设计，既保证了数据的完整性和灵活性，又提升了查询性能，确保了LIS主题数据与整个数据中心的一致性和兼容性。
+
+附件A：数据架构ER图
+
+
+A.1 LIS数据架构整体ER图
+上图展示了LIS数据架构的完整ER关系，包括：
+数据分层关系： - DL层：LIS5_REQ_INFO、LIS5_REQ_ITEM、LIS5_INSPECT_SAMPLE、LIS_INSPECTION_SAMPLE_charge - DC层：LIS_Sample_Main、LIS_Order_Main、LIS_Work_Record、LIS_Charge_Detail、LIS_Daily_Summary - MDR层：MDR_LIS_Monthly_Summary
+关键业务关系： - 申请单与检验项目：一对多关系 - 申请单与标本：一对多关系（一个申请可产生多个标本） - 标本与医嘱：一对多关系（一个标本包含多个检验项目） - 标本与工作量：一对多关系（标本产生登记、报告等工作量） - 标本与收费：一对多关系（标本产生多个收费项目）
+数据血缘关系： - DL → DC：贴源数据直接映射到明细表 - DC明细 → DC汇总：明细数据按维度聚合 - DC汇总 → MDR：汇总数据按时间维度进一步聚合
+A.2 标本生命周期流程图
+
+上图展示了LIS检验标本的完整生命周期，包括各环节的关键人员和时间信息：
+业务流程环节： 1. 医嘱申请：开单人员在开单时间提出申请内容 2. 标本采集：采集人员在采集时间完成采集内容（检验目的） 3. 标本接收：接收人员在接收时间确认标本 4. 标本检验：检验人员进行具体检验操作 5. 结果报告：报告人员发布报告内容 6. 结果审核：审核人员完成审核内容确认
+工作量统计： - 登记工作量：基于医嘱申请环节统计 - 报告工作量：基于结果报告环节统计
+业务指标映射： - 标本数：基于标本采集环节的条码数 - 项目数：基于医嘱申请环节的医嘱数 - 工作量：登记工作量 + 报告工作量 - 收入金额：基于审核确认的收费金额
+
+附件B：完整建表脚本
+B.1 DC层建表脚本
+B.1.1 LIS_Sample_Main（检验标本主表）
+
+-- =============================================
+-- LIS检验标本主表 - 基于LIS5_INSPECT_SAMPLE
+-- 包含标本完整生命周期信息（申请->采集->接收->检验->报告->审核）
+-- =============================================
+CREATE TABLE LIS_Sample_Main (
+    -- 基础标识信息
+    LIS_Sample_Main_MedOrgCode VARCHAR(60) NOT NULL,        -- 医疗机构代码
+    LIS_Sample_Main_MedOrgName VARCHAR(100),                -- 医疗机构名称
+    LIS_Sample_Main_EmpiID INT8,                            -- 人员唯一标识ID
+    LIS_Sample_Main_EmpiNo VARCHAR(60),                     -- 人员唯一号
+    LIS_Sample_Main_PersID INT8,                            -- 人员ID
+    LIS_Sample_Main_PersNo VARCHAR(60),                     -- 人员号
+    LIS_Sample_Main_VisitID INT8,                           -- 就诊ID
+    LIS_Sample_Main_VisitNo VARCHAR(60),                    -- 就诊号
+    LIS_Sample_Main_VisitTypeID VARCHAR(60),                -- 就诊类型ID
+    LIS_Sample_Main_VisitTypeCode VARCHAR(60),              -- 就诊类型代码
+    LIS_Sample_Main_VisitTypeName VARCHAR(60),              -- 就诊类型名称
+    
+    -- 标本核心信息
+    LIS_Sample_Main_SampleID VARCHAR(60) PRIMARY KEY,       -- 标本ID（条码号）
+    LIS_Sample_Main_SampleCode VARCHAR(60),                 -- 标本编码
+    LIS_Sample_Main_SampleTypeID VARCHAR(60),               -- 标本类型ID
+    LIS_Sample_Main_SampleTypeCode VARCHAR(60),             -- 标本类型代码  
+    LIS_Sample_Main_SampleTypeName VARCHAR(100),            -- 标本类型名称
+    LIS_Sample_Main_SampleStatusID VARCHAR(60),             -- 标本状态ID
+    LIS_Sample_Main_SampleStatusCode VARCHAR(60),           -- 标本状态代码
+    LIS_Sample_Main_SampleStatusName VARCHAR(100),          -- 标本状态名称
+    
+    -- 科室信息
+    LIS_Sample_Main_DeptID VARCHAR(60),                     -- 申请科室ID
+    LIS_Sample_Main_DeptCode VARCHAR(60),                   -- 申请科室代码
+    LIS_Sample_Main_DeptName VARCHAR(100),                  -- 申请科室名称
+    LIS_Sample_Main_ProfGroupID VARCHAR(60),                -- 亚专业组ID
+    LIS_Sample_Main_ProfGroupCode VARCHAR(60),              -- 亚专业组代码
+    LIS_Sample_Main_ProfGroupName VARCHAR(100),             -- 亚专业组名称
+    
+    -- 时间信息
+    LIS_Sample_Main_InspectionDate VARCHAR(10),             -- 检验日期(YYYYMMDD)
+    LIS_Sample_Main_RequisitionDtTm timestamp,              -- 申请时间
+    LIS_Sample_Main_SamplingDtTm timestamp,                 -- 采集时间
+    LIS_Sample_Main_ReceiveDtTm timestamp,                  -- 接收时间
+    LIS_Sample_Main_ReportDtTm timestamp,                   -- 报告时间
+    
+    -- 业务标识
+    LIS_Sample_Main_IsGoldenCard VARCHAR(1),                -- 是否金卡(Y/N)
+    LIS_Sample_Main_ChargeTypeID VARCHAR(60),               -- 收费类型ID
+    LIS_Sample_Main_ChargeTypeCode VARCHAR(60),             -- 收费类型代码
+    LIS_Sample_Main_ChargeTypeName VARCHAR(100),            -- 收费类型名称
+    
+    -- 操作人员信息
+    LIS_Sample_Main_InputPersID VARCHAR(60),                -- 登记人员ID
+    LIS_Sample_Main_InputPersCode VARCHAR(60),              -- 登记人员代码
+    LIS_Sample_Main_InputPersName VARCHAR(100),             -- 登记人员姓名
+    LIS_Sample_Main_InputDtTm timestamp,                    -- 登记时间
+    
+    -- 采集人员信息
+    LIS_Sample_Main_SamplingPersID VARCHAR(60),             -- 采集人员ID
+    LIS_Sample_Main_SamplingPersCode VARCHAR(60),           -- 采集人员代码
+    LIS_Sample_Main_SamplingPersName VARCHAR(100),          -- 采集人员姓名
+    LIS_Sample_Main_SamplingContent VARCHAR(500),           -- 采集内容(检验目的)
+    
+    -- 接收人员信息
+    LIS_Sample_Main_ReceivePersID VARCHAR(60),              -- 接收人员ID
+    LIS_Sample_Main_ReceivePersCode VARCHAR(60),            -- 接收人员代码
+    LIS_Sample_Main_ReceivePersName VARCHAR(100),           -- 接收人员姓名
+    
+    -- 检验人员信息
+    LIS_Sample_Main_InspectionPersID VARCHAR(60),           -- 检验人员ID
+    LIS_Sample_Main_InspectionPersCode VARCHAR(60),         -- 检验人员代码
+    LIS_Sample_Main_InspectionPersName VARCHAR(100),        -- 检验人员姓名
+    
+    -- 报告人员信息
+    LIS_Sample_Main_ReportPersID VARCHAR(60),               -- 报告人员ID
+    LIS_Sample_Main_ReportPersCode VARCHAR(60),             -- 报告人员代码
+    LIS_Sample_Main_ReportPersName VARCHAR(100),            -- 报告人员姓名
+    LIS_Sample_Main_ReportContent VARCHAR(500),             -- 报告内容(内部说明)
+    
+    -- 审核人员信息
+    LIS_Sample_Main_CheckPersID VARCHAR(60),                -- 审核人员ID
+    LIS_Sample_Main_CheckPersCode VARCHAR(60),              -- 审核人员代码
+    LIS_Sample_Main_CheckPersName VARCHAR(100),             -- 审核人员姓名
+    LIS_Sample_Main_CheckDtTm timestamp,                    -- 审核时间
+    LIS_Sample_Main_CheckContent VARCHAR(500),              -- 审核内容(审核备注)
+    
+    -- 标准扩展字段
+    LIS_Sample_Main_ExtStr1 VARCHAR(200),                   -- 扩展1(字符类型)
+    LIS_Sample_Main_ExtStr2 VARCHAR(200),                   -- 扩展2(字符类型)
+    LIS_Sample_Main_ExtStr3 VARCHAR(200),                   -- 扩展3(字符类型)
+    LIS_Sample_Main_ExtStr4 VARCHAR(200),                   -- 扩展4(字符类型)
+    LIS_Sample_Main_ExtStr5 VARCHAR(200),                   -- 扩展5(字符类型)
+    LIS_Sample_Main_ExtStr6 VARCHAR(200),                   -- 扩展6(字符类型)
+    LIS_Sample_Main_ExtNum1 FLOAT8,                         -- 扩展7(数值类型)
+    LIS_Sample_Main_ExtNum2 FLOAT8,                         -- 扩展8(数值类型)
+    LIS_Sample_Main_ExtDate1 timestamp,                     -- 扩展9(时间类型)
+    LIS_Sample_Main_ExtDate2 timestamp,                     -- 扩展10(时间类型)
+    
+    -- 数据管理字段
+    LIS_Sample_Main_DataSourceFlag VARCHAR(10),             -- 数据来源标识
+    LIS_Sample_Main_DSTable VARCHAR(60),                    -- 接入数据源的表
+    LIS_Sample_Main_DSTableKey VARCHAR(200),                -- 接入数据源的key
+    LIS_Sample_Main_DSTableValue VARCHAR(200),              -- 接入数据源的key值
+    LIS_Sample_Main_IsDeleted INT8 DEFAULT 0,               -- 数据物理删除标识
+    LIS_Sample_Main_LastUpdateDtTm timestamp DEFAULT GETDATE(), -- 最后更新时间
+    LIS_Sample_Main_DataCreateDtTm timestamp DEFAULT GETDATE()  -- 数据创建时间
+);
+
+-- 创建索引
+CREATE INDEX IX_LIS_Sample_Main_MedOrg_Date ON LIS_Sample_Main(LIS_Sample_Main_MedOrgCode, LIS_Sample_Main_InspectionDate);
+CREATE INDEX IX_LIS_Sample_Main_Dept_Date ON LIS_Sample_Main(LIS_Sample_Main_DeptID, LIS_Sample_Main_InspectionDate);
+CREATE INDEX IX_LIS_Sample_Main_ProfGroup_Date ON LIS_Sample_Main(LIS_Sample_Main_ProfGroupCode, LIS_Sample_Main_InspectionDate);
+CREATE INDEX IX_LIS_Sample_Main_Pers_Visit ON LIS_Sample_Main(LIS_Sample_Main_PersID, LIS_Sample_Main_VisitID);
+
+-- 添加表注释
+COMMENT ON TABLE LIS_Sample_Main IS 'LIS检验标本主表-包含标本完整生命周期信息,支持采集人员、报告人员、审核人员等全流程追踪';
+COMMENT ON COLUMN LIS_Sample_Main.LIS_Sample_Main_SamplingPersName IS '采集人员姓名-用于工作量统计';
+COMMENT ON COLUMN LIS_Sample_Main.LIS_Sample_Main_SamplingContent IS '采集内容-检验目的说明';
+COMMENT ON COLUMN LIS_Sample_Main.LIS_Sample_Main_ReportPersName IS '报告人员姓名-用于工作量统计';
+COMMENT ON COLUMN LIS_Sample_Main.LIS_Sample_Main_ReportContent IS '报告内容-内部说明信息';
+COMMENT ON COLUMN LIS_Sample_Main.LIS_Sample_Main_CheckPersName IS '审核人员姓名-用于工作量统计';
+COMMENT ON COLUMN LIS_Sample_Main.LIS_Sample_Main_CheckContent IS '审核内容-审核备注信息';
+
+
+B.1.2 其他DC层表建表脚本
+
+-- =============================================
+-- 其他DC层建表脚本（LIS_Order_Main、LIS_Work_Record等）
+-- 具体建表脚本参见正文第3.2节设计内容
+-- =============================================
+
+
+B.2 MDR层建表脚本
+B.2.1 MDR_LIS_Monthly_Summary（LIS月度汇总主题表）
+-- =============================================
+-- LIS月度汇总主题表
+-- 基于DC汇总表按月聚合，支持同比环比分析
+-- =============================================
+CREATE TABLE MDR_LIS_Monthly_Summary (
+    Summary_ID VARCHAR(50) PRIMARY KEY,                     -- 汇总记录ID
+    Hospital_ID VARCHAR(20),                                -- 医疗机构ID
+    Summary_Date VARCHAR(7),                                -- 汇总月份(YYYY-MM)
+    Dept_ID VARCHAR(20),                                    -- 科室ID
+    Dept_Name VARCHAR(50),                                  -- 科室名称
+    Professional_Group VARCHAR(20),                         -- 亚专业组
+    
+    -- 核心指标（基于DC汇总表聚合）
+    Sample_Count INT DEFAULT 0,                             -- 标本数（条码数）
+    Order_Count INT DEFAULT 0,                              -- 项目数（医嘱数）
+    Work_Count INT DEFAULT 0,                               -- 工作量（登记+报告数）
+    
+    -- 扩展指标
+    Register_Count INT DEFAULT 0,                           -- 登记数
+    Report_Count INT DEFAULT 0,                             -- 报告数
+    Golden_Card_Sample_Count INT DEFAULT 0,                 -- 金卡标本数
+    Income_Amount DECIMAL(15,2) DEFAULT 0,                  -- 收入金额
+    
+    -- 时间维度支持
+    Last_Year_Same_Month VARCHAR(7),                        -- 去年同期月份
+    Last_Month VARCHAR(7),                                  -- 上月
+    
+    -- 扩展分析字段
+    Avg_Work_Per_Sample DECIMAL(10,2),                      -- 平均每标本工作量
+    Golden_Card_Ratio DECIMAL(5,2),                         -- 金卡占比(%)
+    
+    Create_Time DATETIME DEFAULT GETDATE(),
+    Update_Time DATETIME DEFAULT GETDATE()
+);
+
+-- 创建索引
+CREATE INDEX IX_MDR_LIS_Summary_Hospital_Date ON MDR_LIS_Monthly_Summary(Hospital_ID, Summary_Date);
+CREATE INDEX IX_MDR_LIS_Summary_Dept_Date ON MDR_LIS_Monthly_Summary(Dept_ID, Summary_Date);
+CREATE INDEX IX_MDR_LIS_Summary_ProfGroup_Date ON MDR_LIS_Monthly_Summary(Professional_Group, Summary_Date);
+
+-- 添加表注释
+COMMENT ON TABLE MDR_LIS_Monthly_Summary IS 'LIS月度汇总主题表-支持多维度对比分析和同比环比统计';
+
+
+B.3 数据处理脚本示例
+B.3.1 标本主表数据加载脚本
+
+-- =============================================
+-- LIS_Sample_Main数据加载脚本（DL -> DC）
+-- 包含新增的采集人员、报告人员、审核人员信息
+-- =============================================
+INSERT INTO LIS_Sample_Main (
+    LIS_Sample_Main_MedOrgCode,
+    LIS_Sample_Main_SampleID,
+    LIS_Sample_Main_InspectionDate,
+    LIS_Sample_Main_PersID,
+    LIS_Sample_Main_VisitID,
+    LIS_Sample_Main_VisitTypeName,
+    LIS_Sample_Main_DeptID,
+    LIS_Sample_Main_DeptName,
+    LIS_Sample_Main_ProfGroupCode,
+    LIS_Sample_Main_ProfGroupName,
+    LIS_Sample_Main_SampleTypeID,
+    LIS_Sample_Main_SampleTypeCode,
+    LIS_Sample_Main_SampleTypeName,
+    LIS_Sample_Main_RequisitionDtTm,
+    -- 采集人员信息
+    LIS_Sample_Main_SamplingPersName,
+    LIS_Sample_Main_SamplingDtTm,
+    LIS_Sample_Main_SamplingContent,
+    -- 接收人员信息
+    LIS_Sample_Main_ReceivePersName,
+    LIS_Sample_Main_ReceiveDtTm,
+    -- 检验人员信息
+    LIS_Sample_Main_InspectionPersName,
+    -- 报告人员信息
+    LIS_Sample_Main_ReportPersName,
+    LIS_Sample_Main_ReportDtTm,
+    LIS_Sample_Main_ReportContent,
+    -- 审核人员信息
+    LIS_Sample_Main_CheckPersName,
+    LIS_Sample_Main_CheckDtTm,
+    LIS_Sample_Main_CheckContent,
+    LIS_Sample_Main_SampleStatusName,
+    LIS_Sample_Main_IsGoldenCard,
+    LIS_Sample_Main_InputPersName,
+    LIS_Sample_Main_InputDtTm
+)
+SELECT 
+    s.hospital_ID as LIS_Sample_Main_MedOrgCode,
+    s.inspection_id as LIS_Sample_Main_SampleID,
+    s.inspection_date as LIS_Sample_Main_InspectionDate,
+    s.patient_id as LIS_Sample_Main_PersID,
+    s.outpatient_id as LIS_Sample_Main_VisitID,
+    CASE s.patient_type WHEN '1' THEN '门诊' WHEN '2' THEN '住院' ELSE '其他' END as LIS_Sample_Main_VisitTypeName,
+    s.patient_dept as LIS_Sample_Main_DeptID,
+    s.patient_dept_name as LIS_Sample_Main_DeptName,
+    s.GROUP_ID as LIS_Sample_Main_ProfGroupCode,
+    -- 亚专业组名称映射
+    CASE s.GROUP_ID 
+        WHEN '01' THEN '采血'
+        WHEN '02' THEN '分子'
+        WHEN '03' THEN '精准医疗'
+        WHEN '04' THEN '临检'
+        WHEN '05' THEN '免疫'
+        WHEN '06' THEN '生化'
+        WHEN '07' THEN '微生物'
+        WHEN '08' THEN '血库'
+        WHEN '09' THEN '永宁'
+        ELSE '其他'
+    END as LIS_Sample_Main_ProfGroupName,
+    s.sample_class as LIS_Sample_Main_SampleTypeID,
+    s.sample_class as LIS_Sample_Main_SampleTypeCode,
+    s.sample_class_name as LIS_Sample_Main_SampleTypeName,
+    s.Requisition_time as LIS_Sample_Main_RequisitionDtTm,
+    -- 采集人员信息
+    s.sampling_person as LIS_Sample_Main_SamplingPersName,
+    s.sampling_time as LIS_Sample_Main_SamplingDtTm,
+    s.test_order_name as LIS_Sample_Main_SamplingContent,
+    -- 接收人员信息
+    s.incept_person as LIS_Sample_Main_ReceivePersName,
+    s.incept_time as LIS_Sample_Main_ReceiveDtTm,
+    -- 检验人员信息
+    s.inspection_person as LIS_Sample_Main_InspectionPersName,
+    -- 报告人员信息
+    s.issued_person as LIS_Sample_Main_ReportPersName,
+    s.issued_time as LIS_Sample_Main_ReportDtTm,
+    s.Internal_remark as LIS_Sample_Main_ReportContent,
+    -- 审核人员信息
+    s.check_person as LIS_Sample_Main_CheckPersName,
+    s.check_time as LIS_Sample_Main_CheckDtTm,
+    s.remark as LIS_Sample_Main_CheckContent,
+    -- 其他字段
+    CASE s.inspection_state 
+        WHEN '0' THEN '未完成' 
+        WHEN '1' THEN '已完成' 
+        WHEN '9' THEN '已作废' 
+        ELSE '未知' 
+    END as LIS_Sample_Main_SampleStatusName,
+    CASE WHEN s.charge_type LIKE '%金卡%' OR s.charge_type LIKE '%VIP%' THEN 'Y' ELSE 'N' END as LIS_Sample_Main_IsGoldenCard,
+    s.input_person as LIS_Sample_Main_InputPersName,
+    s.input_time as LIS_Sample_Main_InputDtTm
+FROM LIS5_INSPECT_SAMPLE s
+WHERE s.inspection_date >= FORMAT(DATEADD(DAY, -1, GETDATE()), 'yyyyMMdd')
+AND s.inspection_id IS NOT NULL;
+
+
+
+附件C：字段血缘关系详细映射
+C.1 新增字段血缘关系说明
+采集环节字段映射
+DC字段	DL源字段	字段说明	业务含义
+LIS_Sample_Main_SamplingPersID	LIS5_INSPECT_SAMPLE.sampling_person	采集人员ID	采集人员唯一标识
+LIS_Sample_Main_SamplingPersName	LIS5_INSPECT_SAMPLE.sampling_person	采集人员姓名	用于工作量统计分析
+LIS_Sample_Main_SamplingDtTm	LIS5_INSPECT_SAMPLE.sampling_time	采集时间	标本采集的具体时间
+LIS_Sample_Main_SamplingContent	LIS5_INSPECT_SAMPLE.test_order_name	采集内容	检验目的和采集要求
+报告环节字段映射
+DC字段	DL源字段	字段说明	业务含义
+LIS_Sample_Main_ReportPersID	LIS5_INSPECT_SAMPLE.issued_person	报告人员ID	报告发布人员唯一标识
+LIS_Sample_Main_ReportPersName	LIS5_INSPECT_SAMPLE.issued_person	报告人员姓名	用于工作量统计分析
+LIS_Sample_Main_ReportDtTm	LIS5_INSPECT_SAMPLE.issued_time	报告时间	报告发布的具体时间
+LIS_Sample_Main_ReportContent	LIS5_INSPECT_SAMPLE.Internal_remark	报告内容	报告的内部说明信息
+审核环节字段映射
+DC字段	DL源字段	字段说明	业务含义
+LIS_Sample_Main_CheckPersID	LIS5_INSPECT_SAMPLE.check_person	审核人员ID	审核人员唯一标识
+LIS_Sample_Main_CheckPersName	LIS5_INSPECT_SAMPLE.check_person	审核人员姓名	用于工作量统计分析
+LIS_Sample_Main_CheckDtTm	LIS5_INSPECT_SAMPLE.check_time	审核时间	审核完成的具体时间
+LIS_Sample_Main_CheckContent	LIS5_INSPECT_SAMPLE.remark	审核内容	审核的备注和说明信息
+标本类型字段映射
+DC字段	DL源字段	字段说明	业务含义
+LIS_Sample_Main_SampleTypeID	LIS5_INSPECT_SAMPLE.sample_class	标本类型ID	标本类型的唯一编码
+LIS_Sample_Main_SampleTypeCode	LIS5_INSPECT_SAMPLE.sample_class	标本类型代码	便于统计分析的代码
+LIS_Sample_Main_SampleTypeName	LIS5_INSPECT_SAMPLE.sample_class_name	标本类型名称	标本类型的中文描述
+C.2 工作量统计逻辑
+基于新增字段，工作量统计的详细逻辑如下：
+1.采集工作量：基于LIS_Sample_Main_SamplingPersName和LIS_Sample_Main_SamplingDtTm统计
+2.登记工作量：基于LIS_Sample_Main_InputPersName和LIS_Sample_Main_InputDtTm统计
+3.检验工作量：基于LIS_Sample_Main_InspectionPersName统计
+4.报告工作量：基于LIS_Sample_Main_ReportPersName和LIS_Sample_Main_ReportDtTm统计
+5.审核工作量：基于LIS_Sample_Main_CheckPersName和LIS_Sample_Main_CheckDtTm统计
+通过这些详细的人员和时间信息，可以精确追踪每个环节的工作量，为科室绩效考核和人员工作量统计提供准确的数据支撑。
+
+
+

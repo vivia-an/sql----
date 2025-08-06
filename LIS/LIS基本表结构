@@ -1,0 +1,3261 @@
+ 
+表结构说明
+杏和临床实验室信息平台5.0
+
+
+
+
+
+
+
+
+
+
+上海杏和软件有限公司
+
+
+文档名称	杏和临床实验室信息平台--表结构说明
+版本号	V5.0	版本日期	2015.04.22
+创建者		创建日期	2015.04.22
+版本修订记录
+版本号	变更内容	变更时间	修改人
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+目   录
+目   录	2
+2.	业务相关表	6
+2.1	LIS5_inspect_DBINDEX_LIST (标本信息主索引表)	6
+2.2	LIS5_REQ_DBINDEX_LIST (申请信息主索引表)	7
+2.3	LIS_queue (队列记录表)老	8
+2.4	LIS5_queue (队列记录表)	9
+2.1.	LIS5_patient_info (患者信息表)	12
+2.2.	LIS5_patient_visit_list (患者就诊记录表)	14
+2.3.	LIS_patient_ (患者诊断信息表)	16
+2.4.	LIS5_change_log(修改日志表)	17
+2.5.	LIS_INSPECTION_SAMPLE (检验标本信息表)	18
+2.6.	LIS5_INSPECT_SAMPLE (检验标本信息表)	24
+2.7.	LIS_INSPECTION_SAMPLE_charge (检验标本收费表)	29
+2.8.	LIS_INSPECTION_RESULT (检验结果信息表)	32
+2.9.	LIS_inspection_report (检验报告信息表)	35
+2.10.	LIS5_inspection_RESULT_sign (检验标本标记信息表)	36
+2.11.	LIS5_INSPECT_ISSUED_REPORT（发布报告信息表）	37
+2.12.	LIS5_INSPECT_REPORT_PAGE（检验报告单归档表）	38
+2.13.	LIS_REQUISITION_INFO(标签信息表)	39
+2.14.	LIS_REQUISITION_ITEM(标签项目信息表)	44
+2.15.	LIS5_ORDER_LIST (采集预约信息表)	45
+2.16.	LIS5_SAMPLE_COLLECTION_LIST（标本收藏记录表)	46
+2.17.	LIS5_REQ_charge(标签费用信息表)	47
+2.18.	LIS5_REQ_Etag_state(标签状态记录表)	49
+2.19.	LIS5_REQ_sample_state(标本状态记录表)	50
+2.20.	LIS5_INSPECTION_state(检验单状态记录表)	51
+2.21.	LIS5_REQ_item_state(任务项状态记录表)	52
+2.22.	LIS5_REQ_incept_list（标本接收记录表)	53
+2.23.	LIS5_REQ_incept_END_list（标本接收结束记录表)	54
+2.24.	LIS5_SAMPLE_PACK_info (标本包信息表)	55
+2.25.	LIS5_SAMPLE_PACK_LIST (包标本记录表)	58
+2.26.	LIS5_sample_PACK_state(标本包状态记录表)	59
+2.27.	LIS5_collect_TASK_INFO (标本采集任务信息表)	60
+2.28.	LIS5_collect_TASK_LIST (标本采集任务记录表)	61
+2.29.	LIS5_SAMPLE_print_info (标本清单信息表)	62
+2.30.	LIS5_SAMPLE_print_LIST (清单标本记录表)	63
+2.31.	LIS5_SAMPLE_COLLECT_INFO（标本采集信息表）	64
+2.32.	LIS5_req_COLLECT_info（标签采集任务表）	65
+2.33.	LIS5_inspect_info（检验任务单表）	68
+2.34.	LIS5_req_FAST_info（绿色通道标签信息表）	70
+2.35.	LIS5_SAMPLE_COLLECT_pic（标本采集图片信息表）	72
+2.36.	LIS5_ (评价信息表)	72
+2.37.	LIS5_REQ_CHARGE_JOB (接收分配任务信息表)	75
+2.38.	LIS5_REQ_CHARGE_LOG (接收分配日志信息表)	77
+2.39.	LIS5_PATIENT_special_LIST(特殊病人记录表)	79
+2.40.	LIS5_REPORT_rEcall_LIST (报告召回记录表)	81
+2.41.	LIS5_REPORT_rEcall_HLIST (历史报告召回记录表)	84
+2.42.	LIS5_report_delay_LIST(报告延时记录表)	87
+2.43.	LIS5_Unqualified_sample_LIST （不合格标本记录表)	89
+2.44.	LIS5_Unqualified_sample_HLIST （历史不合格标本记录表)	93
+2.45.	LIS5_INSPECTION_RESULT_ALARM(检验结果危急值信息表)	96
+2.46.	LIS5_INSPECTION_RESULT_HALARM(历史检验结果危急值信息表)	102
+2.47.	LIS5_INSPECTION_RERUN_LIST (标本复查记录表)	109
+2.48.	LIS5_INSPECTION_rerun_RESULT (复查结果表)	112
+2.49.	LIS5_INSPECTION_RERUN_HLIST (历史标本复查记录表)	113
+2.50.	LIS5_PRINT_JOB（打印任务表）	115
+2.51.	LIS5_PRINT_JOB_log（打印日志表）	116
+2.52.	LIS5_SAMPLE_JOB（标本任务表）	117
+2.53.	LIS5_SAMPLE_log（标本日志表）	118
+2.54.	LIS5_REQ_REPRINT_LOG（标签补打日志表）	119
+2.55.	LIS5_report_ISSUE_JOB（报告发布任务表）	120
+2.56.	LIS5_report_ISSUE_log（报告发布日志表）	121
+2.57.	lIS5_report_send_JOB（报告同步任务表）	122
+2.58.	LIS5_report_send_log（报告同步日志表）	123
+2.59.	LIS5_report_print_log（报告打印日志表）	124
+2.60.	LIS5_report_read_log（报告阅读日志表）	125
+2.61.	LIS5_report_CA_JOB（报告CA任务表）	126
+2.62.	LIS5_report_CA_LOG（报告CA日志表）	127
+2.63.	LIS5_sample_dispose_list（待检标本处理信息表）	128
+2.64.	LIS5_test_reagent_use_list(项目试剂消耗记录表)	129
+2.65.	LIS5_group（分组实时监控状态表）	131
+2.66.	LIS5_ai_CHECK_LIST (智能审核启动信息表)	132
+2.67.	LIS5_AUTO_CHECK_LIST (自动审核人员信息表)	133
+2.68.	LIS5_INSTRUMENT_CHECK_LIST (仪器自动审核启动信息表)	134
+2.69.	LIS5_Verify_rule_ JOB (规则验证记录表)	135
+2.70.	LIS5_Verify_rule_ sample (标本验证标本信息表)	136
+2.71.	LIS5_Verify_rule_Intercept(标本验证拦截信息表)	137
+2.72.	LIS5_Verify_rule_STAT (标本验证规则统计信息表)	137
+2.73.	LIS5_Verify_item_STAT (标本验证分类统计信息表)	138
+2.74.	LIS5_SAMPLE_VERIFY_INFO (标本验证信息表)	139
+2.75.	LIS5_sample_VERIFY_list (标本验证记录表)	140
+2.76.	LIS5_inspect_rule_group (分组检验规则表)	140
+2.77.	LIS5_inspection_sample_rule (标本规则信息表)	141
+2.78.	LIS5_REPORT_AI_CHECK_list（智能审核记录表）	142
+2.79.	LIS5_REPORT_manual_CHECK_list（人工审核记录表）	144
+2.80.	LIS5_SAMPLE_EXp_VERIFY_INFO (标本专家验证信息表)	145
+2.81.	LIS5_sample_VERIFY_EXPERT(标本专家验证专家记录表)	146
+2.82.	LIS5_samPle_expVERIFY_list (标本专家验证记录表)	146
+2.83.	LIS5_SAMPLE_JOB（标本检测任务表）	147
+2.84.	LIS5_SAMPLE_job_log（标本检测日志表）	148
+2.85.	LIS5_analysis_report （结果解释报告信息表)	149
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2.业务相关表
+2.1LIS5_REQ_INFO(申请单信息表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	申请ID	req_id                	VC	20	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	申请医疗机构ID
+3	申请来源	req_SOURCE	VC	20	N	1本院
+2外院
+4	院区ID	AREA_ID	VC	20	N	
+5	申请模板ID	template_id                 	VC	20		
+6	申请日期	req_DATE	D		N	YYYY-mm-DD
+7	申请HISID	req_HIS_ID	VC	30		
+8	患者主索引ID	pat_id                 	VC	30		
+9	病人ID	patient_id                 	VC	30		
+10	检查类别	inspect_type	VC	20		
+11	病人类别	patient_type                  	VC	20		
+12	住院号	outpatient_id                  	VC	50		
+13	病人唯一号	intpatient_id                 	VC	50		
+14	次数	visit_num	VC	10		
+15	收费类别ID	charge_type_ID                   	VC	20		
+16	收费类别	charge_type_NAME                   	VC	50		
+17	姓名	patient_name                  	VC	50		
+18	性别	patient_sex                   	VC	2		
+19	年龄	patient_age                   	VC	20		
+20	出生年月	patient_birthday	VC	20		
+21	民族	patient_nation                	VC	50		
+22	身份证号	Id_card	VC	30		
+23	地址	patient_address	VC	100		
+24	患者电话	patient_phone	VC	50		
+25	用药信息	take_medicine	VC	50		
+26	是否饮食	diet	VC	50		
+27	RH血型	bloodtype_rh                  	VC	20		
+28	ABO血型	bloodtype_abo                 	VC	20		
+29	RH表型	rh_phenotype	VC	20		
+30	身高	patient_Height	VC	20		
+31	体重	patient_Weight	VC	20		
+32	科别ID	dept_LIS_ID	VC	20		
+33	科别HISID	dept_HIS_ID	VC	20		
+34	科别名称	dept_name             	VC	50		
+35	病区ID	ward_lis_Id              	VC	20		
+36	病区HISID	ward_his_id              	VC	20		
+37	病区名称	ward_name             	VC	50		
+38	护理单元ID	nurse_lis_Id              	VC	20		
+39	护理单元HISID	nurse_his_id              	VC	20		
+40	护理单元名称	nurse_name             	VC	50		
+41	床号	patient_bed                   	VC	20		
+42	特殊条件	especial_condition            	VC	20		
+43	传染标记	Infection                     	VC	50		
+44	临床诊断	clinical_diagnoses            	VC	100		
+45	简要病史	medical_record                	VC	200		
+46	开单科室	req_dept              	VC	50		
+47	开单时间	req_time              	VC	20		
+48	开单人员ID	req_person_LISID           	VC	20		
+49	开单人员HISID	req_persoN_HISID           	VC	20		
+50	开单人员	req_person            	VC	50		
+51	开单人员电话	req_person_phone            	VC	50		
+52	开单电脑	req_computer           	VC	50		
+53	执行科室	execute_dept                  	VC	50		
+54	执行时间	execute_time                  	VC	20		
+55	执行人员	execute_person                	VC	50		
+56	执行电脑	execute_computer              	VC	50		
+57	收费时间	charge_time                   	VC	20		
+58	收费人员	charge_person                 	VC	50		
+59	收费科室	charge_DEPT                 	VC	20		
+60	收费电脑	charge_computer                 	VC	50		
+61	申请来源	Req_from	VC	50		
+62	检验科室	inspect_dept	VC	50		
+63	孕妇编号	GESTATIONAL_NO	VC	20		
+64	孕妇孕周	GESTATIONAL_WEEKS	VC	20		
+65	收费状态	charge_state                  	VC	20		
+66	申请状态	req_state             	VC	20		0未完成
+1已完成
+9已作废
+67	修改状态	change_state             	VC	20		1新增
+2生成
+9作废
+68	首次登记人	FIRST_Rperson	VC	50		
+69	首次登记时间	FIRST_Rtime	D			
+70	最后修改人员	last_mperson	VC	50		
+71	最后修改时间	last_mtime	D			
+72	备注	remark	VC	200		
+2.2LIS5_REQ_ITEM(申请单辅助项目信息表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	申请ID	req_id                	VC	20	N	PK
+2	项目ID	ITEM_ID	VC	20	N	PK
+3	排序号	item_sort                	VC	20		
+4	中文名称	item_cname                  	VC	100		
+5	项目结果	item_result	VC	500		
+6	判断结果	item_judge_result	VC	100		
+7	项目状态	result_state             	VC	20		
+8	首次登记人	FIRST_Rperson	VC	50		
+9	首次登记时间	FIRST_Rtime	D			
+10	最后修改人员	last_mperson	VC	50		
+11	最后修改时间	last_mtime	D			
+2.1.LIS5_ORDER_INFO(医嘱信息表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	医嘱ID	order_id                	VC	20	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	
+3	申请ID	req_id                	VC	20		
+4	申请院区ID	area_ID	VC	20		
+5	医嘱日期	order_date	D			
+6	检查类别	inspect_type	VC	20		
+7	病人类别	patient_type                  	VC	20		
+8	患者主索引	pat_id                 	VC	30		
+9	病人ID	patient_id                 	VC	30		
+10	住院号	outpatient_id                  	VC	50		
+11	病人唯一号	intpatient_id                 	VC	50		
+12	次数	visit_num	VC	10		
+13	收费类别	charge_type                   	VC	20		
+14	姓名	patient_name                  	VC	50		
+15	性别	patient_sex                   	VC	2		
+16	年龄	patient_age                   	VC	20		
+17	出生年月	patient_birthday	VC	20		
+18	民族	patient_nation                	VC	20		
+19	身份证号	Id_card	VC	30		
+20	地址	patient_address	VC	100		
+21	用药信息	take_medicine	VC	50		
+22	是否饮食	diet	VC	50		
+23	RH血型	bloodtype_rh                  	VC	20		
+24	ABO血型	bloodtype_abo                 	VC	20		
+25	RH表型	rh_phenotype	VC	20		
+26	科别	patient_dept                  	VC	20		
+27	病区	patient_ward                  	VC	20		
+28	床号	patient_bed                   	VC	20		
+29	特殊条件	especial_condition            	VC	20		
+30	已检验信息	inspected_info                	VC	100		
+31	传染标记	Infection                     	VC	50		
+32	临床诊断	clinical_diagnoses            	VC	100		
+33	简要病史	medical_record                	VC	200		
+34	开单科室	requisition_dept              	VC	50		
+35	开单时间	requisition_time              	VC	50		
+36	开单人员	requisition_person            	VC	50		
+37	执行科室	execute_dept                  	VC	50		
+38	执行时间	execute_time                  	VC	50		
+39	执行人员	execute_person                	VC	50		
+40	打印科室	print_dept                    	VC	50		
+41	打印时间	print_time                    	VC	50		
+42	打印人员	print_person                  	VC	50		
+43	标本种类	sample_class                  	VC	50		
+44	标本种类名称	sample_class_name	VC	50		
+45	生理周期	MENSTRUAL_CYCLE	VC	50		
+46	孕妇编号	GESTATIONAL_NO	VC	20		
+47	孕妇孕周	GESTATIONAL_WEEKS	VC	20		
+48	护理单元	NURSE_UNIT	VC	20		
+49	医嘱状态	order_state             	VC	20		
+50	备注	remark                        	VC	100		
+2.3LIS5_inspect_DBINDEX_LIST (标本信息主索引表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	数据库ID	DB_id                 	VC	20	N	PK
+2	数据库名称	DB_NAME	VC	50		
+3	数据库文件	DBFILE_PATH	VC	200		
+4	审核开始时间	check_START_DATE	VC	20		
+5	审核结束时间	check_END_DATE	VC	20		
+6	数据库连接	DB_LINK	VC	500		
+7	数据库说明	DB_DESC	VC	500		
+8	数据库状态	DB_STATE	VC	10		
+9	首次登记人	FIRST_Rperson	VC	50		
+10	首次登记时间	FIRST_Rtime	VC	50		格式：yyyy-mm-ddhh:mm:ss
+11	最后修改人员	last_mperson	VC	50		
+12	最后修改时间	last_mtime	VC	50		
+13	备注	remark                        	VC	255		
+2.4LIS5_REQ_DBINDEX_LIST (申请信息主索引表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	数据库ID	DB_id                 	VC	20	N	PK
+2	数据库名称	DB_NAME	VC	50		
+3	数据库文件	DBFILE_PATH	VC	200		
+4	申请开始时间	DB_START_DATE	VC	50		
+5	申请结束时间	DB_END_DATE	VC	50		
+6	数据库连接	DB_LINK	VC	500		
+7	数据库说明	DB_DESC	VC	500		
+8	数据库状态	DB_STATE	VC	10		
+9	首次登记人	FIRST_Rperson	VC	50		
+10	首次登记时间	FIRST_Rtime	VC	50		格式：yyyy-mm-ddhh:mm:ss
+11	最后修改人员	last_mperson	VC	50		
+12	最后修改时间	last_mtime	VC	50		
+13	备注	remark                        	VC	255		
+2.5LIS_queue (队列记录表)老
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	号码ID	ID                  	VC	10	N	PK
+2	队列号码	queue_number	VC	20	N	
+3	队列时间	queue_datetime              	DT		N	 定时采集时间
+4	队列创建时间	queue_createdatetime	DT		N	
+5	队列ID	queue_flag	VC	10		
+6	叫号窗口	local_ip                	VC	20		
+7	患者姓名	patient_name	VC	50		
+8	叫号次数	call_nums	N			
+9	叫号人	call_name	VC	50		
+10	生成电脑	create_name	VC	50		
+11	发声次数	call_voice	N			
+12	优先级	vip	VC	10		  越小优先级越高
+13	发声时间	voice_time                   	DT			
+14	叫号时间	call_time	DT			
+15	打印次数	REPTINT_NUMS	N			
+16	后移次数	MOVE_NUMS	N			
+17	门诊号	outpatient_id	VC	20		
+18	采集单元ID	queue_group	VC	20		
+19	是否作废过	isreget	VC	10		
+20	采血须知	sampling_notice	VC	50		
+21	号码状态	queue_state	VC	10		初始值为0 ：未采血；
+准备采血，部分完成，已完成，已作废
+22	首次登记人	FIRST_Rperson	VC	50		
+23	首次登记时间	FIRST_Rtime	VC	50		格式：yyyy-mm-dd hh:mm:ss
+24	最后修改人员	last_mperson	VC	50		
+25	最后修改时间	last_mtime	VC	50		
+26	备注	remark                        	VC	255		
+2.6LIS5_queue (队列记录表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	序号	quEUE_NO                	VC	20	N	PK
+2	采集单元ID	unit_ID	VC	20	N	
+3	队列ID	queue_id                 	VC	20	N	队列ID
+4	队列日期	queue_date	VC	20	N	
+5	队列号码	queue_number	VC	20	N	
+6	队列时间	queue_datetime              	VC	20		
+7	取号类型	Pick_type	VC	20		1自助
+2人工
+3预约
+8	队列类型	queue_type	VC	10		1VIP队列
+2普通队列
+3定时队列
+4均衡队列
+5过号重置队列
+6体液队列
+9	优先级别	queue_level	VC	20		1高 
+2中 
+3低
+10	呼叫窗口ID	window_id                 	VC	20		
+11	患者主索引	pat_ID	VC	50		
+12	患者ID	OUTpatIENT_ID	VC	50		
+13	患者门诊号	INpatIENT_ID	VC	50		
+14	患者姓名	patient_name	VC	50		
+15	叫号次数	call_nums	N			
+16	叫号人	call_name	VC	50		
+17	叫号时间	call_time	VC	50		
+18	打印次数	REPTINT_NUMS	N			
+19	后移次数	MOVE_NUMS	N			
+20	采血须知	sampling_notice	VC	50		须知类型名称
+21	取号时间	create_time	VC	50		
+22	取号电脑	create_computer	VC	50		
+23	采集时间	sampling_time	VC	50		
+24	采集人	sampling_person	VC	50		
+25	采集电脑	sampling_computer	VC	50		
+26	号码状态	queue_state	VC	10		0未采
+1准备采血
+2正在采血
+3已完成
+10已作废
+27	首次登记人	FIRST_Rperson	VC	50		
+28	首次登记时间	FIRST_Rtime	VC	50		格式：yyyy-mm-dd hh:mm:ss
+29	最后修改人员	last_mperson	VC	50		
+30	最后修改时间	last_mtime	VC	50		
+31	备注	remark                        	VC	255		
+2.7LIS5_queue_HISTORY (历史队列记录表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	序号	quEUE_NO                	VC	20	N	PK
+2	采集单元ID	unit_ID	VC	20	N	
+3	队列ID	queue_id                 	VC	20	N	队列ID
+4	队列日期	queue_date	VC	20	N	
+5	队列号码	queue_number	VC	20	N	
+6	队列时间	queue_datetime              	VC	20		
+7	取号类型	Pick_type	VC	20		1自助
+2人工
+3预约
+8	队列类型	queue_type	VC	10		1VIP队列
+2普通队列
+3定时队列
+4均衡队列
+5过号重置队列
+6体液队列
+9	优先级别	queue_level	VC	20		1高 
+2中 
+3低
+10	呼叫窗口ID	window_id                 	VC	20		
+11	患者主索引	pat_ID	VC	50		
+12	患者ID	OUTpatIENT_ID	VC	50		
+13	患者门诊号	INpatIENT_ID	VC	50		
+14	患者姓名	patient_name	VC	50		
+15	叫号次数	call_nums	N			
+16	叫号人	call_name	VC	50		
+17	叫号时间	call_time	VC	50		
+18	打印次数	REPTINT_NUMS	N			
+19	后移次数	MOVE_NUMS	N			
+20	采血须知	sampling_notice	VC	50		须知类型名称
+21	取号时间	create_time	VC	50		
+22	取号电脑	create_computer	VC	50		
+23	采集时间	sampling_time	VC	50		
+24	采集人	sampling_person	VC	50		
+25	采集电脑	sampling_computer	VC	50		
+26	号码状态	queue_state	VC	10		0未采
+1准备采血
+2正在采血
+3已完成
+10已作废
+27	首次登记人	FIRST_Rperson	VC	50		
+28	首次登记时间	FIRST_Rtime	VC	50		格式：yyyy-mm-dd hh:mm:ss
+29	最后修改人员	last_mperson	VC	50		
+30	最后修改时间	last_mtime	VC	50		
+31	备注	remark                        	VC	255		
+2.2.LIS5_change_log(修改日志表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	记录ID	log_id                  	VC	20	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	
+3	科室ID	lab_id	VC	20		
+4	分组ID	group_id	VC	20		
+5	修改日期	change_date                 	VC	20	N	
+6	修改类型	change_type	VC	20	N	数据修改
+7	数据表	change_table	VC	50	N	PATIENT、SAMPLE、INFO
+8	来源系统					
+9	涉及数据表					
+10	修改信息ID	INFO_ID	VC	50	N	检验单ID、条码号
+11	修改项目ID	item_ID	VC	50	N	字段、项目ID
+12	修改项目名称	item_name	VC	50	N	字段名称、项目名称
+13	修改模块	chanage_module	VC	50		
+14	原因分类	cause_class	VC	50		
+15	修改原因	change_cause	VC	500		
+16	修改前内容	change_before_content	VC	500		
+17	修改后内容	change_AFTER_content	VC	500		
+18	修改状态	change_state            	VC	20		
+19	修改人	change_person	VC	50		
+20	修改时间	change_time	VC	50		
+21	修改电脑	change_computer	VC	50		
+22	备注	remark	VC	200		
+2.3.LIS_INSPECTION_SAMPLE (检验标本信息表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	检验ID	inspection_id                 	VC	30	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	
+3	分组ID	group_id                      	VC	20	N	
+4	检验分类	inspection_class	VC	50		一般检验类
+微生物检验类
+骨髓检验类
+一般检验描述类
+5	检验日期	inspection_date               	VC	8	N	聚集索引yyyymmdd
+6	检验时间	inspection_time               	VC	6	N	
+7	标本编号	sample_number                 	VC	20	N	
+8	申请单ID	requisition_id                	VC	20		
+9	病人类别	patient_type                  	VC	2		
+10	病人主索引	pat_id	VC	50		
+11	病人ID	patient_id                  	VC	30		
+12	住院号	outpatient_id                 	VC	50		
+13	病人唯一号	inpatient_id                  	VC	50		
+14	就诊流水号	Invoice_id                    	VC	50		
+15	次数	visit_num	VC	10		
+16	收费类别	charge_type                   	VC	50		
+17	检查类别	inspect_type	VC	20		
+18	病人姓名	patient_name                  	VC	50		
+19	病人性别	patient_sex                   	VC	10		
+20	年龄类型	age_type                     	VC	20		
+21	输入年龄	age_input                      	VC	20		
+22	实际年龄	age_save                      	N	10		
+23	出生年月	patient_birthday	VC	50		
+24	手机号	mobileno	VC	50		
+25	身份证号	Id_card	VC	30		
+26	邮箱	E_mail	VC	50		
+27	地址	patient_address	VC	100		
+28	民族	patient_nation                	VC	50		
+29	民族名称	patient_nation_name           	VC	50		
+30	ABO血型	bloodtype_abo                 	VC	20		
+31	RH血型	bloodtype_rh                  	VC	20		
+32	RH表型	rh_phenotype	VC	20		
+33	病人科别	patient_dept                  	VC	20		
+34	科别名称	patient_dept_name             	VC	50		
+35	病人病区	patient_ward                  	VC	20		
+36	病区名称	patient_ward_name             	VC	50		
+37	病人床号	patient_bed                   	VC	20		
+38	特殊条件	especial_condition            	VC	100		
+39	临床诊断编号	clinical_diagnoses            	VC	100		ICD10码
+40	诊断名称	clinical_diagnoses_name       	VC	100		
+41	标本种类	sample_class                  	VC	20		
+42	标本种类名称	sample_class_name             	VC	50		
+43	传染标记	infect_status                 	VC	50		
+44	标本性状	sample_status                 	VC	50		
+45	性状名称	sample_status_name            	VC	50		
+46	采集部位	sampling_position             	VC	50		
+47	部位名称	sampling_position_name        	VC	50		
+48	是否饮食	IF_diet	VC	50		
+49	是否用药	IF_drug	VC	50		
+50	疾病信息	DISEASE	VC	50		
+51	妥协接收	receIve_compromise	VC	50		
+52	检验目的	test_order                    	VC	255		
+53	目的名称	test_order_name               	VC	255		
+54	样本收费	sample_charge                 	N	12		
+55	标本项目数	item_count                    	N	10		
+56	工作量	workload                      	N	10		
+57	采样时间	sampling_time                 	D			
+58	采样人员	sampling_person               	VC	50		
+59	开单时间	Requisition_time              	D			
+60	开单人员	requisition_person            	VC	50		
+61	开单人员帐号	requisition_person_N	VC	50		
+62	开单人员手机号	req_mobile_no	VC	50		
+63	送检单位	deliver_hospital               	VC	100		
+64	送出人员	send_person                  	VC	50		
+65	送出时间	send_time                    	D			
+66	收样时间	incept_time                   	D			
+67	收样人员	incept_person                 	VC	50		
+68	收样电脑	incept_computer             	VC	50		
+69	录入人员	input_person                  	VC	50		
+70	录入时间	input_time                    	D			
+71	录入电脑	input_computer	VC	50		
+72	检验人员	inspection_person             	VC	50		
+73	审核人员	check_person                  	VC	50		
+74	审核时间	check_time                    	D			
+75	审核电脑	check_computer                	VC	50		
+76	结果完成时间	resultfinish_time	D			
+77	预报告时间	forecast_time	D			
+78	首次打印人员	print_person                  	VC	50		
+79	首次打印时间	print_time                    	D			
+80	打印次数	print_count                   	N	4		
+81	内部说明	inside_remark                  	VC	100		
+82	原病人类别	patient_type_old	VC	10		
+83	检验仪器	inspect_instrument	VC	100		
+84	标本ID	Sample_ID	VC	50		
+85	收费状态	charge_state                  	VC	10		
+86	检验状态	inspection_state              	VC	10		
+87	复查状态	rerun_state	VC	10		
+88	首次阅读人员	read_person                  	VC	50		
+89	首次阅读时间	read_time                    	D			
+90	阅读状态	read_state	VC	10		
+91	存储位置	storage_location	VC	50		
+92	首次登记人	FIRST_Rperson	VC	50		
+93	首次登记时间	FIRST_Rtime	VC	50		格式：yyyy-mm-dd hh:mm:ss
+94	最后修改人员	last_mperson	VC	50		
+95	最后修改时间	last_mtime	VC	50		
+96	备注	remark                        	VC	255		
+97	备注名称	remark_name                   	VC	255		
+2.4.LIS5_INSPECT_SAMPLE (检验标本状态信息表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	检验ID	inspection_id                 	VC	30	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	
+3	检测机构ID	hospital_testID	VC	20		
+4	申请院区ID	area_ID	VC	20		
+5	采集院区ID	area_COLLECTID	VC	20		
+6	检测检验ID	inspection_testid                 	VC	30		外送标本
+检测机构检验单ID
+7	检验分类	inspection_CLASS	VC	30		一般检验类
+微生物检验类
+骨髓检验类
+8	实验室ID	LAB_ID	VC	20	N	
+9	检验分组ID	GROUP_ID	VC	10	N	
+10	检验专业组	PGROUP_ID	VC	10	N	
+11	检验日期	inspection_date	VC	10	N	聚集索引yyyymmdd
+12	标本编号	sample_number                 	VC	20	N	
+13	申请单ID	requisition_id                	VC	20		
+14	病人类别	patient_type                  	VC	2		
+15	病人主索引	pat_id	VC	50		
+16	病人ID	patient_id                  	VC	30		
+17	住院号	outpatient_id                 	VC	50		
+18	病人唯一号	inpatient_id                  	VC	50		
+19	就诊流水号	Invoice_id                    	VC	50		
+20	次数	visit_num	VC	10		
+21	收费类别	charge_type                   	VC	50		
+22	检查类别	inspect_type	VC	20		
+23	病人姓名	patient_name                  	VC	50		
+24	病人性别	patient_sex                   	VC	10		
+25	输入年龄	age_INPUT                    	VC	20		
+26	年龄时间	AGE_SAVE	N			
+27	手机号	mobileno	VC	50		
+28	身份证号	Id_card	VC	30		
+29	邮箱	E_mail	VC	50		
+30	地址	ADDRESS	VC	100		
+31	病人民族	patient_NATION                 	VC	20		
+32	民族名称	patient_NATION_name             	VC	50		
+33	病人科别	patient_dept                  	VC	20		
+34	科别名称	patient_dept_name             	VC	50		
+35	病人病区	patient_ward                  	VC	20		
+36	病区名称	patient_ward_name             	VC	50		
+37	病人床号	patient_bed                   	VC	20		
+38	特殊条件	especial_condition            	VC	100		
+39	临床诊断编号	clinical_diagnoses            	VC	100		
+40	诊断名称	clinical_diagnoses_name       	VC	100		
+41	标本种类	sample_class                  	VC	20		
+42	标本种类名称	sample_class_name             	VC	50		
+43	检验目的	test_order                    	VC	500		
+44	目的名称	test_order_name               	VC	500		
+45	生理周期	MENSTRUAL_CYCLE	VC	50		
+46	用药信息	take_medicine	VC	50		
+47	是否饮食	IF_diet	VC	50		
+48	孕妇编号	GESTATIONAL_NO	VC	20		
+49	孕妇孕周	GESTATIONAL_WEEKS	VC	20		
+50	开单时间	Requisition_time              	D			
+51	开单人员	requisition_person            	VC	50		
+52	开单人员手机	req_MOBILE_NO	VC	50		
+53	标签打印时间	Req_print_time              	D			
+54	标签打印人员	Req_print_person            	VC	50		
+55	采集时间	sampling_time                 	D			
+56	采集人员	sampling_person               	VC	50		
+57	接收时间	incept_time                   	D			
+58	接收人员	incept_person                 	VC	50		
+59	中心接收时间	CEn_incept_time                   	D			服务机构接收时间
+60	中心接收人员	CEN_incept_person                 	VC	50		服务机构接收时间
+61	检验人员	inspection_person	VC	50		
+62	预报告时间	prereport_time	D			门诊按照采集时候预报告时间来算
+63	编号时间	input_time                 	D			
+64	编号人员	input_person               	VC	50		
+65	上线时间	Pipeline_time	d			
+66	上线人员	Pipeline_person	VC	50		
+67	上机时间	machine_time	d			
+68	上机人员	machine_person	VC	50		
+69	上机流水号	machine_serial_no	N			第一次上机流水号
+70	检测仪器	INSPECT_machine	VC	50		第一次检测仪器
+71	结果完成时间	finish_result_time	D			
+72	智能审核时间	aI_check_time	D			
+73	检验审核人员	taduit_person                  	VC	50		
+74	检验审核时间	taduit_time                    	D			
+75	审核人员	check_person                  	VC	50		
+76	审核时间	check_time                    	D			
+77	批准人员	CONFIRm_person                  	VC	50		
+78	批准时间	CONFIRm_time                    	D			
+79	发布人员	issued_person	VC	50		
+80	发布时间	issued_time	D			
+81	打印人员	print_PERSON	VC	50		
+82	打印时间	print_time	D			
+83	打印次数	print_count	N			
+84	采集ID	collect_id	VC	20		
+85	报告单发布ID	ISSUED_ID	VC	20		发布后写入
+86	标本存储位置	storage_location	VC	50		
+87	锁定人员	lock_person	VC	50		
+88	锁定时间	lock_time	VC	20		
+89	收费状态	charge_state                  	VC	20		
+90	检验状态	inspection_state              	VC	20		固定基础数据表
+91	保密等级	security_level	VC	20		
+92	流水线状态	assembly_line_state	VC	50		
+93	复查状态	rerun_state	VC	20		
+94	特殊状态	special_state	VC	20		
+95	危急值状态	alarm_state	VC	20		
+96	结果异常状态	result_Abnormal_state	VC	20		
+97	结果修改状态	result_edit_state	N			0无修改
+1发布前修改
+2发布后修改
+10审核前修改
+11审核后修改
+20打印前修改
+21打印后修改
+98	标本信息状态	sample_edit_state	N			0无修改
+1发布前修改
+2发布后修改
+99	项目结果状态	item_state	N			0无项目
+1未做
+2部分完成
+3已完成
+100	药敏状态	Drug_sensitivity_state	N			
+101	WHONET状态	WHONET_STATE	N			
+102	传染病状态	Infectious_state	N			0无
+1有
+103	描述结果状态	Describe_result_state	N			
+104	过程图像状态	Process_graph_state	n			0 没有
+N 图像个数
+105	患者图片状态	patient_graph_state	N			0 没有
+N 图像个数
+106	标本图片状态	sample_graph_state	N			0 没有
+N 图像个数
+107	嘱托状态	Entrust_state	N			
+108	审核类型	check_type	N			1人工审核
+2自动审核
+109	智能审核状态		N			0未判断
+1不通过
+9通过
+110	结果报告解释状态	Analytical_state	N			
+111	初步报告状态	Pre_report_state	VC	20		
+112	签名状态	SIGN_STATE	VC	20		
+113	报告单状态	report_state	VC	20		
+114	阅读状态	read_state	VC	20		
+115	报告超时状态	report_Timeout_state	VC	20		
+116	报告延时状态	report_delay_state	VC	20		
+117	报告召回状态	report_reacall_state	VC	20		
+118	标本收藏状态	collect_state	VC	10		
+119	费用核对状态	fee_check_state	VC	20		
+120	内部说明分类	Internal_class	VC	50		
+121	内部说明	Internal_remark	VC	500		
+122	首次登记人	FIRST_Rperson	VC	50		
+123	首次登记时间	FIRST_Rtime	VC	50		格式：yyyy-mm-dd hh:mm:ss
+124	最后修改人员	last_mperson	VC	50		
+125	最后修改时间	last_mtime	VC	50		
+126	备注分类	remark_class	VC	50		
+127	备注	remark                        	VC	500		
+2.5.LIS5_INSPECT_TEST (标本上机检测信息表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	检测ID	test_id                 	VC	50	N	PK
+2	检验ID	inspection_id                 	VC	30	N	
+3	医疗机构ID	hospital_ID	VC	20	N	
+4	上机时间	machine_time	d			
+5	上机人员	machine_person	VC	50		
+6	上机流水号	machine_serial_no	VC	20		多次上机流水号
+7	检测仪器	INSPECT_machine	VC	50		多次检测仪器
+8	首次登记人	FIRST_Rperson	VC	50		
+9	首次登记时间	FIRST_Rtime	VC	50		格式：yyyy-mm-dd hh:mm:ss
+10	备注	remark                        	VC	500		
+2.6.LIS_INSPECTION_SAMPLE_charge (检验标本收费表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	收费ID	sample_item_id                 	VC	20	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	
+3	标签ID	REQUISITION_id                 	VC	20		
+4	检验单ID	inspection_id                 	VC	30	N	
+5	检验日期	inspection_date               	VC	8	N	聚集索引yyyymmdd
+6	分组ID	GROUP_ID	VC	20		
+7	诊疗项目ID	charge_item_id	VC	10		
+8	诊疗项目名称	chinese_name_short	VC	50		
+9	收费类型	charge_type	VC	20		
+10	HIS_ID	HIS_ID	VC	50		
+11	数量	amount	N			
+12	收费	charge	N			
+13	工作量	workload	n			
+14	收费人员	charge_person	VC	50		
+15	收费时间	charge_time	D			
+16	收费IP	charge_postion	VC	50		
+17	收费状态	charge_state	VC	2		
+18	首次登记人	FIRST_Rperson	VC	50		
+19	首次登记时间	FIRST_Rtime	VC	50		格式：yyyy-mm-dd hh:mm:ss
+20	最后修改人员	last_mperson	VC	50		
+21	最后修改时间	last_mtime	VC	50		
+22	备注	remark                        	VC	200		
+2.7.LIS_INSPECTION_RESULT (检验结果信息表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	检验单ID	inspection_id                 	VC	30	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	PK
+3	项目ID	test_item_id                  	VC	20	N	PK
+4	分组ID	group_id                      	VC	20	N	
+5	检验日期	inspection_date               	VC	8	N	聚集索引yyyymmdd
+6	检验时间	inspection_time               	VC	6	N	
+7	标本编号	sample_number                 	VC	20	N	
+8	排序号	test_item_sort                	VC	20		
+9	项目代号	test_item_code               	VC	50		
+10	英文名称	english_name              	VC	50		
+11	中文名称	chinese_name                	VC	100		
+12	原始结果	original_result               	VC	50		
+13	定量结果	quantitative_result           	VC	50		
+14	定性结果	qualitative_result            	VC	50		
+15	结果标志	result_sign	VC	50		
+16	错误信息	error_info	VC	100		
+17	项目参考值	test_item_reference           	VC	255		
+18	项目单位	test_item_unit                	VC	20		
+19	项目收费	test_item_charge              	N	10		
+20	工作量	Workload                      	N	4		
+21	测试次数	test_count                    	VC	20		
+22	检验目的	test_order                   	VC	20		
+23	检验仪器	inspection_instrument         	VC	50		
+24	实验方法	test_method	VC	100		
+25	检验人员	inspection_person             	VC	50		
+26	检验位置	inspection_position             	VC	50		
+27	对应HISID	HIS_ID	VC	50		
+28	报告单发布ID	ISSUED_ID	VC	20		
+29	列序号	col_position        	VC	20		
+30	打印序号	print_id        	VC	20		
+31	检验试剂	Inspection_reagent	VC	20		试剂批号
+32	结果类型	result_type	VC	50		
+33	仪器检验时间	inspection_datetime	VC	50		
+34	首次结果	rerun_result	VC	50		
+35	首次仪器	rerun_instrument	VC	50		
+36	稀释比例	DILUTION_RATE	VC	20		
+37	接收时间	Rincept_time	VC	20		
+38	接收人员	Rincept_person	VC	50		
+39	审核人员	Check_person	VC	50		
+40	审核时间	Check_time	d			
+41	危急值状态	ALARM_state	VC	20		
+42	结果标记	result_sign	VC	50		
+43	参考值ID	ref_ID	VC	20		
+44	首次登记人	FIRST_Rperson	VC	50		
+45	首次登记时间	FIRST_Rtime	VC	50		格式：yyyy-mm-ddmm:ss:hh
+46	最后修改人员	last_mperson	VC	50		
+47	最后修改时间	last_mtime	VC	50		
+48	备注	remark        	VC	50		
+2.8.LIS_inspection_graph_LIST（标本图像信息表）
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	检验单ID	inspection_id	VC	20	N	PK
+2	图像ID	graph_num	VC	20	N	PK
+3	日期	inspection_date	VC	8	N	聚集索引yyyymmdd
+4	选择项目ID	select_num	VC	20		
+5	图像描述	graph_prompt	VC	500		
+6	选择描述	select_prompt	VC	500		
+7	图像类型	graph_type	VC	50		
+8	图像分类	graph_class	VC	50		
+9	是否分享	if_share	VC	20		
+10	是否标准	if_standand	VC	20		
+11	图像编号	label_no	VC	50		
+12	图片名称	file_name	VC	50		
+13	图片路径	file_path	VC	100		
+14	采集人员	capture_person	VC	50		
+15	采集时间	capture_time	VC	50		
+16	采集电脑	capture_computer	VC	50		
+17	状态	graph_STATE	VC	50		
+18	首次登记人	FIRST_Rperson	VC	50		
+19	首次登记时间	FIRST_Rtime	VC	50		
+20	最后修改人员	last_mperson	VC	50		
+21	最后修改时间	last_mtime	VC	50		
+22	备注	remark                        	VC	500		
+2.9.LIS_inspection_report (检验报告信息表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	检验单ID	inspection_id	VC	30	N	PK
+2	报告ID	report_id	VC	20	N	PK
+3	报告日期	inspection_date	VC	8		聚集索引yyyymmdd
+4	检验分类	inspection_class	VC	20	N	
+5	报告分类	report_class	VC	20		1普通报告
+2特殊回执
+3报告解读
+6	纸张类型	page_TYPE	VC	20		1半张
+2整张
+3自定义
+4三之一张
+7	报告格式	report_format	VC	50		
+8	PDF报告格式	PDF_report_format	VC	50		
+9	报告文件	report_file	VC	200		
+10	报告标题	report_title	VC	100		
+11	项目行数	item_row	VC	20		
+12	报告归类序号	report_NUM	VC	20		
+13	生成时间	GENERATE_time	VC	50		
+14	生成电脑	GENERATE_computer	VC	50		
+15	状态	report_state	VC	10		0未处理
+1已处理
+16	首次登记时间	Create_time	D			
+17	首次登记人员	create_person	VC	50		
+18	最后修改人员	last_mperson	VC	50		
+19	最后修改时间	last_mtime	D			
+20	备注	remark                        	VC	200		
+
+2.10.LIS5_inspection_RESULT_sign (检验标本标记信息表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	检验单ID	inspection_id	VC	20	N	PK
+2	标记ID	sign_id	VC	20	N	PK
+3	标记类型	SIGN_TYPE	VC	20		
+4	项目ID	ITEM_id	VC	20		
+5	分组ID	group_ID	VC	20		
+6	标记日期	SIGN_date	VC	20	N	聚集索引yyyymmdd
+7	标记字典ID	SIGN_DICTID	VC	20		
+8	标记分类	SIGN_CLASS	VC	20		
+9	标记代号	sign_code	VC	50		
+10	标记排序号	SIGN_sort	VC	20		
+11	标记中文名称	sign_cname	VC	200		
+12	仪器序列号	instrument_SNUM	VC	20		
+13	检测系统系列ID	Sinstru_serialid	VC	20		
+14	标记状态	sign_state	VC	10		0、未处理
+1、已处理
+15	首次登记时间	FIRST_Rtime	VC	20		
+16	首次登记人员	FIRST_Rperson	VC	20		
+17	备注	remark                        	VC	200		
+2.11.LIS5_INSPECT_ISSUED_REPORT（发布报告信息表）
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	报告单发布ID	ISSUED_ID	VC	50	N	PK
+2	发布日期	ISSUED_DATE	N		N	PK
+3	检验单ID	INSPECTION_ID	VC	30	N	
+4	医疗机构ID	HOSPITAL_ID	VC	20	N	
+5	检测机构ID	HOSPITAL_TESTID	VC	20	N	检测机构ID
+6	报告类型	report_TYPE	VC	20		1初步报告
+2特殊回执
+3正式报告
+4解释报告
+10外来报告
+7	报告日期	REPORT_DATE	VC	20		聚集索引yyyymmdd
+8	报告类别	REPORT_CLASS	VC	50		一般检验类
+骨髓检验类
+微生物检验类
+9	报告格式	REPORT_FORMAT	VC	50		
+10	纸张类型	page_TYPE	VC	20		1半张
+2整张
+3自定义
+4三之一张
+11	报告标题	REPORT_TITLE	VC	100		
+12	报告文件	REPORT_FILE	VC	100		
+13	报告页数	page_count	N			
+14	归档页ID	PAGE_ID	VC	50		
+15	发布人员	ISSued_PERSON	VC	50		
+16	发布时间	ISSued_TIME	VC	50		
+17	PDF生成时间	PDF_GENERATE_TIME	VC	50		
+18	OSS_KEY	OSS_KEY	VC	50		
+19	发布状态	ISSued_state	VC	20		
+20	备注	REMARK	VC	200		
+2.12.LIS5_CA_USE（CA用户信息表）
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	记录ID	RECORD_ID	VC	50	N	PK
+2	KEY唯一码	KEY_id	VC	50		PK
+3	KEY持有人	KEY_name	VC	50		
+4	KEY密码	KEY_PASSWORD	VC	50		
+5	LIS用户ID	useR_NO	VC	20		
+6	LIS用户登录名	LOGIN_ID	VC	20		
+7	LIS登录密码	LIS_PASSWORD	VC	50		
+8	插入时间	KEY_ONLINE_TIME               	VC	50		
+9	CA应用服务IP	KEY_USE_IP	VC	20		
+10	CA操作电脑	KEY_USE_COMPUTER	VC	50		
+11	TOKEN信息	KEY_token	VC	200		
+12	备注	REMARK	VC	200		
+2.13.LIS5_CA_USE_LOG（CA用户登录记录表）
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	记录ID	LOG_ID	VC	50	N	PK
+2	KEY唯一码	KEY_id	VC	50	N	PK
+3	KEY持有人	KEY_name	VC	50		
+4	LIS用户ID	useR_NO	VC	20		
+5	LIS用户登录名	LOGIN_ID	VC	20		
+6	插入时间	KEY_ONLINE_TIME               	VC	50		
+7	CA应用服务IP	KEY_USE_IP	VC	20		
+8	CA操作电脑	KEY_USE_COMPUTER	VC	50		
+9	TOKEN信息	KEY_token	VC	200		
+10	备注	REMARK	VC	200		
+2.14.LIS5_INSPECT_REPORT_CA（发布报告CA信息表）
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	报告单发布ID	ISSUED_ID	VC	50	N	PK
+2	发布日期	ISSUED_DATE	N		N	PK
+3	检验单ID	INSPECTION_ID	VC	30	N	
+4	医疗机构ID	HOSPITAL_ID	VC	20	N	
+5	OSS_KEY	OSS_KEY	VC	50		
+6	签名原值	SIGN_ORESULT	L			
+7	签名值	SIGN_RESULT	VC	4000		
+8	签章时间	sign_TIME	D			
+9	时间戳原值	original_timestamp	VC	4000		
+10	时间戳签名值	sign_timestamp	VC	4000		
+11	发布状态	ISSued_state	VC	20		
+12	备注	REMARK	VC	200		
+2.15.LIS5_INSPECT_REPORT_PAGE（检验报告单归档表）
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	报告单页ID	page_ID	VC	20	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	PK
+3	病人主索引	pat_Id	VC	50		
+4	病人ID	patient_Id	VC	50		
+5	住院号	outpatient_id	VC	30		
+6	病人唯一号	inpatient_id	VC	30		
+7	住院次数	visit_id	VC	20		
+8	报告单页分类	page_class	VC	50		
+9	报告单页码	page_no	VC	20		
+10	报告单子页码	PAGE_SUB_NO	VC	10		
+11	报告单页文件	page_file	VC	100		
+12	打印次数	print_num	VC	20		
+13	首次打印人	FIRST_Pperson	VC	50		
+14	首次打印时间	FIRST_Ptime	VC	50		格式：yyyy-mm-ddmm:ss:hh
+15	生成人员	Generation_person	VC	50		
+16	生成时间	Generation_time	VC	50		
+17	报告单页状态	page_STATE	VC	50		0 未生成
+1 已生成
+18	备注	remark	VC	100		
+
+2.16.LIS_REQUISITION_INFO(标本信息表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	标本ID	requisition_id                	VC	20	N	PK
+2	生成日期	generate_date	D		N	聚集索引 yyyy-mm-dd
+3	医疗机构ID	hospital_ID	VC	20	N	
+4	检测医疗机构ID	hospital_testID	VC	20		
+5	申请院区ID	area_ID	VC	20		
+6	采集院区ID	area_TESTID	VC	20		
+7	专业组ID	Pgroup_ID	VC	20		
+8	检查类别	inspect_type	VC	20		
+9	病人ID	patient_id                 	VC	30		
+10	病人类别	patient_type                  	VC	20		
+11	住院号	outpatient_id                  	VC	50		
+12	病人唯一号	intpatient_id                 	VC	50		
+13	次数	visit_num	VC	10		
+14	收费类别	charge_type                   	VC	20		
+15	姓名	patient_name                  	VC	50		
+16	性别	patient_sex                   	VC	2		
+17	年龄	patient_age                   	VC	20		
+18	年龄小时	age_save	N			
+19	出生年月	patient_birthday	VC	20		
+20	民族	patient_nation                	VC	20		
+21	身份证号	Id_card	VC	30		
+22	手机号	mobilE_NO	VC	30		
+23	邮箱	E-mail	VC	50		
+24	地址	patient_address	VC	100		
+25	用药信息	take_medicine	VC	50		
+26	是否饮食	diet	VC	50		
+27	RH血型	bloodtype_rh                  	VC	20		
+28	ABO血型	bloodtype_abo                 	VC	20		
+29	RH表型	rh_phenotype	VC	20		
+30	科别	patient_dept                  	VC	20		
+31	病区	patient_ward                  	VC	20		
+32	床号	patient_bed                   	VC	20		
+33	特殊条件	especial_condition            	VC	20		
+34	已检验信息	inspected_info                	VC	100		
+35	传染标记	Infection                     	VC	50		
+36	临床诊断	clinical_diagnoses            	VC	100		
+37	简要病史	medical_record                	VC	200		
+38	开单科室	requisition_dept              	VC	50		
+39	开单时间	requisition_time              	VC	50		
+40	开单人员	requisition_person            	VC	50		
+41	开单人员手机	req_person_MOBILE	VC	50		
+42	执行科室	execute_dept                  	VC	50		
+43	执行时间	execute_time                  	VC	50		
+44	执行人员	execute_person                	VC	50		
+45	打印科室	print_dept                    	VC	50		
+46	打印时间	print_time                    	VC	50		
+47	打印人员	print_person                  	VC	50		
+48	标本种类	sample_class                  	VC	50		
+49	标本种类名称	sample_class_name	VC	50		
+50	采集部位	sampling_position             	VC	50		
+51	采集科室	sampling_dept                 	VC	50		
+52	采集时间	sampling_time                 	VC	50		
+53	采集人员	sampling_person               	VC	50		
+54	接收科室	receive_dept                  	VC	50		
+55	接收时间	receive_time                  	VC	50		
+56	接收人员	receive_person                	VC	50		
+57	中心接收时间	CEn_incept_time                   	D			服务机构接收时间
+58	中心接收人员	CEN_incept_person                 	VC	50		服务机构接收时间
+59	清单打印科室	list_dept                  	VC	50		
+60	清单打印时间	list_time                  	VC	50		
+61	清单打印人员	list_person                	VC	50		
+62	申请来源	Requisition_from	VC	50		
+63	HIS代码	His_id	VC	50		
+64	发送人员	Send_person	VC	50		
+65	队列号	Queue_number	VC	20		
+66	队列状态	Queue_state	VC	10		
+67	退回人员	Return_person	VC	50		
+68	退回时间	Return_time	VC	50		
+69	退回原因	Return_cause	VC	100		
+70	退回方法	Return_method	VC	50		
+71	退回接收人员	Return_accept_person	VC	50		
+72	退回人员说明	Return_person_remark	VC	50		
+73	送达分组	sendin_group	VC	50		
+74	送达人员	sendin_person	VC	50		
+75	送达时间	sendin_time	VC	50		
+76	检验科室	inspect_dept	VC	50		
+77	送达地点	sendin_place	VC	50		
+78	条码序号	barcode_seq	VC	20		
+79	取报告时间	get_report_time	VC	50		
+80	合并标记	unite_flag	VC	20		
+81	签收批号	signin_number	VC	20		
+82	原申请状态	requisition_state_bak	VC	20		
+83	预报告时间	prereport_time	VC	50		
+84	生理周期	MENSTRUAL_CYCLE	VC	50		
+85	孕妇编号	GESTATIONAL_NO	VC	20		
+86	孕妇孕周	GESTATIONAL_WEEKS	VC	20		
+87	护理单元	NURSE_UNIT	VC	20		
+88	最后接收单元ID	UNIT_ID	VC	20		
+89	采集院区ID	SAMPLING_AREA_ID	VC	20		
+90	标签ID	REQ_ID	VC	20		
+91	申请单状态	requisition_state             	VC	20		
+92	备注	remark                        	VC	100		
+2.17.LIS_REQUISITION_ITEM(标签项目信息表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	申请单ID	requisition_id                	VC	20	N	PK
+2	诊疗项目ID	charge_item_id                	VC	20	N	PK
+3	生成日期	generate_date	D		N	聚集索引 yyyy-mm-dd
+4	医疗机构ID	hospital_ID	VC	20	N	
+5	科室ID	LAB_ID	VC	20	N	
+6	专业组ID	Pgroup_ID	VC	20		
+7	生成时间	generate_date	D			
+8	His代码	His_id	VC	50		
+9	数量	ITEM_AMOUNT                      	DEC	10,2		
+10	单价	ITEM_charge                        	DEC	10,2		
+11	记费折扣	item_discount	DEC	10,2		
+12	金额	ITEM_charge                        	DEC	10,2		
+13	收费时间	charge_time                   	VC	50		
+14	收费人员	charge_person                 	VC	20		
+15	收费科室	charge_DEPT                 	VC	20		
+16	发票号	invoice_NO	VC	50		
+17	医嘱ID	ORDER_id	VC	50		
+18	检验日期	inspection_date	VC	20		
+19	检验分组	GROUp_ID	VC	10		
+20	标本编号	SAMPLE_NUMBER	VC	20		
+21	检验单ID	INSPECTIION_ID	VC	30		
+22	编号时间	NUMBer_time	VC	30		
+23	编号人员	NUMBer_person	VC	50		
+24	规则ID	RULE_ID	VC	50		接收规则ID
+25	HASH值	hash_value	VC	50		
+26	任务单ID	inspect_id	VC	20		
+27	包ID	SENDPACKAGE_ID	VC	20		
+28	预报告时间	prereport_time	VC	20		
+29	收费状态	charge_state                  	VC	20		
+30	诊疗项目状态	item_state             	VC	20		0未处理
+1已接收	
+2已编号
+11正在检验	
+13检验完成	
+15已完成
+31临时外送
+50已撤销	
+31	最后修改人员	last_mperson	VC	50		
+32	最后修改时间	last_mtime	D			
+33	备注	remark	VC	200		
+2.18.LIS5_REQ_TEST_ITEM(标签检验相关项目结果表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	申请单ID	requisition_id                	VC	20	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	PK
+3	项目ID	ITEM_ID	VC	20	N	PK
+4	项目名称	item_name	VC	50		
+5	项目结果	item_result	VC	100		
+6	项目单位	item_unit	VC	20		
+7	项目状态	item_state             	VC	20		
+8	首次登记人	FIRST_Rperson	VC	50		
+9	首次登记时间	FIRST_Rtime	VC	50		
+10	最后修改人员	last_mperson	VC	50		
+11	最后修改时间	last_mtime	D			
+12	备注	remark	VC	200		
+2.19.LIS5_ORDER_LIST (采集预约信息表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	预约信息ID	order_id                 	VC	20	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	
+3	预约资源ID	source_id                 	VC	20	N	
+4	院区ID	AREA_ID	VC	20	N	
+5	预约日期	order_date               	VC	20	N	
+6	预约星期	order_week	VC	20		
+7	预约人ID	order_pat_id	VC	50		
+8	预约人卡号	order_card	VC	50		
+9	预约人	order_patient	VC	50		
+10	预约号码	order_number	VC	50		
+11	预约时间	order_time	VC	50		
+12	预约排序号	oRder_sort	VC	20		
+13		OPEN_ID	VC	20		
+14	预约状态	order_state              	VC	10		
+15	推送状态	push_state	VC	10		
+16	复查状态	rerun_state	VC	10		
+17	首次登记人	FIRST_Rperson	VC	50		
+18	首次登记时间	FIRST_Rtime	VC	50		格式：yyyy-mm-dd hh:mm:ss
+19	最后修改人员	last_mperson	VC	50		
+20	最后修改时间	last_mtime	VC	50		
+21	备注	remark                        	VC	255		
+2.20.LIS5_SAMPLE_COLLECTION_LIST（标本收藏记录表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	收藏ID	collection_ID	VC	20	N	PK
+2	检验单ID	INSPECTION_ID	VC	20	N	
+3	医疗机构ID	hospital_ID	VC	20	N	
+4	用户ID	user_no	VC	20	N	
+5	收藏日期	collection_date	VC	20	N	
+6	用户姓名	user_name	VC	50		
+7	申请单ID	requisition_id                	VC	20		
+8	收藏时间	collection_time	VC	50		
+9	收藏专业组	collection_pgroup	VC	50		
+10	收藏电脑名称	collection_computer	VC	50		
+11	收藏IP	collection_IP	VC	50		
+12	收藏分类	collection_CLASS	VC	50		
+13	收藏原因	collection_CAUSE	VC	1000		
+14	状态	collection_state                  	VC	50		1、有效 0、无效
+15	首次人员	FIRST_PERSON	VC	20		
+16	首次时间	FIRST_TIME	VC	20		
+17	最后修改人员	LAST_MPERSON            	VC	20		
+18	最后修改时间	LAST_MTIME	VC	20		
+19	备注	remark	VC	200		
+2.21.LIS5_REQ_charge(标签费用信息表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	费用ID	charge_id	VC	20	N	PK
+2	采集ID	colloct_id                	VC	20	N	PK（采集ID）
+3	生成日期	generate_date	D		N	聚集索引 yyyy-mm-dd
+4	费用类型	charge_TYPE	VC	20		材料费、采血费、项目费
+5	诊疗项目ID	charge_item_id                	VC	20		
+6	标签ID	requisition_ID	VC	20		
+7	His代码	His_id	VC	20		
+8	费用名称	charge_name	VC	50		
+9	数量	AMOUNT                      	DEC	10,2		
+10	规格	CHARGE_SPEC	VC	20		
+11	单价	Unit_Price                       	DEC	10,2		
+12	记费折扣	discount	DEC	10,2		
+13	总金额	Total_amount                    	DEC	10,2		
+14	收费时间	charge_time                   	VC	20		
+15	收费人员	charge_person                 	VC	20		
+16	收费科室	charge_DEPT                 	VC	20		
+17	收费状态	charge_state                  	VC	20		
+18	首次人员	FIRST_PERSON	VC	20		
+19	首次时间	FIRST_TIME	VC	20		
+20	最后修改人员	LAST_MPERSON            	VC	20		
+21	最后修改时间	LAST_MTIME	VC	20		
+22	备注	remark	VC	200		
+2.22.LIS5_REQ_sample_state(标本状态记录表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	序号	SAMPLE_ID	VC	20	N	PK
+2	日期	STATE_YEAR	VC	10	N	Pk 聚集索引yyyymmdd
+3	标本ID	requisition_id                	VC	20	N	
+4	标签ID	REQ_id                	VC	20	N	
+5	医疗机构ID	hospital_ID	VC	20	N	
+6	执行单元ID	execute_unit_ID	VC	20		
+7	执行模块	execute_module	VC	30		
+8	执行动作	execute_action	VC	50		标签打印
+采集确认
+标本归集
+标本送出
+标本送达
+标本接收
+9	执行时间	execute_time	D			标本转运
+标本退回
+标本储存
+标本销毁
+标签补打
+10	执行人员	execute_person	VC	50		
+11	执行科室	execute_dept	VC	50		
+12	原因分类	cause_type	VC	100		多个原因分类用逗号分开，不能修改原来分类
+13	执行原因	EXECUTE_CAUSE	VC	500		
+14	执行前状态	Front_state	VC	50		
+15	执行状态	sample_state                  	VC	50		
+16	电脑IP	execute_IP	VC	50		
+17	电脑名称	execute_COMPUTER	VC	50		
+18	首次人员	FIRST_PERSON	VC	50		
+19	首次时间	FIRST_TIME	D			
+20	备注	remark	VC	200		
+2.23.LIS5_INSPECTION_state(检验单状态记录表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	序号	inspect_ID	VC	50	N	PK
+2	年份	STATE_YEAR	VC	10		Pk聚集索引yyyymmdd
+3	检验单ID	INSPECTION_id                	VC	30	N	
+4	标本ID	requisition_id                	VC	20	N	
+5	标签ID	REQ_id                	VC	20	N	
+6	医疗机构ID	hospital_ID	VC	20	N	
+7	执行模块	execute_module	VC	30	N	
+8	执行动作	execute_action	VC	50	N	标本编号
+智能审核
+检验审核
+报告审核
+报告批准
+报告发布
+报告推送
+报告打印
+报告阅读
+报告召回
+状态调整
+9	执行时间	execute_time	D			
+10	执行人员	execute_person	VC	50		
+11	执行科室	execute_dept	VC	50		
+12	原因分类	cause_type	VC	100		多个原因分类用逗号分开，不能修改原来分类
+13	执行原因	EXECUTE_CAUSE	VC	500		
+14	执行前状态	Front_state	VC	50		
+15	执行状态	sample_state                  	VC	50		
+16	电脑IP	execute_IP	VC	50		
+17	电脑名称	execute_COMPUTER	VC	50		
+18	首次人员	FIRST_PERSON	VC	50		
+19	首次时间	FIRST_TIME	D			
+20	备注	remark	VC	200		
+2.24.LIS5_REQ_item_state(任务项状态记录表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	序号	item_ID	VC	20	N	PK
+2	申请单ID	requisition_id                	VC	20	N	
+3	诊疗项目id	charge_item_id	VC	20	N	
+4	医疗机构ID	hospital_ID	VC	20	N	
+5	执行模块	execute_module	VC	30		
+6	执行动作	execute_action	VC	50		
+7	执行时间	execute_time	VC	50		
+8	执行人员	execute_person	VC	50		
+9	执行科室	execute_dept	VC	50		
+10	执行前状态	Front_state	VC	50		
+11	执行状态	ITEM_state                  	VC	50		
+12	电脑IP	execute_IP	VC	50		
+13	电脑名称	execute_COMPUTER	VC	50		
+14	首次人员	FIRST_PERSON	VC	20		
+15	首次时间	FIRST_TIME	VC	20		
+16	最后修改人员	LAST_MPERSON            	VC	20		
+17	最后修改时间	LAST_MTIME	VC	20		
+18	备注	remark	VC	200		
+
+2.25.LIS5_REQ_incept_list（标本接收记录表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	接收ID	incept_ID	VC	20	N	PK
+2	申请单ID	requisition_id                	VC	20	N	
+3	接收日期	incept_DATE	d		N	聚集索引yyyy-mm-dd
+4	医疗机构ID	hospital_ID	VC	20	N	
+5	接收单元ID	UNIT_ID	VC	20	N	
+6	接收人员	incept_person	VC	50		
+7	接收时间	incept_time	VC	50		
+8	接收科室	incept_dept	VC	50		
+9	接收电脑名称	incept_computer	VC	50		
+10	接收IP	incept_IP	VC	50		
+11	接收分配类型	incept_type	VC	50		0、检测
+1、存储
+2、外送
+3、分配
+12	分配单元ID	Iunit_id	VC	50		通讯管理单元、标本接收单元、标本管理单元、标本外送单元
+13	分配编号	sorting_num	VC	50		标本ID、库位号
+14	结束接收人	END_INCEPT_PERSON	VC	50		
+15	结束接收时间	END_INCEPT_time	VC	50		
+16	接收结束ID	incept_end_ID	VC	20		
+17	状态	incept_state                  	VC	50		1、有效 0、无效
+18	首次人员	FIRST_PERSON	VC	20		
+19	首次时间	FIRST_TIME	VC	20		
+20	最后修改人员	LAST_MPERSON            	VC	20		
+21	最后修改时间	LAST_MTIME	VC	20		
+22	备注	remark	VC	200		
+2.26.LIS5_REQ_incept_END_list（标本接收结束记录表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	结束接收ID	end_incept_ ID	VC	20	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	
+3	接收单元ID	UNIT_ID	VC	20	N	
+4	结束接收日期	END_INCEPT_date	VC	20	N	
+5	结束接收人	END_INCEPT_PERSON	VC	50		
+6	结束接收时间	END_INCEPT_time	VC	50		
+7	标本数	sample_num	N			
+8	状态	end_incept_ state                  	VC	50		1、有效 
+0、无效
+9	首次人员	FIRST_PERSON	VC	20		
+10	首次时间	FIRST_TIME	VC	20		
+11	最后修改人员	LAST_MPERSON            	VC	20		
+12	最后修改时间	LAST_MTIME	VC	20		
+13	备注	remark	VC	200		
+2.27.LIS5_SAMPLE_PACK_info (标本包信息表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	包ID	pack_id                	VC	20	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	
+3	接收单元ID	UNIT_ID	VC	20		
+4	打包日期	pack_DATE	VC	20	N	聚集索引yyyy-mm-dd
+5	包编号	pack_NO                  	VC	20		
+6	包类型	pack_type	VC	20		0、本院  
+1、外送 
+2、分配
+3、远程送出
+7	标本包类类型	SAMPLE_PACK_TYPE	VC	20		
+8	分配规则ID	rule_Id	VC	20		
+9	标本送检包ID	sendpackage_Id	VC	20		
+10	标本送检包	SPECIMEN_PACKAGE	VC	50		
+11	检验包标记	PACKAGE_flag	VC	20		
+12	目的单元ID	dest_uniT_ID	VC	20		如果外送标本填服务机构ID
+13	送检目的地	SENDIN_destination                   	VC	50		
+14	病人病区	patient_ward	VC	50		
+15	病人病区	patient_ward_name	VC	50		
+16	标本数	sample_num	N			
+17	开始时间	start_time	VC	20		
+18	结束时间	end_time	VC	20		
+19	打包模块	MODULE	VC	50		
+20	打包人员	pack_person	VC	50		
+21	打包时间	pack_time	VC	20		
+22	打包科室	pack_dept	VC	20		
+23	打印人员	print_person	VC	50		封包人员
+24	打印时间	print_time	VC	20		
+25	送出人员	SENDOUT_PERSON	VC	50		
+26	送出时间	SENDOUT_TIME	VC	20		
+27	收集人员	gather_PERSON	VC	50		
+28	收集时间	gather_TIME	VC	20		
+29	送达人员	sendin_PERSON	VC	50		
+30	送达时间	sendin_TIME	VC	20		
+31	接收人员	incepT_PERSON	VC	50		
+32	接收时间	incepT_TIME	VC	20		
+33	接收科室	incepT_dept	VC	20		
+34	外运送出人员	oSENDOUT_PERSON	VC	50		
+35	外运送出时间	oSENDOUT_TIME	VC	20		
+36	外运收集人员	ogather_PERSON	VC	50		
+37	外运收集时间	ogather_TIME	VC	20		
+38	外运送达人员	osendin_PERSON	VC	50		
+39	外运送达人员	osendin_TIME	VC	50		
+40	外运接收时间	oincepT_PERSON	VC	20		
+41	外运接收时间	oincepT_TIME	VC	20		
+42	电脑IP	pack_IP	VC	50		
+43	电脑名称	pack_COMPUTER	VC	50		
+44	包状态	pack_STATE	VC	10		0、已打包 
+1、已封包（已打印）
+2、已送出（收集）
+10、已送达
+11、已外运送出(转运)
+12、已外运送达
+13、已接收
+21、被合并 
+22、被撤销 
+45	送达状态	sendin_STATE	VC	50		正确未空
+不正确: 收集个数/送达个数
+46	首次人员	FIRST_PERSON	VC	50		
+47	首次时间	FIRST_TIME	VC	20		
+48	最后修改人员	LAST_MPERSON            	VC	50		
+49	最后修改时间	LAST_MTIME	VC	20		
+50	备注	remark	VC	200		
+2.28.LIS5_SAMPLE_PACK_LIST (包标本记录表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	包记录ID	pack_listid                	VC	20	N	PK
+2	包ID	pack_id                	VC	20	N	
+3	标签ID	Requisition_id                	VC	20	N	
+4	打包日期	pack_DATE	VC	20	N	聚集索引yyyy-mm-dd
+5	标签状态	pack_req_state	VC	20		0、有效
+1、已合并
+2、已撤销
+3、已接收
+5、未送
+6	归集人员	collect_PERSON	VC	50		
+7	归集时间	collect_TIME	Vc	20		
+8	归集IP	collect_IP	VC	50		
+9	未送原因分类	unsend_class	VC	50		
+10	未送原因	unsend_cause	VC	200		
+11	操作接收单元	IUNIT_ID	Vc	20		
+12	未送登记人员	unsend_PERSON	VC	50		
+13	未送登记时间	unsend_TIME	VC	20		
+14	未送登记电脑	unsend_COMPUTER	VC	50		
+15	首次人员	FIRST_PERSON	VC	20		
+16	首次时间	FIRST_TIME	VC	20		
+17	最后修改人员	LAST_MPERSON            	VC	20		
+18	最后修改时间	LAST_MTIME	VC	20		
+19	备注	remark	VC	200		
+2.29.LIS5_sample_PACK_state(标本包状态记录表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	序号	package_ID	VC	20	N	PK
+2	包ID	pack_id                	VC	20	N	
+3	打包日期	pack_DATE	VC	20	N	聚集索引yyyy-mm-dd
+4	医疗机构ID	hospital_ID	VC	20	N	
+5	执行模块	execute_module	VC	30		
+6	执行动作	execute_action	VC	50		
+7	执行时间	execute_time	VC	50		
+8	执行人员	execute_person	VC	50		
+9	执行科室	execute_dept	VC	50		
+10	执行原因	EXECUTE_CAUSE	VC	500		
+11	执行前状态	Front_state	VC	50		
+12	执行状态	pack_state                  	VC	50		
+13	电脑IP	execute_IP	VC	50		
+14	电脑名称	execute_COMPUTER	VC	50		
+15	首次人员	FIRST_PERSON	VC	50		
+16	首次时间	FIRST_TIME	VC	20		
+17	最后修改人员	LAST_MPERSON            	VC	50		
+18	最后修改时间	LAST_MTIME	VC	20		
+19	备注	remark	VC	200		
+2.30.LIS5_collect_TASK_INFO (标本采集任务信息表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	任务ID	task_id                	VC	20	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	
+3	接收单元ID	UNIT_ID	VC	20		
+4	任务日期	task_DATE	VC	20		
+5	任务编号	task_NO                  	VC	20		
+6	任务类型	task_type	VC	20		0、本院  
+1、外送 
+7	任务标本数	sample_num	N			
+8	打印人员	print_person	VC	50		人员
+9	打印时间	print_time	VC	20		
+10	收集人员	gather_PERSON	VC	50		
+11	收集时间	gather_TIME	VC	20		
+12	收集电脑	gather_computer	VC	50		
+13	任务状态	task_STATE	VC	10		0、已接收任务
+1、已封任务包（已打印） 
+14	首次人员	FIRST_PERSON	VC	50		
+15	首次时间	FIRST_TIME	VC	20		
+16	最后修改人员	LAST_MPERSON            	VC	50		
+17	最后修改时间	LAST_MTIME	VC	20		
+18	备注	remark	VC	200		
+2.31.LIS5_collect_TASK_LIST (标本采集任务记录表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	记录ID	TASK_listid                	VC	20	N	PK
+2	标签ID	Requisition_id                	VC	20	N	
+3						
+4	任务ID	task_id                	VC	20		
+5	分配人员	TASK_PERSON	VC	50		
+6	分配时间	TASK_TIME	VC	20		
+7	分配IP	TASK _IP	VC	50		
+8	标签状态	task_req_state	VC	20		0已分配
+1已接收
+2已采集
+9	首次人员	FIRST_PERSON	VC	20		
+10	首次时间	FIRST_TIME	VC	20		
+11	最后修改人员	LAST_MPERSON            	VC	20		
+12	最后修改时间	LAST_MTIME	VC	20		
+13	备注	remark	VC	200		
+2.32.LIS5_SAMPLE_print_info (标本清单信息表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	清单ID	print_id                	VC	20	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	
+3	打印日期	print_DATE	VC	20		
+4	清单编号	print_NO                  	VC	20		
+5	清单类型	print_type	VC	20		0、打印 
+1、确认
+6	病人病区	patient_ward	VC	50		
+7	病人病区	patient_ward_name	VC	50		
+8	标本数	sample_num	N			
+9	打印人员	print_person	VC	50		
+10	打印时间	print_time	VC	20		
+11	打印电脑	print_COMPUTER	VC	50		
+12	确认人员	check_PERSON	VC	50		
+13	确认时间	check_TIME	VC	20		
+14	电脑名称	check_COMPUTER	VC	50		
+15	清单状态	pack_STATE	VC	10		0、已打包 
+1、已封包（已打印） 
+16	首次人员	FIRST_PERSON	VC	50		
+17	首次时间	FIRST_TIME	VC	20		
+18	最后修改人员	LAST_MPERSON            	VC	50		
+19	最后修改时间	LAST_MTIME	VC	20		
+20	备注	remark	VC	200		
+2.33.LIS5_SAMPLE_print_LIST (清单标本记录表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	清单明细ID	print_listid                	VC	20	N	PK
+2	清单ID	print_id                	VC	20	N	
+3	标签ID	Requisition_id                	VC	20	N	
+4	标签状态	print_req_state	VC	20		0、 有效 
+2、已撤销
+5	操作人员	operate_PERSON	VC	50		
+6	操作时间	operate_TIME	VC	20		
+7	操作电脑	operate_computer	VC	50		
+8	首次人员	FIRST_PERSON	VC	20		
+9	首次时间	FIRST_TIME	VC	20		
+10	最后修改人员	LAST_MPERSON            	VC	20		
+11	最后修改时间	LAST_MTIME	VC	20		
+12	备注	remark	VC	200		
+2.34.LIS5_COLLECT_INFO（标本采集信息表）
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	采集ID	collect_id	VC	20	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	
+3	采集日期	collect_date	VC	20		
+4	病人主索引	pat_id	VC	50		
+5	病人ID	patient_id	VC	50		
+6	住院号	outpatient_id	VC	50		
+7	病人唯一号	inpatient_id	VC	50		
+8	姓名	patient_name	VC	50		
+9	性别	patient_sex	VC	10		
+10	年龄	patient_age	VC	10		
+11	身份证	ID_CARD	VC	50		
+12	联系电话	MOBILE_NO	VC	50		
+13	标本数	sample_num	N			
+14	采集状态	collect_STATE	VC	50		
+15	报告状态	report_state	VC	50		
+16	申请人员	REQUISITION_person	VC	50		
+17	申请时间	REQUISITION_time	VC	20		
+18	取号方式	nuMbr_type	VC	20		
+19	取号时间	numbr_time	VC	20		
+20	取号电脑IP	nuMbr_IP	VC	50		
+21	取号电脑名称	nuMbr_computer	VC	50		
+22	队列ID	QUEUE_ID	VC	50		
+23	队列类型	queue_type	VC	20		
+24	叫号时间	call_time	VC	20		
+25	叫号人员	call_person	VC	50		
+26	后移时间	MOVE_time	VC	20		
+27	采集窗口	collect_window	VC	20		
+28	采集人	collect_Rperson	VC	50		
+29	采集时间	collect_Rtime	VC	50		
+30	采集电脑IP	collect_IP	VC	50		
+31	采集电脑名称	collect_computer	VC	50		
+32	最后修改人员	last_mperson	VC	50		
+33	最后修改时间	last_mtime	VC	50		
+34	备注	remark                        	VC	500		
+2.35.LIS5_req_COLLECT_info（标签采集任务表）
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	标签ID	REQUISITION_id	VC	20	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	
+3	生成日期	generate_date	D		N	聚集索引yyyy-mm-dd
+4	试管种类	tube_color	VC	50		
+5	试管颜色	tube_color_RGB	VC	20		
+6	标本检测地ID	SENDPACKAGE_ID	VC	20		
+7	标本检测地	specimen_package	VC	50		
+8	标本检测地标记	PACKAGE_FLAG	VC	50		
+9	送检目的地	SENDIN_DESTINATION	VC	100		
+10	患者准备	before_REQUEST	VC	200		
+11	采样要求	SAMPLING_REQUEST	VC	200		
+12	采后要求	after_request	VC	200		
+13	检测专业组	test_group	VC	50		
+14	项目统计分类	tat_group	VC	50		
+15	报告时间分类	REPTIME_CLASS	VC	20		
+16	报告时间	reptime_info	VC	100		
+17	取单地点	report_place	VC	100		
+18	采样时间	collect_time	VC	100		
+19	采样地点	collect_place	VC	100		
+20	采集说明	COLLECT_NOTES	VC	100		
+21	采集签名	cOLLECT_sign	VC	20		1单签名
+2双签名
+3无需签名
+22	采集确认类型	CONFIRM_TYPE	VC	20		1人工确认
+2自助确认
+3直接确认
+23	采集试管	collect_tube	VC	50		试管ID
+24	采集费	collect_cost	VC	20		采集费ID
+25	材料费	TUBE_COST	VC	20		材料费ID
+26	是否血标本	IF_blood	VC	10		0静脉血标本
+1非血标本
+2非静脉血标本
+27	是否需要空腹	IF_emptiness	VC	10		0不需要空腹
+1需要空腹
+28	抗凝情况	if_anti	VC	20		0不需抗凝
+1需抗凝
+29	申请来源	req_source	VC	20		1医嘱
+2手工
+30	是否打印须知	IF_print_TAG	VC	20		0不打印
+1打印采血须知
+31	标签打印张数	print_num	N			
+32	工作单	WorK_sheet	VC	50		
+33	取号标记	queue_sign	VC	20		
+34	采集截止时间	Deadline_time	VC	20		
+35	规则标记	RULE_FLAG	VC	20		
+36	项目合并标记	UNITE_FLAG	VC	50		
+37	重复项目标记	repeat_flag	VC	20		
+38	预警送检时间	warning_sendtime	VC	20		
+39	预警核收时间	warning_incepttime	VC	20		
+40	预期采集时间	Expected_samplingtime	VC	20		
+41	预期送检时间	Expected_sendtime	VC	20		
+42	预期核收时间	Expected_incepttime	VC	20		
+43	预期报告时间	Expected_REPORT_TIME	VC	20		
+44	采集ID	collect_id	VC	20		
+45	采集单元ID	sunit_ID	VC	20		
+46	采集窗口ID	WINDOW_ID	VC	20		
+47	报告时间模块	REPTIME_MODULE	VC	20		
+48	收集人员					
+49	收集时间					
+50						
+51	采集任务状态	req_state	VC	20		0未采集
+1已发送
+2已采集
+52	首次登记人	FIRST_Rperson	VC	50		
+53	首次登记时间	FIRST_Rtime	VC	50		
+54	最后修改人员	last_mperson	VC	50		
+55	最后修改时间	last_mtime	VC	50		
+56	备注	remark                        	VC	500		
+2.36.LIS5_req_FAST_info（绿色通道标签信息表）
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	标签ID	REQ_id	VC	20	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	
+3	院区ID	AREA_ID	VC	20	N	
+4	科室ID	lab_ID	VC	20		
+5	新标签ID	requisition_ID	VC	20		
+6	检查类型	inspect_type	VC	20		
+7	登记时间	register_time	VC	30		
+8	登记人员	register_person	VC	50		
+9	登记IP	register_computer	VC	50		
+10	收费时间	charge_time	VC	30		
+11	收费人员	charge_person	VC	50		
+12	收费电脑	charge_computer	VC	50		
+13	收费状态	charge_state	VC	20		1未收费
+2已收费
+14	状态	req_state	VC	20		1未完成
+2已完成
+3已作废
+15	首次登记人	FIRST_Rperson	VC	50		
+16	首次登记时间	FIRST_Rtime	VC	50		
+17	最后修改人员	last_mperson	VC	50		
+18	最后修改时间	last_mtime	VC	50		
+19	备注	remark                        	VC	500		
+
+2.37.LIS5_SAMPLE_COLLECT_pic（标本采集图片信息表）
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	图片ID	pic_id	VC	20	N	PK
+2	采集ID	collect_id	VC	20	N	PK
+3	采集日期	collect_date	VC	20		
+4	图片名称	file_name	VC	50		
+5	图片路径	file_path	VC	100		
+6	图片描述	pic_desc	VC	500		
+7	采集人员	collect_person	VC	50		
+8	采集时间	collect_time	VC	50		
+9	采集电脑	collect_computer	VC	50		
+10	状态	pic_STATE	VC	50		
+11	首次登记人	FIRST_Rperson	VC	50		
+12	首次登记时间	FIRST_Rtime	VC	50		
+13	最后修改人员	last_mperson	VC	50		
+14	最后修改时间	last_mtime	VC	50		
+15	备注	remark                        	VC	500		
+
+2.38.LIS5_ (评价信息表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	任务ID	JOB_id                	VC	20	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	
+3	任务日期	job_DATE	VC	20		
+4	老任务ID	OJOB_ID                	VC	20		
+5	返回代号	RETURN_CODE	VC	50		
+6	返回错误	RETURN_ERRMSG	VC	500		
+7	检验分组	GROUP_ID                    	VC	10		
+8	标签ID	REQUISITION_ID                      	VC	50		
+9	检验单ID	INSPECTION_ID	VC	50		
+10	检验日期	INSPECTION_DATE                     	VC	20		
+11	标本编号	SAMPLE_NUMBER                 	VC	20		
+12	病人类别	PATIENT_TYPE                	VC	20		
+13	收费类别	CHARGE_TYPE              	VC	20		
+14	住院号	outpatient_Id	VC	50		
+15	病人唯一号	inpatient_Id	VC	50		
+16	住院次数	visit_NUM	VC	20		
+17	病人姓名	PATIENT_NAME	VC	50		
+18	病人性别	PATIENT_SEX	VC	20		
+19	病人年龄	PATIENT_AGE	VC	20		
+20	病人科别	PATIENT_DEPT_NAME	VC	50		
+21	病人病区	PATIENT_WARD_NAME	VC	50		
+22	病人床号	PATIENT_BED	VC	50		
+23	检验目的	TEST_ORDER_NAME                	VC	500		
+24	分类	CLASS	VC	50		
+25	模块	MODULE	VC	50		
+26	类型	TYPE	VC	50		
+27	单元ID	UNIT_ID	VC	50		
+28	用户ID	LOGIN_ID	VC	50		
+29	用户名	USER_NAME	VC	50		
+30	电脑IP	UNIT_IP	VC	50		
+31	电脑名称	UNIT_COMPUTER	VC	50		
+32	任务内容	JOB_CONTENT	VC	4000		
+33	处理措施	operate_step	VC	500		
+34	处理人员	operate_person	VC	50		
+35	处理时间	operate_time	VC	50		
+36	任务状态	JOB_STATE	VC	10		
+37	检验状态	INSPECTION_STATE	VC	20		
+38	首次人员	FIRST_PERSON	VC	20		
+39	首次时间	FIRST_TIME	V	20		
+40	最后修改人员	LAST_MPERSON            	VC	20		
+41	最后修改时间	LAST_MTIME	VC	20		
+42	备注	remark	VC	200		
+2.39.LIS5_PATIENT_special_LIST(特殊病人情况记录表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	记录ID	Spat_id       	VC	20	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	
+3	登记日期	register_date	VC	20	N	
+4	标本标签ID	REQUISITION_ID                      	VC	100		
+5	标本检验单ID	INSPECTION_ID	VC	100		
+6	判断规则	judge_RUle	VC	200		
+7	院区ID	area_ID	VC	20		
+8	科室ID	LAB_ID	VC	20		
+9	病人类别	PATIENT_TYPE                	VC	20		
+10	收费类别	CHARGE_TYPE              	VC	20		
+11	病人主索引	pat_id	VC	50		
+12	住院ID	patient_Id	VC	20		
+13	住院号	outpatient_Id	VC	50		
+14	病人唯一号	inpatient_Id	VC	50		
+15	住院次数	visit_NUM	VC	20		
+16	病人姓名	PATIENT_NAME	VC	50		
+17	病人性别	PATIENT_SEX	VC	20		
+18	病人年龄	PATIENT_AGE	VC	20		
+19	病人科别	PATIENT_DEPT	VC	50		
+20	病人科别	PATIENT_DEPT_NAME	VC	50		
+21	病人病区	PATIENT_WARD	VC	50		
+22	病人病区	PATIENT_WARD_NAME	VC	50		
+23	病人床号	PATIENT_BED	VC	50		
+24	身份证	ID_card	VC	50		
+25	接收人	RECEIVE_person	VC	50		
+26	特殊分类	special_class	VC	10		
+27	特殊类型	special_TYPE	VC	50		1传染病
+2特殊阳性
+3特殊情况
+28	内容	special_content	VC	100		
+29	特殊标记	special_ sign	VC	20		
+30	是否通知临床	IF_notice	VC	20		0、不通知  1、需通知
+31	是否科室提示	IF_Prompt	VC	20		0、不提示  1、需提示
+32	是否自助报告显示	if_selfreport	VC	20		0、不打印  1、需打印
+33	判断规则内容	rule_content	VC	4000		
+34	病人状态	pat_STATE	VC	20		0、未确认  1、已确认
+35	首次人员	FIRST_PERSON	VC	20		
+36	首次时间	FIRST_TIME	V	20		
+37	最后修改人员	LAST_MPERSON            	VC	20		
+38	最后修改时间	LAST_MTIME	VC	20		
+39	备注	remark	VC	200		
+
+2.40.LIS5_REPORT_rEcall_LIST (报告召回记录表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	召回ID	RECALL_id       	VC	20	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	
+3	检验单ID	INSPECTION_ID	VC	30	N	
+4	实验室ID	lab_ID	VC	20	N	
+5	院区ID	area_ID	VC	20	N	
+6	召回日期	recall_date	VC	20	N	
+7	模块	recall_MODULE	VC	50		
+8	分组ID	GROUp_ID	VC	20	N	
+9	检验分类	GROUp_CLASS	VC	20		
+10	检验日期	inspection_date	VC	20		
+11	标签ID	REQUISITION_ID                      	VC	100		
+12	病人主索引	pat_id	VC	50		
+13	病人ID	patient_id	VC	20		
+14	病人类别	PATIENT_TYPE                	VC	20		
+15	收费类别	CHARGE_TYPE              	VC	20		
+16	住院号	outpatient_Id	VC	50		
+17	病人唯一号	inpatient_Id	VC	50		
+18	住院次数	visit_NUM	VC	20		
+19	病人姓名	PATIENT_NAME	VC	50		
+20	病人性别	PATIENT_SEX	VC	20		
+21	病人年龄	PATIENT_AGE	VC	20		
+22	病人科别ID	PATIENT_DEPT	VC	50		
+23	病人科别	PATIENT_DEPT_NAME	VC	50		
+24	病人病区ID	PATIENT_WARD	VC	50		
+25	病人病区	PATIENT_WARD_NAME	VC	50		
+26	病人床号	PATIENT_BED	VC	50		
+27	标本种类ID	sample_class	VC	50		
+28	标本种类	sample_class_name	VC	50		
+29	检验目的	test_order	VC	500		
+30	检验目的名称	test_order_name	VC	500		
+31	检验状态	inspection_state	VC	20		
+32	申请人员	req_PERSON	VC	50		
+33	申请时间	req_TIME	VC	50		
+34	电脑IP	req_IP	VC	50		
+35	电脑名称	req_COMPUTER	VC	50		
+36	召回类型	recall_type	VC	50		
+37	召回原因分类	recall_cause_class	VC	50		
+38	召回原因	recall_cause	VC	500		
+39	审核人员	check_person	VC	50		
+40	审核时间	check_time	VC	500		
+41	确认人员	confirm_person	VC	50		
+42	确认时间	confirm_time	VC	50		
+43	电话确认人员	call_person	VC	50		
+44	电话号码	call_number	VC	50		
+45	电话确认时间	call_time	VC	50		
+46	接报人员	Receive_person	VC	50		
+47	接报时间	Receive_time	VC	50		
+48	是否保留时间	If_Retain	VC	20		0不保留
+1保留审核时间
+2保留审核及发布时间
+49	原审核时间	Ocheck_time	D			
+50	原审核人员	ocheck_person	VC	50		
+51	原发布时间	OISSUED_time	D			
+52	原发布人员	OISSUED_PERSON	VC	50		
+53	是否通知临床	IF_notice	VC	20		0、不通知  
+1、需通知
+54	召回状态	recall_STATE	VC	20		0、已申请 
+1、已审核 
+2、已回馈  
+3、已处理
+4、已重新审核
+55	首次人员	FIRST_PERSON	VC	20		
+56	首次时间	FIRST_TIME	V	20		
+57	最后修改人员	LAST_MPERSON            	VC	20		
+58	最后修改时间	LAST_MTIME	VC	20		
+59	备注	remark	VC	200		
+2.41.LIS5_REPORT_rEcall_HLIST (历史报告召回记录表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	召回ID	RECALL_id       	VC	20	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	
+3	检验单ID	INSPECTION_ID	VC	30	N	
+4	实验室ID	lab_ID	VC	20	N	
+5	院区ID	area_ID	VC	20	N	
+6	召回日期	recall_date	VC	20	N	
+7	模块	recall_MODULE	VC	50		
+8	分组ID	GROUp_ID	VC	20	N	
+9	检验分类	GROUp_CLASS	VC	20		
+10	检验日期	inspection_date	VC	20		
+11	标签ID	REQUISITION_ID                      	VC	100		
+12	病人主索引	pat_id	VC	50		
+13	病人ID	patient_id	VC	20		
+14	病人类别	PATIENT_TYPE                	VC	20		
+15	收费类别	CHARGE_TYPE              	VC	20		
+16	住院号	outpatient_Id	VC	50		
+17	病人唯一号	inpatient_Id	VC	50		
+18	住院次数	visit_NUM	VC	20		
+19	病人姓名	PATIENT_NAME	VC	50		
+20	病人性别	PATIENT_SEX	VC	20		
+21	病人年龄	PATIENT_AGE	VC	20		
+22	病人科别ID	PATIENT_DEPT	VC	50		
+23	病人科别	PATIENT_DEPT_NAME	VC	50		
+24	病人病区ID	PATIENT_WARD	VC	50		
+25	病人病区	PATIENT_WARD_NAME	VC	50		
+26	病人床号	PATIENT_BED	VC	50		
+27	标本种类ID	sample_class	VC	50		
+28	标本种类	sample_class_name	VC	50		
+29	检验目的	test_order	VC	500		
+30	检验目的名称	test_order_name	VC	500		
+31	检验状态	inspection_state	VC	20		
+32	申请人员	req_PERSON	VC	50		
+33	申请时间	req_TIME	VC	50		
+34	电脑IP	req_IP	VC	50		
+35	电脑名称	req_COMPUTER	VC	50		
+36	召回分类	recall_type	VC	50		
+37	召回原因	recall_cause	VC	500		
+38	审核人员	check_person	VC	50		
+39	审核时间	check_time	VC	500		
+40	确认人员	confirm_person	VC	50		
+41	确认时间	confirm_time	VC	50		
+42	电话确认人员	call_person	VC	50		
+43	电话号码	call_number	VC	50		
+44	电话确认时间	call_time	VC	50		
+45	接报人员	Receive_person	VC	50		
+46	接报时间	Receive_time	VC	50		
+47	是否通知临床	IF_notice	VC	20		0、不通知  1、需通知
+48	召回状态	recall_STATE	VC	20		
+49	首次人员	FIRST_PERSON	VC	20		
+50	首次时间	FIRST_TIME	V	20		
+51	最后修改人员	LAST_MPERSON            	VC	20		
+52	最后修改时间	LAST_MTIME	VC	20		
+53	备注	remark	VC	200		
+
+2.42.LIS5_report_delay_LIST(报告延时记录表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	记录ID	delay_id       	VC	20	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	
+3	登记日期	register_date	VC	20	N	
+4	标本标签ID	REQUISITION_ID                      	VC	100		
+5	标本检验单ID	INSPECTION_ID	VC	100		
+6	院区ID	area_ID	VC	20		
+7	病人类别	PATIENT_TYPE                	VC	20		
+8	收费类别	CHARGE_TYPE              	VC	20		
+9	病人主索引	pat_id	VC	50		
+10	住院ID	patient_Id	VC	20		
+11	住院号	outpatient_Id	VC	50		
+12	病人唯一号	inpatient_Id	VC	50		
+13	住院次数	visit_NUM	VC	20		
+14	病人姓名	PATIENT_NAME	VC	50		
+15	病人性别	PATIENT_SEX	VC	20		
+16	病人年龄	PATIENT_AGE	VC	20		
+17	病人科别	PATIENT_DEPT	VC	50		
+18	病人病区	PATIENT_WARD_NAME	VC	50		
+19	病人科别	PATIENT_DEPT	VC	50		
+20	病人病区	PATIENT_WARD_NAME	VC	50		
+21	病人床号	PATIENT_BED	VC	50		
+22	身份证	ID_card	VC	50		
+23	新报告时间	new_report_time	VC	50		
+24	通知方式	notice_mode	VC	50		1、短信 2、电话  3、微信
+25	原因分类	delay_class	VC	50		
+26	延时原因	delay_cause	VC	200		
+27	是否通知临床	IF_notice	VC	20		0、不通知  1、需通知
+28	是否自助报告显示	IF_Selfreport	VC	20		0、不打印  1、需打印
+29	确认人员	confirm_person	VC	50		
+30	确认时间	confirm_time	VC	50		
+31	电话确认人员	call_person	VC	50		
+32	电话号码	call_number	VC	50		
+33	电话确认时间	call_time	VC	50		
+34	接报人员	Receive_person	VC	50		
+35	接报时间	Receive_time	VC	50		
+36	信息ID	INFO_ID	VC	30		
+37	状态	delay_STATE	VC	20		0、已登记  1、已确认  2、电话确认
+38	首次人员	FIRST_PERSON	VC	20		
+39	首次时间	FIRST_TIME	V	20		
+40	最后修改人员	LAST_MPERSON            	VC	20		
+41	最后修改时间	LAST_MTIME	VC	20		
+42	备注	remark	VC	200		
+2.43.LIS5_Unqualified_sample_LIST （不合格标本记录表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	标本ID	sample_id                 	VC	20	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	
+3	院区	area_id 	VC	20		
+4	实验室ID	LAB_id 	VC	20		
+5	检验单ID	inspection_id                 	c	30		
+6	登记日期	inspection_date	VC	20		
+7	专业组ID	UGROUP_ID	VC	20		
+8	分组ID	group_id	VC	20		
+9	不合格分类	unqualified_type	VC	50		1不合格
+2标本性状
+3标签撤销
+4终止检测
+10	病人类别	patient_type	VC	20		
+11	条码ID	requisition_id	VC	20		
+12	相关条码号	REL_req_id	VC	100		
+13	病人主索引	pat_id	VC	50		
+14	病人姓名	Patient_name	VC	50		
+15	病人ID	outpatient_id	VC	50		
+16	病人性别	patient_sex	VC	10		
+17	年龄	age_input	VC	20		
+18	病人科别	patient_dept                  	VC	20		
+19	科别名称	patient_dept_name             	VC	50		
+20	病人病区	patient_ward                  	VC	20		
+21	病区名称	patient_ward_name             	VC	50		
+22	病人床号	patient_bed                   	VC	20		
+23	检验目的	test_order	VC	200		
+24	检验目的名称	test_order_name	VC	500		
+25	标本种类	sample_class	VC	20		
+26	标本种类名称	sample_class_name	VC	50		
+27	采集人员	sampling_person	VC	50		
+28	采集时间	sampling_time	VC	50		
+29	采集科室	sampling_dept	VC	20		
+30	采集科室名称	sampling_dept_name	VC	50		
+31	检验人员	INspection_person	VC	50		
+32	处理人	dispose_person	VC	50		
+33	处理时间	dispose_time	VC	50		格式：yyyy-mm-dd hh:mm:ss
+34	处理模块	MODULE_ID	VC	50		一般检验、标本接收
+35	反馈时间	AFFIRM_time	VC	50		
+36	反馈人员	AFFIRM_person	VC	50		
+37	反馈方式	AFFIRM_TYPE	VC	50		
+38	电话时间	CALL_time	VC	50		
+39	电话人员	CALL_person	VC	50		
+40	电话号码	CALL_NUM	VC	50		
+41	接收人员类型	receive_type	VC	10		1医生
+2护士
+3患者
+42	接收时间	receive_time	VC	50		
+43	接收人员	receive_person	VC	50		
+44	原因分类	cause_type	VC	100		多个原因分类用逗号分开，不能修改原来分类
+45	不合格原因	Unqualified _CAUSE	VC	500		
+46	科室处理建议	dispose_advise	VC	50		
+47	是否通知临床	IF_notice	VC	20		0、不通知  1、需通知
+48	是否退费	IF_CHARGE	VC	20		0、不退费  1、需退费
+49	临床处置时间	CLIdispose_time	VC	50		
+50	临床处置人员	CLIdispose_person	VC	50		
+51	临床处置方式	CLIdispose_TYPE	VC	50		1、重采  2、终止检测 3、重新申请
+52	临床处置原因	CLIdispose_CAUSE	VC	500		
+53	外送状态	out_confirm_state	VC	10		0未处理
+1已确认
+2已取消
+54	外送确认人员	out_confirm_person	VC	50		
+55	外送确认时间	out_confirm_time	VC	50		
+56	状态	sample_state	VC	50		0、已登记  1、已反馈  9、已取消
+57	备注	remark                        	VC	200		
+2.44.LIS5_Unqualified_sample_HLIST （历史不合格标本记录表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	标本ID	sample_id                 	VC	20	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	
+3	院区	area_id 	VC	20	N	
+4	实验室ID	LAB_id 	VC	20	N	
+5	检验单ID	inspection_id                 	VC	30		
+6	登记日期	inspection_date	VC	20		
+7	专业组ID	UGROUP_ID	VC	20		
+8	分组ID	group_id	VC	20		
+9	病人类别	patient_type	VC	20		
+10	条码ID	requisition_id	VC	20		
+11	相关条码号	REL_req_id	VC	100		
+12	病人主索引	pat_id	VC	50		
+13	病人姓名	Patient_name	VC	50		
+14	病人ID	outpatient_id	VC	50		
+15	病人性别	patient_sex	VC	10		
+16	年龄	age_input	VC	20		
+17	病人科别	patient_dept                  	VC	20		
+18	科别名称	patient_dept_name             	VC	50		
+19	病人病区	patient_ward                  	VC	20		
+20	病区名称	patient_ward_name             	VC	50		
+21	病人床号	patient_bed                   	VC	20		
+22	检验目的	test_order	VC	200		
+23	检验目的名称	test_order_name	VC	500		
+24	标本种类	sample_class	VC	20		
+25	标本种类名称	sample_class_name	VC	50		
+26	采集人员	sampling_person	VC	50		
+27	采集时间	sampling_time	VC	50		
+28	采集科室	sampling_dept	VC	20		
+29	采集科室名称	sampling_dept_name	VC	50		
+30	检验人员	INspection_person	VC	50		
+31	处理人	dispose_person	VC	50		
+32	处理时间	dispose_time	VC	50		格式：yyyy-mm-dd hh:mm:ss
+33	处理模块	MODULE_ID	VC	50		一般检验、标本接收
+34	反馈时间	AFFIRM_time	VC	50		
+35	反馈人员	AFFIRM_person	VC	50		
+36	反馈方式	AFFIRM_TYPE	VC	50		
+37	电话时间	CALL_time	VC	50		
+38	电话人员	CALL_person	VC	50		
+39	电话号码	CALL_NUM	VC	50		
+40	接收时间	receive_time	VC	50		
+41	接收人员	receive_person	VC	50		
+42	原因分类	cause_type	VC	100		多个原因分类用逗号分开，不能修改原来分类
+43	不合格原因	Unqualified _CAUSE	VC	500		
+44	科室处理建议	dispose_advise	VC	50		
+45	是否通知临床	IF_notice	VC	20		0、不通知  1、需通知
+46	是否退费	IF_CHARGE	VC	20		0、不退费  1、需退费
+47	临床处置时间	CLIdispose_time	VC	50		
+48	临床处置人员	CLIdispose_person	VC	50		
+49	临床处置方式	CLIdispose_TYPE	VC	50		1、重采  2、终止检测 3、重新申请
+50	临床处置原因	CLIdispose_CAUSE	VC	500		
+51	外送状态	out_confirm_state	VC	10		0未处理
+1已确认
+2已取消
+52	外送确认人员	out_confirm_person	VC	50		
+53	外送确认时间	out_confirm_time	VC	50		
+54	状态	sample_state	VC	50		0、已登记  1、已反馈  9、已取消
+55	备注	remark                        	VC	200		
+
+2.45.LIS5_INSPECTION_RESULT_ALARM(检验结果危急值信息表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	结果ID	result_id                 	VC	20	N	PK
+2	医疗机构ID	hospital_id	VC	20	N	
+3	检验ID	inspection_id                 	VC	30	N	0
+4	科室ID	lab_id	VC	20	N	
+5	分组ID	group_id                      	VC	20	N	
+6	检验分类	inspection_class	VC	50		一般检验类、微生物检验类、骨髓检验类、一般检验描述类
+7	检验日期	inspection_date               	VC	8	N	
+8	标本编号	sample_number                 	VC	20	N	
+9	申请单ID	requisition_id                	VC	20		
+10	病人类别	patient_type                  	VC	2		
+11	病人主索引	pat_id	VC	50		
+12	病人ID	patient_id                  	VC	30		
+13	住院号	outpatient_id                 	VC	50		
+14	病人唯一号	inpatient_id                  	VC	50		
+15	次数	visit_num	VC	10		
+16	病人姓名	patient_name                  	VC	50		
+17	病人性别	patient_sex                   	VC	10		
+18	输入年龄	age_input                      	VC	20		
+19	手机号	mobile_no	VC	50		
+20	身份证号	Id_card	VC	30		
+21	地址	patient_address	VC	100		
+22	病人科别	patient_dept                  	VC	20		
+23	科别名称	patient_dept_name             	VC	50		
+24	病人病区	patient_ward                  	VC	20		
+25	病区名称	patient_ward_name             	VC	50		
+26	病人床号	patient_bed                   	VC	20		
+27	仪器号	INSPECTION_INSTRUMENT	VC	50		
+28	仪器架号	INSPECTION_POSITION
+	VC	50		
+29	标本种类	sample_class                  	VC	20		
+30	标本种类名称	sample_class_name             	VC	50		
+31	诊断编码	clinical_diagnoses	VC	50		
+32	诊断名称	clinical_diagnoses_name	VC	100		
+33	检验目的	test_order	VC	200		
+34	危急值级别	alarm_level	VC	50		
+35	危急值类型	alarm_type	VC	50		
+36	危急值ID	alarm_id	VC	20	N	
+37	项目ID	test_item_id	VC	20	N	
+38	排序号	test_item_sort	VC	20		
+39	项目名称	chinese_name	VC	50		
+40	原始结果	originAL_result	VC	100		
+41	第一次结果	quantitative_result1	VC	100		危急值第一次结果，复查后方第一次结果
+42	结果	quantitative_result	VC	200		
+43	判断	qualitative_result	VC	50		
+44	危急值下限	alarm_lower	VC	50		
+45	危急值上限	alarm_upper	VC	50		
+46	参考范围	alarm_reference	VC	100		
+47	单位	test_item_unit	VC	50		
+48	危急值产生时间	Perception_time	VC	50		
+49	危急值产生方式	Perception_type	VC	50		1自动判断
+2手工输入
+3外送标本
+50	危急值产生人员	Perception_person	VC	50		
+51	感知确认人员	warning_person	VC	50		
+52	感知确认时间	warning_time	VC	50		
+53	感知确认电脑	warning_computer	VC	50		
+54	预设感知时限	Perception_timeline	N			
+55	感知备注	WARNING_REMARK	VC	50		
+56	预警-感知确认	TAT_PWTIME	N			
+57	复查确认人员	CHECK_person	VC	50		
+58	复查确认时间	CHECK_time	VC	50		
+59	复查确认电脑	check_computer	VC	50		
+60	感知确认-复查	TAT_WCTIME	N			
+61	报告方式	report_type	VC	10		1网络
+2电话
+
+62	报告人员	send_person	VC	50		
+63	报告时间	send_time	VC	50		
+64	报告电话号码	send_number	VC	50		
+65	报告电脑	send_computer	VC	50		
+66	报告情况	send_Situation	VC	500		
+67	预设报告时限	report_timeline	N			
+68	实际报告时限	report_Actual_timeline	N			
+69	通知对象类型	inform_person	VC	20		
+70	临床阅读人员1	Nurse_Read	VC	50		
+71	临床阅读时间1	Nurse_Read_time	VC	50		
+72	临床阅读电脑1	Nurse_Read_computer	VC	50		
+73	临床阅读情况1	Nurse_Read_Situation	VC	500		
+74	临床阅读状态1	Nurse_Read_state	VC	50		0未阅读确认
+1已阅读确认
+75	临床阅读人员2	doctor_Read	VC	50		
+76	临床阅读时间2	doctor_Read_time	VC	50		
+77	临床阅读情况2	doctor_Read_Situation	VC	500		
+78	临床阅读状态2	doctor_Read_state	VC	50		0未阅读确认
+1已阅读确认
+79	预设阅读时限	read_timeline	N			
+80	实际阅读时限	read_Actual_timeline	N			
+81	超时电话报告人员	call_person	VC	50		
+82	超时电话报告号码	call_number	VC	50		
+83	超时电话报告时间	call_time	VC	50		
+84	超时电话报告电脑	call_computer	VC	50		
+85	超时接报人员	Receive_person	VC	50		
+86	超时接报时间	Receive_time	VC	50		
+87	回馈确认人员	Feedback_person	VC	50		
+88	回馈确认时间	Feedback_time	VC	50		
+89	报告召回方式	cancel_type	VC	10		1网络
+2电话
+90	召回人员	cancel_person	VC	50		
+91	召回时间	cancel_time	VC	50		
+92	召回电话号码	cancel_call_num	VC	50		
+93	召回报告电脑	cancel_computer	VC	50		
+94	召回原因分类	cancel_cause_type	VC	50		
+95	召回原因	cancel_cause	VC	500		
+96	召回审核人员	cancel_check_person	VC	50		
+97	召回审核时间	cancel_check_time	VC	50		
+98	召回审核原因	cancel_check_cause	VC	500		
+99	召回回馈确认人员	cancel_Fperson	VC	50		
+100	召回回馈确认时间	cancel_Ftime	VC	50		
+101	召回回馈确认电脑	cancel_computer	VC	50		
+102	召回状态	cancel_state	VC	20		0已召回申请
+1已审核
+2已召回确认
+103	召回电话人员	cancel_call_person	VC	50		
+104	召回电话时间	cancel_call_time	VC	50		
+105	召回接报人	cancel_receive_person	VC	50		
+106	召回电话号码	cancel_call_num	VC	50		
+107	召回电话确认状态	cancel_call_state	VC	20		0未电话确认
+1已电话确认
+108	召回措施	cancel_mehtod	VC	50		
+109	召回备注	cancel_remark	VC	50		
+110	报告-接报	TAT_RRTIME	N			
+111	召回申请-回馈	TAT_CancelTIME	N			
+112	电话确认状态	call_state	VC	50		0未电话确认
+1已电话确认
+113	电话确认备注	CALL_REMARK	VC	50		
+114	危急值设置ID	alarm_id                 	VC	20		
+115	状态	Alarm_state	VC	50		0预警中
+1已感知
+2已报告
+3已回馈
+5待取消
+6已取消
+9复查消除
+10已消除
+15不报告
+16报告规则
+-1已删除
+116	外送标本状态	out_confirm_state	VC	50		0未处理
+1已确认
+2已取消
+117	外送确认人员	out_confirm_person	VC	50		
+118	外送确认时间	out_confirm_time	VC	50		
+119	备注	REMARK	VC	500		
+2.46.LIS5_INSPECTION_RESULT_HALARM(历史检验结果危急值信息表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	结果ID	result_id                 	VC	20	N	PK
+2	医疗机构ID	hospital_id	VC	20	N	
+3	检验ID	inspection_id                 	VC	30	N	0
+4	科室ID	lab_id	VC	20	N	
+5	分组ID	group_id                      	VC	20	N	
+6	检验分类	inspection_class	VC	50		一般检验类、微生物检验类、骨髓检验类、一般检验描述类
+7	检验日期	inspection_date               	VC	8	N	
+8	标本编号	sample_number                 	VC	20	N	
+9	申请单ID	requisition_id                	VC	20		
+10	病人类别	patient_type                  	VC	2		
+11	病人主索引	pat_id	VC	50		
+12	病人ID	patient_id                  	VC	30		
+13	住院号	outpatient_id                 	VC	50		
+14	病人唯一号	inpatient_id                  	VC	50		
+15	次数	visit_num	VC	10		
+16	病人姓名	patient_name                  	VC	50		
+17	病人性别	patient_sex                   	VC	10		
+18	输入年龄	age_input                      	VC	20		
+19	手机号	mobile_no	VC	50		
+20	身份证号	Id_card	VC	30		
+21	地址	patient_address	VC	100		
+22	病人科别	patient_dept                  	VC	20		
+23	科别名称	patient_dept_name             	VC	50		
+24	病人病区	patient_ward                  	VC	20		
+25	病区名称	patient_ward_name             	VC	50		
+26	病人床号	patient_bed                   	VC	20		
+27	仪器号	INSPECTION_INSTRUMENT	VC	50		
+28	仪器架号	INSPECTION_POSITION
+	VC	50		
+29	标本种类	sample_class                  	VC	20		
+30	标本种类名称	sample_class_name             	VC	50		
+31	诊断编码	clinical_diagnoses	VC	50		
+32	诊断名称	clinical_diagnoses_name	VC	100		
+33	检验目的	test_order	VC	200		
+34	危急值级别	alarm_level	VC	50		
+35	危急值类型	alarm_type	VC	50		
+36	危急值设置ID	alarm_id	VC	20	N	
+37	项目ID	test_item_id	VC	20	N	
+38	排序号	test_item_sort	VC	20		
+39	项目名称	chinese_name	VC	50		
+40	原始结果	originAL_result	VC	100		
+41	第一次结果	quantitative_result1	VC	100		危急值第一次结果，复查后方第一次结果
+42	结果	quantitative_result	VC	200		
+43	判断	qualitative_result	VC	50		
+44	危急值下限	alarm_lower	VC	50		
+45	危急值上限	alarm_upper	VC	50		
+46	参考范围	alarm_reference	VC	100		
+47	单位	test_item_unit	VC	50		
+48	危急值产生时间	Perception_time	VC	50		
+49	危急值产生方式	Perception_type	VC	50		1、自动判断
+手工输入
+50	预警确认人员	warning_person	VC	50		2、
+51	预警确认时间	warning_time	VC	50		
+52	预设感知时限	Perception_timeline	N			
+53	感知备注	WARNING_REMARK	VC	50		
+54	产生-确认	TAT_PWTIME	N			
+55	复核确认人员	CHECK_person	VC	50		
+56	复核确认时间	CHECK_time	VC	50		
+57	确认-复查	TAT_WCTIME	N			
+58	报告确认人员	send_person	VC	50		
+59	报告确认时间	send_time	VC	50		
+60	报告确认电脑	send_computer	VC	50		
+61	报告确认情况	send_Situation	VC	500		
+62	预设报告时限	report_timeline	N			
+63	实际报告时限	report_Actual_timeline	N			
+64	临床阅读人员1	Nurse_Read	VC	50		
+65	临床阅读时间1	Nurse_Read_time	VC	50		
+66	临床阅读情况1	Nurse_Read_Situation	VC	500		
+67	临床阅读状态1	Nurse_Read_state	VC	50		0、未阅读确认
+已阅读确认
+68	临床阅读人员2	doctor_Read	VC	50		1、
+69	临床阅读时间2	doctor_Read_time	VC	50		
+70	临床阅读情况2	doctor_Read_Situation	VC	500		
+71	临床阅读状态2	doctor_Read_state	VC	50		0、未阅读确认
+已阅读确认
+72	预设阅读时限	read_timeline	N			1、
+73	实际阅读时限	read_Actual_timeline	N			
+74	电话确认人员	call_person	VC	50		
+75	电话号码	call_number	VC	50		
+76	电话确认时间	call_time	VC	50		
+77	接报人员	Receive_person	VC	50		
+78	接报时间	Receive_time	VC	50		
+79	召回人员	cancel_person	VC	50		
+80	召回时间	cancel_time	VC	50		
+81	召回原因分类	cancel_cause_type	VC	50		
+82	召回原因	cancel_cause	VC	500		
+83	召回审核人员	cancel_check_person	VC	50		
+84	召回审核时间	cancel_check_time	VC	50		
+85	召回审核原因	cancel_check_cause	VC	500		
+86	召回回馈确认人员	cancel_ Fperson	VC	50		
+87	召回回馈确认时间	cancel_Ftime	VC	50		
+88	召回状态	cancel_state	VC	20		0、已召回申请
+1、已审核
+2、已召回确认
+89	召回电话人员	cancel_call_person	VC	50		0、
+90	召回电话时间	cancel_call_time	VC	50		
+91	召回接报人	cancel_receive_person	VC	50		0、
+92	召回电话号码	cancel_call_num	VC	50		1、
+93	召回电话确认状态	cancel_call_state	VC	20		1、未电话确认
+已电话确认
+94	召回措施	cancel_mehtod	VC	50		
+95	召回备注	cancel_remark	VC	50		
+96	报告-接报	TAT_RRTIME	N			
+97	召回申请-回馈	TAT_CancelTIME	N			
+98	电话确认状态	call_state	VC	50		2、未电话确认
+3、已电话确认
+99	电话确认备注	CALL_REMARK	VC	50		
+100	回馈确认人员	Feedback_person	VC	50		
+101	回馈确认时间	Feedback_time	VC	50		
+102	状态	Alarm_state	VC	50		0、预警中
+1、已感知
+2、已报告
+3、已回馈
+5、待取消
+6、已取消
+9、复查消除
+10、已消除
+103	外送状态	out_confirm_state	VC	10		0未处理
+1已确认
+2已取消
+104	外送确认人员	out_confirm_person	VC	50		
+105	外送确认时间	out_confirm_time	VC	50		
+106	备注	REMARK	VC	500		
+
+2.47.LIS5_INSPECTION_RERUN_LIST (标本复查记录表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	复查ID	RERUN_ID    	VC	20	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	
+3	检验单ID	INSPECTION_ID	VC	30	N	
+4	实验室ID	lab_ID	VC	20	N	
+5	院区ID	area_ID	VC	20	N	
+6	检验日期	INSPECTION_DATE	VC	20	N	
+7	分组ID	GROUp_ID	VC	20	N	
+8	判断规则	judge_RUle	VC	200		
+9	复查日期	rerun_DATE	VC	20	N	
+10	复查报告类型	rerun_report_type	VC	50		1、报告不延时
+2、报告延时
+11	复查类型	rerun_type	VC	50		1、仪器复查
+2、手工复查
+3、开盖复查
+12	复查编号	rerun_number	VC	20	N	
+13	复查检验单ID	rerun_inspection_id	VC	30	N	
+14	标签ID	REQUISITION_ID                      	VC	20		
+15	病人类别	PATIENT_TYPE                	VC	20		
+16	病人主索引	pat_id	VC	50		
+17	病人ID	patient_id	VC	20		
+18	收费类别	CHARGE_TYPE              	VC	20		
+19	住院号	outpatient_Id	VC	50		
+20	病人唯一号	inpatient_Id	VC	50		
+21	住院次数	visit_NUM	VC	20		
+22	病人姓名	PATIENT_NAME	VC	50		
+23	病人性别	PATIENT_SEX	VC	20		
+24	病人年龄	PATIENT_AGE	VC	20		
+25	病人科别ID	PATIENT_DEPT	VC	50		
+26	病人科别	PATIENT_DEPT_NAME	VC	50		
+27	病人病区ID	PATIENT_WARD	VC	50		
+28	病人病区	PATIENT_WARD_NAME	VC	50		
+29	病人床号	PATIENT_BED	VC	50		
+30	标本种类ID	sample_class	VC	50		
+31	标本种类	sample_class_name	VC	50		
+32	检验目的	test_order	VC	500		
+33	检验目的名称	test_order_name	VC	500		
+34	复查项目	rerun_ITEM	VC	500		
+35	检验状态	inspection_state	VC	50		
+36	复查人员	rerun_PERSON	VC	50		
+37	复查时间	rerun_TIME	VC	50		
+38	复查分类	rerun_class	VC	50		
+39	复查原因	reRUN_cause	VC	500		
+40	审核人员	check_person	VC	50		
+41	审核时间	check_time	VC	50		
+42	确认人员	confirm_person	VC	50		
+43	确认时间	confirm_time	VC	50		
+44	复查状态	rerun_STATE	VC	20		
+45	电脑IP	rerun_IP	VC	50		
+46	电脑名称	rerun_COMPUTER	VC	50		
+47	首次人员	FIRST_PERSON	VC	20		
+48	首次时间	FIRST_TIME	V	20		
+49	最后修改人员	LAST_MPERSON            	VC	20		
+50	最后修改时间	LAST_MTIME	VC	20		
+51	备注	remark	VC	200		
+2.48.LIS5_INSPECTION_rerun_RESULT (复查结果表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	复查ID	RERUN_ID    	VC	20	N	PK
+2	检验单ID	inspection_id                 	VC	30	N	PK
+3	项目ID	item_id                  	VC	20	N	PK
+4	排序号	item_sort                	VC	20		
+5	项目代号	item_code               	VC	50		
+6	中文名称	ITEM_cname                	VC	100		
+7	定量结果	quantitative_result           	VC	50		
+8	定性结果	qualitative_result            	VC	50		
+9	项目单位	item_unit                	VC	20		
+10	检验仪器	inspection_instrument         	VC	50		
+11	检验位置	inspection_position             	VC	50		
+12	检验试剂	Inspection_reagent	VC	20		试剂批号
+13	仪器检验时间	inspection_datetime	VC	50		
+14	稀释比例	DILUTION_RATE	VC	20		
+15	接收时间	Rincept_time	VC	20		
+16	接收人员	Rincept_person	VC	50		
+17	结果标记	result_sign	VC	50		
+18	首次登记人	FIRST_Rperson	VC	50		
+19	首次登记时间	FIRST_Rtime	VC	50		格式：yyyy-mm-ddmm:ss:hh
+20	最后修改人员	last_mperson	VC	50		
+21	最后修改时间	last_mtime	VC	50		
+22	备注	remark        	VC	50		
+2.49.LIS5_INSPECTION_RERUN_HLIST (历史标本复查记录表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	复查ID	RERUN_ID    	VC	20	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	
+3	检验单ID	INSPECTION_ID	VC	30	N	
+4	实验室ID	lab_ID	VC	20	N	
+5	院区ID	area_ID	VC	20	N	
+6	复查日期	rerun_DATE	VC	20	N	
+7	检验日期	INSPECTION_DATE	VC	20	N	
+8	分组ID	GROUp_ID	VC	20	N	
+9	复查模块	rerun_MODULE	VC	50		
+10	复查类型	rerun_type	VC	50		a)报告不延时
+b)报告延时
+11	复查编号	rerun_number	VC	20		
+12	复查检验单ID	rerun_inspection_id	VC	30		
+13	标签ID	REQUISITION_ID                      	VC	20		
+14	病人类别	PATIENT_TYPE                	VC	20		
+15	病人主索引	pat_id	VC	50		
+16	病人ID	patient_id	VC	20		
+17	收费类别	CHARGE_TYPE              	VC	20		
+18	住院号	outpatient_Id	VC	50		
+19	病人唯一号	inpatient_Id	VC	50		
+20	住院次数	visit_NUM	VC	20		
+21	病人姓名	PATIENT_NAME	VC	50		
+22	病人性别	PATIENT_SEX	VC	20		
+23	病人年龄	PATIENT_AGE	VC	20		
+24	病人科别ID	PATIENT_DEPT	VC	50		
+25	病人科别	PATIENT_DEPT_NAME	VC	50		
+26	病人病区ID	PATIENT_WARD	VC	50		
+27	病人病区	PATIENT_WARD_NAME	VC	50		
+28	病人床号	PATIENT_BED	VC	50		
+29	标本种类ID	sample_class	VC	50		
+30	标本种类	sample_class_name	VC	50		
+31	检验目的	test_order	VC	500		
+32	检验目的名称	test_order_name	VC	500		
+33	复查项目	rerun_ITEM	VC	500		
+34	检验状态	inspection_state	VC	50		
+35	复查人员	rerun_PERSON	VC	50		
+36	复查时间	rerun_TIME	VC	50		
+37	复查分类	rerun_type	VC	50		
+38	复查原因	reRUN_cause	VC	500		
+39	审核人员	check_person	VC	50		
+40	审核时间	check_time	VC	50		
+41	确认人员	confirm_person	VC	50		
+42	确认时间	confirm_time	VC	50		
+43	复查状态	rerun_STATE	VC	20		
+44	电脑IP	rerun_IP	VC	50		
+45	电脑名称	rerun_COMPUTER	VC	50		
+46	首次人员	FIRST_PERSON	VC	20		
+47	首次时间	FIRST_TIME	V	20		
+48	最后修改人员	LAST_MPERSON            	VC	20		
+49	最后修改时间	LAST_MTIME	VC	20		
+50	备注	remark	VC	200		
+2.50.LIS5_sample_dispose_list（待检标本处理信息表）
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	处理ID	dispose_ID	VC	20	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	
+3	处理日期	dispose_date	VC	20		
+4	处理类型	dispose_TYPE	VC	20		
+5	待检项目	quarantine_item	VC	500		存放查询的诊疗项目
+6	查询条件	QUERY_CONDITION	VC	500		
+7	处理人	dispose_person	VC	50		
+8	处理时间	dispose_time	VC	50		
+9	处理状态	dispose_state	VC	50		
+10	生成人	create_person	VC	50		
+11	生成时间	create_time	VC	50		
+12	处理电脑IP	dispose_IP	VC	50		
+13	处理电脑名称	dispose_computer	VC	50		
+14	备注	remark	VC	200		
+2.51.LIS5_group_Monitor（分组实时监控状态表）
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	监控ID	Monitor_ID	VC	50	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	
+3	科室ID	lab_ID	VC	20	N	
+4	分组ID	group_ID	VC	20	N	
+5	监控分类	Monitor_class	VC	20	N	固定基础数据
+6	监控结果	Monitor_result	VC	50		
+7	状态	Monitor_state	VC	20		
+8	更新人员	create_person	VC	50		
+9	更新时间	create_time	VC	50		
+10	备注	remark	VC	200		
+
+2.52.LIS5_ai_CHECK_LIST (智能审核启动信息表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	日志ID	AUTO_id                 	VC	20	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	
+3	设置ID	setup_ID	VC	20	N	
+4	分组 ID	group_id                 	VC	20	N	
+5	开始编号	SAMPLE_NUMBER_S	VC	50		
+6	结束编号	SAMPLE_NUMBER_e	VC	50		
+7	启动时间	startup_time	VC	50		
+8	启动人员	startup_person	VC	50		
+9	启动电脑	startup_computer	VC	50		
+10	停止分类	OPERATE_TYPE	VC	50		原因分类
+11	停止原因	OPERATE_CAUSE	VC	500		
+12	停止时间	OPERATE_TIME	VC	50		
+13	停止人员	OPERATE_person	VC	50		
+14	停止电脑	OPERATE_computer	VC	50		
+15	状态	OPERATE_STATE	VC	20		1智能审核启动
+2停止
+16	备注	remark                        	VC	500		
+2.53.LIS5_AUTO_CHECK_LIST (自动审核人员信息表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	日志ID	AUTO_id                 	VC	20	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	
+3	设置ID	setup_ID	VC	20	N	
+4	分组 ID	group_id                 	VC	20	N	
+5	审核日期	check_date	VC	20		
+6	审核人员	check_person	VC	50		
+7	检验人员	inspection_person	VC	50		
+8	患者类别	patient_type	VC	20		
+9	开始编号	SAMPLE_NUMBER_S	VC	50		
+10	结束编号	SAMPLE_NUMBER_e	VC	50		
+11	启动时间	startup_time	VC	50		
+12	启动人员	startup_person	VC	50		
+13	启动电脑	startup_computer	VC	50		
+14	暂停仪器	INSTRUMENT	VC	500		
+15	停止分类	OPERATE_TYPE	VC	50		原因分类
+16	停止原因	OPERATE_CAUSE	VC	500		
+17	停止时间	OPERATE_TIME	VC	50		
+18	停止人员	OPERATE_person	VC	50		
+19	停止电脑	OPERATE_computer	VC	50		
+20	状态	OPERATE_STATE	VC	20		1启动
+2停止
+21	备注	remark                        	VC	500		
+2.54.LIS5_INSTRUMENT_CHECK_LIST (仪器自动审核启动信息表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	日志ID	AUTO_id                 	VC	20	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	
+3	分组 ID	group_id                 	VC	20	N	
+4	仪器ID	INSTRUMENT_ID	VC	20		
+5	仪器序列号	instrument_SNUM	VC	50		
+6	启动时间	startup_time	VC	50		
+7	启动人员	startup_person	VC	50		
+8	启动电脑	startup_computer	VC	50		
+9	停止分类	OPERATE_TYPE	VC	50		原因分类
+10	停止原因	OPERATE_CAUSE	VC	500		
+11	停止时间	OPERATE_TIME	VC	50		
+12	停止人员	OPERATE_person	VC	50		
+13	状态	OPERATE_STATE	VC	20		1启动
+2停止
+14	备注	remark                        	VC	500		
+2.55.LIS5_Verify_rule_ JOB (规则验证记录表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	任务ID	JOB_id	VC	20	N	PK
+2	专业组 ID	Pgroup_id                 	VC	20	N	
+3	分组 ID	group_id                 	VC	200		
+4	验证次数	Verify_times	VC	20		
+5	标本范围	sample_SQL	VC	1000		
+6	操作人工号	LOGIN_ID                	VC	20		
+7	操作人姓名	USER_NAME	VC	50		
+8	验证时间	JOB_TIME                 	VC	50		
+9	标本总数	sample_NUm	N			
+10	未参与样本数	UNJOIN_NUM	N			
+11	拦截样本数	Intercept_num	N			
+12	任务状态	JOB_STATE	VC	50		1验证中
+2验证完成
+13	操作电脑IP	JOB_IP	VC	20		
+14	操作电脑	JOB_COMPUTER	VC	50		
+15	备注	remark                        	VC	500		
+
+2.56.LIS5_Verify_rule_ sample (标本验证标本信息表) 
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	验证ID	JOB_ID	VC	20	N	PK
+2	检验单ID	inspection_id                 	VC	20	N	PK
+3	检验日期	inspection_date	VC	20		
+4	样本编号	sample_NUmber	VC	20		
+5	分组ID	GROUP_ID	VC	20		
+6	患者类别	patient_type	VC	20		
+7	患者姓名	patient_name	VC	50		
+8	患者性别	patient_SEX	VC	10		
+9	患者年龄	patient_name	VC	20		
+10	患者科别	patient_dept	VC	50		
+11	患者科别名称	patient_dept_name	VC	50		
+12	患者病区	patient_ward	VC	50		
+13	患者病区名称	patient_ward_name	VC	50		
+14	标本种类	sample_class	VC	50		
+15	标本种类名称	sample_class_name	VC	50		
+16	临床诊断	clinical_diagnoses	VC	100		
+17	判断规则	judge_rule              	VC	4000		
+18	状态	rule_state	VC	50		0未判断
+1已判断
+19	生成人	Create_person	VC	50		
+20	生成时间	Create_time	VC	50		格式：yyyy-mm-dd hh:mm:ss
+21	备注	remark                        	VC	200		
+2.57.LIS5_Verify_rule_Intercept(标本验证拦截信息表) 
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	验证ID	JOB_ID	VC	20	N	PK
+2	检验单ID	inspection_id                 	VC	20	N	PK
+3	规则ID	rule_id                 	VC	20	N	PK
+4	生成人	Create_person	VC	50		
+5	生成时间	Create_time	VC	50		格式：yyyy-mm-dd hh:mm:ss
+6	备注	remark                        	VC	200		
+2.58.LIS5_Verify_rule_STAT (标本验证规则统计信息表) 
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	验证ID	JOB_ID	VC	20	N	PK
+2	规则ID	rule_id                 	VC	20	N	PK
+3	规则判断样本数	sample_num	N			
+4	拦截数	Intercept_num	N			
+5	生成人	Create_person	VC	50		
+6	生成时间	Create_time	VC	50		格式：yyyy-mm-dd hh:mm:ss
+7	备注	remark                        	VC	200		
+2.59.LIS5_Verify_item_STAT (标本验证分类统计信息表) 
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	验证ID	JOB_ID	VC	20	N	PK
+2	项目ID	item_id                 	VC	20	N	PK
+3	项目类型	item_type	VC	20		1项目分析
+2患者类别
+3患者科别
+4患者病区
+5标本种类
+4	项目名称	item_name	VC	50		
+5	项目排序号	item_sort	VC	20		
+6	判断样本数	sample_num	N			
+7	拦截数	Intercept_num	N			
+8	生成人	Create_person	VC	50		
+9	生成时间	Create_time	VC	50		格式：yyyy-mm-dd hh:mm:ss
+10	备注	remark                        	VC	200		
+2.60.LIS5_SAMPLE_VERIFY_INFO (标本验证信息表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	验证ID	verify_ID	VC	20	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	
+3	专业组 ID	Pgroup_id                 	VC	20	N	
+4	分组 ID	group_id                 	VC	20		
+5	验证次数	Verification_times	VC	20		
+6	验证总数	Verification_NUM	VC	20		
+7	标本范围	sample_SQL	VC	1000		
+8	总样本数	sample_NUM	N			
+9	一致数	Coincident _NUM	N			
+10	一致率	Coincident_RATE	DEC	8,2		
+11	不一致数	Abhorrent_num	N			
+12	不一致率	Abhorrent_RATE	DEC	8,2		
+13	验证状态	verify_state	VC	50		1、开始验证  2、结束验证
+14	操作人工号	LOGIN_ID                	VC	20		
+15	操作人姓名	USER_NAME	VC	50		
+16	操作电脑IP	JOB_IP	VC	20		
+17	操作电脑	JOB_COMPUTER	VC	50		
+18	备注	remark                        	VC	500		
+2.61.LIS5_sample_VERIFY_list (标本验证记录表) 
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	验证ID	verify_ID	VC	20	N	PK
+2	检验单ID	inspection_id                 	VC	20	N	PK
+3	验证时间	verify_time	VC	50		
+4	验证人员	verify_person	VC	50		
+5	验证原因	verify_Cause	VC	500		
+6	自动审核状态	auto_check	VC	50		
+7	人工审核状态	man_check	VC	50		
+8	验证状态	sample_verify_state	VC	50		0、一致  1、不一致
+9	备注	remark                        	VC	200		
+
+2.62.LIS5_inspect_rule_group (分组检验规则表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	规则 ID	rule_id                 	VC	20	N	PK
+2	科室ID	LAB_id                 	VC	20	N	PK
+3	专业组ID	Pgroup_ID	VC	20	N	PK
+4	分组 ID	group_id                 	VC	20	N	PK
+5	排序号	rule_sort	VC	10		
+6	规则状态	rule_state	VC	20		0、暂停
+1、启用
+7	首次登记人	FIRST_Rperson	VC	50		
+8	首次登记时间	FIRST_Rtime	VC	50		格式：yyyy-mm-dd hh:mm:ss
+9	最后修改人员	last_mperson	VC	50		
+10	最后修改时间	last_mtime	VC	50		
+11	备注	remark                        	VC	255		
+
+2.63.LIS5_inspection_sample_rule (标本规则信息表) 
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	检验单ID	inspection_id                 	VC	20	N	PK
+2	规则ID	rule_id                 	VC	20	N	PK
+3	规则类型	rule_type	VC	50		
+4	规则分类	rule_class	VC	50		
+5	规则名称	rule_name	VC	100		
+6	规则提示	rule_prompt	VC	1000		
+7	处理原因分类	dispose_class	VC	50		
+8	处理原因	dispose_cause	VC	500		
+9	处理时间	dispose_time	VC	50		
+10	处理人员	dispose_person	VC	50		
+11	处理电脑	dispose_computer	VC	50		
+12	规则状态	rule_state	VC	50		
+13	生成人	Create_person	VC	50		
+14	生成时间	Create_time	VC	50		格式：yyyy-mm-dd hh:mm:ss
+15	备注	remark                        	VC	200		
+
+2.64.LIS5_REPORT_AI_CHECK_list（智能审核记录表）
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	审核ID	CHECK_ID	VC	20	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	
+3	检验单ID	INSPECTION_id	VC	30	N	
+4	实验室ID	lab_ID	VC	20		
+5	专业组ID	PGROUP_ID	VC	20	N	
+6	检验分组ID	GROUP_ID	VC	20	N	
+7	院区ID	AREA_ID	VC	20		
+8	标本编号	sample_NUmber	VC	20		
+9	检验日期	inspection_DATE	VC	20	N	聚集索引 yyyymmdd
+10	审核日期	check_date	VC	20		
+11	审核类型	check_TYPE	VC	20		1智能审核
+2自动审核
+12	审核分类	CHECK_CLASS	VC	20		1当前审核
+2历史审核
+13	患者类别	patient_type	VC	20		
+14	患者主索引	PAT_ID	VC	30		
+15	患者住院号	OUTPATIENT_ID	VC	50		
+16	患者年龄	patient_sex	VC	20		
+17	患者年龄	patient_age	VC	20		
+18	患者科别	patient_dept	VC	50		
+19	患者病区	patient_WARD	VC	50		
+20	标本种类	SAMPLE_CLASS	VC	50		
+21	检验目的	TEST_ORDER	VC	500		
+22	临床诊断	clinical_diagnoses            	VC	100		
+23	分析项目	TEST_ITEM	VC	500		5001,5002
+24	审核人	check_person	VC	50		
+25	审核时间	check_time	VC	50		
+26	判断规则	JUDGE_RULE	VC	4000		201,202
+27	拦截规则	Intercept_RULE	VC	4000		201,202
+28	拦截规则类型	Intercept_rule_type	VC	200		
+29	拦截规则分类	Intercept_rule_CLASS	VC	200		
+30	拦截规则项目分类	Intercept_rule_item_clASS	VC	500		
+31	检验状态	inspectIOn_state	VC	20		
+32	审核状态	check_state	VC	50		9通过
+1不通过
+33	电脑IP	dispose_IP	VC	50		
+34	电脑名称	dispose_computer	VC	50		
+35	备注	remark	VC	200		
+2.65.LIS5_REPORT_manual_CHECK_list（人工审核记录表）
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	审核ID	CHECK_ID	VC	20	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	
+3	检验单ID	INSPECTION_id	VC	30	N	
+4	审核日期	check_date	VC	20		
+5	审核类型	check_TYPE	VC	20		
+6	审核人	check_person	VC	50		
+7	审核时间	check_time	VC	50		
+8	审核状态	check_state	VC	50		
+9	电脑IP	dispose_IP	VC	50		
+10	电脑名称	dispose_computer	VC	50		
+11	原因分类	cause_type	VC	100		多个原因分类用逗号分开，不能修改原来分类
+12	不通过原因	nopass_CAUSE	VC	500		
+13	首次登记人	FIRST_Rperson	VC	50		
+14	首次登记时间	FIRST_Rtime	VC	50		格式：yyyy-mm-dd hh:mm:ss
+15	最后修改人员	last_mperson	VC	50		
+16	最后修改时间	last_mtime	VC	50		
+17	备注	remark                        	VC	200		
+2.66.LIS5_SAMPLE_EXp_VERIFY_INFO (标本专家验证信息表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	验证ID	verify_ID	VC	20	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	
+3	专业组 ID	Pgroup_id                 	VC	20	N	
+4	分组 ID	group_id                 	VC	20		
+5	排序号	verify_SORT	VC	20		
+6	发起人	sponsor	VC	50		
+7	专家人数	expert_num	N			
+8	抽样样本数	sample_NUM	N			
+9	至少项目数	item_NUM	N			
+10	标本生成规则	generate_rule	VC	20		
+11	验证目的	verify_objective	VC	500		
+12	开始日期	start_date	VC	50		
+13	结束日期	end_date	VC	50		
+14	验证状态	verify_state	VC	50		0、未完成  1、已完成
+15	首次登记人	FIRST_Rperson	VC	50		
+16	首次登记时间	FIRST_Rtime	VC	50		
+17	最后修改人员	last_mperson	VC	50		
+18	最后修改时间	last_mtime	VC	50		
+19	备注	remark                        	VC	200		
+2.67.LIS5_sample_VERIFY_EXPERT(标本专家验证专家记录表) 
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	验证ID	verify_ID	VC	20	N	PK
+2	专家ID	expert_id                 	VC	20	N	PK
+3	通过数	Accepted_num	N			
+4	不通过数	Rejected_num	N			
+5	真阴数	T_neg_num	N			
+6	真阳数	T_POS_num	N			
+7	假阴数	F_neg_num	N			
+8	假阳数	F_POS_num	N			
+9	敏感度	Sensitivity	DEC	(8,3)		
+10	特异性	Specificity	DEC	(8,3)		
+11	阳性预期值	pos_Expected_value	DEC	(8,3)		
+12	阴性预期值	NEG_Expected_value	DEC	(8,3)		
+13	验证状态	verify_state	VC	20		0、未完成  1、已完成
+14	备注	remark                        	VC	200		
+2.68.LIS5_samPle_expVERIFY_list (标本专家验证记录表) 
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	验证ID	verify_ID	VC	20	N	PK
+2	专家ID	expert_id                 	VC	20	N	PK
+3	检验单ID	inspection_id                 	VC	20	N	PK
+4	验证时间	verify_time	VC	50		
+5	验证方式	verify_mode	VC	50		
+6	原因分类	cause_type	VC	100		多个原因分类用逗号分开，不能修改原来分类
+7	不通过原因	nopass_CAUSE	VC	500		
+8	审核状态	check_state	VC	20		1、通过  2、不通过
+9	备注	remark                        	VC	200		
+2.69.LIS5_SAMPLE_JOB（标本检测任务表）
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	任务ID	JOB_ID	VC	20	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	
+3	通讯管理单元ID	com_unit	VC	20	N	
+4	类型	JOB_TYPE	VC	20	N	
+5	标本ID	sample_ID	VC	20	N	
+6	标本日期	JOB_DATE	VC	20	N	
+7	标签ID	requisition_ID	VC	20		
+8	分组ID	group_ID	VC	20		
+9	检验单ID	inspection_ID	VC	30		
+10	任务模块	job_MODULE	VC	50		
+11	用户ID	login_ID	VC	20		
+12	用户姓名	user_name	VC	50		
+13	检验人员	inspection_person	VC	50		
+14	任务状态	JOB_state	VC	50		
+15	生成时间	JOb_time	VC	50		
+16	执行人员	execute_person	VC	50		
+17	执行时间	execute_time	VC	50		
+18	备注	remark	VC	200		
+
+2.70.LIS5_SAMPLE_job_log（标本检测日志表）
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	任务ID	JOB_ID	VC	20	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	
+3	通讯管理单元ID	com_unit	VC	20	N	
+4	类型	JOB_TYPE	VC	20	N	
+5	标本ID	sample_ID	VC	20	N	
+6	标本日期	JOB_DATE	VC	20	N	
+7	标签ID	requisition_ID	VC	20		
+8	分组ID	group_ID	VC	20		
+9	检验单ID	inspection_ID	VC	30		
+10	任务模块	job_MODULE	VC	50		
+11	用户ID	login_ID	VC	20		
+12	用户姓名	user_name	VC	50		
+13	检验人员	inspection_person	VC	50		
+14	任务状态	JOB_state	VC	50		
+15	生成时间	JOb_time	VC	50		
+16	执行人员	execute_person	VC	50		
+17	执行时间	execute_time	VC	50		
+18	备注	remark	VC	200		
+
+
+2.71.LIS5_INSPECT_EXPLAIN_report （结果解释报告信息表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	报告ID	report_id                 	VC	20	N	PK
+2	模板ID	template_id                 	VC	20	N	
+3	检验单ID	INSPECTION_ID	VC	30	N	
+4	分组ID	group_ID	VC	20	N	
+5	检验日期	inspection_date               	VC	8		
+6	标本编号	sample_number                 	VC	20		
+7	申请单ID	requisition_id                	VC	20		
+8	报告编号	REPORT_code	VC	50		
+9	结果解释	REPORT_explain	VC	4000		
+10	诊断及建议	Diagnosis_advise	VC	4000		
+11	解释人员	explain_person	VC	50		
+12	解释时间	explain_TIME	D			
+13	审核人员	check_person	VC	50		
+14	审核日期	check_time	D			
+15	文件路径	FILE_PATH	VC	200		
+16	报告状态	REPORT_state                 	VC	20		1未审核
+1已审核
+17	首次登记人	FIRST_Rperson	VC	50		
+18	首次登记时间	FIRST_Rtime	VC	50		
+19	最后修改人员	last_mperson	VC	50		
+20	最后修改时间	last_mtime	VC	50		
+21	备注	remark	VC	200		
+2.72.LIS5_inspect_change_LOG (标本信息修改记录表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	修改记录ID	LOG_ID    	VC	50	N	PK
+2	记录日期	LOG_YEAR	VC	10	N	PK 聚集索引 yyyymmdd
+3	标本ID	requisition_id                	VC	20	N	
+4	标签ID	REQ_id                	VC	20	N	
+5	检验单ID	inspection_id                 	VC	30	N	
+6	医疗机构ID	hospital_ID	VC	20	N	
+7	模块ID	module_Id	VC	20	N	
+8	信息字段	field_code               	VC	30	N	
+9	信息名称	field_name          	VC	50		
+10	操作界面	operate_menu	VC	50		
+11	操作分类	operate_class	VC	50		
+12	修改前内容	before_content	VC	500		
+13	修改后内容	after_content	VC	500		
+14	修改时间	change_time	D			
+15	修改人员	change_person	VC	50		
+16	修改电脑	change_computer	VC	50		
+17	修改原因分类	change_class	VC	50		
+18	修改原因	change_cause	VC	500		
+19	状态	change_state	VC	10		
+20	备注	remark        	VC	50		
+2.73.LIS5_RESULT_change_LOG (结果修改记录表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	修改记录ID	LOG_ID    	VC	50	N	PK
+2	记录日期	LOG_YEAR	VC	10	N	PK聚集索引yyyymmdd
+3	修改类型	change_type	VC	30	N	结果修改
+结果增加
+4	标本ID	requisition_id                	VC	20	N	
+5	标签ID	REQ_id                	VC	20	N	
+6	检验单ID	inspection_id                 	VC	30	N	
+7	模块ID	module_Id	VC	20	N	
+8	操作界面	operate_menu	VC	50		
+9	操作分类	operate_class	VC	50		
+10	项目ID	test_item_id                  	VC	20	N	
+11	医疗机构ID	hospital_ID	VC	20	N	
+12	原定量结果	quantitative_result           	VC	50		
+13	原定性结果	qualitative_result            	VC	50		
+14	新定量结果	quantitative_result_N           	VC	50		
+15	新定性结果	qualitative_result_N            	VC	50		
+16	修改时间	change_time	D			
+17	修改人员	change_person	VC	50		
+18	修改电脑	change_computer	VC	50		
+19	修改原因分类	change_class	VC	50		
+20	修改原因	change_cause	VC	500		
+21	状态	change_state	VC	10		
+22	备注	remark        	VC	50		
+
+2.74.LIS5_inspect_numBER_LOG (标本编号调整记录表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	记录ID	LOG_ID    	VC	50	N	PK
+2	记录日期	LOG_YEAR	VC	10	N	PK聚集索引yyyymmdd
+3	调整类型	change_type	VC	30	N	编号修改
+信息复制
+4	标本ID	requisition_id                	VC	20	N	
+5	标签ID	REQ_id                	VC	20	N	
+6	检验单ID	inspection_id                 	VC	30	N	
+7	医疗机构ID	hospital_ID	VC	20	N	
+8	模块ID	module_Id	VC	20	N	
+9	操作界面	operate_menu	VC	50		
+10	操作分类	operate_class	VC	50		
+11	原检验单ID	inspection_id_n                 	VC	30		
+12	调整时间	change_time	D			
+13	调整人员	change_person	VC	50		
+14	调整电脑	change_computer	VC	50		
+15	调整原因分类	change_class	VC	50		
+16	调整原因	change_cause	VC	500		
+17	状态	change_state	VC	10		
+18	备注	remark        	VC	50		
+2.75.LIS5_INSPECT_DEL_LOG (标本信息删除记录表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	日志ID	LOG_ID    	VC	50	N	PK
+2	记录日期	LOG_YEAR	VC	10	N	Pk聚集索引yyyymmdd
+3	标本ID	requisition_id                	VC	20	N	
+4	标签ID	REQ_id                	VC	20	N	
+5	检验单ID	inspection_id                 	VC	30	N	
+6	医疗机构ID	hospital_ID	VC	20	N	
+7	模块ID	module_Id	VC	20	N	
+8	操作界面	operate_menu	VC	50		
+9	操作分类	operate_class	VC	50		
+10	删除时间	DEL_time	D			
+11	删除人员	DEL_person	VC	50		
+12	删除电脑	DEL_computer	VC	50		
+13	删除原因分类	DEL_class	VC	50		
+14	删除原因	DEL_cause	VC	500		
+15	状态	DEL_state	VC	10		
+16	备注	remark        	VC	50		
+2.76.LIS5_INSPECT_DEL_list (标本信息删除明细表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	明细ID	list_ID    	VC	50	N	PK
+2	记录日期	LOG_YEAR	VC	10	N	Pk聚集索引yyyymmdd
+3	日志ID	LOG_ID    	VC	50	N	
+4	信息分类	table_class	VC	50	N	
+5	信息名称	table_name          	VC	50		
+6	删除内容	DEL_content	TEXT			
+7	状态	DEL_state	VC	10		
+8	备注	remark        	VC	50		
+
+2.77.LIS5_MSG_INFO (消息信息表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	消息ID	MSG_ID	VC	50	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	
+3	院区ID	aREA_ID	VC	20	N	
+4	实验室ID	LAB_ID	VC	20	N	
+5	模块ID	module_Id	VC	20	N	
+6	消息对应ID	msg_CorrID	VC	50	N	第三方消息来源对应ID
+7	单元ID	unit_Id	VC	50	N	
+8	单元类型	unit_type	VC	20	N	消息通知对象固定基础数据
+9	消息日期	mag_date	D		N	聚集索引yyyy-mm-dd
+10	消息分类	msg_class                     	VC	50		消息分类固定基础数据
+11	消息类型	msg_type                      	VC	50		1消息生成
+2消息确认
+3消息消除生成
+4消息撤销
+12	消息生成操作	MSG_operate	VC	50		
+13	消息主题	msg_title                     	VC	500		
+14	消息内容	msg_content                   	VC	4000		
+15	消息级别	msg_level                     	VC	50		
+16	消息URL	msg_url	VC	500		
+17	消息有效时限	msg_valid_time	D			
+18	消息发送人员	SEND_PERSON	VC	50		
+19	消息发送时间	SEND_TIME	D			
+20	消息发送电脑	SEND_COMPUTER	VC	50		
+21	消息超时时限	msg_overtime	N			分钟
+0表示不需要超时提示
+22	消息状态	msg_state	VC	50		0未处理
+1已处理
+10已作废
+23	消息接收人员	reCEIVE_PERSON	VC	50		
+24	消息接收时间	reCEIVE_TIME	VC	20		
+25	消息接收电脑	reCEIVE_COMPUTER	VC	20		
+26	备注	remark                        	VC	500		
+2.78.LIS5_MSG_SEND_LIST(消息发送记录表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	消息ID	MSG_ID	VC	50	N	PK
+2	模块客户端ID	CLIENT_MID	VC	50	N	PK
+3	客户端ID	client_ID	VC	20	N	PK
+4	消息接收IP	client_IP	VC	50		
+5	模块ID	module_ID	VC	20	N	
+6	单元ID	unit_ID	VC	20	N	
+7	单元类型	unit_type	VC	20	N	
+8	提示方式	MSG_TIPS_TYPE	VC	20		语音；
+闪烁；
+自动弹出
+进行组合
+9	端口	MSG_PORT	VC	20		消息接收端口号
+10	消息终端状态	client_state	VC	50		0未处理
+1已处理
+11	备注	remark                        	VC	500		
+2.79.LIS5_inspect_Email_LOG (邮件发送记录表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	记录ID	email_ID    	VC	50	N	PK
+2	检验单ID	inspection_id                 	VC	30	N	
+3	医疗机构ID	hospital_ID	VC	20	N	
+4	模块ID	module_Id	VC	20	N	
+5	邮件分类	email_class	VC	20	N	1报告单
+2统计报表
+6	操作界面	operate_menu	VC	50		
+7	操作分类	operate_class	VC	50		
+8	邮件地址	E_mail                 	VC	50		
+9	发送时间	send_time	D			
+10	发送人员	send_person	VC	50		
+11	发送电脑	send_computer	VC	50		
+12	完成时间	finish_time	D			
+13	状态	send_state	VC	10		0未发送
+1已发送
+14	备注	remark        	VC	50		
+2.80.LIS5_USER_LOGIN_LOG（用户登录记录表）
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	记录ID	LOG_ID	VC	50	N	PK
+2	记录日期	LOG_YEAR	VC	10	N	Pk聚集索引yyyymmdd
+3	用户ID	useR_NO	VC	20		
+4	医疗机构ID	HOSPITAL_ID	VC	20		
+5	登录名	LOGIN_ID	VC	20		
+6	登录时间	LOGIN_TIME	D			
+7	退出时间	logout_TIME	D			
+8	是否登录成功	IF_sUCCESS	VC	10		1登录成功
+2登录失败
+9	登录电脑	LOGIN_COMPUTER	VC	50		
+10	登录电脑IP	LOGIN_IP	VC	50		
+11	登录模块	LOGIN_MODULE	VC	50		
+12	模块版本	MODULE_VER	VC	20		
+13	备注	REMARK	VC	200		
+
+3.医嘱相关表
+3.1lIS5_pat_info(患者信息表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	患者ID	patient_id                 	VC	20	N	PK
+2	医疗机构ID	hospital_ID	VC	20	N	
+3	登记日期	register_date               	VC	8		
+4	身份证ID	ID_CARD	VC	50		
+5	患者主索引	pat_id                  	VC	30		
+6	住院号	outpatient_id                 	VC	50		
+7	病人唯一号	inpatient_id                  	VC	50		
+8	次数	visit_num	VC	10		
+9	收费类别	charge_type                   	VC	50		
+10	患者姓名	patient_name                  	VC	50		
+11	患者性别	patient_sex                   	VC	10		
+12	患者年龄	patient_age                      	VC	20		
+13	出生年月	patient_birthday	VC	50		
+14	身高	PATIENT_ HEIGHT	N			
+15	体重	PATIENT_WEIGHT	N			
+16	手机号	mobileno	VC	50		
+17	身份证号	Id_card	VC	30		
+18	地址	patient_address	VC	100		
+19	国籍	patient_nationality	VC	50		
+20	民族	patient_nation                	VC	50		
+21	民族名称	patient_nation_name           	VC	50		
+22	ABO血型	bloodtype_abo                 	VC	20		
+23	RH血型	bloodtype_rh                  	VC	20		
+24	RH表型	rh_phenotype	VC	20		
+25	职业	patient_CAREER	VC	50		
+26	婚姻	patient_MARRIED	VC	50		
+27	教育程度	patient_EDUCATION	VC	50		
+28	联系电话	Contact_tel	VC	200		
+29	输血史	transfusion_history	VC	200		
+30	既往史	Previous_history	VC	200		
+31	个人史	PERSON_HISTORY	VC	200		
+32	家族史	FAMILY_HISTORY	VC	200		
+33	过敏药物	allergy_drug	VC	200		
+34	不良反应药物	adverse_drug	VC	200		
+35	乙肝情况	hBV_status	VC	20		
+36	HCV情况	hcv_status	VC	20		
+37	HIV情况	hiv_status	VC	20		
+38	梅毒情况	syphilis_status	VC	20		
+39	拼音码	spell_code	VC	50		
+40	VIP标识	VIP_ INDICATOR	N			
+41	状态	patient_state                  	VC	10		
+42	首次登记人	FIRST_Rperson	VC	50		
+43	首次登记时间	FIRST_Rtime	D			yyyy-mm-dd hh:mm:ss
+44	最后修改人员	last_mperson	VC	50		
+45	最后修改时间	last_mtime	D			
+46	备注	remark	VC	200		
+3.2LIS5_pat_Visit_LIST(患者就诊记录表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	就诊ID	visiti_id                 	VC	40	N	PK
+2	患者ID	patient_id                 	VC	20	N	
+3	医疗机构ID	hospital_ID	VC	20	N	
+4	院区ID	AREA_ID	VC	20	N	
+5	就诊次数	visit_Num	N			
+6	就诊日期	visiting_date               	D			yyyy-mm-dd
+7	患者类别	patient_type	VC	20	N	1住院
+2门诊
+3
+8	患者唯一号	inpatient_id                  	VC	50		
+9	患者主索引	pat_id                  	VC	30		
+10	住院号	outpatient_id                 	VC	50		
+11	病人唯一号	inpatient_id                  	VC	50		
+12	科别ID	dept_LIS_ID	VC	20		
+13	科别HISID	dept_HIS_ID	VC	20		
+14	科别名称	dept_name             	VC	50		
+15	病区ID	ward_lis_Id              	VC	20		
+16	病区HISID	ward_his_id              	VC	20		
+17	病区名称	ward_name             	VC	50		
+18	护理单元ID	nurse_lis_Id              	VC	20		
+19	护理单元HISID	nurse_his_id              	VC	20		
+20	护理单元名称	nurse_name             	VC	50		
+21	患者床号	patient_bed                   	VC	20		
+22	主管医生	charge_doctor	VC	20		
+23	主管护士	charge_nurse	VC	20		
+24	入院日期	INHOSP_Date	D			
+25	出院日期	OUTHOSP_Date	D			
+26	患者状态	visiti_state	VC	20		1在院
+2出院
+27	首次登记人	FIRST_Rperson	VC	50		
+28	首次登记时间	FIRST_Rtime	D			yyyy-mm-dd hh:mm:ss
+29	最后修改人员	last_mperson	VC	50		
+30	最后修改时间	last_mtime	D			
+31	备注	remark	VC	200		
+3.3LIS5_PAT_clin_diagnoses (诊断信息表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+1	诊断ID	clinical_ID	VC	50	N	PK
+2	患者ID	patient_id                 	VC	20	N	
+3	就诊ID	visiti_id                 	VC	20	N	
+4	诊断类型	diagnoses_type	VC	30		
+5	诊断编号	clinical_diagnoses _NO	VC	50		
+6	诊断名称	clinical_diagnoses _NAME	VC	100		
+7	诊断医师	clinical_doctor	VC	50		
+8	诊断时间	clinical_time	D			
+9	诊断科室	clinical_dept	VC	50		
+10	疾病诊断描述	clinical_desc	VC	500		
+11	是否主诊断	IF_Main_clinical	VC	10		0否
+1是
+12	是否待查	IF_UNKNOWN	VC	10		0否
+1是
+13	是否传染	IF_INFECT	VC	10		0否
+1是
+14	状态	diagnoses_state	VC	10		
+15	首次登记时间	first_Rtime	D			
+16	首次登记人员	first_Rperson	VC	50		
+17	最后修改人员	last_mperson	VC	50		
+18	最后修改时间	last_mtime	D			
+19	备注	remark                        	VC	200		
+3.4LIS5_REQ_INFO(申请信息表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+51	申请ID	req_id                	VC	20	N	PK
+52	医疗机构ID	hospital_ID	VC	20	N	申请医疗机构ID
+53	院区ID	AREA_ID	VC	20	N	
+54	患者主索引ID	pat_id                 	VC	30	N	
+55	申请日期	req_DATE	D		N	YYYY-mm-DD
+56	申请HISID	req_HIS_ID	VC	30		
+57	病人ID	patient_id                 	VC	30		
+58	检查类别	inspect_type	VC	20		
+59	病人ID	patient_id                 	VC	30		
+60	病人类别	patient_type                  	VC	20		
+61	住院号	outpatient_id                  	VC	50		
+62	病人唯一号	intpatient_id                 	VC	50		
+63	次数	visit_num	VC	10		
+64	收费类别ID	charge_type_ID                   	VC	20		
+65	收费类别	charge_type_NAME                   	VC	50		
+66	姓名	patient_name                  	VC	50		
+67	性别	patient_sex                   	VC	2		
+68	年龄	patient_age                   	VC	20		
+69	出生年月	patient_birthday	VC	20		
+70	民族	patient_nation                	VC	50		
+71	身份证号	Id_card	VC	30		
+72	地址	patient_address	VC	100		
+73	患者电话	patient_phone	VC	50		
+74	用药信息	take_medicine	VC	50		
+75	是否饮食	diet	VC	50		
+76	RH血型	bloodtype_rh                  	VC	20		
+77	ABO血型	bloodtype_abo                 	VC	20		
+78	RH表型	rh_phenotype	VC	20		
+79	科别ID	dept_LIS_ID	VC	20		
+80	科别HISID	dept_HIS_ID	VC	20		
+81	科别名称	dept_name             	VC	50		
+82	病区ID	ward_lis_Id              	VC	20		
+83	病区HISID	ward_his_id              	VC	20		
+84	病区名称	ward_name             	VC	50		
+85	护理单元ID	nurse_lis_Id              	VC	20		
+86	护理单元HISID	nurse_his_id              	VC	20		
+87	护理单元名称	nurse_name             	VC	50		
+88	床号	patient_bed                   	VC	20		
+89	特殊条件	especial_condition            	VC	20		
+90	传染标记	Infection                     	VC	50		
+91	临床诊断	clinical_diagnoses            	VC	100		
+92	简要病史	medical_record                	VC	200		
+93	开单科室	req_dept              	VC	50		
+94	开单时间	req_time              	VC	20		
+95	开单人员ID	req_person_LISID           	VC	20		
+96	开单人员HISID	req_persoN_HISID           	VC	20		
+97	开单人员	req_person            	VC	50		
+98	开单人员电话	req_person_phone            	VC	50		
+99	开单电脑	req_computer           	VC	50		
+100	执行科室	execute_dept                  	VC	50		
+101	执行时间	execute_time                  	VC	20		
+102	执行人员	execute_person                	VC	50		
+103	执行电脑	execute_computer              	VC	50		
+104	收费时间	charge_time                   	VC	20		
+105	收费人员	charge_person                 	VC	50		
+106	收费科室	charge_DEPT                 	VC	20		
+107	收费电脑	charge_computer                 	VC	50		
+108	申请来源	Req_from	VC	50		
+109	检验科室	inspect_dept	VC	50		
+110	孕妇编号	GESTATIONAL_NO	VC	20		
+111	孕妇孕周	GESTATIONAL_WEEKS	VC	20		
+112	收费状态	charge_state                  	VC	20		
+113	申请状态	req_state             	VC	20		0未完成
+1已完成
+9已作废
+114	修改状态	change_state             	VC	20		1新增
+2生成
+9作废
+115	首次登记人	FIRST_Rperson	VC	50		
+116	首次登记时间	FIRST_Rtime	D			
+117	最后修改人员	last_mperson	VC	50		
+118	最后修改时间	last_mtime	D			
+119	备注	remark	VC	200		
+3.5LIS5_REQ_ITEM(申请辅助项目信息表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+34	申请ID	req_id                	VC	20	N	PK
+35	项目ID	ITEM_ID	VC	20	N	PK
+1	排序号	item_sort                	VC	20		
+2	中文名称	item_cname                  	VC	100		
+36	项目结果	item_result	VC	500		
+37						
+38						
+39						
+40	项目状态	item_state             	VC	20		
+41	首次登记人	FIRST_Rperson	VC	50		
+42	首次登记时间	FIRST_Rtime	D			
+43	最后修改人员	last_mperson	VC	50		
+44	最后修改时间	last_mtime	D			
+45	备注	remark	VC	200		
+3.6LIS5_REQ_ITEM(医嘱项目信息表)
+序号	中文名称	字段名	类型	长度	NULL	说明
+46	申请ID	req_id                	VC	20	N	PK
+47	诊疗项目ID	Citem_HISid                	VC	20	N	PK
+48	诊疗项目名称	Citem_name            	VC	50		
+49	标本种类ID	sample_class_LISID                  	VC	50		
+50	标本种类HISID	sample_class_HISID                  	VC	50		
+51	标本种类名称	sample_class_name	VC	50		
+52	采集部位ID	sampling_position_LISID                  	VC	50		
+53	采集部位HISID	sampling_position_HISID                  	VC	50		
+54	采集部位名称	sampling_position_name	VC	50		
+55	数量	ITEM_AMOUNT                      	DEC	10,2		
+56	单价	ITEM_charge                        	DEC	10,2		
+57	记费折扣	item_discount	DEC	10,2		
+58	金额	ITEM_charge                        	DEC	10,2		
+59	项目执行状态	citem_state             	VC	20		0未执行
+1已执行
+2已采集
+3已接收
+4已完成
+10已撤销
+11已删除
+60	首次登记人	FIRST_Rperson	VC	50		
+61	首次登记时间	FIRST_Rtime	D			
+62	最后修改人员	last_mperson	VC	50		
+63	最后修改时间	last_mtime	D			
+64	备注	remark	VC	200		
