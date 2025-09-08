@@ -1,0 +1,1837 @@
+
+第一章 表的分类	5
+第二章 系统字典表	6
+1. HerAclRole 系统角色访问控制表	6
+2. HerAclUser 系统用户访问控制表	6
+3. HerCodePY 拼音编码表	6
+4. HerCodePY 五笔编码表	6
+5. HerDepart 部门(科室)表	6
+6. HerDepartUser 部门与系统用户关联表	8
+7. HerInputTable 输入模板表	8
+8. HerPermission 权限表	8
+9. HerRole 系统角色表	8
+10. HerSetting 系统设置表	9
+11. HerSys 系统配置表	9
+12. HerUser 系统用户表	10
+13. HerUserRole 系统用户与系统角色关联表	10
+14. HerWorkStation 系统客户端表	10
+15. HerWorkingStation 系统客户端运行表	11
+第三章 常规字典表	12
+1. DictAgeUnit 年龄单位表	12
+2. DictArea 地区表	12
+3. DictBloodType 血型表	12
+4. DictCountry 国家表	12
+5. DictEducation 教育表	13
+6. DictGeneralInput 通用输入模板表	13
+7. DictICD10 结论ICD-10表	13
+8. DictIdentity 身份表	14
+9. DictInformWay 通知方式表	14
+10. DictJobClass 工作类型表	14
+11. DictMarriage 婚姻表	14
+12. DictNation 民族表	15
+13. DictOccupation 职业表	15
+14. DictPayWay 支付方式表	15
+15. DictReceiptType 发票(收据)类型表	16
+16. DictRelationship 人际关系表	16
+17. DictSection 总检科室表	16
+18. DictSex 性别表	16
+19. DictTitle 职称表	17
+第四章 业务字典表	18
+1. BasAgeDelimiter 年龄分组表	18
+2. BasAskItem 问卷式检查项目表	18
+3. BasBodypart 检查部位表	18
+4. BasClassOfFeeItem 收费项目分类表	18
+5. BasClassOfReceipt 发票(收据)分类表	19
+6. BasConclusion 体检结论表	19
+7. BasConclusionType 体检结论分类表	20
+8. BasCoopOrg 外送机构表	20
+9. BasDepartConclusionType 体检结论分类与分科关联表	20
+10. BasExamFeeItem 收费项目表	20
+11. BasExamFeeItemDetail 收费项目与检查项目关联表	21
+12. BasExamFeeItemSubset 收费项目组合与单项关联表	22
+13. BasExamItem 检查项目表	22
+14. BasExamItemBodypart 检查项目与检查部位关联表	23
+15. BasExamItemType 检查项目类型表	23
+16. BasExamItemValue 检查项目体征词表	24
+17. BasExamItemValueMulti 检查项目体征词多选扩充表	24
+18. BasExamPlace 体检场所表	24
+19. BasExamSuite 体检套餐表	25
+20. BasExamSuiteDetail 体检套餐与收费项目关联表	25
+21. BasExamType 体检类型表	25
+22. BasInterfaceMark 接口收发标志表	26
+23. BasLabType 检验样本类型表	26
+24. BasOrgClass 体检团体类型表	26
+25. BasPatientClass 体检者类型表	27
+26. BasQtyLimit 体检量控制表	27
+27. BasQueueSite 排队分区表	27
+28. BasReportItem 报告项目表	28
+29. BasReportItemDetail 报告项目与检查项目关联表	28
+30. BasSaleDepart 销售部门表	28
+31. BasSectionUser 总检科室与系统用户关联表	28
+32. BasSmsTip 短信信息表	29
+33. BasSmsTipType 短信信息分类表	29
+34. BasSpecialConclusionList 特殊结论列表	29
+35. BasSpecialEntry 特殊条目列表	29
+36. BasTempDepart 科室模板表	30
+第五章 业务数据表	31
+1. PeisMemberCard 会员卡表	31
+2. PeisOrg 体检团体表	31
+3. PeisOrgReservation 体检团体任务表	32
+4. PeisOrgReservationCharge 体检团体结算表	32
+5. PeisOrgReservationDetail 体检团体任务与收费项目关联表	33
+6. PeisOrgReservationGroup 体检团体任务分组表	33
+7. PeisOrgReservationPatient 体检团体体检者任务预定表	34
+8. PeisOrgReservationReceipt 体检团体任务发票表	34
+9. PeisOrgReservationSale 体检团体任务销售表	35
+10. PeisPatient 体检者表	35
+11. PeisPatientArchive 体检者档案表	38
+12. PeisPatientAskItem 体检者问卷式检查项目表	39
+13. PeisPatientCharge 体检者缴费表	39
+14. PeisPatientChargeOnCredit 体检者记帐缴费表	40
+15. PeisPatientConclusion 体检者体检结论表	40
+16. PeisPatientExamDepart 体检者分科检查表	40
+17. PeisPatientExamItem 体检者检查项目表	41
+18. PeisPatientExamItemPicture 体检者检查项目图像表	42
+19. PeisPatientExamItemValue 体检者检查项目体征表	42
+20. PeisPatientFeeItem 体检者收费项目表	42
+21. PeisPatientFeeItemReturned 体检者收费项目退项表	43
+22. PeisPatientQueueOutgoing 体检者登记单明细发送表	44
+23. PeisPatientReceipt 体检者发票表	44
+24. PeisPatientReceiptOnCredit 体检者记帐方式发票表	45
+25. PeisPatientRegisterSheet 体检者登记单表	45
+26. PeisPatientRegisterSheetDetail 体检者登记单与收费项目关联表	46
+27. PeisStatGeneral 体检者综合样本表	46
+28. PeisStatGeneralDetail 体检者综合样本体检者明细表	46
+29. VolatConclusionTrueBase 体检者综合样本相关基数表	47
+30. VolatConclusionTrueBaseOrg 体检者团检任务样本相关基数表	47
+31. VolatDebugLog 系统调试日志表	47
+第六章 基本表间关系	48
+
+
+
+表的分类
+除了_Xxxx为可以不要的测试用表外, 数据表分为两大类:
+字典表:	HerXxxx即系统字典表, BasXxxx业务字典表, DictXxxx常规字典表
+业务数据表:	其它表
+
+
+系统字典表
+
+1. HerAclRole
+系统角色访问控制表	
+字段	类型(长度)	说明
+ID_AclRole	int 	PK, 自增长
+ID_Role	int NOT NULL	FK, 系统角色ID
+ID_Permission	int NOT NULL	FK, 系统权限ID
+Val	bit NOT NULL 	1/0: 是否拥有
+
+2. HerAclUser
+系统用户访问控制表	
+字段	类型(长度)	说明
+ID_AclUser	int 	PK, 自增长
+ID_User	int NOT NULL	FK, 系统用户ID
+ID_Permission	int NOT NULL	FK, 系统权限ID
+Val	bit NOT NULL 	1/0: 是否拥有
+
+3. HerCodePY
+拼音编码表	
+字段	类型(长度)	说明
+ID_PY	int 	PK, 自增长
+HanZi	nvarchar (4) 	汉字
+Py_Code	varchar (10) 	拼音
+Py_Code2	varchar (20) 	第二拼音
+
+4. HerCodePY
+五笔编码表	
+字段	类型(长度)	说明
+ID_WB	Int 	PK, 自增长
+HanZi	nvarchar (4) 	汉字
+Wb_Code	nvarchar (10) 	五笔字型编码
+
+5. HerDepart
+部门(科室)表	
+字段	类型(长度)	说明
+ID_Depart	Int 	PK, 自增长
+SysManMark	varchar (20) 	系统维护标记
+Depart_Name	varchar (30) 	科室名称
+Depart_NameAbr	varchar (10) 	科室名称缩写
+Depart_NamePrn	varchar (50) 	科室打印名称
+Depart_NameEng	varchar (50) 	科室英文名称
+Depart_NameEngAbr	varchar (12) 	科室英文名称缩写
+Depart_Code	varchar (20) 	科室编码
+Depart_Type	varchar (4) 	科室类型
+Depart_HisType	varchar (4) 	科室HIS类型
+ID_Manager	int NULL	FK, 科室负责人ID
+ID_Father	int NULL	FK, 自引用, 上级科室ID
+ID_BEFI_ResPic	int NULL	FK(收费项目表), 结论图片ID,
+F_UnList	bit NOT NULL	非功能科室
+F_GuideDepartOnly	bit NOT NULL	简单指引
+F_NoSummary	bit NULL	小结: 不打小结
+F_DetailNormal	bit NOT NULL	小结: 详细
+F_NoGrouping	bit NULL	小结: 不归并
+F_DiffFields	bit NOT NULL	小结: 不同报告
+F_DiffFields2	bit NULL	小结: 不同报告2
+F_HasInterface	bit NOT NULL	有接口
+DepartDoctorNaming	varchar (20) 	医师命名
+F_AutoDefault	bit NOT NULL	自动缺省
+F_AutoDefaultConclusion	bit NOT NULL	自动缺省小结
+F_DepartDoctorReq	bit NOT NULL	医师必填
+F_AutoApprove	bit NOT NULL	自动审核
+F_NoConcBeforeAppr	bit NOT NULL	审核前不小结
+F_UseDailyNo	bit NULL	每日编号(不使用)
+F_Dep_NoWait	bit NULL	不必等待科室
+GuidanceGroup	int NULL	底单分组
+ID_QueueSite	int NULL	FK, 队列ID
+PacsType	varchar (10) 	影像类型: CT/CR/DR/…
+RemoteServer	varchar (30) 	远程服务器
+RemoteDatabase	varchar (30) 	远程数据库
+RemoteUsername	varchar (30) 	远程用户名
+RemotePassword	varchar (30) 	远程用户密码(加密)
+PicPrintStyle	varchar (10) 	图片打印: FullPage/HalfPage/<空>
+PacsInterfaceFlag	varchar (50) 	接口标志
+Input_Code	varchar (8) 	输入码
+Disp_Order	int NOT NULL	行序
+SummaryNaming	varchar (20) 	小结: 小结命名
+SummaryNormal	text	小结: 正常小结
+SummarySubDelimiter	varchar (20) 	小结: 条内分隔符
+SummarySubDelimiter2	varchar (20) 	小结: 条内分隔符2
+SummaryDelimiter	varchar (20) 	小结: 条目结束符
+SummaryGroupSemicolon	varchar (20) 	小结: 归并符
+SummarySubSerialNoChar	varchar (10) 	小结: 条内序号
+SummarySerialNoChar	varchar (10) 	小结: 条目序号
+F_NoReport	bit NULL	不打报告
+DirectionGuide	varchar (40) 	科室路线说明
+Note	varchar (30) 	备注
+DepartCodeX	varchar (50) 	导出代码
+
+6. HerDepartUser
+部门与系统用户关联表	
+字段	类型(长度)	说明
+ID_DepartUser	int 	PK, 自增长
+ID_Depart	int NOT NULL	FK, 部门ID
+ID_User	int NOT NULL	FK, 系统用户ID
+F_Read	bit NOT NULL	允许读(暂必须等于F_Write)
+F_Write	bit NOT NULL 	允许写
+
+7. HerInputTable
+输入模板表	Reserved
+字段	类型(长度)	说明
+ID_InputTable	int 	PK, 自增长
+InputTable_Name	varchar (30) 	名称
+InputTable_Title	varchar (30) 	标题
+Input_Code	varchar (8) 	输入码
+DispOrder	varchar (8) 	行序
+
+8. HerPermission
+权限表	
+字段	类型(长度)	说明
+ID_Permission	int 	PK, 自增长
+Permission_Code	nvarchar (10) 	权限编码
+Permission_Name	nvarchar (60) 	权限名称
+Disp_Order	int NULL	行序
+Input_Code	varchar (8) 	输入码
+ID_Father	int NULL	FK, 自引用, 上级权限ID
+Note	varchar (20) 	备注
+
+9. HerRole
+系统角色表	
+字段	类型(长度)	说明
+ID_Role	int 	PK, 自增长
+Role_Code	nvarchar (10) 	角色代码
+Role_Name	nvarchar (30) 	角色名称
+ID_Father	int NULL	FK, 自引用, 上级角色ID
+Disp_Order	int NULL	行序
+Role_Kind	int NULL	角色类型
+F_AllUser	bit NULL	是否特殊角色 “所有用户”
+F_AllPerm	bit NULL	是否特殊角色 “系统管理员”
+Input_Code	varchar (8) 	输入码
+Note	varchar (30) 	备注
+
+10. HerSetting
+系统设置表	
+字段	类型(长度)	说明
+ID_Setting	int NOT NULL	ID
+SettingName	varchar (50) 	参数名称
+SettingNode	varchar (200) 	参数节点, PK
+SettingType	varchar (1) 	参数类型: S/B/I/F/D/M/…
+ValString	varchar (2000) 	字符串型值
+ValInteger	int NULL	整型值
+ValBool	bit NULL	布尔值
+ValFloat	float NULL	浮点数值
+ValDateTime	datetime NULL	日期时间值
+ValMoney	money NULL	货币值
+ValText	text	文字值
+ValBlob	image NULL	大对象值
+ValEncoded	varchar (2000) 	加密值(暂不使用)
+ValMeaning	varchar (50) 	意义
+SettingCode	varchar (100) 	参数编码
+Enabled	bit NULL	使能
+Visible	bit NULL	可见
+Required	bit NULL	必填
+Note	varchar (50) 	备注
+
+11. HerSys
+系统配置表	Obsolete 已废弃
+字段	类型(长度)	说明
+ID_Sys	int 	PK, 自增长
+Enabled	tinyint NOT NULL	使能
+HospitalName	varchar (100) 	医院名称
+HospitalNameEncoded	varchar (200) 	医院名称加密结果
+ProductName	varchar (50) 	产品名称
+ProductNameEncoded	varchar (100) 	产品名称加密结果
+VisibleTagOfLogo	int NOT NULL	可见LOGO TAG值
+ReportHeader	image NULL	报告页头
+ReportFooter	image NULL	报告页脚
+BarCodeLength	smallint NOT NULL	条码长度
+RoundToCents	smallint NOT NULL 	收费取整
+
+12. HerUser
+系统用户表	
+字段	类型(长度)	说明
+ID_User	int IDENTITY	PK, 自增长
+Login	nvarchar (8) 	登录名
+Password	nvarchar (16)	密码(加过密的)
+Name	nvarchar (30)	姓名
+UserCode	varchar (10)	用户代码
+Sex	bit NOT NULL 	姓名
+NamePY	nvarchar (20)	姓名拼音
+ID_Depart	int NULL 	部门ID
+Birthdate	datetime NULL 	出生日期
+Phone	nvarchar (15)	电话
+Description	nvarchar (30)	描述
+Disp_Order	int NULL 	行序
+F_Disabled	bit NOT NULL 	禁用
+F_CanDoDiscount	bit NULL 	是否允许打折
+MaxOffPercent	int NULL 	最大打折权限
+IntactFlag	bit NOT NULL 	未触及标志
+Input_Code	varchar (8)	输入码
+ConfidentialLevel	int NULL 	密级
+RightCode	varchar (200)	权力编码
+Picture	image NULL 	照片
+Signature	image NULL 	签名
+F_IsSalePerson	bit NULL 	是否销售员
+SaleDepartCode	varchar (20)	销售部门编码
+
+13. HerUserRole
+系统用户与系统角色关联表	
+字段	类型(长度)	说明
+ID_UserRole	int 	PK, 自增长
+ID_User	int NOT NULL	FK, 系统用户ID
+ID_Role	int NOT NULL 	FK, 系统角色ID
+
+14. HerWorkStation
+系统客户端表	
+字段	类型(长度)	说明
+ID_WorkStation	int 	PK, 自增长
+WorkStationIP	varchar (50) 	客户端IP地址
+WorkStationMac	varchar (50) 	客户端MAC地址
+WorkStationName	varchar (100) 	客户端名称
+WorkStationCPU	varchar (50) 	客户端CPU
+Note	varchar (50) 	备注
+
+15. HerWorkingStation
+系统客户端运行表	
+字段	类型(长度)	说明
+WorkStationIP	varchar (50) 	客户端IP地址		
+WorkStationMac	varchar (50) 	客户端MAC地址		
+WorkStationName	varchar (100) 	客户端名称
+WorkStationCPU	varchar (50) 	客户端CPU
+LogonUser	varchar (50) 	当前登录用户
+LogonTime	datetime NULL	当前登录时间
+LastTouchTime	datetime NULL 	最后刷新时间
+
+
+
+常规字典表
+
+1. DictAgeUnit
+年龄单位表	
+字段	类型(长度)	说明
+ID_AgeUnit	int 	PK, 自增长
+AgeUnit_Code	varchar (8) 	年龄单位编码
+AgeUnit_Name	varchar (10) 	年龄单位名称
+Input_Code	varchar (8) 	输入码
+Note	varchar (20) 	备注
+AgeUnitCodeX	varchar (20) 	年龄单位导出代码
+
+2. DictArea
+地区表	
+字段	类型(长度)	说明
+ID_Area	int 	PK, 自增长
+Area_Code	varchar (6) 	地区编码
+Area_Name	varchar (40) 	地区名称
+Input_Code	varchar (8) 	输入码
+Note	varchar (20) 	备注
+AreaCodeX	varchar (50) 	地区导出代码
+
+3. DictBloodType
+血型表	
+字段	类型(长度)	说明
+ID_BloodType	int 	PK, 自增长
+BloodType_Code	varchar (8) 	血型编码
+BloodType_Name	varchar (10) 	血型名称
+Input_Code	varchar (8) 	输入码
+Note	varchar (20) 	血注
+BloodTypeCodeX	varchar (20) 	血型导出代码
+
+4. DictCountry
+国家表	
+字段	类型(长度)	说明
+ID_Country	int 	PK, 自增长
+Country_Code	varchar (2) 	国家编码
+Country_Name	varchar (28) 	国家名称
+Input_Code	varchar (8) 	输入码
+Note	varchar (20) 	备注
+CountryCodeX	varchar (50) 	国家导出代码
+
+5. DictEducation
+教育表	
+字段	类型(长度)	说明
+ID_Education	int 	PK, 自增长
+Education_Name	varchar (20) 	教育名称
+Education_Code	varchar (10) 	教育编码
+Input_Code	varchar (8) 	输入码
+Note	varchar (20) 	备注
+EducationCodeX	varchar (50) 	教育导出代码
+
+6. DictGeneralInput
+通用输入模板表	
+字段	类型(长度)	说明
+ID_GeneralInput	int 	PK, 自增长
+GeneralInput_TypeName	varchar (10) 	类型名称
+GeneralInput_TypeCode	varchar (10) 	类型编码
+GeneralInput_Name	varchar (200) 	模板名称
+GeneralInput_Text	text	模板文本
+Input_Code	varchar (8) 	输入码
+F_Enabled	bit NULL 	使能
+
+7. DictICD10
+结论ICD-10表	略
+字段	类型(长度)	说明
+icdkey	int NOT NULL	
+idupdate	char (1) 	
+idtodepart	char (1) 	
+lev0	int NULL	
+lev1	varchar (10) 	
+lev2	varchar (10) 	
+lev3	varchar (10) 	
+lev4	varchar (10) 	
+levtree	int NULL	
+icdclass	varchar (10) 	
+icdcode	varchar (10) 	
+icdcodea	varchar (10) 	
+icdcname	varchar (80) 	
+icdename	varchar (80) 	
+icdpyt	varchar (10) 	
+icdother	varchar (255) 	
+updateday	datetime NULL	
+updateoper	varchar (20) 	
+icdnote	varchar (80) 	
+code	varchar (10) 	
+tag	varchar (10) 	
+Input_Code	varchar (8) 	
+
+8. DictIdentity
+身份表	
+字段	类型(长度)	说明
+ID_Identity	int	PK, 自增长
+Identity_Code	varchar (10) 	身份编码
+Identity_Name	varchar (20) 	身份名称
+Input_Code	varchar (8) 	输入码
+Priority_Indicator	bit NULL	优先标志
+Military_Indicator	bit NULL	军队标志
+IdentityCodeX	varchar (50) 	导出代码
+
+9. DictInformWay
+通知方式表	
+字段	类型(长度)	说明
+ID_InformWay	int 	PK, 自增长
+InformWay_Name	varchar (20) 	通知方式名称
+InformWay_Code	varchar (20) 	通知方式代码
+Input_Code	varchar (8) 	输入码
+F_BuiltIn	bit NOT NULL	内置
+InformWayCodeX	varchar (50) 	导出代码
+
+10. DictJobClass
+工作类型表	
+字段	类型(长度)	说明
+ID_JobClass	int NOT NULL	PK, 自增长
+JobClass_Code	varchar (2) 	工作类型代码
+JobClass_Name	varchar (20) 	工作类型名称
+Input_Code	varchar (8) 	输入码
+Note	varchar (20) 	备注
+JobClassCodeX	varchar (50) 	导出代码
+
+11. DictMarriage
+婚姻表	
+字段	类型(长度)	说明
+ID_Marriage	int 	PK, 自增长
+Marriage_Code	varchar (8) 	婚姻代码
+Marriage_Name	varchar (10) 	婚姻名称
+F_HasMarried	bit NOT NULL	视同已婚
+Input_Code	varchar (8) 	输入码
+Note	varchar (20) 	备注
+MarriageCodeX	varchar (50) 	导出代码
+
+12. DictNation
+民族表	
+字段	类型(长度)	说明
+ID_Nation	int 	PK, 自增长
+Nation_Code	varchar (8) 	民族代码
+Nation_Name	varchar (16) 	民族名称
+Input_Code	varchar (8) 	输入码
+Note	varchar (20) 	备注
+NationCodeX	varchar (50) 	导出代码
+
+13. DictOccupation
+职业表	
+字段	类型(长度)	说明
+ID_Occupation	int 	PK, 自增长
+Occupation_Code	varchar (8) 	职业代码
+Occupation_Name	varchar (20) 	职业名称
+Input_Code	varchar (8) 	输入码
+Note	varchar (20) 	备注
+OccupationCodeX	varchar (50) 	导出代码
+
+14. DictPayWay
+支付方式表	
+字段	类型(长度)	说明
+ID_PayWay	Int	PK, 自增长
+PayWay_Name	Varchar(20)	支付方式名称
+PayWay_Code	Varchar(10)	支付方式代码, HIS接口标识
+F_IsCash	bit NOT NULL	现金
+F_IsOffLine	bit NULL	离线
+F_ApplyToAccountOnly	bit NOT NULL	财务专用(不使用)
+F_ApplyTo_Outp	bit NOT NULL	用于门诊(不使用)
+F_ApplyTo_Inp	bit NOT NULL	用于住院(不使用)
+F_ApplyTo_Org	bit NOT NULL	用于团检
+F_ApplyTo_Person	bit NOT NULL	用于个人
+F_ReturnToCash	bit NULL	可退现金
+F_BuiltIn	bit NOT NULL	内置
+F_Disabled	bit NULL 	禁用
+ID_ReceiptType_Org	int NULL 	团体发票ID
+ID_ReceiptType_Person	int NULL 	个人发票ID
+Input_Code	varchar (8)	输入码
+Note	varchar (20)	备注
+PayWayCodeX	varchar (20) 	导出代码
+
+15. DictReceiptType
+发票(收据)类型表	
+字段	类型(长度)	说明
+ID_ReceiptType	int 	PK, 自增长
+ReceiptType_Code	varchar (10) 	发票类型编码
+ReceiptType_Name	varchar (20) 	发票类型名称
+ReceiptType_Output	varchar (20) 	发票类型输出
+Input_Code	varchar (8) 	输入码
+Note	varchar (20) 	备注
+F_BuiltIn	bit NOT NULL	内置
+ReceiptTypeCodeX	varchar (20) 	导出代码
+
+16. DictRelationship
+人际关系表	
+字段	类型(长度)	说明
+ID_Relationship	int 	PK, 自增长
+Relationship_Code	varchar (8) 	人际关系代码
+Relationship_Name	varchar (10) 	人际关系名称
+Input_Code	varchar (8) 	输入码
+Note	varchar (20) 	备注
+RelationshipCodeX	varchar (50) 	导出代码
+
+17. DictSection
+总检科室表	
+字段	类型(长度)	说明
+ID_Section	int 	PK, 自增长
+Section_Name	varchar (30) 	总检科室名称
+Section_Code	varchar (20) 	总检科室代码
+Section_Type	varchar (4) 	总检科室类型
+Input_Code	varchar (8) 	输入码
+DispOrder	varchar (10) 	行序
+Note	varchar (30) 	备注
+SectionCodeX	varchar (50) 	导出代码
+
+18. DictSex
+性别表	
+字段	类型(长度)	说明
+ID_Sex	int 	PK, 自增长
+Sex_Code	varchar (8) 	性别编码
+Sex_Name	varchar (10) 	性别名称
+F_Male	bit NOT NULL	男性
+F_Female	bit NOT NULL	女性
+Input_Code	varchar (8) 	输入码
+Note	varchar (20) 	备注
+SexCodeX	varchar (20) 	导出代码
+
+19. DictTitle
+职称表	
+字段	类型(长度)	说明
+ID_Title	int 	PK, 自增长
+Title_Code	varchar (3) 	职称代码
+Title_Name	varchar (26) 	职称名称
+Input_Code	varchar (8) 	输入码
+Note	varchar (20) 	备注
+TitleCodeX	varchar (50) 	导出代码
+
+
+
+业务字典表
+1. BasAgeDelimiter
+年龄分组表	
+字段	类型(长度)	说明
+ID_AgeDelimiter	int 	PK, 自增长
+AgeDelimiterGroup	varchar (2) 	分组
+AgeDelimiterLo	int NULL	年龄范围上限
+AgeDelimiterHi	int NULL	年龄范围下限
+AgeDelimiterText	varchar (50) 	年龄范围描述
+AgeDelimiterDispOrder	float NULL 	行序
+
+2. BasAskItem
+问卷式检查项目表	
+字段	类型(长度)	说明
+ID_AskItem	int 	PK, 自增长
+ID_ExamFeeItem	int NOT NULL	FK, 收费项目ID
+AskItem_Name	varchar (50) 	问卷项目名称
+AskItem_Code	varchar (50) 	问卷项目代码
+AskItem_Num	varchar (50) 	问卷项目题号
+AskItem_Text	text	问卷项目问题
+ValueType	varchar (2) 	类型: B/R/C <Bool/Radio/Check>
+Answer_Points	varchar (200)	答案分值
+Answer_NoSummary	varchar (50) 	不小结答案
+DispOrder	varchar (10) 	行序
+
+3. BasBodypart
+检查部位表	
+字段	类型(长度)	说明
+ID_Bodypart	int 	PK, 自增长
+BodypartName	varchar (50) 	检查部位名称
+BodypartCode	varchar (50) 	检查部位代码
+BodypartInputCode	varchar (8) 	输入码
+BodypartDispOrder	varchar (20) 	行序
+BodypartCodeX	varchar (50) 	导出代码
+
+4. BasClassOfFeeItem
+收费项目分类表	
+字段	类型(长度)	说明
+ID_ClassOfFeeItem	int 	PK, 自增长
+ClassOfFeeItem_Name	varchar (30) 	收费项目分类名称
+ClassOfFeeItem_NameEng	varchar (30) 	收费项目分类英文名称
+ClassOfFeeItem_Code	varchar (30) 	收费项目分类代码
+DispOrder	varchar (10) 	行序
+InputCode	varchar (8) 	输入码
+
+5. BasClassOfReceipt
+发票(收据)分类表	
+字段	类型(长度)	说明
+ID_ClassOfReceipt	int 	PK, 自增长
+ClassOfReceipt_Name	varchar (30) 	发票分类名称
+ClassOfReceipt_NameEng	varchar (30) 	发票分类英文名称
+ClassOfReceipt_Code	varchar (30) 	发票分类代码
+FinancialSubject	varchar (20) 	财务科目
+DispOrder	varchar (10) 	行序
+InputCode	varchar (8) 	输入码
+F_BuiltIn	bit NOT NULL 	内置
+
+6. BasConclusion
+体检结论表	
+字段	类型(长度)	说明
+ID_Conclusion	int 	PK, 自增长
+SysManMark	varchar (20) 	系统维护标记
+Conclusion_Name	varchar (70) 	结论名称
+Conclusion_NameEng	varchar (140) 	结论英文名称
+ID_ConclusionType	int NULL	FK, 结论类型ID
+ID_ConclusionGroup	int NULL	FK, 团体结论ID
+ID_Section	int NULL	FK, 总检科室ID
+Depiction	text	疾病解释
+Suggestion	text	总检建议
+Advice	text	健康建议
+DietGuide	text	饮食指导
+SportGuide	text	运动指导
+Knowledge	text	健康知道
+SuggestionGroup	text	团体总检建议
+ID_ICD10	int NULL	FK, ICD-10 ID
+Input_Code	varchar (8) 	输入码
+DispOrder	varchar (10) 	行序
+ID_SpecialConclusionList	int NULL	FK, 特殊结论词列表ID
+F_MaleDisease	bit NULL	男性疾病
+F_FemaleDisease	bit NULL	女性疾病
+F_HideOnGroupReport	bit NULL	团检报告隐藏
+ConclusionCodeX	varchar (50) 	导出代码
+
+7. BasConclusionType
+体检结论分类表	
+字段	类型(长度)	说明
+ID_ConclusionType	int 	PK, 自增长
+ConclusionType_Name	varchar (30) 	结论类型名称
+ConclusionType_NameEng	varchar (60) 	结论类型英文名称
+ConclusionType_Code	varchar (20) 	结论类型代码
+Input_Code	varchar (8) 	输入码
+DispOrder	varchar (10) 	行序
+
+8. BasCoopOrg
+外送机构表	
+字段	类型(长度)	说明
+ID_CoopOrg	int 	PK, 自增长
+CoopOrg_Name	varchar (50) 	外送机构名称
+CoopOrg_Code	varchar (50) 	外送机构代码
+Input_Code	varchar (8) 	输入码
+Note	varchar (50) 	备注
+
+9. BasDepartConclusionType
+体检结论分类与分科关联表	
+字段	类型(长度)	说明
+ID_DepartConclusionType	int 	PK, 自增长
+ID_Depart	int NULL	FK, 部门ID
+ID_ConclusionType	int NULL 	FK, 结论类型
+
+10. BasExamFeeItem
+收费项目表	
+字段	类型(长度)	说明
+ID_ExamFeeItem	int IDENTITY	PK, 自增长
+SysManMark	varchar (20) 	系统维护标记
+ExamFeeItem_Name	varchar (50) 	收费项目名称
+ExamFeeItem_NameAbr	varchar (12) 	收费项目名称缩写
+ExamFeeItem_NamePrn	varchar (50) 	收费项目打印名称
+ExamFeeItem_NameEng	varchar (100) 	收费项目英语名称
+ExamFeeItem_NameEngAbr	varchar (12) 	收费项目英语名称缩写
+ExamFeeItem_Code	varchar (50) 	收费项目代码
+ExamFeeItem_FeeCode	varchar (50) 	收费项目收费代码
+ExamFeeItem_HisName	varchar (50) 	收费项目HIS名称
+ID_ReportItem	int NULL 	报告项目ID
+UnitPrice	money NULL 	单价
+SuitePrice	money NULL 	套餐价
+MaterialPrice	money NULL 	耗材价
+CostPrice	money NULL 	成本价
+CoopPrice	money NULL 	外送价
+ID_CoopOrg	int NULL 	外送机构ID
+ID_Depart	int NULL 	所属科室ID
+Depart_Name	varchar (30) 	所属科室名称
+ID_LabType	int NULL 	标本类型ID
+LabType_R	varchar (20) 	杯本类型名称
+HisExecDepartName	varchar (20) 	HIS执行科室名称
+HisExecDepartCode	varchar (20) 	HIS执行科室代码
+HisExecWorkGroupName	varchar (20) 	HIS执行工作组名称
+HisExecWorkGroupCode	varchar (20) 	HIS执行工作组代码
+HisExecWorkStationName	varchar (20) 	HIS执行工作站名称
+HisExecWorkStationCode	varchar (20) 	HIS执行工作站代码
+HisExecWorkBenchName	varchar (20) 	HIS执行工作台名称
+HisExecWorkBenchCode	varchar (20) 	HIS执行工作台代码
+Input_Code	varchar (8) 	输入码
+F_ReportAlone	bit NOT NULL 	独立报告
+F_Male	bit NOT NULL 	男性项目
+F_Female	bit NOT NULL 	女性项目
+F_Alert	bit NOT NULL 	警示项目
+WarningMsg	varchar (50) 	警示信息
+F_AutoVIP	bit NULL 	自动VIP项目
+F_NonExam	bit NULL 	非检查项目
+F_IsDrug	bit NULL 	是否药品
+F_IsForAsk	bit NULL 	是否问卷
+F_HideInGuideSheet	bit NULL 	指引单不打印
+BreakfastOrder	char (1) 	早餐顺序
+F_Disabled	bit NULL 	禁用
+DispOrder	varchar (10) 	行序
+Note	varchar (20) 	说明
+ExamFeeItem_Code2	varchar (50) 	收费项目代码二
+ID_ClassOfFeeItem	int NULL 	收费项目分类ID
+ID_ClassOfReceipt	int NULL	发票项目分类ID
+
+11. BasExamFeeItemDetail
+收费项目与检查项目关联表	
+字段	类型(长度)	说明
+ID_ExamFeeItemDetail	int IDENTITY	PK, 自增长
+ID_ExamFeeItem	int NOT NULL	收费项目ID
+ID_ExamItem	int NOT NULL	检查项目ID
+DispOrder	varchar (10)	行序
+Note	varchar (20) 	备注
+
+12. BasExamFeeItemSubset
+收费项目组合与单项关联表	
+字段	类型(长度)	说明
+ID_ExamFeeItemSubset	int 	PK, 自增长
+ID_ExamFeeItem	int NOT NULL	FK, 收费项目ID
+ID_ExamFeeItemSub	int NOT NULL	FK, 子项收费项目ID
+DispOrder	varchar (10) 	行序
+Note	varchar (20) 	备注
+
+13. BasExamItem
+检查项目表	
+字段	类型(长度)	说明
+ID_ExamItem	int IDENTITY	PK, 自增长
+SysManMark	varchar (20)	系统维护标志
+ExamItem_Name	varchar (50)	检查项目名称
+ExamItem_NameAbr	varchar (12)	检查项目名称缩写
+ExamItem_NamePrn	varchar (50)	检查项目打印名称
+ExamItem_NameEng	varchar (100)	检查项目英文名称
+ExamItem_NameEngAbr	varchar (12)	检查项目英文名称缩写
+ExamItem_Code	varchar (50)	检查项目代码
+ID_ExamItemType	int NULL 	FK, 项目类型ID
+ValueType	varchar (2)	值类型
+ValueUnit	varchar (20)	值单位
+ValueMemoLines	int NULL 	多行文本行数
+F_AutoCalc	bit NOT NULL 	自动计算
+F_Print	bit NULL 	是否打印
+F_MultiVal	bit NULL 	是否多值
+CommonGroup	char (1)	通用组(不再使用)
+ValueCheckCols	int NULL 	多值列数
+F_EntryOnly	bit NOT NULL 	仅自由输入
+F_NoEntry	bit NOT NULL 	无自由输入
+F_EntryToConclusion	bit NOT NULL 	输入至小结
+F_UseCheck	bit NOT NULL 	使用勾选
+F_SameLine	bit NOT NULL 	同行显示
+F_Can_Dup	bit NOT NULL 	可重复(不再使用)
+F_Lab_ByHand	bit NOT NULL 	检验手工项目
+F_Lab_NoWait	bit NOT NULL 	检验不必等待
+ConclusionLevel	int NOT NULL 	小结级别
+F_SummaryTitle	bit NOT NULL 	小结标题
+PhraseForHiLo	varchar (50)	高低用词(不再使用)
+Increment	float NULL 	数值型增量
+NumPrecision	int NULL 	精度
+F_BothNumText	bit NOT NULL 	数字文字同时显示
+F_UseAppMaxMin	bit NOT NULL 	应用范围
+F_IncludeMin	bit NOT NULL 	含低值
+F_IncludeMax	bit NOT NULL 	含高值
+F_Male	bit NOT NULL 	用于男性
+ValueMaleDef	varchar (30)	男性缺省值
+ValueMaleMax	float NULL 	男性上限
+ValueMaleMin	float NULL 	男性下限
+ValueMaleSevereUp	float NULL 	男性生命值上限
+ValueMaleSevereDown	float NULL 	男性生命值下限
+F_Female	bit NOT NULL 	用于女性
+ValueFemaleDef	varchar (30)	女性缺省值
+ValueFemaleMax	float NULL 	女性上限
+ValueFemaleMin	float NULL 	女性下限
+ValueFemaleSevereUp	float NULL 	女性生命值上限
+ValueFemaleSevereDown	float NULL 	女性生命值下限
+Expression	text	表达式
+ID_ConclusionHi	int NULL 	结论词(高)
+ID_ConclusionLo	int NULL 	结论词(低)
+ID_ConclusionPo	int NULL 	结论词(阳)
+ID_ConclusionNe	int NULL 	结论词(阴)
+Input_Code	varchar (10)	输入码
+F_PatientBaseInfo	bit NULL 	(不使用)
+PatientBaseInfoDispOrder	int NULL 	(不使用)
+Note	varchar (20)	备注
+DispOrder	varchar (20)	行序
+ExamItemCodeX	varchar (50)	导出代码
+
+
+14. BasExamItemBodypart
+检查项目与检查部位关联表	
+字段	类型(长度)	说明
+ID_ExamItemBodypart	int 	PK, 自增长
+ID_ExamItem	int NULL	FK, 检查项目ID
+ID_Bodypart	int NULL	FK, 检查部位ID
+F_IsDefault	bit NOT NULL 	缺省值
+
+15. BasExamItemType
+检查项目类型表	
+字段	类型(长度)	说明
+ID_ExamItemType	int 	PK, 自增长
+ExamItemType_Name	varchar (50) 	检查项目类型名称
+ExamItemType_NameEng	varchar (100) 	检查项目类型英文名称
+ExamItemType_Code	varchar (10) 	检查项目类型代码
+ID_Depart	int NULL	FK, 部门ID
+Depart_R	varchar (30) 	部门名称(R)
+Input_Code	varchar (8) 	输入码
+Note	varchar (20) 	备注
+ExamItemTypeCodeX	varchar (50) 	导出代码
+
+16. BasExamItemValue
+检查项目体征词表	
+字段	类型(长度)	说明
+ID_ExamItemValue	int 	PK, 自增长
+ID_ExamItem	int NULL	FK, 检查项目ID
+CommonGroup	char (1) 	公共组 (已废弃)
+ExamItemValue_Name	varchar (100) 	检查项目体征词名称
+ExamItemValue_Code	varchar (50) 	检查项目体征词编码
+Input_Code	varchar (8) 	输入码
+SevereDegree	int NULL	重症级别
+AskScore	int NULL	问卷式分数
+ID_Conclusion	int NULL	FK, 结论词ID
+F_IsDefault	bit NOT NULL	缺省
+ValOper	varchar (2) 	操作符
+ValOperandMale	float NULL	男操作数
+ValOperandFemale	float NULL	女操作数
+DispOrder	varchar (10) 	行序
+ExamItemValue_Text	text	检查项目体征词描述
+
+17. BasExamItemValueMulti
+检查项目体征词多选扩充表	
+字段	类型(长度)	说明
+ID_ExamItemValueMulti	int 	PK, 自增长
+ID_ExamItemValue	int NULL	FK, 检查项目体征词ID
+ID_Bodypart	int NULL	FK, 检查部位
+SevereDegree	int NULL	重症级别
+ID_Conclusion	int NULL 	FK, 结论词ID
+
+18. BasExamPlace
+体检场所表	
+字段	类型(长度)	说明
+ID_ExamPlace	int 	PK, 自增长
+ExamPlaceCode	varchar (20) 	体检场所代码
+ExamPlaceName	varchar (50) 	体检场所名称
+Input_Code	varchar (8) 	输入码
+LimitPersonA	int NULL	人数警告限
+LimitPersonB	int NULL	人数截止限
+LimitMoneyAmountA	money NULL	金额警告限
+LimitMoneyAmountB	money NULL	金额截止限
+Description	varchar (50) 	描述
+
+19. BasExamSuite
+体检套餐表	
+字段	类型(长度)	说明
+ID_ExamSuite	int 	PK, 自增长
+ExamSuite_Name	varchar (50) 	套餐名称
+ExamSuite_NameEng	varchar (100) 	套餐英文名称
+ExamSuite_Code	varchar (6) 	套餐代码
+Price	money NOT NULL	价格
+F_UsePriceInSuite	bit NULL	使用套内价格
+Input_Code	varchar (8) 	输入码
+F_HideOnWeb	bit NULL	WEB 止不显示
+F_Male	bit NOT NULL	用于男性
+F_Female	bit NOT NULL	用于女性
+DispOrder	varchar (10) 	行序
+Note	varchar (20) 	备注
+ExamSuiteCodeX	varchar (50) 	导出代码
+
+20. BasExamSuiteDetail
+体检套餐与收费项目关联表	
+字段	类型(长度)	说明
+ID_ExamSuiteDetail	int 	PK, 自增长
+ID_ExamSuite	int NULL	FK, 体检套餐ID
+ID_ExamFeeItem	int NULL	FK, 收费项目ID
+PriceInSuite	money NULL	套内价格
+DispOrder	varchar (10) 	行序
+Note	varchar (20) 	备注
+
+21. BasExamType
+体检类型表	
+字段	类型(长度)	说明
+ID_ExamType	int 	PK, 自增长
+ExamType_Name	varchar (50) 	体检类型名称
+ExamType_NameEng	varchar (100) 	体检类型英文名称
+ExamType_Code	varchar (10) 	体检类型代码
+Input_Code	varchar (8) 	输入码
+Note	varchar (20) 	备注
+ExamTypeCodeX	varchar (50) 	导出代码
+
+22. BasInterfaceMark
+接口收发标志表	
+字段	类型(长度)	说明
+ID_InterfaceMark	int 	PK, 自增长
+InterfaceMark_Name	varchar (20) 	接口收发标志名称
+InterfaceMark_Code	varchar (20) 	接口收发标志代码
+InterfaceMark_Token	varchar (4) 	接口收发标志符号
+
+23. BasLabType
+检验样本类型表	
+字段	类型(长度)	说明
+ID_LabType	int 	PK, 自增长
+LabType_Name	varchar (20) 	样本类型名称
+LabType_Code	varchar (6) 	样本类型代码
+LabType_Abr	varchar (12) 	样本类型缩写
+LTGuidanceGroup	int NULL	样本类型底单分组
+ID_QueueSite	int NULL	FK, 队列ID
+LTDetailLevel	varchar (6) 	样本类型明细程度: NONE/FI/SubFI
+Input_Code	varchar (8) 	输入码
+Disp_Order	int NOT NULL	行序
+F_SortByFeeItems	bit NOT NULL	按项目排序
+F_ResetTubePosPerBatch	bit NOT NULL	试管位置每批还原
+F_ResetSampleNumPerBatch	bit NOT NULL	样本编号每批还原
+SampleNumStartFrom	int NULL	样本编号起始号码
+F_PrintSampleNum	bit NOT NULL	打印样本编号
+F_IsBlood	bit NOT NULL	是血样
+BarCodeCopies	int NULL	条码拷备数
+BreakfastOrder	char (1) 	早餐顺序: A/B/C/D
+HisLabTypeName	varchar (30) 	HIS样本名称
+HisLabTypeCode	varchar (30) 	HIS样本代码
+Note	varchar (20) 	备注
+LabTypeCodeX	varchar (50) 	样本类型导出代码
+LabTypeAutoCodePrefix	varchar (20) 	样本类型自动代码前缀
+LabTypeAutoCodeSubLen	int NULL	样本类型自动代码明细位数
+LabTypeAutoCodePostfix	varchar (20) 	样本类型自动代码后缀
+
+24. BasOrgClass
+体检团体类型表	
+字段	类型(长度)	说明
+ID_OrgClass	int 	PK, 自增长
+OrgClass_Name	varchar (30) 	团体类型名称
+OrgClass_NameEng	varchar (60) 	团体类型英文名称
+OrgClass_Code	varchar (30) 	团体类型代码
+Input_Code	varchar (8) 	输入码
+Note	varchar (50) 	备注
+
+25. BasPatientClass
+体检者类型表	
+字段	类型(长度)	说明
+ID_PatientClass	int 	PK, 自增长
+PatientClass_Name	varchar (30) 	体检者类型名称
+PatientClass_NameEng	varchar (60) 	体检者类型英文名称
+PatientClass_Code	varchar (30) 	体检者类型代码
+Input_Code	varchar (8) 	输入码
+Note	varchar (50) 	备注
+
+26. BasQtyLimit
+体检量控制表	
+字段	类型(长度)	说明
+ID_QtyLimit	int 	PK, 自增长
+SysManMark	varchar (20) 	维护标记
+PatientType	varchar (20) 	体检者类型控制: O/P/
+ObjectType	varchar (20) 	对象类型: C/D/S/F/E
+ID_Object	int NULL	FK: 对象ID
+Object_Name_R	varchar (100) 	对象名称(冗余)
+ID_ExamPlace	int NULL	FK, 体检场所ID
+WeekDay	int NULL	星期: 1~7; 其它表示整个星期
+LimitWarningMale	int NULL	男性黄色警告限
+LimitWarningFemale	int NULL	女性黄色警告限
+LimitWarningTotal	int NULL	合计黄色警告限
+LimitStopMale	int NULL	男性红色截止限
+LimitStopFemale	int NULL	女性红色截止限
+LimitStopTotal	int NULL	所有红色截止限
+Note	varchar (50) 	备注
+
+27. BasQueueSite
+排队分区表	
+字段	类型(长度)	说明
+ID_QueueSite	int 	PK, 自增长
+QueueSite_Name	varchar (50) 	队列名称
+QueueSite_Code	varchar (20) 	队列编码
+DispOrder	varchar (10) 	行序
+Input_Code	varchar (8) 	输入码
+
+28. BasReportItem
+报告项目表	
+字段	类型(长度)	说明
+ID_ReportItem	int 	PK, 自增长
+ReportItem_Name	varchar (50) 	报告项目名称
+ReportItem_NameAbr	varchar (12) 	报告项目缩写
+ReportItem_NamePrn	varchar (50) 	报告项目打印名称
+ReportItem_NameEng	varchar (100) 	报告项目英文名称
+ReportItem_NameEngAbr	varchar (12) 	报告项目英文名称缩写
+ReportItem_Code	varchar (50) 	报告项目代码
+ID_Depart	int NULL	FK, 科室ID
+Depart_Name	varchar (30) 	科室名称
+Input_Code	varchar (8) 	输入码
+SubItemCount	int NULL	子项目数量
+DispOrder	varchar (10) 	行序
+Note	varchar (20) 	备注
+
+29. BasReportItemDetail
+报告项目与检查项目关联表	
+字段	类型(长度)	说明
+ID_ReportItemDetail	int 	PK, 自增长
+ID_ReportItem	int NOT NULL	FK, 报告项目
+ID_ExamItem	int NOT NULL	FK, 检查项目
+DispOrder	varchar (10) 	行序
+Note	varchar (20) 	备注
+F_Work_Inner_Modify	bit NULL 	标志(内部使用)
+
+30. BasSaleDepart
+销售部门表	
+字段	类型(长度)	说明
+ID_SaleDepart	int 	PK, 自增长
+SaleDepartCode	varchar (20) 	销售部门代码
+SaleDepartName	varchar (50) 	销售部门名称
+ID_SaleDepartLeader	int NULL	FK, 销售部门经理
+Input_Code	varchar (8) 	输入码
+Description	varchar (50) 	描述
+
+31. BasSectionUser
+总检科室与系统用户关联表	
+字段	类型(长度)	说明
+ID_SectionUser	int 	PK, 自增长
+ID_Section	int NOT NULL	FK, 总检科室ID
+ID_User	int NOT NULL 	FK, 系统操作员ID
+
+32. BasSmsTip
+短信信息表	
+字段	类型(长度)	说明
+ID_SmsTip	int 	PK, 自增长
+ID_SmsTipType	int NULL	FK, 短消息类型
+SmsTip_Name	varchar (50) 	短消息名称
+SmsTip_Code	varchar (50) 	短消息代码
+SmsTip_Kind	varchar (20) 	短消息类型
+SmsTip_Text	varchar (500) 	短消息正文
+InputCode	varchar (8) 	输入码
+F_Disabled	bit NULL	禁用
+ID_LastModifier	int NULL	FK, 上次修改者ID
+DT_LastModified	datetime NULL 	上次修改时间
+
+33. BasSmsTipType
+短信信息分类表	
+字段	类型(长度)	说明
+ID_SmsTipType	int 	PK, 自增长
+SmsTipType_Name	varchar (50) 	短消息类型名称
+SmsTipType_Code	varchar (50) 	短消息类型代码
+InputCode	varchar (8) 	输入码
+F_Disabled	bit NULL	禁用
+ID_LastModifier	int NULL	FK, 上次修改者ID
+DT_LastModified	datetime NULL 	上次修改时间
+
+34. BasSpecialConclusionList
+特殊结论列表	
+字段	类型(长度)	说明
+ID_SpecialConclusionList	int 	PK, 自增长
+SpecialConclusionListName	varchar (50) 	特殊结论列表名称
+SpecialConclusionListCode	varchar (50) 	特殊结论列表代码
+SpecialConclusionListCaption	varchar (50) 	特殊结论列表标题
+SpecialConclusionListDispOrder	varchar (50) 	特殊结论列表行序
+Input_Code	varchar (8) 	输入码
+Note	varchar (50) 	备注
+
+35. BasSpecialEntry
+特殊条目列表	与不同的医院紧密相关
+字段	类型(长度)	说明
+ID_SpecialEntry	int 	PK, 自增长
+EntryName	varchar (50) 	特殊条目
+EntryCode	varchar (50) 	输入码
+TableName	varchar (50) 	表名
+FieldName	varchar (50) 	字段名
+EntryID	int NULL 	FK, 条目ID
+
+36. BasTempDepart
+科室模板表	Reserved
+字段	类型(长度)	说明
+ID_TempDepart	int 	PK, 自增长
+ID_Depart	int NULL	FK, 科室ID
+Depart_R	varchar (30) 	科室名称(冗余)
+Organ	varchar (100) 	部位
+Symptom	varchar (100) 	体征
+Inspection	text	检查所见
+Advice	text	建议
+Conclusion	text	结论
+Input_Code	varchar (8) 	输入码
+
+
+
+
+业务数据表
+
+1. PeisMemberCard
+会员卡表	
+字段	类型(长度)	说明
+ID_MemberCard	int 	PK, 自增长
+ID_MemberCardMain	int NULL	FK, 会员卡ID
+MemberCardNo	varchar (50) 	会员卡号
+ID_PatientArchive	int NULL	FK, 体检者档案ID
+MemberName	varchar (30) 	会员姓名
+ID_Sex	int NULL	FK, 性别ID
+MemberSex	varchar (50) 	会员性别
+MemberBirthDate	smalldatetime NULL	会员生日
+MemberIDCardNo	varchar (30) 	会员身份证号
+MemberInputCode	varchar (8) 	输入码
+MemerPhone	varchar (30) 	电话
+DateCreated	datetime NULL	行创建时间
+DateExpired	datetime NULL	卡失效时间
+F_Disabled	datetime NULL	禁用
+MemberOffPercent	int NULL 	会员允许最大扣率
+
+2. PeisOrg
+体检团体表	
+字段	类型(长度)	说明
+ID_Org	int 	PK, 自增长
+Org_Code	varchar (6) 	团体代码
+Org_Name	varchar (50) 	团体名称
+Org_FullName	varchar (50) 	团体全称
+ID_OrgClass	int NULL	FK, 团体类型ID
+Password	varchar (40) 	密码(加密后)
+Input_Code	varchar (8) 	输入码
+Address	varchar (200) 	地址
+Contact	varchar (200) 	联系人
+ID_SalesPerson	int NULL	FK, 中心销售员ID
+Note	varchar (200) 	备注
+OrgConfidentialLevel	int NULL	团体密级
+F_OrgHided	bit NULL	单位隐藏
+OrgCodeX	varchar (50) 	导出代码
+
+3. PeisOrgReservation
+体检团体任务表	
+字段	类型(长度)	说明
+ID_OrgReservation	int 	PK, 自增长
+ID_Org	int NULL	FK, 团体ID
+Org_Name	varchar (100) 	团体名称
+DateReservation	smalldatetime NULL	团体任务预定时间
+DateFinalSettled	smalldatetime NULL	最后结帐时间
+RegSelectable	bit NULL	是否招工备选
+CountExaminee	int NULL	体检者数量
+CountExamineeReserved	int NULL	预约体检者数量
+CountExamineeRegistered	int NULL	已登记体检者数量
+CountExamineeFullFinished	int NULL	已全部体检结束体检者数量
+CountExamineePartFinished	int NULL	部分完成体检者数量
+MoneyAmount	money NULL	金额
+MoneyAmountPaid	money NULL	优惠金额
+ID_FeeCharger	int NULL	FK, 收费员ID
+ID_FeeDiscounter	int NULL	FK, 优惠人员ID
+F_MoneyPaid	bit NOT NULL	款已付
+F_Finished	bit NOT NULL	任务已完成
+Address	varchar (200) 	地址
+Contact	varchar (200) 	联系人
+ID_SalesPerson	int NULL	FK, 销售员ID
+Note	varchar (200) 	备注
+OrgResvConfidentialLevel	int NULL	团体任务密级
+F_OrgResvHided	bit NULL 	团体任务隐藏
+
+4. PeisOrgReservationCharge
+体检团体结算表	
+字段	类型(长度)	说明
+ID_OrgReservationCharge	int 	PK, 自增长
+ID_OrgReservation	int NULL	FK, 团体任务ID
+ID_Payway	int NULL	FK, 收费方式ID
+Payway	varchar (20) 	收费方式(冗余)
+MoneyAmountPaid	money NULL	实收金额
+F_PaidAdvance	bit NOT NULL	是预缴金
+F_FeeCharged	bit NOT NULL	已收退费
+ID_FeeCharger	int NULL	FK, 收费员ID
+FeeChargeTime	datetime NULL	收退费时间
+Note	text	备注
+Ver_ThisRecord	int NULL	行版本
+F_Work_Inner_Modify	bit NULL 	标记(内部使用)
+
+5. PeisOrgReservationDetail
+体检团体任务与收费项目关联表	
+字段	类型(长度)	说明
+ID_OrgReservationDetail	int 	PK, 自增长
+ID_OrgReservationGroup	int NULL	FK, 任务分组ID
+ID_ExamFeeItem	int NULL	FK, 收费项目ID
+SuitePrice	money NULL	套餐价格
+OffPercent	int NULL	扣率
+FactPrice	money NULL 	优惠价格
+
+6. PeisOrgReservationGroup
+体检团体任务分组表	
+字段	类型(长度)	说明
+ID_OrgReservationGroup	int 	PK, 自增长
+ID_OrgReservation	int NOT NULL	FK, 任务ID
+OrgReservationGroupName	varchar (30) 	分组名称
+Input_Code	varchar (8) 	输入码
+Disp_Order	int NULL	行序
+Org_Name	varchar (100) 	单位名称
+DateExamPlanned	datetime NULL	计划体检日期
+Instruction	varchar (30) 	指示
+F_Male	bit NOT NULL	男
+F_Female	bit NOT NULL	女
+F_HasMarried	bit NOT NULL	已婚
+F_NeverMarried	bit NOT NULL	未婚
+AgeMin	int NOT NULL	年龄下限
+AgeMax	int NOT NULL	年龄上限
+GroupType	varchar (10) 	组类
+ID_ExamType	int NULL	FK, 体检类型ID
+ID_ExamSuite	int NULL	FK, 体检套餐ID
+CountExaminee	int NULL	体检者数量
+ID_Payway	int NULL	FK, 支付方式ID
+Payway	varchar (20) 	支付方式
+OffPercent	int NULL	扣率
+GroupPriceLimit	money NULL	统收限额
+F_GroupStarted	bit NOT NULL	组启用
+F_GroupPaused	bit NOT NULL	组禁用
+ID_PatientClass	int NULL	FK, 体检者分类ID
+ConfidentialLevel	int NULL	密级
+Note	varchar (50) 	备注
+
+7. PeisOrgReservationPatient
+体检团体体检者任务预定表	
+字段	类型(长度)	说明
+ID_OrgPatient	int 	PK, 自增长
+ID_OrgReservation	int NULL	FK, 任务ID
+ID_OrgReservationGroup	int NULL	FK, 任务分组ID
+Department	varchar (30) 	部门
+ID_PatientArchive	int NULL	FK, 体检者档案ID
+PatientArchiveNo	varchar (30) 	体检者档案号
+PatientCardNo	varchar (30) 	体检者一卡通号
+IDCardNo	varchar (30) 	身份证号
+PatientName	varchar (16) 	体检者姓名
+Input_Code	varchar (8) 	输入码
+ID_Patient	int NULL	FK, 体检号
+PatientCode	varchar (50) 	体检号码
+Id_Sex	int NULL	FK, 性别ID
+Sex	varchar (6) 	性别
+BirthDate	smalldatetime NULL	生日
+Age	int NULL	年龄
+ID_AgeUnit	int NULL	FK, 年龄单位
+AgeUnit	varchar (4) 	年龄单位
+AgeOfReal	numeric (18, 5) NULL	实数年龄
+GroupType	varchar (10) 	组类
+Id_Marriage	int NULL	FK, 婚姻ID
+Marriage	varchar (6) 	婚姻
+Id_Nation	int NULL	FK, 民族ID
+Nation	varchar (16) 	民族
+ID_Occupation	int NULL	FK, 职业ID
+Occupation	varchar (20) 	职业
+Id_Education	int NULL	FK, 教育ID
+Education	varchar (20) 	教育
+ID_ResArea	int NULL	FK, 地区ID
+ResArea	varchar (40) 	地区
+Address	varchar (120) 	地址
+Phone	varchar (30) 	电话
+F_Prepared	bit NULL 	单位备单标示
+
+8. PeisOrgReservationReceipt
+体检团体任务发票表	
+字段	类型(长度)	说明
+ID_OrgReservationReceipt	int	PK, 自增长
+ID_OrgReservation	int NOT NULL	FK, 任务ID
+FactPrice	money NULL	优惠价格
+ID_ReceiptType	int NOT NULL	FK, 发票ID
+F_Remitted	bit NOT NULL	已出票
+ID_Remitter	int NULL	FK, 出票人ID
+RemitTime	datetime NULL	出票时间
+ReceiptSheetNo	varchar (30) 	发票号码
+F_Returned	bit NOT NULL	已退
+ID_Returner	int NULL	FK, 退票人ID
+ReturnTime	datetime NULL	退票时间
+ID_OrgBranch	int NULL	FK, 子团体ID
+Receipt_Org_Name	varchar (50) 	发票团体名称
+Note	varchar (30) 	备注
+
+9. PeisOrgReservationSale
+体检团体任务销售表	
+字段	类型(长度)	说明
+ID_OrgReservationSale	int 	PK, 自增长
+ID_OrgReservation	int NULL	FK, 任务ID
+ID_SalePerson	int NULL	FK, 销售人ID
+WeightPercentage	int NULL	销售份额权重
+SaleFlag	varchar (10) 	销售标志
+Note	char (50) 	备注
+
+10. 
+PeisPatient
+体检者表	
+字段	类型(长度)	说明
+ID_Patient	int	PK, 自增长, 体检号
+ID_OrgPatient	int NULL 	预定体检编码
+ID_PatientArchive	int NULL 	FK, 档案ID
+PatientCode	varchar (50)	体检代码
+PatientCodePrn	varchar (50)	体检代码打印格式
+PatientArchiveNo	varchar (30)	档案代码
+PatientCardNo	varchar (30)	一卡通号
+PatientBizNo	varchar (50)	业务编号
+IDCardNo	varchar (30)	身份证号
+DailyNumberDate	smalldatetime NULL 	每日编码日期
+DailyNumber	int NULL 	每日编码
+NumTotal	int NULL 	总编号
+NumYear	int NULL 	年编号
+NumMonth	int NULL 	月编号
+NumDay	int NULL 	日编号
+NumOrg	int NULL 	团体编号
+NumOrgResv	int NULL 	任务编号
+ID_NonOrg	int NULL 	非团体虚拟团体ID
+PatientName	varchar (30)	姓名
+Input_Code	varchar (8)	输入码
+ID_OrgReservationGroup	int NULL 	FK, 分组ID
+ID_OrgReservation	int NULL 	FK, 预定任务ID
+ID_Org	int NULL 	FK, 团体ID
+Org_Name	varchar (50)	团体名称
+Org_Depart	varchar (30)	团体部门
+ID_Payway	int NULL 	FK, 支付方式ID
+Payway	varchar (20)	支付方式
+OffPercent	int NULL 	扣率
+MaxOffPercent	int NULL 	最大扣率
+PersonPriceLimit	money NULL 	统收限额
+ID_Sex	int NULL 	FK, 性别ID
+Sex	varchar (8)	性别
+BirthDate	datetime NULL 	出生日期
+Age	int NULL 	年龄
+ID_AgeUnit	int NULL 	FK, 年龄单位ID
+AgeUnit	varchar (8)	年龄单位
+AgeOfReal	numeric(18 5) NULL 	实数年龄
+ID_Marriage	int NULL 	FK, 婚姻ID
+Marriage	varchar (4)	婚姻
+ID_Nation	int NULL 	FK, 民族ID
+Nation	varchar (16)	民族
+Address	varchar (120)	地址
+ID_InformWay	int NULL 	FK, 通知方式ID
+ID_OpenDoctor	int NULL 	FK, 开单医生ID
+Email	varchar (80)	电子邮件
+Phone	varchar (30)	电话
+ID_PatientClass	int NULL 	FK, 体检者类型ID
+ID_Education	int NULL 	FK, 教育ID
+Education	varchar (20)	教育
+ID_Occupation	int NULL 	FK, 职业ID
+Occupation	varchar (20)	职业
+Id_ResArea	int NULL 	FK, 地区ID
+ResArea	varchar (40)	地区
+DateInorganization	smalldatetime NULL 	入职日期
+F_IsForPrepare	bit NOT NULL 	预定
+F_IsForReserve	bit NOT NULL 	预约
+DateCreated	datetime NULL 	记录创建时间
+F_Registered	bit NOT NULL 	已登记
+DateRegister	datetime NULL 	登记时间
+Position_Code	varchar (6)	位置
+JobType_Code	varchar (6)	工作类型编码
+MoneyAmount	money NULL 	应付金额
+MoneyAmountPaid	money NULL 	实付金额
+GuidanceNote	text	指引单说明
+WorkNo	varchar (20)	工号
+ID_DoctorReg	int NULL 	FK, 登记员ID
+DoctorReg	varchar (16)	登记员
+ID_ExamType	int NULL 	FK, 体检类型ID
+ID_ExamSuite	int NULL 	体检类型
+ExamSuite_Name	varchar (50)	套餐名称
+ID_DoctorConclusion	int NULL 	(不使用)
+DoctorConclusion	varchar (16)	(不使用)
+ID_DoctorApply	int NULL 	FK, 开单医生ID
+DoctorApply	varchar (16)	开单医生
+F_GuidancePrinted	bit NOT NULL 	指引单已打
+F_FeeCharged	bit NOT NULL 	已缴费
+F_ExamStarted	bit NOT NULL 	已开始体检
+F_ReadyToFinal	bit NOT NULL 	分检完成
+ID_DoctorFee	int NULL 	FK, 收费员ID
+DoctorFee	varchar (16)	收费员
+F_Paused	bit NOT NULL 	禁检
+F_FinalLocked	bit NOT NULL 	总检锁定
+F_FinalExamed	bit NOT NULL 	总检完成
+F_FinalApproved	bit NULL 	总审完成
+ID_DoctorFinal	int NULL 	FK, 总检医生ID
+DoctorFinal_Name_R	varchar (12)	总检医生
+DateFinalExamed	smalldatetime NULL 	总检时间
+ID_DoctorFinalApproved	int NULL 	总审医生
+DateFinalApproved	smalldatetime NULL 	总审时间
+F_CardIssued	bit NOT NULL 	磁卡已发
+F_CardReturned	bit NOT NULL 	磁卡已交还
+F_CoverPrinted	bit NULL 	报告封面已打印
+F_ReportPrinted	bit NOT NULL 	报告已打印
+ID_ReportPrintedBy	int NULL 	FK, 报告打印者ID
+DateReportPrinted	smalldatetime NULL 	报告打印日期
+F_ReportInformed	bit NOT NULL 	报告领取通知
+DateReportInformed	smalldatetime NULL 	报告领取通知时间
+F_ReportFetched	bit NOT NULL 	报告已取
+DateReportFetched	smalldatetime NULL 	报告领取日期
+F_IsSevere	bit NOT NULL 	重大疾病
+F_Closed	bit NOT NULL 	结案
+DateClosed	smalldatetime NULL 	结案日期
+F_NeedTraced	bit NOT NULL 	需要跟踪
+F_DiffPerson	bit NOT NULL 	非本人体检
+ConfidentialLevel	int NULL 	密级
+F_SettleAll	bit NOT NULL 	预结
+Picture	image NULL 	照片
+Signature	image NULL 	签名
+Note	varchar (30)	备注
+DT_LastModifiedThisAt	datetime NULL 	最近修改时间
+F_InnerOper	bit NULL 	内部操作标志
+SevereDegree	int NULL 	重症级别
+SevereDegreeNote	varchar (50)	重症说明
+F_SevereInformed	bit NULL 	重症已通知
+SevereInformTime	datetime NULL 	重症通知时间
+ID_SevereInformBy	int NULL 	FK, 重症通知人ID
+Conclusion	text	综述
+ConclusionSummary	text	结论
+Suggestion	text	建议
+ConclusionRich	image NULL 	建议(暂不使用)
+Advice	text	健康建议
+DietGuide	text	饮食建议
+SportGuide	text	运行建议
+Knowledge	text	健康知识
+Message	text	温馨提示
+PositiveSummary	text	阳性综述
+ResultCompare	text	结果比较
+InterfaceMarks	varchar (50)	接口标志
+PatientFlag	varchar (50)	体检者标志
+TimingStartedAt	datetime NULL 	体检者记时器开始
+TimeResultLastChange	datetime NULL 	体检者记时器改变时间
+TimeResultLastArchive	datetime NULL 	体检者结果上次档案
+TimeResultLastOLAP	datetime NULL 	体检者结果上一次OLAP时间
+HospitalCode	varchar (50)	医院代码
+HospitalName	varchar (100)	医院名称
+
+11. PeisPatientArchive
+体检者档案表	
+字段	类型(长度)	说明
+ID_PatientArchive	int NOT NULL	PK, 非自增长, 档案ID
+PatientArchiveNo	varchar (30) 	档案号
+PatientCardNo	varchar (30) 	一卡通号
+IDCardNo	varchar (30) 	身份证号
+PatientName	varchar (16) 	姓名
+Input_Code	varchar (8) 	输入码
+ID_Sex	int NULL	FK, 性别ID
+Sex	varchar (8) 	性别: 男/女
+Age	int NULL	年龄
+AgeBaseDate	datetime NULL	年龄的时间基准
+BirthDate	datetime NULL	生日
+ID_Marriage	int NULL	FK, 婚姻ID
+Marriage	varchar (4) 	婚姻
+ID_Nation	int NULL	FK, 民族ID
+Nation	varchar (16) 	民族
+Address	varchar (120) 	住址
+Phone	varchar (30) 	电话
+ID_Education	int NULL	FK, 教育ID
+Education	varchar (20) 	教育
+ID_Occupation	int NULL	FK, 职业ID
+Occupation	varchar (20) 	职业
+Id_ResArea	int NULL	FK, 地区ID
+ResArea	varchar (40) 	地区
+DateRegister	smalldatetime NULL	登记时间
+Note	varchar (30) 	备注
+
+12. PeisPatientAskItem
+体检者问卷式检查项目表	
+字段	类型(长度)	说明
+ID_PatientAskItem	int 	PK, 自增长
+ID_PatientExamDepart	int NOT NULL	FK, 体检者分科检查科室ID
+ID_PatientFeeItem	int NULL	FK, 体检者收费项目ID
+ID_ExamFeeItem	int NULL	FK, 收费项目ID
+ID_AskItem	int NULL	FK, 问卷式检查项目ID
+AskItem_Text	text	问题
+Answer_Bool	bit NULL	答案: 布尔型
+Answer_Radio	int NULL	答案: 单选
+Answer_Check	varchar (30) 	答案: 多选
+SevereDegree	int NULL	重症级别
+DispOrder	varchar (10) 	行序
+RowCreateTime	datetime NULL 	行创建时间(内部使用)
+
+13. PeisPatientCharge
+体检者缴费表	
+字段	类型(长度)	说明
+ID_PatientCharge	int IDENTITY	PK, 自增长
+ID_Patient	int NULL	FK, 体检号(ID)
+ID_Payway	int NULL	FK, 支付方式ID
+Payway	varchar (20)	支持方式
+MoneyAmount	money NULL	金额应付
+MoneyAmountPaid	money NULL ,	金额实付
+F_Work_ByOrgDelta	bit NOT NULL ,	(内部使用)
+F_FeeTransfered	bit NULL ,	金额已接口
+F_FeeConfirmed	bit NULL ,	收费确认
+F_FeeCharged	bit NOT NULL ,	已收费
+F_FeeChargedOnCredit	bit NULL ,	已收费(记帐)
+F_IsReturn	bit NOT NULL ,	为退费
+F_ReceiptPrinted	bit NULL ,	发票已打印
+ID_FeeCharger	int NULL ,	FK, 收费员ID
+FeeChargeTime	datetime NULL ,	缴费时间
+Note	text	备注
+Ver_ThisRecord	int NULL ,	行版本
+F_Work_Inner_Modify	bit NULL 	(内部使用)
+
+14. PeisPatientChargeOnCredit
+体检者记帐缴费表	
+字段	类型(长度)	说明
+ID_PatientChargeOnCredit	int 	PK, 自增长
+ID_Patient	int NULL	体检号
+ID_Payway	int NULL	FK, 收费方式ID
+Payway	varchar (20) 	收费方式
+MoneyAmountPaid	money NULL	实收金额
+F_FeeCharged	bit NOT NULL	已收退费
+ID_FeeCharger	int NULL	FK, 收费员ID
+FeeChargeTime	datetime NULL	收费时间
+F_FeeChargedOnCredit	bit NULL	记帐
+Note	varchar (30) 	备注
+Ver_ThisRecord	int NULL	行版本(内部使用)
+F_Work_Inner_Modify	bit NULL 	内部改动(内部使用)
+
+15. PeisPatientConclusion
+体检者体检结论表	
+字段	类型(长度)	说明
+ID_PatientConclusion	int 	PK, 自增长
+ID_Patient	int NULL	体检号
+ID_Depart	int NULL	FK, 部门ID
+ID_Conclusion	int NULL	FK, 结论ID
+F_BySummary	bit NOT NULL	小结生成
+F_Invisible	bit NULL	不可见
+Conclusion_Name_R	varchar (70) 	结论(冗余)
+ConclusionType_Name	varchar (30) 	结论类型
+DispOrder	varchar (20) 	行序
+Depiction	text	疾病解释
+Suggestion	text	总检建议
+Advice	text	健康建议
+DietGuide	text	饮食指导
+SportGuide	text	健康指导
+Knowledge	text	健康知识
+
+16. PeisPatientExamDepart
+体检者分科检查表	
+字段	类型(长度)	说明
+ID_PatientExamDepart	int 	PK, 自增长
+ID_Patient	int NULL	体检号
+PatientName_R	varchar (50) 	体检者姓名(冗余)
+ID_Depart	int NULL	FK, 部门ID
+Depart_Name_R	varchar (30) 	科室名称(冗余)
+DepartDailyNoDate	smalldatetime NULL	科室日编号日期
+DepartDailyNo	int NULL	科室日编号
+Depart_SummaryNaming_R	varchar (20) 	科室小结命名(冗余)
+DepartSummary	text	科室小结
+ID_DepartDoctor	int NULL	FK, 科室医生ID
+DepartDoctor_Name_R	varchar (16) 	科室医生(冗余)
+ID_Typist	int NULL	FK, 录入者ID
+Typist_Name_R	varchar (16) 	录入者
+LastTypistTime	datetime NULL	录入时间
+F_GiveUp	bit NOT NULL	弃检
+F_Approved	bit NOT NULL	科室审核
+ID_DepartApprovedBy	int NULL	FK, 科室审核者ID
+DepartApprovedBy_Name_R	varchar (16) 	科室审核者姓名(冗余)
+ExamApproveTime	datetime NULL	科室审核时间
+RowCreateTime	datetime NULL	行创建时间
+F_LabRcvdFromLis	bit NOT NULL	LIS结果已收(不使用)
+MessageToFinal	text	信息
+ID_ConsultDoctor	int NULL	FK, 审核医师ID
+ConsultDoctor_Name_R	varchar (16) 	审核医师(冗余)
+SevereDegree	int NULL	重症级别
+PositiveSummary	text	阳性结果
+F_ApprovedAux	bit NULL 	辅助审核(供接口使用)
+
+17. PeisPatientExamItem
+体检者检查项目表	
+字段	类型(长度)	说明
+ID_PatientExamItem	int 	PK, 自增长
+ID_PatientExamDepart	int NULL	FK, 体检者检查分科ID
+ID_PatientFeeItem	int NULL	FK, 体检者收费项目ID
+ID_ExamFeeItem	int NULL	FK, 收费项目ID
+ID_ExamItem	int NULL	FK, 检查项目ID
+ExamItem_Name_R	varchar (50) 	检查项目名称(冗余)
+ExamItem_Code_R	varchar (50) 	检查项目编码(冗余)
+ID_Bodypart	int NULL	FK, 检查部位ID
+Bodypart_Name_R	varchar (50) 	检查部位名称(冗余)
+ID_ExamItemValue	int NULL	FK, 检查体检描述ID
+SevereDegree	int NULL	重症级别
+RefRange	varchar (30) 	参考范围
+ExamItemValues	text	检查项目体征词
+ExamItemValuesText	text	检查项目体征: 描述
+ExamItemValuesShort	varchar (60) 	检查项目体征: 简单描述
+ExamItemValuesNumber	float NULL	检查项目体征: 数字
+LabItemFlag	varchar (10) 	检查项目标志
+F_LabItemNormal	bit NULL	是否 “正常”
+ExamItemValuesNumber2	float NULL	检查项目体征: 数字2
+ExamItemValuesNumber3	float NULL	检查项目体征: 数字3
+BEFID_DispOrder_R	varchar (10) 	收费项目中检查项目行序
+RowCreateTime	datetime NULL	行创建时间
+F_LabRcvdFromLis	bit NOT NULL 	LIS结果已收(不使用)
+
+18. PeisPatientExamItemPicture
+体检者检查项目图像表	
+字段	类型(长度)	说明
+ID_PatientExamItemPicture	int 	PK, 自增长
+ID_PatientExamItem	int NULL	FK, 体检者检查项目ID
+PictureRelativeFilename	varchar (300) 	图片相对路径
+PictureTitle	varchar (50) 	图片标题
+PictureDescription	text	图片描述
+Picture	image NULL	图片
+F_HidePic	bit NULL 	不打印
+
+19. PeisPatientExamItemValue
+体检者检查项目体征表	
+字段	类型(长度)	说明
+ID_PatientExamItemValue	int 	PK, 自增长
+ID_PatientExamItem	int NULL	FK, 体检者检查项目ID
+ID_ExamItemValue	int NULL	FK, 体检者检查体征词ID
+ExamItemValueText	text	体检者检查体征描述
+Disp_Order	int NULL 	行序
+
+20. PeisPatientFeeItem
+体检者收费项目表	
+字段	类型(长度)	说明
+ID_PatientFeeItem	int 	PK, 自增长
+ID_Patient	int NULL	FK, 体检号
+ID_ExamFeeItem	int NULL	FK, 体检者收费项目ID
+ExamFeeItem_Name	varchar (50) 	收费项目名称(冗余)
+Price	money NULL	原始价格（应收收入）
+FactPrice	money NULL	优惠价格（实收收入）
+SettlePrice	money NULL	结算价格(目前仅用于团检)
+F_AddedItem	bit NOT NULL	新增项目(不再使用)
+ID_Payway	int NULL	FK, 支付方式ID
+F_Registered	bit NULL	已登记
+ID_DoctorReg	int NULL	FK, 登记员ID
+DoctorReg_R	varchar (16) 	登记员(冗余)
+RegisterTime	datetime NULL	登记时间
+ID_PatientRegisterSheet	int NULL	FK, 登记单ID
+F_RegReturned	bit NULL	已退登记
+F_FeeCharged	bit NOT NULL	已收费
+ID_FeeCharger	int NULL	FK, 收费员ID
+FeeCharger_Name_R	varchar (16) 	收费员姓名(冗余)
+FeeChargeTime	datetime NULL	收费时间
+ID_FeeDiscounter	int NULL	FK, 打折者ID
+BatchNumber	int NULL	检验: 批次
+TubePosition	int NULL	检验: 管位
+SampleNumber	int NULL	检验: 样本号
+F_LabSampled	bit NOT NULL	检验: 已采样
+ID_LabSampler	int NULL	检验: FK, 采样者ID
+LabSampler_Name_R	varchar (16) 	检验: 采样者
+LabSampleTime	datetime NULL	检验: 采样时间
+F_LabSendToLis	bit NOT NULL	检验: 已发至LIS
+LabSendToLisTime	datetime NULL	检验: 发至LIS时间
+F_LabRcvdFromLis	bit NOT NULL	检验: 已自LIS收到结果
+LabRcvdFromLisTime	datetime NULL	检验: 收到LIS结果时间
+F_GiveUp	bit NULL	弃检
+F_Examinated	bit NOT NULL	已检
+ID_PatientExamDepart	int NULL	FK, 体检者检查科室
+ID_ExamDoctor	int NULL	FK, 分科检查医师ID
+ExamDoctor_Name_R	varchar (16) 	分科检查医师
+ExaminateTime	datetime NULL	分科检查时间
+F_Mark_FeeReturn	bit NOT NULL	退费拟退标志
+F_Work_Inner_Modify	bit NULL	修改标志(内部使用)
+SevereDegree	int NULL	重症级
+PositiveSummary	text	阳性小结
+InterfaceMarks	varchar (50) 	接口标志
+UrlResult	varchar (500) 	结果URL
+
+21. PeisPatientFeeItemReturned
+体检者收费项目退项表	
+字段	类型(长度)	说明
+ID_PatientFeeItemReturned	int 	PK, 自增长
+ID_PatientFeeItem	int NOT NULL	FK, 体检者收费项目ID
+ID_Patient	int NULL	FK, 体检号
+ID_ExamFeeItem	int NULL	FK, 收费项目
+ExamFeeItem_Name	varchar (50) 	收费项目名称
+Price	money NULL	原始价格
+FactPrice	money NULL	优惠价格
+ID_DoctorReg	int NULL	FK, 登记员ID
+DoctorReg_R	varchar (16) 	登记员姓名(冗余)
+ID_FeeCharger	int NULL	FK, 收费员ID
+FeeCharger_Name_R	varchar (16) 	收费员姓名(冗余)
+FeeChargeTime	datetime NULL	收费时间
+FeeReturnTime	datetime NULL 	退费时间
+
+22. PeisPatientQueueOutgoing
+体检者登记单明细发送表	
+字段	类型(长度)	说明
+ID_QueueOutgoing	int 	PK, 自增长
+ID_Patient	int NULL	FK, 体检号
+ID_PatientRegisterSheet	char (10) 	FK, 登记单ID
+ID_PatientRegisterSheetDetail	char (10) 	FK, 登记单明细ID
+Destination	varchar (30) 	传送对象
+F_Sending	bit NULL	发送中标志
+F_Marker	bit NULL	标记
+CreateTime	datetime NULL	行创建时间
+DispOrder	int NULL	行序
+ID_Operator	int NULL	FK, 操作员ID
+OperatorName	varchar (20) 	操作员
+
+23. PeisPatientReceipt
+体检者发票表	
+字段	类型(长度)	说明
+ID_PatientReceipt	int 	PK, 自增长
+ID_Patient	int NOT NULL	FK, 体检号
+Patient_Name	varchar (16) 	体检者姓名
+ReceiptSheetNo	varchar (30) 	发票号
+FactPrice	money NULL	价格
+ID_ReceiptType	int NULL	FK, 发票类型ID
+ID_FeeCharger	int NULL	FK, 收费员ID
+FeeCharger_Name_R	varchar (16) 	收费员姓名
+FeeChargeTime	datetime NULL	收费时间
+F_Accounted	bit NOT NULL	已上帐
+F_Returned	bit NOT NULL	已退票
+ID_FeeReturner	int NULL	FK, 退费者ID
+FeeReturner_Name_R	varchar (16) 	退费者姓名
+FeeReturnTime	datetime NULL 	退费时间
+
+24. PeisPatientReceiptOnCredit
+体检者记帐方式发票表	
+字段	类型(长度)	说明
+ID_PatientReceiptOnCredit	Int 	PK, 自增长
+ID_Patient	int NOT NULL	FK, 体检号
+FactPrice	money NULL	价格
+ID_ReceiptType	int NOT NULL	FK, 发票类型ID
+F_Remitted	bit NOT NULL	已出票
+ID_Remitter	int NULL	已出票
+RemitTime	datetime NULL	出票时间
+ReceiptSheetNo	varchar (30) 	发票号码
+F_Returned	bit NOT NULL	已退票
+ID_Returner	int NULL	FK, 退票者ID
+ReturnTime	datetime NULL	退票时间
+Receipt_Patient_Name	varchar (50) 	发票体检者姓名
+Note	varchar (30) 	备注
+
+25. PeisPatientRegisterSheet
+体检者登记单表	
+字段	类型(长度)	说明
+ID_PatientRegisterSheet	int 	PK, 自增长
+PatientRegisterSheetNo	varchar (50) 	体检者登记单号码
+ID_PatientRegisterSheetChain	int NULL	FK, 关联登记单ID
+HisOneCardNo	varchar (50) 	HIS一卡通号码
+HisOneCardType	varchar (20) 	HIS一卡通号码类型
+HisPatientArchiveNo	varchar (50) 	HIS病案号
+HisPatientNo	varchar (50) 	HIS病人号
+ID_Patient	int NULL	FK, 体检号
+PatientName	varchar (30) 	体检者姓名
+F_IsReturn	bit NULL	已退
+F_IsWholeReturn	bit NULL	全退
+ID_PatientRegisterSheetWholeReturn	int NULL	FK, 全退登记单ID
+ID_Payway	int NULL	FK, 收费方式ID
+F_RegTransfered	bit NULL	登记单已传送
+F_RegConfirmed	bit NULL	登记已确认
+F_FeeCharged	bit NULL	已收费
+MoneyAmount	money NULL	金额
+HisExecDepartCode	varchar (20) 	HIS执行科室代码
+OpenDoctorCode	varchar (20) 	开单医生代码
+OpenDoctorName	varchar (20) 	开单医生姓名
+ID_OperRegister	int NULL	FK, 登记员ID
+SheetOperTime	datetime NULL	登记单时间
+ID_FeeCharger	int NULL	FK, 收费员ID
+FeeChargeTime	datetime NULL	收费时间
+F_Work_Inner_Modify	bit NULL 	标记(内部使用)
+
+26. PeisPatientRegisterSheetDetail
+体检者登记单与收费项目关联表	
+字段	类型(长度)	说明
+ID_PatientRegisterSheetDetail	int 	PK, 自增长
+ID_PatientRegisterSheet	int NULL	FK, 登记单ID
+ID_PatientRegisterSheetReg	int NULL	FK, 登记单??ID
+F_VirtualItem	bit NULL	虚拟项目
+ID_PatientFeeItem	int NULL	FK, 体检者收费项目ID
+ID_ExamFeeItem	int NULL	FK, 体检者检查项目ID
+ExamFeeItem_Code	varchar (50) 	收费项目代码
+ExamFeeItem_Name	varchar (50) 	收费项目名称
+UnitPrice	money NULL	单价
+Qty	int NULL	数量
+F_Work_Inner_Modify	bit NULL 	标记(内部使上)
+
+27. PeisStatGeneral
+体检者综合样本表	
+字段	类型(长度)	说明
+ID_StatGeneral	int 	PK, 自增长
+StatGeneralName	varchar (100) 	综合样本名称
+StatGeneralTitle	varchar (200) 	综合样本标题
+StatGeneralType	varchar (20) 	综合样本类型
+DateTimeTrueBase	datetime NULL	综合样本时间
+ID_Org	int NULL	FK, 体检团体ID
+ID_OrgReservation	int NULL	FK, 体检团体任务ID
+DateTimeFrom	datetime NULL	时间段(自)
+DateTimeTo	datetime NULL	时间段(至)
+Input_Code	varchar (8) 	输入码
+DateTimeCreated	datetime NULL	行创建时间
+ID_Operator	int NULL	FK, 系统操作员ID
+Note	varchar (50) 	备注
+
+28. PeisStatGeneralDetail
+体检者综合样本体检者明细表	
+字段	类型(长度)	说明
+ID_StatGeneralDetail	int 	PK, 自增长
+ID_StatGeneral	int NULL	FK, 综合样本ID
+ID_Patient	int NULL	体检号
+PatientName	varchar (50) 	体检者姓名
+DataPosition	varchar (20) 	数据位置
+Sex	varchar (20) 	性别
+AgeWithUnit	varchar (20) 	年龄及单位
+ID_OrgReservation	int NULL	FK, 团检任务员ID
+Org_Name	varchar (50) 	团体名称
+F_Disabled	bit NULL 	禁检
+
+29. VolatConclusionTrueBase
+体检者综合样本相关基数表	
+字段	类型(长度)	说明
+ID_ConclusionTrueBase	Int 	PK, 自增长
+ID_StatGeneral	Int NULL	PF, 综合样本ID
+ID_Conclusion	int NULL	FK, 结论词ID
+TrueTotal_Male	int NULL	男性数量
+TrueTotal_Female	int NULL	女性数量
+TrueTotal_Total	int NULL	合计数量
+TimeLastUpdated	datetime NULL 	最近更新时间
+
+30. VolatConclusionTrueBaseOrg
+体检者团检任务样本相关基数表	
+字段	类型(长度)	说明
+ID_ConclusionTrueBaseOrg	int 	PK, 自增长
+ID_OrgReservation	int NULL	PF, 任务ID
+ID_Conclusion	int NULL	结论词
+TrueTotal_Male	int NULL	男性数量
+TrueTotal_Female	int NULL	女性数量
+TrueTotal_Total	int NULL	合计数量
+TimeLastUpdated	datetime NULL 	最近更新时间
+
+31. VolatDebugLog
+系统调试日志表	Reserved
+字段	类型(长度)	说明
+ID_DebugLog	int 	PK, 自增长
+TableName	varchar (50) 	表名
+FieldName	varchar (50)	字段名
+Operation	varchar (10) 	操作
+OldValue	varchar (50) 	原值
+NewValue	varchar (50) 	新值
+ID_Operator	int NULL	FK, 操作员ID
+OperatorName	varchar (10) 	操作员姓名
+OperTime	datetime NULL	操作时间
+OperClientIP	varchar (30) 	操作客户端

@@ -1,0 +1,238 @@
+-- 病理收入  
+
+SELECT 
+    OrderName AS "医嘱项名称",
+    TotalFee AS "总费用",
+    Quantity AS "数量",
+    UnitPrice AS "单价",
+    VisitType AS "就诊类型",
+    ChargeName AS "收费项名称",
+    VisitwardName AS "护理单元_科内机构",
+    VisitwardCode AS "护理单元_科内机构代码",
+    VisitDeptName AS "就诊科室_科内机构",
+    VisitDeptCode AS "就诊科室_科内机构代码",
+    MakePrescDeptName AS "开单科室_科内机构",
+    MakePrescDeptCode AS "开单科室_科内机构代码",
+    MakePrescPersName AS "开单医生",
+    MakePrescPersCode AS "开单医生工号",
+    VisitDoctName AS "主管医生",
+    VisitDoctCode AS "主管医生工号",
+    CheckSClassName AS "核算子类",
+    RecDeptName AS "接收科室_科内机构",
+    RecDeptCode AS "接收科室_科内机构代码",
+    ExecPersDesc AS "执行人姓名",
+    ExecPersCode AS "执行人工号",
+    CheckPClassName AS "核算大类",
+    ReportDtTm AS "报表时间"
+FROM m1.mdr_income
+WHERE IsDeleted = '0' and RecDeptName in ( '病理科','锦江病理科','温江病理科','天府病理科')
+  AND  SUBSTRING(ReportDtTm, 1, 7) = 
+      FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM')
+
+
+检查治疗收入(元)
+
+
+
+SELECT 
+    sum(TotalFee) AS "检查治疗收入(元)"
+FROM m1.mdr_income
+WHERE IsDeleted = '0' and RecDeptName in ( '病理科','锦江病理科','温江病理科','天府病理科')
+  AND  SUBSTRING(ReportDtTm, 1, 7) = 
+      FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM')
+
+
+继续查询收入：
+
+
+穿刺中心细胞病理收入(元) 
+
+接收科室为“穿刺诊疗中心、锦江穿刺诊疗中心”，医嘱项名称为“淋巴结细针穿刺检查、皮下包块细针穿刺检查、乳腺肿物穿刺活检术(细针)、脱落细胞学检查与诊断(涂片)、细针穿刺细胞学检查与诊断(细胞块)、细针穿刺细胞学检查与诊断(涂片)”
+
+
+SELECT 
+    SUM(TotalFee) AS "穿刺诊疗中心总收入"
+FROM m1.mdr_income
+WHERE IsDeleted = '0'
+    AND (RecDeptName LIKE '%穿刺诊疗中心%' OR RecDeptName LIKE '%锦江穿刺诊疗中心%')
+    AND OrderName IN (
+        '淋巴结细针穿刺检查',
+        '皮下包块细针穿刺检查',
+        '乳腺肿物穿刺活检术(细针)',
+        '脱落细胞学检查与诊断(涂片)',
+        '细针穿刺细胞学检查与诊断(细胞块)',
+        '细针穿刺细胞学检查与诊断(涂片)'
+    )
+    AND SUBSTRING(ReportDtTm, 1, 7) = 
+        FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM')
+
+
+
+
+
+SUBSTRING("dateregister", 1, 7) AS "年月"
+
+
+
+===========-- 病理统计查询 - 上月数据累加汇总
+-- 病理统计查询 - 上月数据累加汇总
+
+
+WITH last_month_range AS (
+  SELECT
+    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM-dd') || ' 00:00:00' AS start_date,
+    FORMAT_DATETIME(LAST_DAY_OF_MONTH(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH)), 'yyyy-MM-dd') || ' 23:59:59' AS end_date
+),
+
+-- 冰冻签发
+bingdong_count AS (
+  SELECT COUNT(1) AS count_value, '冰冻签发' AS stat_type
+  FROM hid0101_mssql_bl_rep.t_jcxx, last_month_range
+  WHERE f_blk IN ('锦江冰冻','冰冻') 
+    AND f_bgzt = '已审核' 
+    AND f_bgrq >= start_date 
+    AND f_bgrq <= end_date
+    AND isdeleted = '0'
+    AND f_blk NOT LIKE '上锦%'
+    AND f_blk NOT LIKE '公卫%'
+    AND f_blk NOT LIKE '峨眉%'
+),
+
+-- 免疫组化报告签发
+mianyizu_count AS (
+  SELECT COUNT(1) AS count_value, '免疫组化报告签发' AS stat_type
+  FROM hid0101_mssql_bl_rep.t_bcbg a 
+  LEFT JOIN hid0101_mssql_bl_rep.t_jcxx b ON a.f_blh = b.f_blh,
+  last_month_range
+  WHERE b.f_blk IN ('普通外检','加快') 
+    AND a.f_bc_bgzt = '已审核' 
+    AND a.f_bc_bgrq >= start_date 
+    AND a.f_bc_bgrq <= end_date
+    AND a.isdeleted = '0'
+    AND b.isdeleted = '0'
+    AND b.f_blk NOT LIKE '上锦%'
+    AND b.f_blk NOT LIKE '公卫%'
+    AND b.f_blk NOT LIKE '峨眉%'
+),
+
+-- 签发报告
+qianfa_count AS (
+  SELECT COUNT(1) AS count_value, '签发报告' AS stat_type
+  FROM hid0101_mssql_bl_rep.t_jcxx, last_month_range
+  WHERE f_blk IN ('普通外检','加快') 
+    AND f_bgzt = '已审核' 
+    AND f_bgrq >= start_date 
+    AND f_bgrq <= end_date
+    AND isdeleted = '0'
+    AND f_blk NOT LIKE '上锦%'
+    AND f_blk NOT LIKE '公卫%'
+    AND f_blk NOT LIKE '峨眉%'
+),
+
+-- 送检工作量-普通外检
+songjian_putong AS (
+  SELECT COUNT(*) AS count_value, '送检工作量-普通外检' AS stat_type
+  FROM hid0101_mssql_bl_rep.t_jcxx, last_month_range
+  WHERE f_blk = '普通外检' 
+    AND f_sdrq >= start_date 
+    AND f_sdrq <= end_date
+    AND isdeleted = '0'
+    AND f_blk NOT LIKE '上锦%'
+    AND f_blk NOT LIKE '公卫%'
+    AND f_blk NOT LIKE '峨眉%'
+),
+
+-- 送检工作量-加快
+songjian_jiakuai AS (
+  SELECT COUNT(*) AS count_value, '送检工作量-加快' AS stat_type
+  FROM hid0101_mssql_bl_rep.t_jcxx, last_month_range
+  WHERE f_blk = '加快' 
+    AND f_sdrq >= start_date 
+    AND f_sdrq <= end_date
+    AND isdeleted = '0'
+    AND f_blk NOT LIKE '上锦%'
+    AND f_blk NOT LIKE '公卫%'
+    AND f_blk NOT LIKE '峨眉%'
+),
+
+-- 汇总所有统计
+all_stats AS (
+  SELECT count_value, stat_type FROM bingdong_count
+  UNION ALL
+  SELECT count_value, stat_type FROM mianyizu_count
+  UNION ALL
+  SELECT count_value, stat_type FROM qianfa_count
+  UNION ALL
+  SELECT count_value, stat_type FROM songjian_putong
+  UNION ALL
+  SELECT count_value, stat_type FROM songjian_jiakuai
+)
+
+-- 最终结果：总计
+SELECT 
+  SUM(count_value) AS "本部检查治疗人次/项次"
+FROM all_stats
+
+
+
+检查治疗收入(元)
+
+
+
+SELECT 
+    sum(TotalFee) AS "检查治疗收入(元)"
+FROM m1.mdr_income
+WHERE IsDeleted = '0' and RecDeptName in ( '病理科','锦江病理科','温江病理科','天府病理科')
+  AND  SUBSTRING(ReportDtTm, 1, 7) = 
+      FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM')
+
+
+SELECT 
+    SUM(TotalFee) AS "穿刺中心细胞病理收入(元)"
+FROM m1.mdr_income
+WHERE IsDeleted = '0' 
+  AND RecDeptName IN ('穿刺诊疗中心', '锦江穿刺诊疗中心')
+  AND OrderName IN (
+      '淋巴结细针穿刺检查',
+      '皮下包块细针穿刺检查', 
+      '乳腺肿物穿刺活检术(细针)',
+      '脱落细胞学检查与诊断(涂片)',
+      '细针穿刺细胞学检查与诊断(细胞块)',
+      '细针穿刺细胞学检查与诊断(涂片)'
+  )
+  AND SUBSTRING(ReportDtTm, 1, 7) = 
+      FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM')
+
+
+-- 体检收入
+
+select
+    sum("计算金额")
+from
+(
+    select
+        case
+            when "qty" is null then cast("FactPrice" as decimal(10, 2))
+            else cast(cast("qty" as decimal(10, 2)) as integer) * cast("FactPrice" as decimal(10, 2))
+        end as "计算金额"
+    from
+        m1.mdr_peisincome
+    where
+        ((f_feecharged = 'AQ==')
+        or f_feecharged = 'true')
+        and examfeeitem_name in ('宫颈刮片病理细胞学检查','宫颈刮片病理细胞学检查【HPV】','液基薄层细胞学检查','液基薄层细胞学检查【加HPV】','尿液基细胞学检测','液基薄层细胞制片术','肠癌无创脱落细胞多靶点基因检测','液基薄层细胞学检查【加HPV，加白带常规】','两癌筛查【HPV+白带】','两癌筛查液基薄层细胞制片术','两癌筛查组织病理学检查','两癌筛查妇科','两癌筛查妇科【HPV+白带】','两癌筛查妇科【液基】','两癌筛查组织病理学检查【需取组织检查才用条码】','液基薄层细胞学检查【加白带常规】','体检液基薄层细胞制片术','液基薄层细胞制片术','液基薄层细胞学检查（HPV）（体检）')
+        and substring(dateregister, 1, 7) = DATE_FORMAT(DATE_ADD('month', -1, current_date), '%Y-%m')
+        and medorgcode in ('HID0101')
+)
+
+
+-- 本部收入合计
+
+-- 领取材料费
+
+
+
+------------华西本部的结束了，接下来就是
+
+
+

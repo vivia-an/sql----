@@ -1,0 +1,3756 @@
+SET SESSION query_max_stage_count = 2500;
+ 
+
+
+ WITH base_result AS (SELECT 
+    date_format(date_add('month', -1, current_date), '%Y-%m') as "周期",
+    '上月' as "周期名称",
+    1 as "排序",
+   
+        SUM(CASE WHEN T."kcjl" = '入库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '袋'
+             AND T."xx2" = '合计' AND T."js2" = '袋'  
+             AND T."xx3" = '合计' AND T."js3" = '袋'
+             AND T."xx4" = '合计' AND T."js4" = '袋'
+        THEN T."hxb1" + T."xj1" + T."xxb1" + T."lcd1" 
+        ELSE 0 END) as "入库血液",
+        SUM(CASE WHEN T."kcjl" = '出库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '袋'
+             AND T."xx2" = '合计' AND T."js2" = '袋'  
+             AND T."xx3" = '合计' AND T."js3" = '袋'
+             AND T."xx4" = '合计' AND T."js4" = '袋'
+        THEN T."hxb1" + T."xj1" + T."xxb1" + T."lcd1" 
+        ELSE 0 END) as "出库血液",
+        
+        SUM(CASE WHEN T."kcjl" = '入库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '袋'
+             AND T."xx2" = '合计' AND T."js2" = '袋'  
+             AND T."xx3" = '合计' AND T."js3" = '袋'
+             AND T."xx4" = '合计' AND T."js4" = '袋'
+        THEN T."hxb1"  
+        ELSE 0 END) as "红细胞入库",
+        
+        SUM(CASE WHEN T."kcjl" = '出库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '袋'
+             AND T."xx2" = '合计' AND T."js2" = '袋'  
+             AND T."xx3" = '合计' AND T."js3" = '袋'
+             AND T."xx4" = '合计' AND T."js4" = '袋'
+        THEN T."hxb1"  
+        ELSE 0 END) as "红细胞出库",
+        
+        SUM(CASE WHEN T."kcjl" = '入库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '量'
+             AND T."xx2" = '合计' AND T."js2" = '量'  
+             AND T."xx3" = '合计' AND T."js3" = '量'
+             AND T."xx4" = '合计' AND T."js4" = '量'
+        THEN T."hxb1"  
+        ELSE 0 END) as "红细胞入库-量",
+        
+        SUM(CASE WHEN T."kcjl" = '出库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '量'
+             AND T."xx2" = '合计' AND T."js2" = '量'  
+             AND T."xx3" = '合计' AND T."js3" = '量'
+             AND T."xx4" = '合计' AND T."js4" = '量'
+        THEN T."hxb1"  
+        ELSE 0 END) as "红细胞出库-量",
+        
+        SUM(CASE WHEN T."kcjl" = '入库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '袋'
+             AND T."xx2" = '合计' AND T."js2" = '袋'  
+             AND T."xx3" = '合计' AND T."js3" = '袋'
+             AND T."xx4" = '合计' AND T."js4" = '袋'
+        THEN T."lcd1"  
+        ELSE 0 END) as "冷沉淀入库",
+        
+        
+        SUM(CASE WHEN T."kcjl" = '入库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '量'
+             AND T."xx2" = '合计' AND T."js2" = '量'  
+             AND T."xx3" = '合计' AND T."js3" = '量'
+             AND T."xx4" = '合计' AND T."js4" = '量'
+        THEN T."xj1"  
+        ELSE 0 END) as "血浆入库-量",
+        
+        SUM(CASE WHEN T."kcjl" = '出库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '量'
+             AND T."xx2" = '合计' AND T."js2" = '量'  
+             AND T."xx3" = '合计' AND T."js3" = '量'
+             AND T."xx4" = '合计' AND T."js4" = '量'
+        THEN T."xxb1"  
+        ELSE 0 END) as "血小板出库-量",
+        
+            SUM(CASE WHEN T."kcjl" = '出库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '袋'
+             AND T."xx2" = '合计' AND T."js2" = '袋'  
+             AND T."xx3" = '合计' AND T."js3" = '袋'
+             AND T."xx4" = '合计' AND T."js4" = '袋'
+        THEN T."lcd1"  
+        ELSE 0 END) as "冷沉淀出库",
+        
+                SUM(CASE WHEN T."kcjl" = '出库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '袋'
+             AND T."xx2" = '合计' AND T."js2" = '袋'  
+             AND T."xx3" = '合计' AND T."js3" = '袋'
+             AND T."xx4" = '合计' AND T."js4" = '袋'
+        THEN T."xj1"  
+        ELSE 0 END) as "血浆出库",
+        
+                    SUM(CASE WHEN T."kcjl" = '出库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '袋'
+             AND T."xx2" = '合计' AND T."js2" = '袋'  
+             AND T."xx3" = '合计' AND T."js3" = '袋'
+             AND T."xx4" = '合计' AND T."js4" = '袋'
+        THEN T."xxb1"  
+        ELSE 0 END) *3 as "全院调剂血小板次数",
+        
+        
+        (WITH surgery_blood AS (
+    SELECT 
+        t.id,
+        -- 使用presto的日期函数判断是否周末
+        CASE 
+            WHEN day_of_week(CAST(t.scheduled_date AS TIMESTAMP)) IN (6,7) THEN 1 
+            ELSE 0 
+        END as is_weekend
+    from   hid0101_orcl_operaanesthisa_emrhis.sam_apply t
+    -- 关联手术登记表获取实际手术信息
+    LEFT JOIN hid0101_orcl_operaanesthisa_emrhis.sam_reg reg 
+        ON t.id = reg.sam_apply_id 
+        AND reg.isdeleted = '0'
+    -- 关联麻醉事件表获取输血信息
+    INNER JOIN hid0101_orcl_operaanesthisa_emrhis.sam_anar_enent en 
+        ON t.id = en.sam_apply_id 
+        AND en.isdeleted = '0'
+        AND en.s_mzsjlb_dm = '31'  -- 输血事件
+--        AND en.event_text LIKE '%手术%'  -- 用血目的是手术
+    WHERE t.health_service_org_id = 'HXSSMZK'
+        AND t.oper_type = 'ROOM_OPER'  -- 手术间手术
+        AND t.is_reject = '2'  -- 已通过申请
+        AND t.s_sssyzt_dm = '90'  -- 已完成手术
+        AND t.isdeleted = '0'
+        AND t.scheduled_date >= date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d')
+        AND t.scheduled_date <= date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d')
+)
+SELECT 
+    COUNT(DISTINCT id) as "周末手术用血台次"
+from   surgery_blood 
+WHERE is_weekend = 1) "周末加班手术台次",
+        
+        
+-- 输血科综合统计报表（基于输血血缘文档修正版）
+(select sum(t."费用")- (select case when sum( case when t."费用" is null then 0 else t."费用" end) is null then 0 else sum( case when t."费用" is null then 0 else t."费用" end) end  from   (SELECT 
+    B.BLOOD_NAME as "血液项目名称",
+    SUM(CAST(A.BLOOD_AMOUNT as DOUBLE)) as "数量",
+    SUM(COALESCE(CAST(e.charge AS DOUBLE), 0)) as "费用"
+from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT A
+INNER JOIN hid0101_orcl_lis_xhbis.BIS6_MATCH_BLOOD_TYPE B 
+    ON A.BLOOD_TYPE_ID = B.BLOOD_TYPE_ID
+    AND A.isdeleted = '0'
+    AND B.isdeleted = '0'
+INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE C
+    ON A.INSPECTION_ID = C.INSPECTION_ID
+    AND C.isdeleted = '0'
+INNER JOIN hid0101_orcl_lis_xhbis.bis6_charged_info d
+    ON A.BLOODBAG_ID = d.sample_charge_id
+    AND d.isdeleted = '0'
+INNER JOIN hid0101_orcl_lis_xhinterface.xinghe_charged_list e
+    ON d.sample_charge_id = e.sample_charge_id
+    AND e.isdeleted = '0'
+WHERE A.BLOODBAG_STATE NOT IN ('1','2')
+    AND A.SENDBLOOD_TIME between  date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d') and date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d') 
+GROUP BY B.BLOOD_NAME) t) as "配血检收入"
+
+
+from    (
+SELECT 
+    "XM" as "项目名称",
+    SUM("RC") as "人次",
+    SUM("FY") as "费用",
+    SUM("GZL") as "工作量"
+from   (
+    -- 第一部分：LIS检验收费统计
+    SELECT DISTINCT
+        c."chinese_name" as "XM",
+        COUNT(a."inspection_id") as "RC",
+        SUM(COALESCE(CAST(b."charge" AS DOUBLE), 0)) as "FY",
+        SUM(COALESCE(CASE WHEN CAST(b."workload" AS DOUBLE) = 0 THEN 1 ELSE CAST(b."workload" AS DOUBLE) END, 1)) as "GZL"
+    from   hid0101_orcl_lis_dbo.lis_inspection_sample a
+    INNER JOIN hid0101_orcl_lis_dbo.lis_inspection_sample_charge b
+        ON a."inspection_id" = b."inspection_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhsystem1.lis_charge_item c
+        ON b."charge_item_id" = c."charge_item_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."group_id" IN ('G013','G053','G105','G111')
+        AND a."input_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d'), ' 23:59:59')
+    GROUP BY c."chinese_name"
+
+    UNION ALL
+
+    -- 第二部分：血型统计（通过申请信息关联）
+    SELECT DISTINCT
+        c."blood_type_name" as "XM",
+        COUNT(a."inspection_id") as "RC",
+        0 as "FY",
+        COUNT(a."inspection_id") as "GZL"
+    from   hid0101_orcl_lis_dbo.lis_inspection_sample a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_req_info b
+        ON a."requisition_id" = b."req_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_req_blood c
+        ON b."req_id" = c."req_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."group_id" IN ('G013','G053','G105','G111')
+        AND a."input_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d'), ' 23:59:59')
+    GROUP BY c."blood_type_name"
+
+    UNION ALL
+
+    -- 第三部分：血袋收费统计（修正库名和表结构）
+    SELECT 
+        e."charge_item_name" as "XM",
+        COUNT(b."BLOODBAG_ID") as "RC",
+        SUM(COALESCE(CAST(e."charge" AS DOUBLE), 0)) as "FY",
+        COUNT(b."BLOODBAG_ID") as "GZL"
+    from   hid0101_orcl_lis_xhdata.lis6_inspect_sample a
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT b
+        ON a."inspection_id" = b."INSPECTION_ID"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type c
+        ON b."BLOOD_TYPE_ID" = c."BLOOD_TYPE_ID"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_charged_info d
+        ON b."BLOODBAG_ID" = d."sample_charge_id"
+        AND d."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhinterface.xinghe_charged_list e
+        ON d."sample_charge_id" = e."sample_charge_id"
+        AND e."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND e."his_id" IN ('LIS07068','LIS0300114','LIS0300255')
+        AND d."charge_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d'), ' 23:59:59')
+    GROUP BY e."charge_item_name"
+
+    UNION ALL
+
+    -- 第四部分：收费信息统计（使用正确的库名）
+    SELECT
+        b."charge_item_name" as "XM",
+        SUM(COALESCE(CAST(b."charge_num" AS DOUBLE), 0)) as "RC",
+        SUM(COALESCE(CAST(b."charge" AS DOUBLE), 0)) as "FY",
+        COUNT(a."charged_id") as "GZL"
+    from   hid0101_orcl_lis_xhbis.bis6_charged_info a
+    INNER JOIN hid0101_orcl_lis_xhinterface.xinghe_charged_list b
+        ON a."sample_charge_id" = b."sample_charge_id"
+        AND b."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."charge_state" IN ('charged','uncharged')
+        AND a."charge_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d'), ' 23:59:59')
+        AND a."sample_charge_id" LIKE 'H%'
+    GROUP BY b."charge_item_name"
+
+    UNION ALL
+
+    -- 第五部分：补费统计（排除特定项目）
+    SELECT
+        a."charge_item_name" as "XM",
+        SUM(COALESCE(CAST(a."charge_num" AS DOUBLE), 0)) as "RC",
+        SUM(COALESCE(CAST(a."charge" AS DOUBLE), 0)) as "FY",
+        COUNT(a."charged_id") as "GZL"
+    from   hid0101_orcl_lis_xhbis.bis6_charged_info a
+    WHERE a."isdeleted" = '0'
+        AND a."charge_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d'), ' 23:59:59')
+        AND a."charge_state" IN ('charged','uncharged')
+        AND a."charged_type" = '补费'
+        AND a."sample_charge_id" NOT IN ('LIS023141','LIS023137','LIS07142','LIS07140','LIS07139','LIS07138','LIS07137','LIS07134','LIS07131',
+                                       'LIS07127','LIS017635','LIS07123','LIS0300114','LIS0300255')
+    GROUP BY a."charge_item_name"
+
+    UNION ALL
+
+    -- 第六部分：补费统计（包含特定项目）
+    SELECT
+        a."charge_item_name" as "XM",
+        COUNT(a."charged_id") as "RC",
+        SUM(COALESCE(CAST(a."charge" AS DOUBLE), 0)) as "FY",
+        COUNT(a."charged_id") as "GZL"
+    from   hid0101_orcl_lis_xhbis.bis6_charged_info a
+    WHERE a."isdeleted" = '0'
+        AND a."charge_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d'), ' 23:59:59')
+        AND a."charge_state" IN ('charged','uncharged')
+        AND a."charged_type" = '补费'
+        AND a."sample_charge_id" IN ('LIS023141','LIS023137','LIS07142','LIS07140','LIS07139','LIS07138','LIS07137','LIS07134','LIS07131',
+                                   'LIS07127','LIS017635','LIS07123','LIS0300114','LIS0300255')
+    GROUP BY a."charge_item_name"
+
+    UNION ALL
+
+    -- 第七部分：申请单统计（使用正确的库名和表名）
+    SELECT 
+        a."charge_name" as "XM",
+        COUNT(DISTINCT b."req_id") as "RC",
+        SUM(COALESCE(CAST(a."charge" AS DOUBLE), 0)) as "FY",
+        COUNT(DISTINCT b."req_id") as "GZL"
+    from   hid0101_orcl_lis_bis.his_requisition a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_req_info b
+        ON a."rep_id" = b."req_id"
+        AND b."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND b."req_type" = '4'
+        AND b."patient_dept_name" NOT LIKE '%测试%'
+        AND b."req_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d'), ' 23:59:59')
+    GROUP BY a."charge_name"
+
+    UNION ALL
+
+    -- 第八部分：血袋输入统计（使用文档中的正确表结构）
+    SELECT DISTINCT
+        b."BLOOD_NAME" as "XM",
+        COUNT(a."BLOODBAG_ID") as "RC",
+        SUM(COALESCE(CAST(a."BLOOD_CHARGE" AS DOUBLE), 0)) as "FY",
+        COUNT(a."BLOODBAG_ID") as "GZL"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."BLOOD_TYPE_ID" = b."BLOOD_TYPE_ID"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.lis6_inspect_sample c
+        ON a."INSPECTION_ID" = c."inspection_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."SENDBLOOD_TIME" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d'), ' 23:59:59')
+    GROUP BY b."BLOOD_NAME"
+
+    UNION ALL
+
+    -- 第九部分：配血方法统计（使用血缘文档中的表结构）
+    SELECT DISTINCT
+        e."method_name" as "XM",
+        COUNT(a."MATCH_ID") as "RC",
+        SUM(COALESCE(CAST(e."method_charge" AS DOUBLE), 0)) as "FY",
+        COUNT(a."MATCH_ID") as "GZL"
+    from   hid0101_orcl_lis_xhbis.bis6_bloodbag_match a
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT d
+        ON a."BLOODBAG_ID" = d."BLOODBAG_ID"
+        AND d."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON d."BLOOD_TYPE_ID" = b."BLOOD_TYPE_ID"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.lis6_inspect_sample c
+        ON a."INSPECTION_ID" = c."inspection_id"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_method e
+        ON a."METHOD_TYPE_ID" = e."method_id"
+        AND e."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."MACTH_DATE" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d'), ' 23:59:59')
+        AND e."method_id" NOT IN ('00000004','00000006','00000007','4')
+    GROUP BY e."method_name"
+) T
+GROUP BY T."XM"
+ORDER BY T."XM"
+) t) as "配血检收入"
+,
+
+        
+        
+         (select case when sum( case when t."费用" is null then 0 else t."费用" end) is null then 0 else sum( case when t."费用" is null then 0 else t."费用" end) end  from   (SELECT 
+    B.BLOOD_NAME as "血液项目名称",
+    SUM(CAST(A.BLOOD_AMOUNT as DOUBLE)) as "数量",
+    SUM(COALESCE(CAST(e.charge AS DOUBLE), 0)) as "费用"
+
+
+
+
+
+from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT A
+INNER JOIN hid0101_orcl_lis_xhbis.BIS6_MATCH_BLOOD_TYPE B 
+    ON A.BLOOD_TYPE_ID = B.BLOOD_TYPE_ID
+    AND A.isdeleted = '0'
+    AND B.isdeleted = '0'
+INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE C
+    ON A.INSPECTION_ID = C.INSPECTION_ID
+    AND C.isdeleted = '0'
+INNER JOIN hid0101_orcl_lis_xhbis.bis6_charged_info d
+    ON A.BLOODBAG_ID = d.sample_charge_id
+    AND d.isdeleted = '0'
+INNER JOIN hid0101_orcl_lis_xhinterface.xinghe_charged_list e
+    ON d.sample_charge_id = e.sample_charge_id
+    AND e.isdeleted = '0'
+WHERE A.BLOODBAG_STATE NOT IN ('1','2')
+    AND A.SENDBLOOD_TIME between  date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d') and date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d') 
+GROUP BY B.BLOOD_NAME) t) as "血费收入"
+        
+    
+        
+        
+        
+from    (-- ================================
+    -- 第一部分：库存记录统计（10个查询：4种血型×2种统计方式+合计×2种统计方式）
+    -- ================================
+    
+    -- 01. O型库存袋数统计
+    SELECT 
+        '库存记录' as "kcjl", 
+        'O型' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='O型' THEN a."bloodbag_id" END) as "hxb1",
+        'O型' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='O型' THEN a."bloodbag_id" END) as "xj1", 
+        'O型' as "xx3", '袋' as "js3",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='O型' THEN a."bloodbag_id" END) as "xxb1",
+        'O型' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='O型' THEN a."bloodbag_id" END) as "lcd1",
+        '001' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."bloodbag_state" IN ('1','2')
+        AND a."isdeleted" = '0'
+        -- ⚠️ 院区条件暂时注释，根据需要取消注释
+        -- AND a."area_id" = 'A001'
+
+    UNION ALL
+    
+    -- 02. O型库存血量统计
+    SELECT 
+        '库存记录' as "kcjl", 
+        'O型' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='O型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        'O型' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='O型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        'O型' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='O型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        'O型' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='O型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '002' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."bloodbag_state" IN ('1','2')
+        AND a."isdeleted" = '0'
+
+    UNION ALL
+    
+    -- 03. A型库存袋数统计
+    SELECT 
+        '库存记录' as "kcjl", 
+        'A型' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='A型' THEN a."bloodbag_id" END) as "hxb1",
+        'A型' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='A型' THEN a."bloodbag_id" END) as "xj1", 
+        'A型' as "xx3", '袋' as "js3",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='A型' THEN a."bloodbag_id" END) as "xxb1",
+        'A型' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='A型' THEN a."bloodbag_id" END) as "lcd1",
+        '003' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."bloodbag_state" IN ('1','2')
+        AND a."isdeleted" = '0'
+
+    UNION ALL
+    
+    -- 04. A型库存血量统计
+    SELECT 
+        '库存记录' as "kcjl", 
+        'A型' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='A型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        'A型' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='A型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        'A型' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='A型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        'A型' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='A型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '004' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."bloodbag_state" IN ('1','2')
+        AND a."isdeleted" = '0'
+
+    UNION ALL
+    
+    -- 05. B型库存袋数统计
+    SELECT 
+        '库存记录' as "kcjl", 
+        'B型' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='B型' THEN a."bloodbag_id" END) as "hxb1",
+        'B型' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='B型' THEN a."bloodbag_id" END) as "xj1", 
+        'B型' as "xx3", '袋' as "js3",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='B型' THEN a."bloodbag_id" END) as "xxb1",
+        'B型' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='B型' THEN a."bloodbag_id" END) as "lcd1",
+        '005' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."bloodbag_state" IN ('1','2')
+        AND a."isdeleted" = '0'
+
+    UNION ALL
+    
+    -- 06. B型库存血量统计
+    SELECT 
+        '库存记录' as "kcjl", 
+        'B型' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='B型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        'B型' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='B型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        'B型' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='B型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        'B型' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='B型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '006' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."bloodbag_state" IN ('1','2')
+        AND a."isdeleted" = '0'
+
+    UNION ALL
+    
+    -- 07. AB型库存袋数统计
+    SELECT 
+        '库存记录' as "kcjl", 
+        'AB型' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='AB型' THEN a."bloodbag_id" END) as "hxb1",
+        'AB型' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='AB型' THEN a."bloodbag_id" END) as "xj1",
+        'AB型' as "xx3", '袋' as "js3", 
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='AB型' THEN a."bloodbag_id" END) as "xxb1",
+        'AB型' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='AB型' THEN a."bloodbag_id" END) as "lcd1",
+        '007' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."bloodbag_state" IN ('1','2')
+        AND a."isdeleted" = '0'
+
+    UNION ALL
+    
+    -- 08. AB型库存血量统计
+    SELECT 
+        '库存记录' as "kcjl", 
+        'AB型' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='AB型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        'AB型' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='AB型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        'AB型' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='AB型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        'AB型' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='AB型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '008' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."bloodbag_state" IN ('1','2')
+        AND a."isdeleted" = '0'
+
+    UNION ALL
+    
+    -- 09. 库存合计袋数统计
+    SELECT 
+        '库存记录' as "kcjl", 
+        '合计' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' THEN a."bloodbag_id" END) as "hxb1",
+        '合计' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' THEN a."bloodbag_id" END) as "xj1", 
+        '合计' as "xx3", '袋' as "js3",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' THEN a."bloodbag_id" END) as "xxb1",
+        '合计' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' THEN a."bloodbag_id" END) as "lcd1",
+        '009' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."bloodbag_state" IN ('1','2')
+        AND a."isdeleted" = '0'
+
+    UNION ALL
+    
+    -- 10. 库存合计血量统计
+    SELECT 
+        '库存记录' as "kcjl", 
+        '合计' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        '合计' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        '合计' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        '合计' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '010' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."bloodbag_state" IN ('1','2')
+        AND a."isdeleted" = '0'
+
+    -- ================================
+    -- 第二部分：入库记录统计（10个查询：4种血型×2种统计方式+合计×2种统计方式）
+    -- ================================
+    
+    UNION ALL
+    
+    -- 11. O型入库袋数统计
+    SELECT 
+        '入库记录' as "kcjl", 
+        'O型' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='O型' THEN a."bloodbag_id" END) as "hxb1",
+        'O型' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='O型' THEN a."bloodbag_id" END) as "xj1", 
+        'O型' as "xx3", '袋' as "js3",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='O型' THEN a."bloodbag_id" END) as "xxb1",
+        'O型' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='O型' THEN a."bloodbag_id" END) as "lcd1",
+        '011' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        -- ✅ 入库时间条件：使用in_time字段
+        AND a."in_time" >= date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d') 
+        AND a."in_time" <= date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 12. O型入库血量统计
+    SELECT 
+        '入库记录' as "kcjl", 
+        'O型' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='O型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        'O型' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='O型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        'O型' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='O型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        'O型' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='O型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '012' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."in_time" >= date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d') 
+        AND a."in_time" <= date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 13. A型入库袋数统计
+    SELECT 
+        '入库记录' as "kcjl", 
+        'A型' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='A型' THEN a."bloodbag_id" END) as "hxb1",
+        'A型' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='A型' THEN a."bloodbag_id" END) as "xj1", 
+        'A型' as "xx3", '袋' as "js3",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='A型' THEN a."bloodbag_id" END) as "xxb1",
+        'A型' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='A型' THEN a."bloodbag_id" END) as "lcd1",
+        '013' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."in_time" >= date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d') 
+        AND a."in_time" <= date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 14. A型入库血量统计
+    SELECT 
+        '入库记录' as "kcjl", 
+        'A型' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='A型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        'A型' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='A型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        'A型' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='A型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        'A型' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='A型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '014' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."in_time" >= date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d') 
+        AND a."in_time" <= date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 15. B型入库袋数统计
+    SELECT 
+        '入库记录' as "kcjl", 
+        'B型' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='B型' THEN a."bloodbag_id" END) as "hxb1",
+        'B型' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='B型' THEN a."bloodbag_id" END) as "xj1", 
+        'B型' as "xx3", '袋' as "js3",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='B型' THEN a."bloodbag_id" END) as "xxb1",
+        'B型' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='B型' THEN a."bloodbag_id" END) as "lcd1",
+        '015' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."in_time" >= date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d') 
+        AND a."in_time" <= date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 16. B型入库血量统计
+    SELECT 
+        '入库记录' as "kcjl", 
+        'B型' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='B型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        'B型' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='B型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        'B型' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='B型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        'B型' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='B型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '016' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."in_time" >= date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d') 
+        AND a."in_time" <= date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 17. AB型入库袋数统计
+    SELECT 
+        '入库记录' as "kcjl", 
+        'AB型' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='AB型' THEN a."bloodbag_id" END) as "hxb1",
+        'AB型' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='AB型' THEN a."bloodbag_id" END) as "xj1",
+        'AB型' as "xx3", '袋' as "js3", 
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='AB型' THEN a."bloodbag_id" END) as "xxb1",
+        'AB型' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='AB型' THEN a."bloodbag_id" END) as "lcd1",
+        '017' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."in_time" >= date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d') 
+        AND a."in_time" <= date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 18. AB型入库血量统计
+    SELECT 
+        '入库记录' as "kcjl", 
+        'AB型' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='AB型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        'AB型' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='AB型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        'AB型' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='AB型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        'AB型' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='AB型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '018' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."in_time" >= date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d') 
+        AND a."in_time" <= date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 19. 入库合计袋数统计
+    SELECT 
+        '入库记录' as "kcjl", 
+        '合计' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' THEN a."bloodbag_id" END) as "hxb1",
+        '合计' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' THEN a."bloodbag_id" END) as "xj1", 
+        '合计' as "xx3", '袋' as "js3",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' THEN a."bloodbag_id" END) as "xxb1",
+        '合计' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' THEN a."bloodbag_id" END) as "lcd1",
+        '019' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."in_time" >= date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d') 
+        AND a."in_time" <= date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 20. 入库合计血量统计
+    SELECT 
+        '入库记录' as "kcjl", 
+        '合计' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        '合计' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        '合计' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        '合计' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '020' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."in_time" >= date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d') 
+        AND a."in_time" <= date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d')
+
+    -- ================================
+    -- 第三部分：出库记录统计（10个查询：4种血型×2种统计方式+合计×2种统计方式）
+    -- ================================
+    
+    UNION ALL
+    
+    -- 21. O型出库袋数统计
+    SELECT 
+        '出库记录' as "kcjl", 
+        'O型' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='O型' THEN a."bloodbag_id" END) as "hxb1",
+        'O型' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='O型' THEN a."bloodbag_id" END) as "xj1", 
+        'O型' as "xx3", '袋' as "js3",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='O型' THEN a."bloodbag_id" END) as "xxb1",
+        'O型' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='O型' THEN a."bloodbag_id" END) as "lcd1",
+        '021' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE d
+        ON a."inspection_id" = d."inspection_id"    
+        AND d."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        -- ✅ 出库时间条件：使用OUT_DATE字段
+        AND a."out_date" >= date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d') 
+        AND a."out_date" <= date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 22. O型出库血量统计
+    SELECT 
+        '出库记录' as "kcjl", 
+        'O型' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='O型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        'O型' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='O型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        'O型' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='O型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        'O型' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='O型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '022' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE d
+        ON a."inspection_id" = d."inspection_id"    
+        AND d."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."out_date" >= date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d') 
+        AND a."out_date" <= date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 23. A型出库袋数统计
+    SELECT 
+        '出库记录' as "kcjl", 
+        'A型' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='A型' THEN a."bloodbag_id" END) as "hxb1",
+        'A型' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='A型' THEN a."bloodbag_id" END) as "xj1", 
+        'A型' as "xx3", '袋' as "js3",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='A型' THEN a."bloodbag_id" END) as "xxb1",
+        'A型' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='A型' THEN a."bloodbag_id" END) as "lcd1",
+        '023' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE d
+        ON a."inspection_id" = d."inspection_id"    
+        AND d."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."out_date" >= date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d') 
+        AND a."out_date" <= date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 24. A型出库血量统计
+    SELECT 
+        '出库记录' as "kcjl", 
+        'A型' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='A型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        'A型' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='A型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        'A型' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='A型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        'A型' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='A型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '024' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE d
+        ON a."inspection_id" = d."inspection_id"    
+        AND d."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."out_date" >= date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d') 
+        AND a."out_date" <= date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 25. B型出库袋数统计
+    SELECT 
+        '出库记录' as "kcjl", 
+        'B型' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='B型' THEN a."bloodbag_id" END) as "hxb1",
+        'B型' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='B型' THEN a."bloodbag_id" END) as "xj1", 
+        'B型' as "xx3", '袋' as "js3",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='B型' THEN a."bloodbag_id" END) as "xxb1",
+        'B型' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='B型' THEN a."bloodbag_id" END) as "lcd1",
+        '025' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE d
+        ON a."inspection_id" = d."inspection_id"    
+        AND d."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."out_date" >= date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d') 
+        AND a."out_date" <= date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 26. B型出库血量统计
+    SELECT 
+        '出库记录' as "kcjl", 
+        'B型' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='B型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        'B型' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='B型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        'B型' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='B型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        'B型' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='B型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '026' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE d
+        ON a."inspection_id" = d."inspection_id"    
+        AND d."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."out_date" >= date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d') 
+        AND a."out_date" <= date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 27. AB型出库袋数统计
+    SELECT 
+        '出库记录' as "kcjl", 
+        'AB型' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='AB型' THEN a."bloodbag_id" END) as "hxb1",
+        'AB型' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='AB型' THEN a."bloodbag_id" END) as "xj1",
+        'AB型' as "xx3", '袋' as "js3", 
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='AB型' THEN a."bloodbag_id" END) as "xxb1",
+        'AB型' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='AB型' THEN a."bloodbag_id" END) as "lcd1",
+        '027' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE d
+        ON a."inspection_id" = d."inspection_id"    
+        AND d."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."out_date" >= date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d') 
+        AND a."out_date" <= date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 28. AB型出库血量统计
+    SELECT 
+        '出库记录' as "kcjl", 
+        'AB型' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='AB型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        'AB型' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='AB型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        'AB型' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='AB型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        'AB型' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='AB型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '028' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE d
+        ON a."inspection_id" = d."inspection_id"    
+        AND d."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."out_date" >= date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d') 
+        AND a."out_date" <= date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 29. 出库合计袋数统计
+    SELECT 
+        '出库记录' as "kcjl", 
+        '合计' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' THEN a."bloodbag_id" END) as "hxb1",
+        '合计' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' THEN a."bloodbag_id" END) as "xj1", 
+        '合计' as "xx3", '袋' as "js3",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' THEN a."bloodbag_id" END) as "xxb1",
+        '合计' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' THEN a."bloodbag_id" END) as "lcd1",
+        '029' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE d
+        ON a."inspection_id" = d."inspection_id"    
+        AND d."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."out_date" >= date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d') 
+        AND a."out_date" <= date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 30. 出库合计血量统计
+    SELECT 
+        '出库记录' as "kcjl", 
+        '合计' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        '合计' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        '合计' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        '合计' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '030' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE d
+        ON a."inspection_id" = d."inspection_id"    
+        AND d."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."out_date" >= date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d') 
+        AND a."out_date" <= date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d')
+
+) T
+
+
+union all 
+
+ SELECT 
+    date_format(date_add('month', -2, current_date), '%Y-%m')  as "周期",
+    '上上月' as "周期名称",
+    2 as "排序",
+   
+        SUM(CASE WHEN T."kcjl" = '入库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '袋'
+             AND T."xx2" = '合计' AND T."js2" = '袋'  
+             AND T."xx3" = '合计' AND T."js3" = '袋'
+             AND T."xx4" = '合计' AND T."js4" = '袋'
+        THEN T."hxb1" + T."xj1" + T."xxb1" + T."lcd1" 
+        ELSE 0 END) as "入库血液",
+        SUM(CASE WHEN T."kcjl" = '出库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '袋'
+             AND T."xx2" = '合计' AND T."js2" = '袋'  
+             AND T."xx3" = '合计' AND T."js3" = '袋'
+             AND T."xx4" = '合计' AND T."js4" = '袋'
+        THEN T."hxb1" + T."xj1" + T."xxb1" + T."lcd1" 
+        ELSE 0 END) as "出库血液",
+        
+        SUM(CASE WHEN T."kcjl" = '入库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '袋'
+             AND T."xx2" = '合计' AND T."js2" = '袋'  
+             AND T."xx3" = '合计' AND T."js3" = '袋'
+             AND T."xx4" = '合计' AND T."js4" = '袋'
+        THEN T."hxb1"  
+        ELSE 0 END) as "红细胞入库",
+        
+        SUM(CASE WHEN T."kcjl" = '出库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '袋'
+             AND T."xx2" = '合计' AND T."js2" = '袋'  
+             AND T."xx3" = '合计' AND T."js3" = '袋'
+             AND T."xx4" = '合计' AND T."js4" = '袋'
+        THEN T."hxb1"  
+        ELSE 0 END) as "红细胞出库",
+        
+        SUM(CASE WHEN T."kcjl" = '入库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '量'
+             AND T."xx2" = '合计' AND T."js2" = '量'  
+             AND T."xx3" = '合计' AND T."js3" = '量'
+             AND T."xx4" = '合计' AND T."js4" = '量'
+        THEN T."hxb1"  
+        ELSE 0 END) as "红细胞入库-量",
+        
+        SUM(CASE WHEN T."kcjl" = '出库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '量'
+             AND T."xx2" = '合计' AND T."js2" = '量'  
+             AND T."xx3" = '合计' AND T."js3" = '量'
+             AND T."xx4" = '合计' AND T."js4" = '量'
+        THEN T."hxb1"  
+        ELSE 0 END) as "红细胞出库-量",
+        
+        SUM(CASE WHEN T."kcjl" = '入库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '袋'
+             AND T."xx2" = '合计' AND T."js2" = '袋'  
+             AND T."xx3" = '合计' AND T."js3" = '袋'
+             AND T."xx4" = '合计' AND T."js4" = '袋'
+        THEN T."lcd1"  
+        ELSE 0 END) as "冷沉淀入库",
+        
+        
+        SUM(CASE WHEN T."kcjl" = '入库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '量'
+             AND T."xx2" = '合计' AND T."js2" = '量'  
+             AND T."xx3" = '合计' AND T."js3" = '量'
+             AND T."xx4" = '合计' AND T."js4" = '量'
+        THEN T."xj1"  
+        ELSE 0 END) as "血浆入库-量",
+        
+        SUM(CASE WHEN T."kcjl" = '出库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '量'
+             AND T."xx2" = '合计' AND T."js2" = '量'  
+             AND T."xx3" = '合计' AND T."js3" = '量'
+             AND T."xx4" = '合计' AND T."js4" = '量'
+        THEN T."xxb1"  
+        ELSE 0 END) as "血小板出库-量",
+        
+            SUM(CASE WHEN T."kcjl" = '出库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '袋'
+             AND T."xx2" = '合计' AND T."js2" = '袋'  
+             AND T."xx3" = '合计' AND T."js3" = '袋'
+             AND T."xx4" = '合计' AND T."js4" = '袋'
+        THEN T."lcd1"  
+        ELSE 0 END) as "冷沉淀出库",
+        
+                SUM(CASE WHEN T."kcjl" = '出库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '袋'
+             AND T."xx2" = '合计' AND T."js2" = '袋'  
+             AND T."xx3" = '合计' AND T."js3" = '袋'
+             AND T."xx4" = '合计' AND T."js4" = '袋'
+        THEN T."xj1"  
+        ELSE 0 END) as "血浆出库",
+        
+                    SUM(CASE WHEN T."kcjl" = '出库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '袋'
+             AND T."xx2" = '合计' AND T."js2" = '袋'  
+             AND T."xx3" = '合计' AND T."js3" = '袋'
+             AND T."xx4" = '合计' AND T."js4" = '袋'
+        THEN T."xxb1"  
+        ELSE 0 END) *3 as "全院调剂血小板次数",
+        
+        
+        (WITH surgery_blood AS (
+    SELECT 
+        t.id,
+        -- 使用presto的日期函数判断是否周末
+        CASE 
+            WHEN day_of_week(CAST(t.scheduled_date AS TIMESTAMP)) IN (6,7) THEN 1 
+            ELSE 0 
+        END as is_weekend
+    from   hid0101_orcl_operaanesthisa_emrhis.sam_apply t
+    -- 关联手术登记表获取实际手术信息
+    LEFT JOIN hid0101_orcl_operaanesthisa_emrhis.sam_reg reg 
+        ON t.id = reg.sam_apply_id 
+        AND reg.isdeleted = '0'
+    -- 关联麻醉事件表获取输血信息
+    INNER JOIN hid0101_orcl_operaanesthisa_emrhis.sam_anar_enent en 
+        ON t.id = en.sam_apply_id 
+        AND en.isdeleted = '0'
+        AND en.s_mzsjlb_dm = '31'  -- 输血事件
+--        AND en.event_text LIKE '%手术%'  -- 用血目的是手术
+    WHERE t.health_service_org_id = 'HXSSMZK'
+        AND t.oper_type = 'ROOM_OPER'  -- 手术间手术
+        AND t.is_reject = '2'  -- 已通过申请
+        AND t.s_sssyzt_dm = '90'  -- 已完成手术
+        AND t.isdeleted = '0'
+        AND t.scheduled_date >= date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d')
+        AND t.scheduled_date <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d')
+)
+SELECT 
+    COUNT(DISTINCT id) as "周末手术用血台次"
+from   surgery_blood 
+WHERE is_weekend = 1) "周末加班手术台次",
+        
+        
+-- 输血科综合统计报表（基于输血血缘文档修正版）
+(select sum(t."费用")- (select case when sum( case when t."费用" is null then 0 else t."费用" end) is null then 0 else sum( case when t."费用" is null then 0 else t."费用" end) end  from   (SELECT 
+    B.BLOOD_NAME as "血液项目名称",
+    SUM(CAST(A.BLOOD_AMOUNT as DOUBLE)) as "数量",
+    SUM(COALESCE(CAST(e.charge AS DOUBLE), 0)) as "费用"
+from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT A
+INNER JOIN hid0101_orcl_lis_xhbis.BIS6_MATCH_BLOOD_TYPE B 
+    ON A.BLOOD_TYPE_ID = B.BLOOD_TYPE_ID
+    AND A.isdeleted = '0'
+    AND B.isdeleted = '0'
+INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE C
+    ON A.INSPECTION_ID = C.INSPECTION_ID
+    AND C.isdeleted = '0'
+INNER JOIN hid0101_orcl_lis_xhbis.bis6_charged_info d
+    ON A.BLOODBAG_ID = d.sample_charge_id
+    AND d.isdeleted = '0'
+INNER JOIN hid0101_orcl_lis_xhinterface.xinghe_charged_list e
+    ON d.sample_charge_id = e.sample_charge_id
+    AND e.isdeleted = '0'
+WHERE A.BLOODBAG_STATE NOT IN ('1','2')
+    AND A.SENDBLOOD_TIME between  date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d') and date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d') 
+GROUP BY B.BLOOD_NAME) t) as "配血检收入"
+
+
+from    (
+SELECT 
+    "XM" as "项目名称",
+    SUM("RC") as "人次",
+    SUM("FY") as "费用",
+    SUM("GZL") as "工作量"
+from   (
+    -- 第一部分：LIS检验收费统计
+    SELECT DISTINCT
+        c."chinese_name" as "XM",
+        COUNT(a."inspection_id") as "RC",
+        SUM(COALESCE(CAST(b."charge" AS DOUBLE), 0)) as "FY",
+        SUM(COALESCE(CASE WHEN CAST(b."workload" AS DOUBLE) = 0 THEN 1 ELSE CAST(b."workload" AS DOUBLE) END, 1)) as "GZL"
+    from   hid0101_orcl_lis_dbo.lis_inspection_sample a
+    INNER JOIN hid0101_orcl_lis_dbo.lis_inspection_sample_charge b
+        ON a."inspection_id" = b."inspection_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhsystem1.lis_charge_item c
+        ON b."charge_item_id" = c."charge_item_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."group_id" IN ('G013','G053','G105','G111')
+        AND a."input_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d'), ' 23:59:59')
+    GROUP BY c."chinese_name"
+
+    UNION ALL
+
+    -- 第二部分：血型统计（通过申请信息关联）
+    SELECT DISTINCT
+        c."blood_type_name" as "XM",
+        COUNT(a."inspection_id") as "RC",
+        0 as "FY",
+        COUNT(a."inspection_id") as "GZL"
+    from   hid0101_orcl_lis_dbo.lis_inspection_sample a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_req_info b
+        ON a."requisition_id" = b."req_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_req_blood c
+        ON b."req_id" = c."req_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."group_id" IN ('G013','G053','G105','G111')
+        AND a."input_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d'), ' 23:59:59')
+    GROUP BY c."blood_type_name"
+
+    UNION ALL
+
+    -- 第三部分：血袋收费统计（修正库名和表结构）
+    SELECT 
+        e."charge_item_name" as "XM",
+        COUNT(b."BLOODBAG_ID") as "RC",
+        SUM(COALESCE(CAST(e."charge" AS DOUBLE), 0)) as "FY",
+        COUNT(b."BLOODBAG_ID") as "GZL"
+    from   hid0101_orcl_lis_xhdata.lis6_inspect_sample a
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT b
+        ON a."inspection_id" = b."INSPECTION_ID"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type c
+        ON b."BLOOD_TYPE_ID" = c."BLOOD_TYPE_ID"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_charged_info d
+        ON b."BLOODBAG_ID" = d."sample_charge_id"
+        AND d."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhinterface.xinghe_charged_list e
+        ON d."sample_charge_id" = e."sample_charge_id"
+        AND e."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND e."his_id" IN ('LIS07068','LIS0300114','LIS0300255')
+        AND d."charge_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d'), ' 23:59:59')
+    GROUP BY e."charge_item_name"
+
+    UNION ALL
+
+    -- 第四部分：收费信息统计（使用正确的库名）
+    SELECT
+        b."charge_item_name" as "XM",
+        SUM(COALESCE(CAST(b."charge_num" AS DOUBLE), 0)) as "RC",
+        SUM(COALESCE(CAST(b."charge" AS DOUBLE), 0)) as "FY",
+        COUNT(a."charged_id") as "GZL"
+    from   hid0101_orcl_lis_xhbis.bis6_charged_info a
+    INNER JOIN hid0101_orcl_lis_xhinterface.xinghe_charged_list b
+        ON a."sample_charge_id" = b."sample_charge_id"
+        AND b."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."charge_state" IN ('charged','uncharged')
+        AND a."charge_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d'), ' 23:59:59')
+        AND a."sample_charge_id" LIKE 'H%'
+    GROUP BY b."charge_item_name"
+
+    UNION ALL
+
+    -- 第五部分：补费统计（排除特定项目）
+    SELECT
+        a."charge_item_name" as "XM",
+        SUM(COALESCE(CAST(a."charge_num" AS DOUBLE), 0)) as "RC",
+        SUM(COALESCE(CAST(a."charge" AS DOUBLE), 0)) as "FY",
+        COUNT(a."charged_id") as "GZL"
+    from   hid0101_orcl_lis_xhbis.bis6_charged_info a
+    WHERE a."isdeleted" = '0'
+        AND a."charge_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d'), ' 23:59:59')
+        AND a."charge_state" IN ('charged','uncharged')
+        AND a."charged_type" = '补费'
+        AND a."sample_charge_id" NOT IN ('LIS023141','LIS023137','LIS07142','LIS07140','LIS07139','LIS07138','LIS07137','LIS07134','LIS07131',
+                                       'LIS07127','LIS017635','LIS07123','LIS0300114','LIS0300255')
+    GROUP BY a."charge_item_name"
+
+    UNION ALL
+
+    -- 第六部分：补费统计（包含特定项目）
+    SELECT
+        a."charge_item_name" as "XM",
+        COUNT(a."charged_id") as "RC",
+        SUM(COALESCE(CAST(a."charge" AS DOUBLE), 0)) as "FY",
+        COUNT(a."charged_id") as "GZL"
+    from   hid0101_orcl_lis_xhbis.bis6_charged_info a
+    WHERE a."isdeleted" = '0'
+        AND a."charge_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d'), ' 23:59:59')
+        AND a."charge_state" IN ('charged','uncharged')
+        AND a."charged_type" = '补费'
+        AND a."sample_charge_id" IN ('LIS023141','LIS023137','LIS07142','LIS07140','LIS07139','LIS07138','LIS07137','LIS07134','LIS07131',
+                                   'LIS07127','LIS017635','LIS07123','LIS0300114','LIS0300255')
+    GROUP BY a."charge_item_name"
+
+    UNION ALL
+
+    -- 第七部分：申请单统计（使用正确的库名和表名）
+    SELECT 
+        a."charge_name" as "XM",
+        COUNT(DISTINCT b."req_id") as "RC",
+        SUM(COALESCE(CAST(a."charge" AS DOUBLE), 0)) as "FY",
+        COUNT(DISTINCT b."req_id") as "GZL"
+    from   hid0101_orcl_lis_bis.his_requisition a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_req_info b
+        ON a."rep_id" = b."req_id"
+        AND b."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND b."req_type" = '4'
+        AND b."patient_dept_name" NOT LIKE '%测试%'
+        AND b."req_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d'), ' 23:59:59')
+    GROUP BY a."charge_name"
+
+    UNION ALL
+
+    -- 第八部分：血袋输入统计（使用文档中的正确表结构）
+    SELECT DISTINCT
+        b."BLOOD_NAME" as "XM",
+        COUNT(a."BLOODBAG_ID") as "RC",
+        SUM(COALESCE(CAST(a."BLOOD_CHARGE" AS DOUBLE), 0)) as "FY",
+        COUNT(a."BLOODBAG_ID") as "GZL"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."BLOOD_TYPE_ID" = b."BLOOD_TYPE_ID"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.lis6_inspect_sample c
+        ON a."INSPECTION_ID" = c."inspection_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."SENDBLOOD_TIME" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d'), ' 23:59:59')
+    GROUP BY b."BLOOD_NAME"
+
+    UNION ALL
+
+    -- 第九部分：配血方法统计（使用血缘文档中的表结构）
+    SELECT DISTINCT
+        e."method_name" as "XM",
+        COUNT(a."MATCH_ID") as "RC",
+        SUM(COALESCE(CAST(e."method_charge" AS DOUBLE), 0)) as "FY",
+        COUNT(a."MATCH_ID") as "GZL"
+    from   hid0101_orcl_lis_xhbis.bis6_bloodbag_match a
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT d
+        ON a."BLOODBAG_ID" = d."BLOODBAG_ID"
+        AND d."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON d."BLOOD_TYPE_ID" = b."BLOOD_TYPE_ID"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.lis6_inspect_sample c
+        ON a."INSPECTION_ID" = c."inspection_id"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_method e
+        ON a."METHOD_TYPE_ID" = e."method_id"
+        AND e."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."MACTH_DATE" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d'), ' 23:59:59')
+        AND e."method_id" NOT IN ('00000004','00000006','00000007','4')
+    GROUP BY e."method_name"
+) T
+GROUP BY T."XM"
+ORDER BY T."XM"
+) t) as "配血检收入"
+,
+
+        
+        
+         (select case when sum( case when t."费用" is null then 0 else t."费用" end) is null then 0 else sum( case when t."费用" is null then 0 else t."费用" end) end  from   (SELECT 
+    B.BLOOD_NAME as "血液项目名称",
+    SUM(CAST(A.BLOOD_AMOUNT as DOUBLE)) as "数量",
+    SUM(COALESCE(CAST(e.charge AS DOUBLE), 0)) as "费用"
+
+
+
+
+
+from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT A
+INNER JOIN hid0101_orcl_lis_xhbis.BIS6_MATCH_BLOOD_TYPE B 
+    ON A.BLOOD_TYPE_ID = B.BLOOD_TYPE_ID
+    AND A.isdeleted = '0'
+    AND B.isdeleted = '0'
+INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE C
+    ON A.INSPECTION_ID = C.INSPECTION_ID
+    AND C.isdeleted = '0'
+INNER JOIN hid0101_orcl_lis_xhbis.bis6_charged_info d
+    ON A.BLOODBAG_ID = d.sample_charge_id
+    AND d.isdeleted = '0'
+INNER JOIN hid0101_orcl_lis_xhinterface.xinghe_charged_list e
+    ON d.sample_charge_id = e.sample_charge_id
+    AND e.isdeleted = '0'
+WHERE A.BLOODBAG_STATE NOT IN ('1','2')
+    AND A.SENDBLOOD_TIME between  date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d') and date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d') 
+GROUP BY B.BLOOD_NAME) t) as "血费收入"
+        
+    
+        
+        
+        
+from    (-- ================================
+    -- 第一部分：库存记录统计（10个查询：4种血型×2种统计方式+合计×2种统计方式）
+    -- ================================
+    
+    -- 01. O型库存袋数统计
+    SELECT 
+        '库存记录' as "kcjl", 
+        'O型' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='O型' THEN a."bloodbag_id" END) as "hxb1",
+        'O型' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='O型' THEN a."bloodbag_id" END) as "xj1", 
+        'O型' as "xx3", '袋' as "js3",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='O型' THEN a."bloodbag_id" END) as "xxb1",
+        'O型' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='O型' THEN a."bloodbag_id" END) as "lcd1",
+        '001' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."bloodbag_state" IN ('1','2')
+        AND a."isdeleted" = '0'
+        -- ⚠️ 院区条件暂时注释，根据需要取消注释
+        -- AND a."area_id" = 'A001'
+
+    UNION ALL
+    
+    -- 02. O型库存血量统计
+    SELECT 
+        '库存记录' as "kcjl", 
+        'O型' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='O型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        'O型' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='O型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        'O型' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='O型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        'O型' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='O型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '002' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."bloodbag_state" IN ('1','2')
+        AND a."isdeleted" = '0'
+
+    UNION ALL
+    
+    -- 03. A型库存袋数统计
+    SELECT 
+        '库存记录' as "kcjl", 
+        'A型' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='A型' THEN a."bloodbag_id" END) as "hxb1",
+        'A型' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='A型' THEN a."bloodbag_id" END) as "xj1", 
+        'A型' as "xx3", '袋' as "js3",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='A型' THEN a."bloodbag_id" END) as "xxb1",
+        'A型' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='A型' THEN a."bloodbag_id" END) as "lcd1",
+        '003' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."bloodbag_state" IN ('1','2')
+        AND a."isdeleted" = '0'
+
+    UNION ALL
+    
+    -- 04. A型库存血量统计
+    SELECT 
+        '库存记录' as "kcjl", 
+        'A型' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='A型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        'A型' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='A型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        'A型' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='A型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        'A型' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='A型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '004' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."bloodbag_state" IN ('1','2')
+        AND a."isdeleted" = '0'
+
+    UNION ALL
+    
+    -- 05. B型库存袋数统计
+    SELECT 
+        '库存记录' as "kcjl", 
+        'B型' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='B型' THEN a."bloodbag_id" END) as "hxb1",
+        'B型' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='B型' THEN a."bloodbag_id" END) as "xj1", 
+        'B型' as "xx3", '袋' as "js3",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='B型' THEN a."bloodbag_id" END) as "xxb1",
+        'B型' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='B型' THEN a."bloodbag_id" END) as "lcd1",
+        '005' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."bloodbag_state" IN ('1','2')
+        AND a."isdeleted" = '0'
+
+    UNION ALL
+    
+    -- 06. B型库存血量统计
+    SELECT 
+        '库存记录' as "kcjl", 
+        'B型' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='B型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        'B型' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='B型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        'B型' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='B型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        'B型' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='B型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '006' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."bloodbag_state" IN ('1','2')
+        AND a."isdeleted" = '0'
+
+    UNION ALL
+    
+    -- 07. AB型库存袋数统计
+    SELECT 
+        '库存记录' as "kcjl", 
+        'AB型' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='AB型' THEN a."bloodbag_id" END) as "hxb1",
+        'AB型' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='AB型' THEN a."bloodbag_id" END) as "xj1",
+        'AB型' as "xx3", '袋' as "js3", 
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='AB型' THEN a."bloodbag_id" END) as "xxb1",
+        'AB型' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='AB型' THEN a."bloodbag_id" END) as "lcd1",
+        '007' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."bloodbag_state" IN ('1','2')
+        AND a."isdeleted" = '0'
+
+    UNION ALL
+    
+    -- 08. AB型库存血量统计
+    SELECT 
+        '库存记录' as "kcjl", 
+        'AB型' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='AB型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        'AB型' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='AB型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        'AB型' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='AB型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        'AB型' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='AB型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '008' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."bloodbag_state" IN ('1','2')
+        AND a."isdeleted" = '0'
+
+    UNION ALL
+    
+    -- 09. 库存合计袋数统计
+    SELECT 
+        '库存记录' as "kcjl", 
+        '合计' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' THEN a."bloodbag_id" END) as "hxb1",
+        '合计' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' THEN a."bloodbag_id" END) as "xj1", 
+        '合计' as "xx3", '袋' as "js3",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' THEN a."bloodbag_id" END) as "xxb1",
+        '合计' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' THEN a."bloodbag_id" END) as "lcd1",
+        '009' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."bloodbag_state" IN ('1','2')
+        AND a."isdeleted" = '0'
+
+    UNION ALL
+    
+    -- 10. 库存合计血量统计
+    SELECT 
+        '库存记录' as "kcjl", 
+        '合计' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        '合计' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        '合计' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        '合计' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '010' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."bloodbag_state" IN ('1','2')
+        AND a."isdeleted" = '0'
+
+    -- ================================
+    -- 第二部分：入库记录统计（10个查询：4种血型×2种统计方式+合计×2种统计方式）
+    -- ================================
+    
+    UNION ALL
+    
+    -- 11. O型入库袋数统计
+    SELECT 
+        '入库记录' as "kcjl", 
+        'O型' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='O型' THEN a."bloodbag_id" END) as "hxb1",
+        'O型' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='O型' THEN a."bloodbag_id" END) as "xj1", 
+        'O型' as "xx3", '袋' as "js3",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='O型' THEN a."bloodbag_id" END) as "xxb1",
+        'O型' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='O型' THEN a."bloodbag_id" END) as "lcd1",
+        '011' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        -- ✅ 入库时间条件：使用in_time字段
+        AND a."in_time" >= date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d') 
+        AND a."in_time" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 12. O型入库血量统计
+    SELECT 
+        '入库记录' as "kcjl", 
+        'O型' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='O型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        'O型' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='O型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        'O型' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='O型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        'O型' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='O型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '012' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."in_time" >= date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d') 
+        AND a."in_time" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 13. A型入库袋数统计
+    SELECT 
+        '入库记录' as "kcjl", 
+        'A型' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='A型' THEN a."bloodbag_id" END) as "hxb1",
+        'A型' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='A型' THEN a."bloodbag_id" END) as "xj1", 
+        'A型' as "xx3", '袋' as "js3",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='A型' THEN a."bloodbag_id" END) as "xxb1",
+        'A型' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='A型' THEN a."bloodbag_id" END) as "lcd1",
+        '013' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."in_time" >= date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d') 
+        AND a."in_time" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 14. A型入库血量统计
+    SELECT 
+        '入库记录' as "kcjl", 
+        'A型' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='A型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        'A型' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='A型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        'A型' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='A型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        'A型' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='A型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '014' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."in_time" >= date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d') 
+        AND a."in_time" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 15. B型入库袋数统计
+    SELECT 
+        '入库记录' as "kcjl", 
+        'B型' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='B型' THEN a."bloodbag_id" END) as "hxb1",
+        'B型' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='B型' THEN a."bloodbag_id" END) as "xj1", 
+        'B型' as "xx3", '袋' as "js3",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='B型' THEN a."bloodbag_id" END) as "xxb1",
+        'B型' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='B型' THEN a."bloodbag_id" END) as "lcd1",
+        '015' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."in_time" >= date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d') 
+        AND a."in_time" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 16. B型入库血量统计
+    SELECT 
+        '入库记录' as "kcjl", 
+        'B型' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='B型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        'B型' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='B型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        'B型' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='B型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        'B型' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='B型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '016' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."in_time" >= date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d') 
+        AND a."in_time" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 17. AB型入库袋数统计
+    SELECT 
+        '入库记录' as "kcjl", 
+        'AB型' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='AB型' THEN a."bloodbag_id" END) as "hxb1",
+        'AB型' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='AB型' THEN a."bloodbag_id" END) as "xj1",
+        'AB型' as "xx3", '袋' as "js3", 
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='AB型' THEN a."bloodbag_id" END) as "xxb1",
+        'AB型' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='AB型' THEN a."bloodbag_id" END) as "lcd1",
+        '017' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."in_time" >= date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d') 
+        AND a."in_time" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 18. AB型入库血量统计
+    SELECT 
+        '入库记录' as "kcjl", 
+        'AB型' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='AB型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        'AB型' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='AB型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        'AB型' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='AB型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        'AB型' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='AB型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '018' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."in_time" >= date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d') 
+        AND a."in_time" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 19. 入库合计袋数统计
+    SELECT 
+        '入库记录' as "kcjl", 
+        '合计' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' THEN a."bloodbag_id" END) as "hxb1",
+        '合计' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' THEN a."bloodbag_id" END) as "xj1", 
+        '合计' as "xx3", '袋' as "js3",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' THEN a."bloodbag_id" END) as "xxb1",
+        '合计' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' THEN a."bloodbag_id" END) as "lcd1",
+        '019' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."in_time" >= date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d') 
+        AND a."in_time" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 20. 入库合计血量统计
+    SELECT 
+        '入库记录' as "kcjl", 
+        '合计' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        '合计' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        '合计' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        '合计' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '020' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."in_time" >= date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d') 
+        AND a."in_time" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d')
+
+    -- ================================
+    -- 第三部分：出库记录统计（10个查询：4种血型×2种统计方式+合计×2种统计方式）
+    -- ================================
+    
+    UNION ALL
+    
+    -- 21. O型出库袋数统计
+    SELECT 
+        '出库记录' as "kcjl", 
+        'O型' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='O型' THEN a."bloodbag_id" END) as "hxb1",
+        'O型' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='O型' THEN a."bloodbag_id" END) as "xj1", 
+        'O型' as "xx3", '袋' as "js3",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='O型' THEN a."bloodbag_id" END) as "xxb1",
+        'O型' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='O型' THEN a."bloodbag_id" END) as "lcd1",
+        '021' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE d
+        ON a."inspection_id" = d."inspection_id"    
+        AND d."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        -- ✅ 出库时间条件：使用OUT_DATE字段
+        AND a."out_date" >= date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d') 
+        AND a."out_date" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 22. O型出库血量统计
+    SELECT 
+        '出库记录' as "kcjl", 
+        'O型' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='O型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        'O型' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='O型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        'O型' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='O型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        'O型' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='O型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '022' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE d
+        ON a."inspection_id" = d."inspection_id"    
+        AND d."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."out_date" >= date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d') 
+        AND a."out_date" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 23. A型出库袋数统计
+    SELECT 
+        '出库记录' as "kcjl", 
+        'A型' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='A型' THEN a."bloodbag_id" END) as "hxb1",
+        'A型' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='A型' THEN a."bloodbag_id" END) as "xj1", 
+        'A型' as "xx3", '袋' as "js3",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='A型' THEN a."bloodbag_id" END) as "xxb1",
+        'A型' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='A型' THEN a."bloodbag_id" END) as "lcd1",
+        '023' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE d
+        ON a."inspection_id" = d."inspection_id"    
+        AND d."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."out_date" >= date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d') 
+        AND a."out_date" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 24. A型出库血量统计
+    SELECT 
+        '出库记录' as "kcjl", 
+        'A型' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='A型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        'A型' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='A型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        'A型' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='A型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        'A型' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='A型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '024' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE d
+        ON a."inspection_id" = d."inspection_id"    
+        AND d."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."out_date" >= date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d') 
+        AND a."out_date" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 25. B型出库袋数统计
+    SELECT 
+        '出库记录' as "kcjl", 
+        'B型' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='B型' THEN a."bloodbag_id" END) as "hxb1",
+        'B型' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='B型' THEN a."bloodbag_id" END) as "xj1", 
+        'B型' as "xx3", '袋' as "js3",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='B型' THEN a."bloodbag_id" END) as "xxb1",
+        'B型' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='B型' THEN a."bloodbag_id" END) as "lcd1",
+        '025' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE d
+        ON a."inspection_id" = d."inspection_id"    
+        AND d."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."out_date" >= date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d') 
+        AND a."out_date" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 26. B型出库血量统计
+    SELECT 
+        '出库记录' as "kcjl", 
+        'B型' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='B型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        'B型' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='B型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        'B型' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='B型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        'B型' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='B型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '026' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE d
+        ON a."inspection_id" = d."inspection_id"    
+        AND d."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."out_date" >= date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d') 
+        AND a."out_date" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 27. AB型出库袋数统计
+    SELECT 
+        '出库记录' as "kcjl", 
+        'AB型' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='AB型' THEN a."bloodbag_id" END) as "hxb1",
+        'AB型' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='AB型' THEN a."bloodbag_id" END) as "xj1",
+        'AB型' as "xx3", '袋' as "js3", 
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='AB型' THEN a."bloodbag_id" END) as "xxb1",
+        'AB型' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='AB型' THEN a."bloodbag_id" END) as "lcd1",
+        '027' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE d
+        ON a."inspection_id" = d."inspection_id"    
+        AND d."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."out_date" >= date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d') 
+        AND a."out_date" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 28. AB型出库血量统计
+    SELECT 
+        '出库记录' as "kcjl", 
+        'AB型' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='AB型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        'AB型' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='AB型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        'AB型' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='AB型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        'AB型' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='AB型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '028' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE d
+        ON a."inspection_id" = d."inspection_id"    
+        AND d."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."out_date" >= date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d') 
+        AND a."out_date" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 29. 出库合计袋数统计
+    SELECT 
+        '出库记录' as "kcjl", 
+        '合计' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' THEN a."bloodbag_id" END) as "hxb1",
+        '合计' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' THEN a."bloodbag_id" END) as "xj1", 
+        '合计' as "xx3", '袋' as "js3",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' THEN a."bloodbag_id" END) as "xxb1",
+        '合计' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' THEN a."bloodbag_id" END) as "lcd1",
+        '029' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE d
+        ON a."inspection_id" = d."inspection_id"    
+        AND d."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."out_date" >= date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d') 
+        AND a."out_date" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 30. 出库合计血量统计
+    SELECT 
+        '出库记录' as "kcjl", 
+        '合计' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        '合计' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        '合计' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        '合计' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '030' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE d
+        ON a."inspection_id" = d."inspection_id"    
+        AND d."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."out_date" >= date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d') 
+        AND a."out_date" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d')
+
+) T
+union all
+
+ SELECT 
+    date_format(date_add('month', -13, current_date), '%Y-%m') as "周期",
+    '去年同期' as "周期名称",
+    3 as "排序",
+   
+        SUM(CASE WHEN T."kcjl" = '入库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '袋'
+             AND T."xx2" = '合计' AND T."js2" = '袋'  
+             AND T."xx3" = '合计' AND T."js3" = '袋'
+             AND T."xx4" = '合计' AND T."js4" = '袋'
+        THEN T."hxb1" + T."xj1" + T."xxb1" + T."lcd1" 
+        ELSE 0 END) as "入库血液",
+        SUM(CASE WHEN T."kcjl" = '出库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '袋'
+             AND T."xx2" = '合计' AND T."js2" = '袋'  
+             AND T."xx3" = '合计' AND T."js3" = '袋'
+             AND T."xx4" = '合计' AND T."js4" = '袋'
+        THEN T."hxb1" + T."xj1" + T."xxb1" + T."lcd1" 
+        ELSE 0 END) as "出库血液",
+        
+        SUM(CASE WHEN T."kcjl" = '入库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '袋'
+             AND T."xx2" = '合计' AND T."js2" = '袋'  
+             AND T."xx3" = '合计' AND T."js3" = '袋'
+             AND T."xx4" = '合计' AND T."js4" = '袋'
+        THEN T."hxb1"  
+        ELSE 0 END) as "红细胞入库",
+        
+        SUM(CASE WHEN T."kcjl" = '出库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '袋'
+             AND T."xx2" = '合计' AND T."js2" = '袋'  
+             AND T."xx3" = '合计' AND T."js3" = '袋'
+             AND T."xx4" = '合计' AND T."js4" = '袋'
+        THEN T."hxb1"  
+        ELSE 0 END) as "红细胞出库",
+        
+        SUM(CASE WHEN T."kcjl" = '入库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '量'
+             AND T."xx2" = '合计' AND T."js2" = '量'  
+             AND T."xx3" = '合计' AND T."js3" = '量'
+             AND T."xx4" = '合计' AND T."js4" = '量'
+        THEN T."hxb1"  
+        ELSE 0 END) as "红细胞入库-量",
+        
+        SUM(CASE WHEN T."kcjl" = '出库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '量'
+             AND T."xx2" = '合计' AND T."js2" = '量'  
+             AND T."xx3" = '合计' AND T."js3" = '量'
+             AND T."xx4" = '合计' AND T."js4" = '量'
+        THEN T."hxb1"  
+        ELSE 0 END) as "红细胞出库-量",
+        
+        SUM(CASE WHEN T."kcjl" = '入库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '袋'
+             AND T."xx2" = '合计' AND T."js2" = '袋'  
+             AND T."xx3" = '合计' AND T."js3" = '袋'
+             AND T."xx4" = '合计' AND T."js4" = '袋'
+        THEN T."lcd1"  
+        ELSE 0 END) as "冷沉淀入库",
+        
+        
+        SUM(CASE WHEN T."kcjl" = '入库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '量'
+             AND T."xx2" = '合计' AND T."js2" = '量'  
+             AND T."xx3" = '合计' AND T."js3" = '量'
+             AND T."xx4" = '合计' AND T."js4" = '量'
+        THEN T."xj1"  
+        ELSE 0 END) as "血浆入库-量",
+        
+        SUM(CASE WHEN T."kcjl" = '出库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '量'
+             AND T."xx2" = '合计' AND T."js2" = '量'  
+             AND T."xx3" = '合计' AND T."js3" = '量'
+             AND T."xx4" = '合计' AND T."js4" = '量'
+        THEN T."xxb1"  
+        ELSE 0 END) as "血小板出库-量",
+        
+            SUM(CASE WHEN T."kcjl" = '出库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '袋'
+             AND T."xx2" = '合计' AND T."js2" = '袋'  
+             AND T."xx3" = '合计' AND T."js3" = '袋'
+             AND T."xx4" = '合计' AND T."js4" = '袋'
+        THEN T."lcd1"  
+        ELSE 0 END) as "冷沉淀出库",
+        
+                SUM(CASE WHEN T."kcjl" = '出库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '袋'
+             AND T."xx2" = '合计' AND T."js2" = '袋'  
+             AND T."xx3" = '合计' AND T."js3" = '袋'
+             AND T."xx4" = '合计' AND T."js4" = '袋'
+        THEN T."xj1"  
+        ELSE 0 END) as "血浆出库",
+        
+                    SUM(CASE WHEN T."kcjl" = '出库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '袋'
+             AND T."xx2" = '合计' AND T."js2" = '袋'  
+             AND T."xx3" = '合计' AND T."js3" = '袋'
+             AND T."xx4" = '合计' AND T."js4" = '袋'
+        THEN T."xxb1"  
+        ELSE 0 END) *3 as "全院调剂血小板次数",
+        
+        
+        (WITH surgery_blood AS (
+    SELECT 
+        t.id,
+        -- 使用presto的日期函数判断是否周末
+        CASE 
+            WHEN day_of_week(CAST(t.scheduled_date AS TIMESTAMP)) IN (6,7) THEN 1 
+            ELSE 0 
+        END as is_weekend
+    from   hid0101_orcl_operaanesthisa_emrhis.sam_apply t
+    -- 关联手术登记表获取实际手术信息
+    LEFT JOIN hid0101_orcl_operaanesthisa_emrhis.sam_reg reg 
+        ON t.id = reg.sam_apply_id 
+        AND reg.isdeleted = '0'
+    -- 关联麻醉事件表获取输血信息
+    INNER JOIN hid0101_orcl_operaanesthisa_emrhis.sam_anar_enent en 
+        ON t.id = en.sam_apply_id 
+        AND en.isdeleted = '0'
+        AND en.s_mzsjlb_dm = '31'  -- 输血事件
+--        AND en.event_text LIKE '%手术%'  -- 用血目的是手术
+    WHERE t.health_service_org_id = 'HXSSMZK'
+        AND t.oper_type = 'ROOM_OPER'  -- 手术间手术
+        AND t.is_reject = '2'  -- 已通过申请
+        AND t.s_sssyzt_dm = '90'  -- 已完成手术
+        AND t.isdeleted = '0'
+        AND t.scheduled_date >= date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d')
+        AND t.scheduled_date <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d')
+)
+SELECT 
+    COUNT(DISTINCT id) as "周末手术用血台次"
+from   surgery_blood 
+WHERE is_weekend = 1) "周末加班手术台次",
+        
+        
+-- 输血科综合统计报表（基于输血血缘文档修正版）
+(select sum(t."费用")- (select case when sum( case when t."费用" is null then 0 else t."费用" end) is null then 0 else sum( case when t."费用" is null then 0 else t."费用" end) end  from   (SELECT 
+    B.BLOOD_NAME as "血液项目名称",
+    SUM(CAST(A.BLOOD_AMOUNT as DOUBLE)) as "数量",
+    SUM(COALESCE(CAST(e.charge AS DOUBLE), 0)) as "费用"
+from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT A
+INNER JOIN hid0101_orcl_lis_xhbis.BIS6_MATCH_BLOOD_TYPE B 
+    ON A.BLOOD_TYPE_ID = B.BLOOD_TYPE_ID
+    AND A.isdeleted = '0'
+    AND B.isdeleted = '0'
+INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE C
+    ON A.INSPECTION_ID = C.INSPECTION_ID
+    AND C.isdeleted = '0'
+INNER JOIN hid0101_orcl_lis_xhbis.bis6_charged_info d
+    ON A.BLOODBAG_ID = d.sample_charge_id
+    AND d.isdeleted = '0'
+INNER JOIN hid0101_orcl_lis_xhinterface.xinghe_charged_list e
+    ON d.sample_charge_id = e.sample_charge_id
+    AND e.isdeleted = '0'
+WHERE A.BLOODBAG_STATE NOT IN ('1','2')
+    AND A.SENDBLOOD_TIME between  date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d') and date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d') 
+GROUP BY B.BLOOD_NAME) t) as "配血检收入"
+
+
+from    (
+SELECT 
+    "XM" as "项目名称",
+    SUM("RC") as "人次",
+    SUM("FY") as "费用",
+    SUM("GZL") as "工作量"
+from   (
+    -- 第一部分：LIS检验收费统计
+    SELECT DISTINCT
+        c."chinese_name" as "XM",
+        COUNT(a."inspection_id") as "RC",
+        SUM(COALESCE(CAST(b."charge" AS DOUBLE), 0)) as "FY",
+        SUM(COALESCE(CASE WHEN CAST(b."workload" AS DOUBLE) = 0 THEN 1 ELSE CAST(b."workload" AS DOUBLE) END, 1)) as "GZL"
+    from   hid0101_orcl_lis_dbo.lis_inspection_sample a
+    INNER JOIN hid0101_orcl_lis_dbo.lis_inspection_sample_charge b
+        ON a."inspection_id" = b."inspection_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhsystem1.lis_charge_item c
+        ON b."charge_item_id" = c."charge_item_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."group_id" IN ('G013','G053','G105','G111')
+        AND a."input_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d'), ' 23:59:59')
+    GROUP BY c."chinese_name"
+
+    UNION ALL
+
+    -- 第二部分：血型统计（通过申请信息关联）
+    SELECT DISTINCT
+        c."blood_type_name" as "XM",
+        COUNT(a."inspection_id") as "RC",
+        0 as "FY",
+        COUNT(a."inspection_id") as "GZL"
+    from   hid0101_orcl_lis_dbo.lis_inspection_sample a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_req_info b
+        ON a."requisition_id" = b."req_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_req_blood c
+        ON b."req_id" = c."req_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."group_id" IN ('G013','G053','G105','G111')
+        AND a."input_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d'), ' 23:59:59')
+    GROUP BY c."blood_type_name"
+
+    UNION ALL
+
+    -- 第三部分：血袋收费统计（修正库名和表结构）
+    SELECT 
+        e."charge_item_name" as "XM",
+        COUNT(b."BLOODBAG_ID") as "RC",
+        SUM(COALESCE(CAST(e."charge" AS DOUBLE), 0)) as "FY",
+        COUNT(b."BLOODBAG_ID") as "GZL"
+    from   hid0101_orcl_lis_xhdata.lis6_inspect_sample a
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT b
+        ON a."inspection_id" = b."INSPECTION_ID"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type c
+        ON b."BLOOD_TYPE_ID" = c."BLOOD_TYPE_ID"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_charged_info d
+        ON b."BLOODBAG_ID" = d."sample_charge_id"
+        AND d."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhinterface.xinghe_charged_list e
+        ON d."sample_charge_id" = e."sample_charge_id"
+        AND e."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND e."his_id" IN ('LIS07068','LIS0300114','LIS0300255')
+        AND d."charge_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d'), ' 23:59:59')
+    GROUP BY e."charge_item_name"
+
+    UNION ALL
+
+    -- 第四部分：收费信息统计（使用正确的库名）
+    SELECT
+        b."charge_item_name" as "XM",
+        SUM(COALESCE(CAST(b."charge_num" AS DOUBLE), 0)) as "RC",
+        SUM(COALESCE(CAST(b."charge" AS DOUBLE), 0)) as "FY",
+        COUNT(a."charged_id") as "GZL"
+    from   hid0101_orcl_lis_xhbis.bis6_charged_info a
+    INNER JOIN hid0101_orcl_lis_xhinterface.xinghe_charged_list b
+        ON a."sample_charge_id" = b."sample_charge_id"
+        AND b."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."charge_state" IN ('charged','uncharged')
+        AND a."charge_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d'), ' 23:59:59')
+        AND a."sample_charge_id" LIKE 'H%'
+    GROUP BY b."charge_item_name"
+
+    UNION ALL
+
+    -- 第五部分：补费统计（排除特定项目）
+    SELECT
+        a."charge_item_name" as "XM",
+        SUM(COALESCE(CAST(a."charge_num" AS DOUBLE), 0)) as "RC",
+        SUM(COALESCE(CAST(a."charge" AS DOUBLE), 0)) as "FY",
+        COUNT(a."charged_id") as "GZL"
+    from   hid0101_orcl_lis_xhbis.bis6_charged_info a
+    WHERE a."isdeleted" = '0'
+        AND a."charge_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d'), ' 23:59:59')
+        AND a."charge_state" IN ('charged','uncharged')
+        AND a."charged_type" = '补费'
+        AND a."sample_charge_id" NOT IN ('LIS023141','LIS023137','LIS07142','LIS07140','LIS07139','LIS07138','LIS07137','LIS07134','LIS07131',
+                                       'LIS07127','LIS017635','LIS07123','LIS0300114','LIS0300255')
+    GROUP BY a."charge_item_name"
+
+    UNION ALL
+
+    -- 第六部分：补费统计（包含特定项目）
+    SELECT
+        a."charge_item_name" as "XM",
+        COUNT(a."charged_id") as "RC",
+        SUM(COALESCE(CAST(a."charge" AS DOUBLE), 0)) as "FY",
+        COUNT(a."charged_id") as "GZL"
+    from   hid0101_orcl_lis_xhbis.bis6_charged_info a
+    WHERE a."isdeleted" = '0'
+        AND a."charge_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d'), ' 23:59:59')
+        AND a."charge_state" IN ('charged','uncharged')
+        AND a."charged_type" = '补费'
+        AND a."sample_charge_id" IN ('LIS023141','LIS023137','LIS07142','LIS07140','LIS07139','LIS07138','LIS07137','LIS07134','LIS07131',
+                                   'LIS07127','LIS017635','LIS07123','LIS0300114','LIS0300255')
+    GROUP BY a."charge_item_name"
+
+    UNION ALL
+
+    -- 第七部分：申请单统计（使用正确的库名和表名）
+    SELECT 
+        a."charge_name" as "XM",
+        COUNT(DISTINCT b."req_id") as "RC",
+        SUM(COALESCE(CAST(a."charge" AS DOUBLE), 0)) as "FY",
+        COUNT(DISTINCT b."req_id") as "GZL"
+    from   hid0101_orcl_lis_bis.his_requisition a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_req_info b
+        ON a."rep_id" = b."req_id"
+        AND b."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND b."req_type" = '4'
+        AND b."patient_dept_name" NOT LIKE '%测试%'
+        AND b."req_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d'), ' 23:59:59')
+    GROUP BY a."charge_name"
+
+    UNION ALL
+
+    -- 第八部分：血袋输入统计（使用文档中的正确表结构）
+    SELECT DISTINCT
+        b."BLOOD_NAME" as "XM",
+        COUNT(a."BLOODBAG_ID") as "RC",
+        SUM(COALESCE(CAST(a."BLOOD_CHARGE" AS DOUBLE), 0)) as "FY",
+        COUNT(a."BLOODBAG_ID") as "GZL"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."BLOOD_TYPE_ID" = b."BLOOD_TYPE_ID"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.lis6_inspect_sample c
+        ON a."INSPECTION_ID" = c."inspection_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."SENDBLOOD_TIME" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d'), ' 23:59:59')
+    GROUP BY b."BLOOD_NAME"
+
+    UNION ALL
+
+    -- 第九部分：配血方法统计（使用血缘文档中的表结构）
+    SELECT DISTINCT
+        e."method_name" as "XM",
+        COUNT(a."MATCH_ID") as "RC",
+        SUM(COALESCE(CAST(e."method_charge" AS DOUBLE), 0)) as "FY",
+        COUNT(a."MATCH_ID") as "GZL"
+    from   hid0101_orcl_lis_xhbis.bis6_bloodbag_match a
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT d
+        ON a."BLOODBAG_ID" = d."BLOODBAG_ID"
+        AND d."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON d."BLOOD_TYPE_ID" = b."BLOOD_TYPE_ID"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.lis6_inspect_sample c
+        ON a."INSPECTION_ID" = c."inspection_id"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_method e
+        ON a."METHOD_TYPE_ID" = e."method_id"
+        AND e."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."MACTH_DATE" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d'), ' 23:59:59')
+        AND e."method_id" NOT IN ('00000004','00000006','00000007','4')
+    GROUP BY e."method_name"
+) T
+GROUP BY T."XM"
+ORDER BY T."XM"
+) t) as "配血检收入"
+,
+
+        
+        
+         (select case when sum( case when t."费用" is null then 0 else t."费用" end) is null then 0 else sum( case when t."费用" is null then 0 else t."费用" end) end  from   (SELECT 
+    B.BLOOD_NAME as "血液项目名称",
+    SUM(CAST(A.BLOOD_AMOUNT as DOUBLE)) as "数量",
+    SUM(COALESCE(CAST(e.charge AS DOUBLE), 0)) as "费用"
+
+
+
+
+
+from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT A
+INNER JOIN hid0101_orcl_lis_xhbis.BIS6_MATCH_BLOOD_TYPE B 
+    ON A.BLOOD_TYPE_ID = B.BLOOD_TYPE_ID
+    AND A.isdeleted = '0'
+    AND B.isdeleted = '0'
+INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE C
+    ON A.INSPECTION_ID = C.INSPECTION_ID
+    AND C.isdeleted = '0'
+INNER JOIN hid0101_orcl_lis_xhbis.bis6_charged_info d
+    ON A.BLOODBAG_ID = d.sample_charge_id
+    AND d.isdeleted = '0'
+INNER JOIN hid0101_orcl_lis_xhinterface.xinghe_charged_list e
+    ON d.sample_charge_id = e.sample_charge_id
+    AND e.isdeleted = '0'
+WHERE A.BLOODBAG_STATE NOT IN ('1','2')
+    AND A.SENDBLOOD_TIME between  date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d') and date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d') 
+GROUP BY B.BLOOD_NAME) t) as "血费收入"
+        
+    
+        
+        
+        
+from    (-- ================================
+    -- 第一部分：库存记录统计（10个查询：4种血型×2种统计方式+合计×2种统计方式）
+    -- ================================
+    
+    -- 01. O型库存袋数统计
+    SELECT 
+        '库存记录' as "kcjl", 
+        'O型' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='O型' THEN a."bloodbag_id" END) as "hxb1",
+        'O型' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='O型' THEN a."bloodbag_id" END) as "xj1", 
+        'O型' as "xx3", '袋' as "js3",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='O型' THEN a."bloodbag_id" END) as "xxb1",
+        'O型' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='O型' THEN a."bloodbag_id" END) as "lcd1",
+        '001' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."bloodbag_state" IN ('1','2')
+        AND a."isdeleted" = '0'
+        -- ⚠️ 院区条件暂时注释，根据需要取消注释
+        -- AND a."area_id" = 'A001'
+
+    UNION ALL
+    
+    -- 02. O型库存血量统计
+    SELECT 
+        '库存记录' as "kcjl", 
+        'O型' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='O型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        'O型' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='O型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        'O型' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='O型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        'O型' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='O型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '002' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."bloodbag_state" IN ('1','2')
+        AND a."isdeleted" = '0'
+
+    UNION ALL
+    
+    -- 03. A型库存袋数统计
+    SELECT 
+        '库存记录' as "kcjl", 
+        'A型' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='A型' THEN a."bloodbag_id" END) as "hxb1",
+        'A型' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='A型' THEN a."bloodbag_id" END) as "xj1", 
+        'A型' as "xx3", '袋' as "js3",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='A型' THEN a."bloodbag_id" END) as "xxb1",
+        'A型' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='A型' THEN a."bloodbag_id" END) as "lcd1",
+        '003' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."bloodbag_state" IN ('1','2')
+        AND a."isdeleted" = '0'
+
+    UNION ALL
+    
+    -- 04. A型库存血量统计
+    SELECT 
+        '库存记录' as "kcjl", 
+        'A型' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='A型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        'A型' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='A型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        'A型' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='A型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        'A型' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='A型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '004' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."bloodbag_state" IN ('1','2')
+        AND a."isdeleted" = '0'
+
+    UNION ALL
+    
+    -- 05. B型库存袋数统计
+    SELECT 
+        '库存记录' as "kcjl", 
+        'B型' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='B型' THEN a."bloodbag_id" END) as "hxb1",
+        'B型' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='B型' THEN a."bloodbag_id" END) as "xj1", 
+        'B型' as "xx3", '袋' as "js3",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='B型' THEN a."bloodbag_id" END) as "xxb1",
+        'B型' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='B型' THEN a."bloodbag_id" END) as "lcd1",
+        '005' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."bloodbag_state" IN ('1','2')
+        AND a."isdeleted" = '0'
+
+    UNION ALL
+    
+    -- 06. B型库存血量统计
+    SELECT 
+        '库存记录' as "kcjl", 
+        'B型' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='B型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        'B型' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='B型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        'B型' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='B型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        'B型' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='B型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '006' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."bloodbag_state" IN ('1','2')
+        AND a."isdeleted" = '0'
+
+    UNION ALL
+    
+    -- 07. AB型库存袋数统计
+    SELECT 
+        '库存记录' as "kcjl", 
+        'AB型' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='AB型' THEN a."bloodbag_id" END) as "hxb1",
+        'AB型' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='AB型' THEN a."bloodbag_id" END) as "xj1",
+        'AB型' as "xx3", '袋' as "js3", 
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='AB型' THEN a."bloodbag_id" END) as "xxb1",
+        'AB型' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='AB型' THEN a."bloodbag_id" END) as "lcd1",
+        '007' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."bloodbag_state" IN ('1','2')
+        AND a."isdeleted" = '0'
+
+    UNION ALL
+    
+    -- 08. AB型库存血量统计
+    SELECT 
+        '库存记录' as "kcjl", 
+        'AB型' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='AB型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        'AB型' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='AB型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        'AB型' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='AB型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        'AB型' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='AB型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '008' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."bloodbag_state" IN ('1','2')
+        AND a."isdeleted" = '0'
+
+    UNION ALL
+    
+    -- 09. 库存合计袋数统计
+    SELECT 
+        '库存记录' as "kcjl", 
+        '合计' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' THEN a."bloodbag_id" END) as "hxb1",
+        '合计' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' THEN a."bloodbag_id" END) as "xj1", 
+        '合计' as "xx3", '袋' as "js3",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' THEN a."bloodbag_id" END) as "xxb1",
+        '合计' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' THEN a."bloodbag_id" END) as "lcd1",
+        '009' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."bloodbag_state" IN ('1','2')
+        AND a."isdeleted" = '0'
+
+    UNION ALL
+    
+    -- 10. 库存合计血量统计
+    SELECT 
+        '库存记录' as "kcjl", 
+        '合计' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        '合计' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        '合计' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        '合计' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '010' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."bloodbag_state" IN ('1','2')
+        AND a."isdeleted" = '0'
+
+    -- ================================
+    -- 第二部分：入库记录统计（10个查询：4种血型×2种统计方式+合计×2种统计方式）
+    -- ================================
+    
+    UNION ALL
+    
+    -- 11. O型入库袋数统计
+    SELECT 
+        '入库记录' as "kcjl", 
+        'O型' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='O型' THEN a."bloodbag_id" END) as "hxb1",
+        'O型' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='O型' THEN a."bloodbag_id" END) as "xj1", 
+        'O型' as "xx3", '袋' as "js3",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='O型' THEN a."bloodbag_id" END) as "xxb1",
+        'O型' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='O型' THEN a."bloodbag_id" END) as "lcd1",
+        '011' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        -- ✅ 入库时间条件：使用in_time字段
+        AND a."in_time" >= date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d') 
+        AND a."in_time" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 12. O型入库血量统计
+    SELECT 
+        '入库记录' as "kcjl", 
+        'O型' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='O型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        'O型' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='O型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        'O型' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='O型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        'O型' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='O型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '012' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."in_time" >= date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d') 
+        AND a."in_time" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 13. A型入库袋数统计
+    SELECT 
+        '入库记录' as "kcjl", 
+        'A型' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='A型' THEN a."bloodbag_id" END) as "hxb1",
+        'A型' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='A型' THEN a."bloodbag_id" END) as "xj1", 
+        'A型' as "xx3", '袋' as "js3",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='A型' THEN a."bloodbag_id" END) as "xxb1",
+        'A型' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='A型' THEN a."bloodbag_id" END) as "lcd1",
+        '013' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."in_time" >= date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d') 
+        AND a."in_time" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 14. A型入库血量统计
+    SELECT 
+        '入库记录' as "kcjl", 
+        'A型' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='A型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        'A型' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='A型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        'A型' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='A型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        'A型' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='A型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '014' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."in_time" >= date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d') 
+        AND a."in_time" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 15. B型入库袋数统计
+    SELECT 
+        '入库记录' as "kcjl", 
+        'B型' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='B型' THEN a."bloodbag_id" END) as "hxb1",
+        'B型' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='B型' THEN a."bloodbag_id" END) as "xj1", 
+        'B型' as "xx3", '袋' as "js3",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='B型' THEN a."bloodbag_id" END) as "xxb1",
+        'B型' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='B型' THEN a."bloodbag_id" END) as "lcd1",
+        '015' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."in_time" >= date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d') 
+        AND a."in_time" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 16. B型入库血量统计
+    SELECT 
+        '入库记录' as "kcjl", 
+        'B型' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='B型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        'B型' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='B型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        'B型' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='B型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        'B型' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='B型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '016' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."in_time" >= date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d') 
+        AND a."in_time" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 17. AB型入库袋数统计
+    SELECT 
+        '入库记录' as "kcjl", 
+        'AB型' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='AB型' THEN a."bloodbag_id" END) as "hxb1",
+        'AB型' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='AB型' THEN a."bloodbag_id" END) as "xj1",
+        'AB型' as "xx3", '袋' as "js3", 
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='AB型' THEN a."bloodbag_id" END) as "xxb1",
+        'AB型' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='AB型' THEN a."bloodbag_id" END) as "lcd1",
+        '017' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."in_time" >= date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d') 
+        AND a."in_time" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 18. AB型入库血量统计
+    SELECT 
+        '入库记录' as "kcjl", 
+        'AB型' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='AB型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        'AB型' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='AB型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        'AB型' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='AB型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        'AB型' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='AB型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '018' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."in_time" >= date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d') 
+        AND a."in_time" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 19. 入库合计袋数统计
+    SELECT 
+        '入库记录' as "kcjl", 
+        '合计' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' THEN a."bloodbag_id" END) as "hxb1",
+        '合计' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' THEN a."bloodbag_id" END) as "xj1", 
+        '合计' as "xx3", '袋' as "js3",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' THEN a."bloodbag_id" END) as "xxb1",
+        '合计' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' THEN a."bloodbag_id" END) as "lcd1",
+        '019' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."in_time" >= date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d') 
+        AND a."in_time" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 20. 入库合计血量统计
+    SELECT 
+        '入库记录' as "kcjl", 
+        '合计' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        '合计' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        '合计' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        '合计' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '020' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."in_time" >= date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d') 
+        AND a."in_time" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d')
+
+    -- ================================
+    -- 第三部分：出库记录统计（10个查询：4种血型×2种统计方式+合计×2种统计方式）
+    -- ================================
+    
+    UNION ALL
+    
+    -- 21. O型出库袋数统计
+    SELECT 
+        '出库记录' as "kcjl", 
+        'O型' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='O型' THEN a."bloodbag_id" END) as "hxb1",
+        'O型' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='O型' THEN a."bloodbag_id" END) as "xj1", 
+        'O型' as "xx3", '袋' as "js3",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='O型' THEN a."bloodbag_id" END) as "xxb1",
+        'O型' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='O型' THEN a."bloodbag_id" END) as "lcd1",
+        '021' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE d
+        ON a."inspection_id" = d."inspection_id"    
+        AND d."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        -- ✅ 出库时间条件：使用OUT_DATE字段
+        AND a."out_date" >= date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d') 
+        AND a."out_date" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 22. O型出库血量统计
+    SELECT 
+        '出库记录' as "kcjl", 
+        'O型' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='O型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        'O型' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='O型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        'O型' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='O型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        'O型' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='O型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '022' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE d
+        ON a."inspection_id" = d."inspection_id"    
+        AND d."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."out_date" >= date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d') 
+        AND a."out_date" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 23. A型出库袋数统计
+    SELECT 
+        '出库记录' as "kcjl", 
+        'A型' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='A型' THEN a."bloodbag_id" END) as "hxb1",
+        'A型' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='A型' THEN a."bloodbag_id" END) as "xj1", 
+        'A型' as "xx3", '袋' as "js3",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='A型' THEN a."bloodbag_id" END) as "xxb1",
+        'A型' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='A型' THEN a."bloodbag_id" END) as "lcd1",
+        '023' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE d
+        ON a."inspection_id" = d."inspection_id"    
+        AND d."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."out_date" >= date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d') 
+        AND a."out_date" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 24. A型出库血量统计
+    SELECT 
+        '出库记录' as "kcjl", 
+        'A型' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='A型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        'A型' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='A型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        'A型' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='A型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        'A型' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='A型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '024' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE d
+        ON a."inspection_id" = d."inspection_id"    
+        AND d."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."out_date" >= date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d') 
+        AND a."out_date" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 25. B型出库袋数统计
+    SELECT 
+        '出库记录' as "kcjl", 
+        'B型' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='B型' THEN a."bloodbag_id" END) as "hxb1",
+        'B型' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='B型' THEN a."bloodbag_id" END) as "xj1", 
+        'B型' as "xx3", '袋' as "js3",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='B型' THEN a."bloodbag_id" END) as "xxb1",
+        'B型' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='B型' THEN a."bloodbag_id" END) as "lcd1",
+        '025' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE d
+        ON a."inspection_id" = d."inspection_id"    
+        AND d."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."out_date" >= date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d') 
+        AND a."out_date" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 26. B型出库血量统计
+    SELECT 
+        '出库记录' as "kcjl", 
+        'B型' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='B型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        'B型' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='B型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        'B型' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='B型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        'B型' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='B型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '026' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE d
+        ON a."inspection_id" = d."inspection_id"    
+        AND d."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."out_date" >= date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d') 
+        AND a."out_date" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 27. AB型出库袋数统计
+    SELECT 
+        '出库记录' as "kcjl", 
+        'AB型' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='AB型' THEN a."bloodbag_id" END) as "hxb1",
+        'AB型' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='AB型' THEN a."bloodbag_id" END) as "xj1",
+        'AB型' as "xx3", '袋' as "js3", 
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='AB型' THEN a."bloodbag_id" END) as "xxb1",
+        'AB型' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='AB型' THEN a."bloodbag_id" END) as "lcd1",
+        '027' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE d
+        ON a."inspection_id" = d."inspection_id"    
+        AND d."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."out_date" >= date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d') 
+        AND a."out_date" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 28. AB型出库血量统计
+    SELECT 
+        '出库记录' as "kcjl", 
+        'AB型' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' AND a."abo_blood_group"='AB型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        'AB型' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' AND a."abo_blood_group"='AB型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        'AB型' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' AND a."abo_blood_group"='AB型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        'AB型' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' AND a."abo_blood_group"='AB型' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '028' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE d
+        ON a."inspection_id" = d."inspection_id"    
+        AND d."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."out_date" >= date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d') 
+        AND a."out_date" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 29. 出库合计袋数统计
+    SELECT 
+        '出库记录' as "kcjl", 
+        '合计' as "xx1", '袋' as "js1",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000009' THEN a."bloodbag_id" END) as "hxb1",
+        '合计' as "xx2", '袋' as "js2",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000010' THEN a."bloodbag_id" END) as "xj1", 
+        '合计' as "xx3", '袋' as "js3",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000011' THEN a."bloodbag_id" END) as "xxb1",
+        '合计' as "xx4", '袋' as "js4",
+        COUNT(DISTINCT CASE WHEN c."component_id"='00000012' THEN a."bloodbag_id" END) as "lcd1",
+        '029' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE d
+        ON a."inspection_id" = d."inspection_id"    
+        AND d."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."out_date" >= date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d') 
+        AND a."out_date" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d')
+
+    UNION ALL
+    
+    -- 30. 出库合计血量统计
+    SELECT 
+        '出库记录' as "kcjl", 
+        '合计' as "xx1", '量' as "js1",
+        SUM(CASE WHEN c."component_id"='00000009' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "hxb1",
+        '合计' as "xx2", '量' as "js2",
+        SUM(CASE WHEN c."component_id"='00000010' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xj1",
+        '合计' as "xx3", '量' as "js3",
+        SUM(CASE WHEN c."component_id"='00000011' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "xxb1",
+        '合计' as "xx4", '量' as "js4",
+        SUM(CASE WHEN c."component_id"='00000012' THEN CAST(a."blood_amount" AS DOUBLE) ELSE 0 END) as "lcd1",
+        '030' as "sort"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."blood_type_id" = b."blood_type_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT c
+        ON b."component_id" = c."component_id"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE d
+        ON a."inspection_id" = d."inspection_id"    
+        AND d."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."out_date" >= date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d') 
+        AND a."out_date" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d')
+
+) T)
+
+SELECT * FROM base_result
+union all 
+ SELECT 
+        -- 环比计算
+        CONCAT(
+            MAX(CASE WHEN "排序" = 1 THEN "周期" END),
+            ' vs ',
+            MAX(CASE WHEN "排序" = 2 THEN "周期" END)
+        ) as "周期",
+        '环比' as "周期名称",
+        4 as "排序",
+        -- 入库血液环比
+        CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "入库血液" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "入库血液" END) - 
+                        MAX(CASE WHEN "排序" = 2 THEN "入库血液" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 2 THEN "入库血液" END), 2)
+             ELSE NULL 
+        END as "入库血液",
+        -- 出库血液环比
+        CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "出库血液" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "出库血液" END) - 
+                        MAX(CASE WHEN "排序" = 2 THEN "出库血液" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 2 THEN "出库血液" END), 2)
+             ELSE NULL 
+        END as "出库血液",
+        -- 红细胞入库环比
+        CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "红细胞入库" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "红细胞入库" END) - 
+                        MAX(CASE WHEN "排序" = 2 THEN "红细胞入库" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 2 THEN "红细胞入库" END), 2)
+             ELSE NULL 
+        END as "红细胞入库",
+        -- 红细胞出库环比
+        CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "红细胞出库" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "红细胞出库" END) - 
+                        MAX(CASE WHEN "排序" = 2 THEN "红细胞出库" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 2 THEN "红细胞出库" END), 2)
+             ELSE NULL 
+        END as "红细胞出库",
+        -- 红细胞入库-量环比
+        CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "红细胞入库-量" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "红细胞入库-量" END) - 
+                        MAX(CASE WHEN "排序" = 2 THEN "红细胞入库-量" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 2 THEN "红细胞入库-量" END), 2)
+             ELSE NULL 
+        END as "红细胞入库-量",
+        -- 红细胞出库-量环比
+        CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "红细胞出库-量" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "红细胞出库-量" END) - 
+                        MAX(CASE WHEN "排序" = 2 THEN "红细胞出库-量" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 2 THEN "红细胞出库-量" END), 2)
+             ELSE NULL 
+        END as "红细胞出库-量",
+        -- 冷沉淀入库环比
+        CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "冷沉淀入库" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "冷沉淀入库" END) - 
+                        MAX(CASE WHEN "排序" = 2 THEN "冷沉淀入库" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 2 THEN "冷沉淀入库" END), 2)
+             ELSE NULL 
+        END as "冷沉淀入库",
+        -- 血浆入库-量环比
+        CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "血浆入库-量" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血浆入库-量" END) - 
+                        MAX(CASE WHEN "排序" = 2 THEN "血浆入库-量" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 2 THEN "血浆入库-量" END), 2)
+             ELSE NULL 
+        END as "血浆入库-量",
+        -- 血小板出库-量环比
+        CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "血小板出库-量" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血小板出库-量" END) - 
+                        MAX(CASE WHEN "排序" = 2 THEN "血小板出库-量" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 2 THEN "血小板出库-量" END), 2)
+             ELSE NULL 
+        END as "血小板出库-量",
+        -- 冷沉淀出库环比
+        CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "冷沉淀出库" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "冷沉淀出库" END) - 
+                        MAX(CASE WHEN "排序" = 2 THEN "冷沉淀出库" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 2 THEN "冷沉淀出库" END), 2)
+             ELSE NULL 
+        END as "冷沉淀出库",
+        -- 血浆出库环比
+        CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "血浆出库" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血浆出库" END) - 
+                        MAX(CASE WHEN "排序" = 2 THEN "血浆出库" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 2 THEN "血浆出库" END), 2)
+             ELSE NULL 
+        END as "血浆出库",
+        -- 全院调剂血小板次数环比
+        CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "全院调剂血小板次数" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "全院调剂血小板次数" END) - 
+                        MAX(CASE WHEN "排序" = 2 THEN "全院调剂血小板次数" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 2 THEN "全院调剂血小板次数" END), 2)
+             ELSE NULL 
+        END as "全院调剂血小板次数",
+        -- 周末加班手术台次环比
+        CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "周末加班手术台次" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "周末加班手术台次" END) - 
+                        MAX(CASE WHEN "排序" = 2 THEN "周末加班手术台次" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 2 THEN "周末加班手术台次" END), 2)
+             ELSE NULL 
+        END as "周末加班手术台次",
+        -- 配血检收入环比
+        CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "配血检收入" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "配血检收入" END) - 
+                        MAX(CASE WHEN "排序" = 2 THEN "配血检收入" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 2 THEN "配血检收入" END), 2)
+             ELSE NULL 
+        END as "配血检收入",
+        -- 血费收入环比
+        CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "血费收入" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血费收入" END) - 
+                        MAX(CASE WHEN "排序" = 2 THEN "血费收入" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 2 THEN "血费收入" END), 2)
+             ELSE NULL 
+        END as "血费收入"
+    FROM base_result
+    WHERE "排序" <= 2
+   union all
+
+     SELECT 
+        -- 环比计算
+        CONCAT(
+            MAX(CASE WHEN "排序" = 1 THEN "周期" END),
+            ' vs ',
+            MAX(CASE WHEN "排序" = 3 THEN "周期" END)
+        ) as "周期",
+        '环比' as "周期名称",
+        5 as "排序",
+        -- 入库血液环比
+        CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "入库血液" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "入库血液" END) - 
+                        MAX(CASE WHEN "排序" = 3 THEN "入库血液" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 3 THEN "入库血液" END), 3)
+             ELSE NULL 
+        END as "入库血液",
+        -- 出库血液环比
+        CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "出库血液" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "出库血液" END) - 
+                        MAX(CASE WHEN "排序" = 3 THEN "出库血液" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 3 THEN "出库血液" END), 3)
+             ELSE NULL 
+        END as "出库血液",
+        -- 红细胞入库环比
+        CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "红细胞入库" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "红细胞入库" END) - 
+                        MAX(CASE WHEN "排序" = 3 THEN "红细胞入库" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 3 THEN "红细胞入库" END), 3)
+             ELSE NULL 
+        END as "红细胞入库",
+        -- 红细胞出库环比
+        CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "红细胞出库" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "红细胞出库" END) - 
+                        MAX(CASE WHEN "排序" = 3 THEN "红细胞出库" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 3 THEN "红细胞出库" END), 3)
+             ELSE NULL 
+        END as "红细胞出库",
+        -- 红细胞入库-量环比
+        CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "红细胞入库-量" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "红细胞入库-量" END) - 
+                        MAX(CASE WHEN "排序" = 3 THEN "红细胞入库-量" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 3 THEN "红细胞入库-量" END), 3)
+             ELSE NULL 
+        END as "红细胞入库-量",
+        -- 红细胞出库-量环比
+        CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "红细胞出库-量" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "红细胞出库-量" END) - 
+                        MAX(CASE WHEN "排序" = 3 THEN "红细胞出库-量" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 3 THEN "红细胞出库-量" END), 3)
+             ELSE NULL 
+        END as "红细胞出库-量",
+        -- 冷沉淀入库环比
+        CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "冷沉淀入库" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "冷沉淀入库" END) - 
+                        MAX(CASE WHEN "排序" = 3 THEN "冷沉淀入库" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 3 THEN "冷沉淀入库" END), 3)
+             ELSE NULL 
+        END as "冷沉淀入库",
+        -- 血浆入库-量环比
+        CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "血浆入库-量" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血浆入库-量" END) - 
+                        MAX(CASE WHEN "排序" = 3 THEN "血浆入库-量" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 3 THEN "血浆入库-量" END), 3)
+             ELSE NULL 
+        END as "血浆入库-量",
+        -- 血小板出库-量环比
+        CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "血小板出库-量" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血小板出库-量" END) - 
+                        MAX(CASE WHEN "排序" = 3 THEN "血小板出库-量" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 3 THEN "血小板出库-量" END), 3)
+             ELSE NULL 
+        END as "血小板出库-量",
+        -- 冷沉淀出库环比
+        CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "冷沉淀出库" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "冷沉淀出库" END) - 
+                        MAX(CASE WHEN "排序" = 3 THEN "冷沉淀出库" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 3 THEN "冷沉淀出库" END), 3)
+             ELSE NULL 
+        END as "冷沉淀出库",
+        -- 血浆出库环比
+        CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "血浆出库" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血浆出库" END) - 
+                        MAX(CASE WHEN "排序" = 3 THEN "血浆出库" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 3 THEN "血浆出库" END), 3)
+             ELSE NULL 
+        END as "血浆出库",
+        -- 全院调剂血小板次数环比
+        CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "全院调剂血小板次数" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "全院调剂血小板次数" END) - 
+                        MAX(CASE WHEN "排序" = 3 THEN "全院调剂血小板次数" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 3 THEN "全院调剂血小板次数" END), 3)
+             ELSE NULL 
+        END as "全院调剂血小板次数",
+        -- 周末加班手术台次环比
+        CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "周末加班手术台次" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "周末加班手术台次" END) - 
+                        MAX(CASE WHEN "排序" = 3 THEN "周末加班手术台次" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 3 THEN "周末加班手术台次" END), 3)
+             ELSE NULL 
+        END as "周末加班手术台次",
+        -- 配血检收入环比
+        CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "配血检收入" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "配血检收入" END) - 
+                        MAX(CASE WHEN "排序" = 3 THEN "配血检收入" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 3 THEN "配血检收入" END), 3)
+             ELSE NULL 
+        END as "配血检收入",
+        -- 血费收入环比
+        CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "血费收入" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血费收入" END) - 
+                        MAX(CASE WHEN "排序" = 3 THEN "血费收入" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 3 THEN "血费收入" END), 3)
+             ELSE NULL 
+        END as "血费收入"
+    FROM base_result
+    WHERE "排序" <= 3
+
+
+    order by "排序"
+
+   

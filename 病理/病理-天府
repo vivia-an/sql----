@@ -1,0 +1,246 @@
+-- 天府病理收入统计报表 - 多期对比分析
+
+WITH last_month_range AS (
+  SELECT
+    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM-dd') || ' 00:00:00' AS start_date,
+    FORMAT_DATETIME(LAST_DAY_OF_MONTH(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH)), 'yyyy-MM-dd') || ' 23:59:59' AS end_date
+),
+
+last_last_month_range AS (
+  SELECT
+    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '2' MONTH), 'yyyy-MM-dd') || ' 00:00:00' AS start_date,
+    FORMAT_DATETIME(LAST_DAY_OF_MONTH(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '2' MONTH)), 'yyyy-MM-dd') || ' 23:59:59' AS end_date
+),
+
+last_year_same_month_range AS (
+  SELECT
+    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '13' MONTH), 'yyyy-MM-dd') || ' 00:00:00' AS start_date,
+    FORMAT_DATETIME(LAST_DAY_OF_MONTH(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '13' MONTH)), 'yyyy-MM-dd') || ' 23:59:59' AS end_date
+),
+
+-- 本月检查治疗人次/项次（天府）
+current_month_count AS (
+  SELECT COUNT(1) AS count_value FROM hid0101_mssql_bl_rep.t_jcxx, last_month_range
+  WHERE f_blk IN ('天府锦江冰冻','天府冰冻','天府普通外检','天府加快') 
+    AND f_bgzt = '已审核' 
+    AND f_bgrq >= start_date 
+    AND f_bgrq <= end_date
+    AND isdeleted = '0'
+),
+
+-- 上月检查治疗人次/项次（天府）
+last_month_count AS (
+  SELECT COUNT(1) AS count_value FROM hid0101_mssql_bl_rep.t_jcxx, last_last_month_range
+  WHERE f_blk IN ('天府锦江冰冻','天府冰冻','天府普通外检','天府加快') 
+    AND f_bgzt = '已审核' 
+    AND f_bgrq >= start_date 
+    AND f_bgrq <= end_date
+    AND isdeleted = '0'
+),
+
+-- 去年同期检查治疗人次/项次（天府）
+last_year_count AS (
+  SELECT COUNT(1) AS count_value FROM hid0101_mssql_bl_rep.t_jcxx, last_year_same_month_range
+  WHERE f_blk IN ('天府锦江冰冻','天府冰冻','天府普通外检','天府加快') 
+    AND f_bgzt = '已审核' 
+    AND f_bgrq >= start_date 
+    AND f_bgrq <= end_date
+    AND isdeleted = '0'
+),
+
+-- 本月检查治疗收入（天府）
+current_month_income AS (
+  SELECT SUM(TotalFee) AS income_value FROM m1.mdr_income
+  WHERE IsDeleted = '0' 
+    AND RecDeptName = '病理科(天府)'
+    AND SUBSTRING(chargedttm, 1, 7) = 
+        FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM')
+),
+
+-- 上月检查治疗收入（天府）
+last_month_income AS (
+  SELECT SUM(TotalFee) AS income_value FROM m1.mdr_income
+  WHERE IsDeleted = '0' 
+    AND RecDeptName = '病理科(天府)'
+    AND SUBSTRING(chargedttm, 1, 7) = 
+        FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '2' MONTH), 'yyyy-MM')
+),
+
+-- 去年同期检查治疗收入（天府）
+last_year_income AS (
+  SELECT SUM(TotalFee) AS income_value FROM m1.mdr_income
+  WHERE IsDeleted = '0' 
+    AND RecDeptName = '病理科(天府)'
+    AND SUBSTRING(chargedttm, 1, 7) = 
+        FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '13' MONTH), 'yyyy-MM')
+),
+
+-- 本月体检收入（天府）
+current_month_physical AS (
+  SELECT SUM("计算金额") AS income_value FROM (
+    SELECT
+      CASE
+        WHEN "qty" IS NULL THEN CAST("FactPrice" AS DECIMAL(10, 2))
+        ELSE CAST(CAST("qty" AS DECIMAL(10, 2)) AS INTEGER) * CAST("FactPrice" AS DECIMAL(10, 2))
+      END AS "计算金额"
+    FROM m1.mdr_peisincome
+    WHERE ((f_feecharged = 'AQ==') OR f_feecharged = 'true')
+      AND examfeeitem_name IN (
+        '宫颈刮片病理细胞学检查','宫颈刮片病理细胞学检查【HPV】','液基薄层细胞学检查',
+        '液基薄层细胞学检查【加HPV】','尿液基细胞学检测','液基薄层细胞制片术',
+        '肠癌无创脱落细胞多靶点基因检测','液基薄层细胞学检查【加HPV，加白带常规】',
+        '两癌筛查【HPV+白带】','两癌筛查液基薄层细胞制片术','两癌筛查组织病理学检查',
+        '两癌筛查妇科','两癌筛查妇科【HPV+白带】','两癌筛查妇科【液基】',
+        '两癌筛查组织病理学检查【需取组织检查才用条码】','液基薄层细胞学检查【加白带常规】',
+        '体检液基薄层细胞制片术','液基薄层细胞制片术','液基薄层细胞学检查（HPV）（体检）'
+      )
+      AND SUBSTRING(dateregister, 1, 7) = DATE_FORMAT(DATE_ADD('month', -1, CURRENT_DATE), '%Y-%m')
+      AND medorgcode IN ('HID0117')
+  ) t1
+),
+
+-- 上月体检收入（天府）
+last_month_physical AS (
+  SELECT SUM("计算金额") AS income_value FROM (
+    SELECT
+      CASE
+        WHEN "qty" IS NULL THEN CAST("FactPrice" AS DECIMAL(10, 2))
+        ELSE CAST(CAST("qty" AS DECIMAL(10, 2)) AS INTEGER) * CAST("FactPrice" AS DECIMAL(10, 2))
+      END AS "计算金额"
+    FROM m1.mdr_peisincome
+    WHERE ((f_feecharged = 'AQ==') OR f_feecharged = 'true')
+      AND examfeeitem_name IN (
+        '宫颈刮片病理细胞学检查','宫颈刮片病理细胞学检查【HPV】','液基薄层细胞学检查',
+        '液基薄层细胞学检查【加HPV】','尿液基细胞学检测','液基薄层细胞制片术',
+        '肠癌无创脱落细胞多靶点基因检测','液基薄层细胞学检查【加HPV，加白带常规】',
+        '两癌筛查【HPV+白带】','两癌筛查液基薄层细胞制片术','两癌筛查组织病理学检查',
+        '两癌筛查妇科','两癌筛查妇科【HPV+白带】','两癌筛查妇科【液基】',
+        '两癌筛查组织病理学检查【需取组织检查才用条码】','液基薄层细胞学检查【加白带常规】',
+        '体检液基薄层细胞制片术','液基薄层细胞制片术','液基薄层细胞学检查（HPV）（体检）'
+      )
+      AND SUBSTRING(dateregister, 1, 7) = DATE_FORMAT(DATE_ADD('month', -2, CURRENT_DATE), '%Y-%m')
+      AND medorgcode IN ('HID0117')
+  ) t2
+),
+
+-- 去年同期体检收入（天府）
+last_year_physical AS (
+  SELECT SUM("计算金额") AS income_value FROM (
+    SELECT
+      CASE
+        WHEN "qty" IS NULL THEN CAST("FactPrice" AS DECIMAL(10, 2))
+        ELSE CAST(CAST("qty" AS DECIMAL(10, 2)) AS INTEGER) * CAST("FactPrice" AS DECIMAL(10, 2))
+      END AS "计算金额"
+    FROM m1.mdr_peisincome
+    WHERE ((f_feecharged = 'AQ==') OR f_feecharged = 'true')
+      AND examfeeitem_name IN (
+        '宫颈刮片病理细胞学检查','宫颈刮片病理细胞学检查【HPV】','液基薄层细胞学检查',
+        '液基薄层细胞学检查【加HPV】','尿液基细胞学检测','液基薄层细胞制片术',
+        '肠癌无创脱落细胞多靶点基因检测','液基薄层细胞学检查【加HPV，加白带常规】',
+        '两癌筛查【HPV+白带】','两癌筛查液基薄层细胞制片术','两癌筛查组织病理学检查',
+        '两癌筛查妇科','两癌筛查妇科【HPV+白带】','两癌筛查妇科【液基】',
+        '两癌筛查组织病理学检查【需取组织检查才用条码】','液基薄层细胞学检查【加白带常规】',
+        '体检液基薄层细胞制片术','液基薄层细胞制片术','液基薄层细胞学检查（HPV）（体检）'
+      )
+      AND SUBSTRING(dateregister, 1, 7) = DATE_FORMAT(DATE_ADD('month', -13, CURRENT_DATE), '%Y-%m')
+      AND medorgcode IN ('HID0117')
+  ) t3
+),
+
+-- 最终结果汇总
+final_results AS (
+  -- 1. 检查治疗人次/项次（天府）
+  SELECT 
+    '检查治疗人次/项次' AS "项目",
+    COALESCE((SELECT count_value FROM current_month_count), 0) AS "本月",
+    COALESCE((SELECT count_value FROM last_month_count), 0) AS "上月",
+    COALESCE((SELECT count_value FROM last_year_count), 0) AS "去年同期",
+    CASE 
+      WHEN COALESCE((SELECT count_value FROM last_month_count), 0) = 0 THEN NULL
+      ELSE ROUND(((COALESCE((SELECT count_value FROM current_month_count), 0) - COALESCE((SELECT count_value FROM last_month_count), 0)) / COALESCE((SELECT count_value FROM last_month_count), 0)) * 100, 2)
+    END AS "与上月差异%",
+    CASE 
+      WHEN COALESCE((SELECT count_value FROM last_year_count), 0) = 0 THEN NULL
+      ELSE ROUND(((COALESCE((SELECT count_value FROM current_month_count), 0) - COALESCE((SELECT count_value FROM last_year_count), 0)) / COALESCE((SELECT count_value FROM last_year_count), 0)) * 100, 2)
+    END AS "与同期差异%"
+  
+  UNION ALL
+  
+  -- 2. 天府检查治疗收入(元)
+  SELECT 
+    '天府检查治疗收入(元)' AS "项目",
+    COALESCE((SELECT income_value FROM current_month_income), 0) AS "本月",
+    COALESCE((SELECT income_value FROM last_month_income), 0) AS "上月",
+    COALESCE((SELECT income_value FROM last_year_income), 0) AS "去年同期",
+    CASE 
+      WHEN COALESCE((SELECT income_value FROM last_month_income), 0) = 0 THEN NULL
+      ELSE ROUND(((COALESCE((SELECT income_value FROM current_month_income), 0) - COALESCE((SELECT income_value FROM last_month_income), 0)) / COALESCE((SELECT income_value FROM last_month_income), 0)) * 100, 2)
+    END AS "与上月差异%",
+    CASE 
+      WHEN COALESCE((SELECT income_value FROM last_year_income), 0) = 0 THEN NULL
+      ELSE ROUND(((COALESCE((SELECT income_value FROM current_month_income), 0) - COALESCE((SELECT income_value FROM last_year_income), 0)) / COALESCE((SELECT income_value FROM last_year_income), 0)) * 100, 2)
+    END AS "与同期差异%"
+  
+  UNION ALL
+  
+  -- 3. 天府体检病理收入(元)
+  SELECT 
+    '天府体检病理收入(元)' AS "项目",
+    COALESCE((SELECT income_value FROM current_month_physical), 0) AS "本月",
+    COALESCE((SELECT income_value FROM last_month_physical), 0) AS "上月",
+    COALESCE((SELECT income_value FROM last_year_physical), 0) AS "去年同期",
+    CASE 
+      WHEN COALESCE((SELECT income_value FROM last_month_physical), 0) = 0 THEN NULL
+      ELSE ROUND(((COALESCE((SELECT income_value FROM current_month_physical), 0) - COALESCE((SELECT income_value FROM last_month_physical), 0)) / COALESCE((SELECT income_value FROM last_month_physical), 0)) * 100, 2)
+    END AS "与上月差异%",
+    CASE 
+      WHEN COALESCE((SELECT income_value FROM last_year_physical), 0) = 0 THEN NULL
+      ELSE ROUND(((COALESCE((SELECT income_value FROM current_month_physical), 0) - COALESCE((SELECT income_value FROM last_year_physical), 0)) / COALESCE((SELECT income_value FROM last_year_physical), 0)) * 100, 2)
+    END AS "与同期差异%"
+  
+  UNION ALL
+  
+  -- 4. 天府收入合计
+  SELECT 
+    '天府收入合计' AS "项目",
+    COALESCE((SELECT income_value FROM current_month_income), 0) + 
+    COALESCE((SELECT income_value FROM current_month_physical), 0) AS "本月",
+    COALESCE((SELECT income_value FROM last_month_income), 0) + 
+    COALESCE((SELECT income_value FROM last_month_physical), 0) AS "上月",
+    COALESCE((SELECT income_value FROM last_year_income), 0) + 
+    COALESCE((SELECT income_value FROM last_year_physical), 0) AS "去年同期",
+    CASE 
+      WHEN (COALESCE((SELECT income_value FROM last_month_income), 0) + 
+            COALESCE((SELECT income_value FROM last_month_physical), 0)) = 0 THEN NULL
+      ELSE ROUND(((
+        (COALESCE((SELECT income_value FROM current_month_income), 0) + 
+         COALESCE((SELECT income_value FROM current_month_physical), 0)) - 
+        (COALESCE((SELECT income_value FROM last_month_income), 0) + 
+         COALESCE((SELECT income_value FROM last_month_physical), 0))
+      ) / (COALESCE((SELECT income_value FROM last_month_income), 0) + 
+           COALESCE((SELECT income_value FROM last_month_physical), 0))) * 100, 2)
+    END AS "与上月差异%",
+    CASE 
+      WHEN (COALESCE((SELECT income_value FROM last_year_income), 0) + 
+            COALESCE((SELECT income_value FROM last_year_physical), 0)) = 0 THEN NULL
+      ELSE ROUND(((
+        (COALESCE((SELECT income_value FROM current_month_income), 0) + 
+         COALESCE((SELECT income_value FROM current_month_physical), 0)) - 
+        (COALESCE((SELECT income_value FROM last_year_income), 0) + 
+         COALESCE((SELECT income_value FROM last_year_physical), 0))
+      ) / (COALESCE((SELECT income_value FROM last_year_income), 0) + 
+           COALESCE((SELECT income_value FROM last_year_physical), 0))) * 100, 2)
+    END AS "与同期差异%"
+)
+
+-- 最终输出结果
+SELECT * FROM final_results
+ORDER BY 
+  CASE "项目"
+    WHEN '检查治疗人次/项次' THEN 1
+    WHEN '天府检查治疗收入(元)' THEN 2
+    WHEN '天府体检病理收入(元)' THEN 3
+    WHEN '天府收入合计' THEN 4
+    ELSE 5
+  END
+  

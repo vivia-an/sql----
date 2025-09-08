@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(/C:\\sql生成项目\\Datacenter/**)",
+      "Read(/C:\\sql生成项目\\Datacenter/**)",
+      "Read(/C:\\sql生成项目\\Datacenter/**)",
+      "Read(/C:\\sql生成项目\\Datacenter/**)",
+      "Read(/C:\\sql生成项目\\Datacenter/**)",
+      "Read(/C:\\sql生成项目\\Datacenter/**)",
+      "Read(/C:\\sql生成项目\\输血\\输血报表-入库/**)",
+      "Read(/C:\\sql生成项目\\Datacenter/**)",
+      "Read(/C:\\sql生成项目\\Datacenter/**)",
+      "Read(/C:\\sql生成项目\\Datacenter/**)",
+      "Read(/C:\\sql生成项目\\Datacenter/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

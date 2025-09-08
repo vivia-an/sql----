@@ -1,0 +1,147 @@
+病理运管报表
+
+-- 体检收费统计查询 - Presto版本
+-- 数据库：hid0101_mssql_healthmanagement_herpeishx
+
+WITH patient_data AS (
+    -- 体检者基础数据
+    SELECT 
+        "ID_Patient" AS "体检号",
+        CAST("DateRegister" AS VARCHAR) AS "登记时间",
+        COALESCE("HospitalName", '华西医院') AS "院区"
+    FROM hid0101_mssql_healthmanagement_herpeishx."PeisPatient" 
+    WHERE "isdeleted" = '0'
+),
+
+fee_data AS (
+    -- 1.在线收费数据
+    SELECT 
+        ppfi."ID_Patient" AS "体检号",
+        pp."登记时间",
+        pp."院区",
+        ppfi."ID_ExamFeeItem" AS "收费项目ID",
+        bcof."ClassOfFeeItem_Name" AS "收费项目分类",
+        befi."Depart_Name" AS "检验科室",
+        CAST(ppfi."Price" AS DECIMAL(10,2)) AS "应收费用",
+        CAST(ppfi."FactPrice" AS DECIMAL(10,2)) AS "实收费用"
+    FROM patient_data pp
+    LEFT JOIN hid0101_mssql_healthmanagement_herpeishx."PeisPatientFeeItem" ppfi
+        ON ppfi."ID_Patient" = pp."体检号" AND ppfi."isdeleted" = '0'
+    LEFT JOIN hid0101_mssql_healthmanagement_herpeishx."BasExamFeeItem" befi
+        ON befi."ID_ExamFeeItem" = ppfi."ID_ExamFeeItem" AND befi."isdeleted" = '0'
+    LEFT JOIN hid0101_mssql_healthmanagement_herpeishx."BasClassOfFeeItem" bcof
+        ON bcof."ID_ClassOfFeeItem" = befi."ID_ClassOfFeeItem" AND bcof."isdeleted" = '0'
+    
+    UNION ALL
+    
+    -- 2.在线退费数据
+    SELECT 
+        ppfi."ID_Patient" AS "体检号",
+        pp."登记时间",
+        pp."院区",
+        ppfi."ID_ExamFeeItem" AS "收费项目ID",
+        bcof."ClassOfFeeItem_Name" AS "收费项目分类",
+        befi."Depart_Name" AS "检验科室",
+        CAST(ppfi."Price" AS DECIMAL(10,2)) AS "应收费用",
+        CAST(ppfi."FactPrice" AS DECIMAL(10,2)) AS "实收费用"
+    FROM patient_data pp
+    LEFT JOIN hid0101_mssql_healthmanagement_herpeishx."PeisPatientFeeItemReturned" ppfi
+        ON ppfi."ID_Patient" = pp."体检号" AND ppfi."isdeleted" = '0'
+    LEFT JOIN hid0101_mssql_healthmanagement_herpeishx."BasExamFeeItem" befi
+        ON befi."ID_ExamFeeItem" = ppfi."ID_ExamFeeItem" AND befi."isdeleted" = '0'
+    LEFT JOIN hid0101_mssql_healthmanagement_herpeishx."BasClassOfFeeItem" bcof
+        ON bcof."ID_ClassOfFeeItem" = befi."ID_ClassOfFeeItem" AND bcof."isdeleted" = '0'
+    
+    UNION ALL
+    
+    -- 3.归档收费数据（如果存在WarePatientFeeItem表）
+    SELECT 
+        ppfi."ID_Patient" AS "体检号",
+        pp."登记时间",
+        pp."院区",
+        ppfi."ID_ExamFeeItem" AS "收费项目ID",
+        bcof."ClassOfFeeItem_Name" AS "收费项目分类",
+        befi."Depart_Name" AS "检验科室",
+        CAST(ppfi."Price" AS DECIMAL(10,2)) AS "应收费用",
+        CAST(ppfi."FactPrice" AS DECIMAL(10,2)) AS "实收费用"
+    FROM patient_data pp
+    LEFT JOIN hid0101_mssql_healthmanagement_herpeishx."WarePatientFeeItem" ppfi
+        ON ppfi."ID_Patient" = pp."体检号" AND ppfi."isdeleted" = '0'
+    LEFT JOIN hid0101_mssql_healthmanagement_herpeishx."BasExamFeeItem" befi
+        ON befi."ID_ExamFeeItem" = ppfi."ID_ExamFeeItem" AND befi."isdeleted" = '0'
+    LEFT JOIN hid0101_mssql_healthmanagement_herpeishx."BasClassOfFeeItem" bcof
+        ON bcof."ID_ClassOfFeeItem" = befi."ID_ClassOfFeeItem" AND bcof."isdeleted" = '0'
+    
+    UNION ALL
+    
+    -- 4.归档退费数据（如果存在WarePatientFeeItemReturned表）
+    SELECT 
+        ppfi."ID_Patient" AS "体检号",
+        pp."登记时间",
+        pp."院区",
+        ppfi."ID_ExamFeeItem" AS "收费项目ID",
+        bcof."ClassOfFeeItem_Name" AS "收费项目分类",
+        befi."Depart_Name" AS "检验科室",
+        CAST(ppfi."Price" AS DECIMAL(10,2)) AS "应收费用",
+        CAST(ppfi."FactPrice" AS DECIMAL(10,2)) AS "实收费用"
+    FROM patient_data pp
+    LEFT JOIN hid0101_mssql_healthmanagement_herpeishx."WarePatientFeeItemReturned" ppfi
+        ON ppfi."ID_Patient" = pp."体检号" AND ppfi."isdeleted" = '0'
+    LEFT JOIN hid0101_mssql_healthmanagement_herpeishx."BasExamFeeItem" befi
+        ON befi."ID_ExamFeeItem" = ppfi."ID_ExamFeeItem" AND befi."isdeleted" = '0'
+    LEFT JOIN hid0101_mssql_healthmanagement_herpeishx."BasClassOfFeeItem" bcof
+        ON bcof."ID_ClassOfFeeItem" = befi."ID_ClassOfFeeItem" AND bcof."isdeleted" = '0'
+),
+
+summary_stats AS (
+    -- 按日期和院区汇总统计
+    SELECT 
+        DATE_FORMAT(CAST("登记时间" AS TIMESTAMP), '%Y-%m-%d') AS "登记日期",
+        "院区",
+        COUNT(DISTINCT "体检号") AS "总人数",
+        SUM("应收费用") AS "应收总费用",
+        SUM("实收费用") AS "实收总费用"
+    FROM fee_data
+    WHERE "体检号" IS NOT NULL
+    GROUP BY 
+        DATE_FORMAT(CAST("登记时间" AS TIMESTAMP), '%Y-%m-%d'),
+        "院区"
+),
+
+detail_stats AS (
+    -- 按日期、院区、收费项目分类、检验科室汇总统计
+    SELECT 
+        DATE_FORMAT(CAST("登记时间" AS TIMESTAMP), '%Y-%m-%d') AS "登记日期",
+        "院区",
+        COALESCE("收费项目分类", '未分类') AS "收费项目分类",
+        COALESCE("检验科室", '未指定') AS "检验科室",
+        COUNT("体检号") AS "项目人数",
+        SUM("应收费用") AS "项目应收总费用",
+        SUM("实收费用") AS "项目实收总费用"
+    FROM fee_data
+    WHERE "体检号" IS NOT NULL
+    GROUP BY 
+        DATE_FORMAT(CAST("登记时间" AS TIMESTAMP), '%Y-%m-%d'),
+        "院区",
+        "收费项目分类",
+        "检验科室"
+)
+
+-- 最终结果查询
+SELECT 
+    ss."院区",
+    ss."登记日期" AS "登记时间",
+    ss."总人数",
+    ss."应收总费用",
+    ss."实收总费用",
+    ds."收费项目分类",
+    ds."检验科室",
+    ds."项目人数",
+    ds."项目应收总费用",
+    ds."项目实收总费用"
+FROM summary_stats ss
+LEFT JOIN detail_stats ds
+    ON ds."登记日期" = ss."登记日期" 
+    AND ds."院区" = ss."院区"
+ORDER BY ss."登记日期", ss."院区", ds."收费项目分类", ds."检验科室";
+

@@ -1,0 +1,154 @@
+WITH income_data AS (
+    SELECT 
+        hosp_code,
+        stat_date,
+        day_of_week(CAST(stat_date AS DATE)) AS weekday,
+        CASE day_of_week(CAST(stat_date AS DATE))
+            WHEN 1 THEN '周日'
+            WHEN 2 THEN '周一'
+            WHEN 3 THEN '周二'
+            WHEN 4 THEN '周三'
+            WHEN 5 THEN '周四'
+            WHEN 6 THEN '周五'
+            WHEN 7 THEN '周六'
+        END AS weekday_name,
+        CAST(charge_day_amt AS DECIMAL(18,2)) AS charge_day_amt,
+        CAST(report_day_amt AS DECIMAL(18,2)) AS report_day_amt
+    FROM check_res.mon_income
+    WHERE CAST(stat_date AS DATE) = DATE_ADD('day', -1, CURRENT_DATE)
+),
+alert_check AS (
+    SELECT 
+        hosp_code,
+        stat_date,
+        weekday,
+        weekday_name,
+        charge_day_amt,
+        report_day_amt,
+        -- 检查charge_day_amt是否在范围内
+        CASE 
+            -- 工作日 (周一到周五)
+            WHEN weekday BETWEEN 2 AND 6 AND (charge_day_amt < 35000000 OR charge_day_amt > 55000000) THEN '超出范围'
+            -- 周六
+            WHEN weekday = 7 AND (charge_day_amt < 15000000 OR charge_day_amt > 30000000) THEN '超出范围'
+            -- 周日
+            WHEN weekday = 1 AND (charge_day_amt < 10000000 OR charge_day_amt > 20000000) THEN '超出范围'
+            ELSE '正常'
+        END AS charge_day_status,
+        -- 检查report_day_amt是否在范围内
+        CASE 
+            -- 工作日 (周一到周五)
+            WHEN weekday BETWEEN 2 AND 6 AND (report_day_amt < 35000000 OR report_day_amt > 55000000) THEN '超出范围'
+            -- 周六
+            WHEN weekday = 7 AND (report_day_amt < 15000000 OR report_day_amt > 30000000) THEN '超出范围'
+            -- 周日
+            WHEN weekday = 1 AND (report_day_amt < 10000000 OR report_day_amt > 20000000) THEN '超出范围'
+            ELSE '正常'
+        END AS report_day_status
+    FROM income_data
+)
+SELECT
+    CONCAT(hosp_code, '-', stat_date, '-', CAST(FLOOR(RAND() * 1000) AS VARCHAR)) AS alert_id,
+    hosp_code,
+    stat_date,
+    weekday,
+    weekday_name,
+    charge_day_amt,
+    report_day_amt,
+    charge_day_status,
+    report_day_status,
+    CASE
+        WHEN charge_day_status = '超出范围' AND report_day_status = '超出范围' THEN 
+            CONCAT('【收入监控预警】', hosp_code, ' ', stat_date, ' ', weekday_name, 
+                  ' charge_day_amt=', CAST(ROUND(charge_day_amt/10000, 2) AS VARCHAR), '万 和 report_day_amt=', 
+                  CAST(ROUND(report_day_amt/10000, 2) AS VARCHAR), '万 均超出预期范围，请关注！')
+        WHEN charge_day_status = '超出范围' THEN 
+            CONCAT('【收入监控预警】', hosp_code, ' ', stat_date, ' ', weekday_name, 
+                  ' charge_day_amt=', CAST(ROUND(charge_day_amt/10000, 2) AS VARCHAR), '万 超出预期范围，请关注！')
+        WHEN report_day_status = '超出范围' THEN 
+            CONCAT('【收入监控预警】', hosp_code, ' ', stat_date, ' ', weekday_name, 
+                  ' report_day_amt=', CAST(ROUND(report_day_amt/10000, 2) AS VARCHAR), '万 超出预期范围，请关注！')
+        ELSE NULL -- 不需要报警的情况
+    END AS alert_message,
+    CURRENT_TIMESTAMP AS create_time
+FROM alert_check
+WHERE charge_day_status = '超出范围' OR report_day_status = '超出范围'
+
+
+
+
+============ 子查询的方式实现
+
+SELECT
+    CONCAT(t2.hosp_code, '-', t2.stat_date, '-', CAST(FLOOR(RAND() * 1000) AS VARCHAR)) AS alert_id,
+    t2.hosp_code,
+    t2.stat_date,
+    t2.weekday,
+    t2.weekday_name,
+    t2.charge_day_amt,
+    t2.report_day_amt,
+    t2.charge_day_status,
+    t2.report_day_status,
+    CASE
+        WHEN t2.charge_day_status = '超出范围' AND t2.report_day_status = '超出范围' THEN 
+            CONCAT('【收入监控预警】', t2.hosp_code, ' ', t2.stat_date, ' ', t2.weekday_name, 
+                  ' charge_day_amt=', CAST(ROUND(t2.charge_day_amt/10000, 2) AS VARCHAR), '万 和 report_day_amt=', 
+                  CAST(ROUND(t2.report_day_amt/10000, 2) AS VARCHAR), '万 均超出预期范围，请关注！')
+        WHEN t2.charge_day_status = '超出范围' THEN 
+            CONCAT('【收入监控预警】', t2.hosp_code, ' ', t2.stat_date, ' ', t2.weekday_name, 
+                  ' charge_day_amt=', CAST(ROUND(t2.charge_day_amt/10000, 2) AS VARCHAR), '万 超出预期范围，请关注！')
+        WHEN t2.report_day_status = '超出范围' THEN 
+            CONCAT('【收入监控预警】', t2.hosp_code, ' ', t2.stat_date, ' ', t2.weekday_name, 
+                  ' report_day_amt=', CAST(ROUND(t2.report_day_amt/10000, 2) AS VARCHAR), '万 超出预期范围，请关注！')
+        ELSE NULL
+    END AS alert_message,
+    CURRENT_TIMESTAMP AS create_time
+FROM (
+    SELECT 
+        t1.hosp_code,
+        t1.stat_date,
+        t1.weekday,
+        t1.weekday_name,
+        t1.charge_day_amt,
+        t1.report_day_amt,
+        CASE 
+            -- 工作日 (周一到周五)
+            WHEN t1.weekday BETWEEN 1 AND 5 AND (t1.charge_day_amt < 35000000 OR t1.charge_day_amt > 55000000) THEN '超出范围'
+            -- 周六
+            WHEN t1.weekday = 6 AND (t1.charge_day_amt < 15000000 OR t1.charge_day_amt > 30000000) THEN '超出范围'
+            -- 周日
+            WHEN t1.weekday = 7 AND (t1.charge_day_amt < 10000000 OR t1.charge_day_amt > 20000000) THEN '超出范围'
+            ELSE '正常'
+        END AS charge_day_status,
+        CASE 
+            -- 工作日 (周一到周五)
+            WHEN t1.weekday BETWEEN 1 AND 5 AND (t1.report_day_amt < 35000000 OR t1.report_day_amt > 55000000) THEN '超出范围'
+            -- 周六
+            WHEN t1.weekday = 6 AND (t1.report_day_amt < 15000000 OR t1.report_day_amt > 30000000) THEN '超出范围'
+            -- 周日
+            WHEN t1.weekday = 7 AND (t1.report_day_amt < 10000000 OR t1.report_day_amt > 20000000) THEN '超出范围'
+            ELSE '正常'
+        END AS report_day_status
+    FROM (
+        SELECT 
+            hosp_code,
+            stat_date,
+            day_of_week(CAST(stat_date AS DATE)) AS weekday,
+            CASE day_of_week(CAST(stat_date AS DATE))
+                WHEN 1 THEN '周一'
+                WHEN 2 THEN '周二'
+                WHEN 3 THEN '周三'
+                WHEN 4 THEN '周四'
+                WHEN 5 THEN '周五'
+                WHEN 6 THEN '周六'
+                WHEN 7 THEN '周日'
+            END AS weekday_name,
+            CAST(charge_day_amt AS DECIMAL(18,2)) AS charge_day_amt,
+            CAST(report_day_amt AS DECIMAL(18,2)) AS report_day_amt
+        FROM check_res.mon_income
+        WHERE CAST(stat_date AS DATE) = DATE_ADD('day', -1, CURRENT_DATE)
+    ) t1
+) t2
+WHERE t2.charge_day_status = '超出范围' OR t2.report_day_status = '超出范围'
+
+

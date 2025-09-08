@@ -1,0 +1,175 @@
+收入	DC_M1	mdr_income	收入主题表	uuid	'uuid'	STRING	0	uuid，					uuid
+收入	DC_M1	mdr_income	收入主题表	ndr	'ndr'	STRING	0	ndr					ndrFlag
+收入	DC_M1	mdr_income	收入主题表	ReportDay	'报表日'	DATE	1	报表日，数据进到主题表的日期，用于数据固化					%s
+收入	DC_M1	mdr_income	收入主题表	MedOrgID	'医疗机构ID'	INT	0	医疗机构ID	NULL				null
+收入	DC_M1	mdr_income	收入主题表	MedOrgCode	'医疗机构代码'	STRING	1	医疗机构代码	HID0101,HID0103,HID0117,HID0120			账单明细表	fee_billdet_medorgcode
+收入	DC_M1	mdr_income	收入主题表	MedOrgName	'“”'	STRING	1	医疗机构名称	华西，上锦。天府，厦门			账单明细表	fee_billdet_medorgname
+收入	DC_M1	mdr_income	收入主题表	EmpiID	'患者唯一ID序号'	INT	0	患者唯一ID序号 由empi反向更新				账单明细表	fee_billdet_empiid
+收入	DC_M1	mdr_income	收入主题表	EmpiNo	'患者唯一ID'	STRING	0	患者唯一ID 由empi反向更新				账单明细表	fee_billdet_empino
+收入	DC_M1	mdr_income	收入主题表	PID	'人员ID序号'	STRING	0	人员ID 在业务上唯一标识				账单明细表	fee_billdet_persid
+收入	DC_M1	mdr_income	收入主题表	PersID	'人员ID'	INT	0	人员ID 在业务上唯一标识				账单明细表	fee_billdet_persid
+收入	DC_M1	mdr_income	收入主题表	PersNo	'登记号'	STRING	1	登记号，患者唯一识别号，00开头10位数				账单明细表	fee_billdet_persno
+收入	DC_M1	mdr_income	收入主题表	VID	'就诊ID序号 '	STRING	0	业务系统就诊唯一标识				账单明细表	fee_billdet_extstr3
+收入	DC_M1	mdr_income	收入主题表	VisitID	'就诊ID'	INT	0	就诊唯一标识				账单明细表	fee_billdet_visitid
+收入	DC_M1	mdr_income	收入主题表	VisitNo	'就诊号'	STRING	1	就诊号，就诊唯一识别号，IP EP OP开头12位数				账单明细表	fee_billdet_visitno
+收入	DC_M1	mdr_income	收入主题表	SerialNo	'流水号 '	STRING	0	流水号				账单明细表	fee_billdet_billdetid
+收入	DC_M1	mdr_income	收入主题表	VisitType	'就诊类型'	STRING	1	就诊类型	O、E、I			账单明细表	fee_billdet_visittypecode
+收入	DC_M1	mdr_income	收入主题表	UniqueID	'本表唯一标识'	INT	0	本表唯一标识，自增	NULL				null
+收入	DC_M1	mdr_income	收入主题表	DataType	'workloadid'	INT	0	用于存workloadid	NULL				null
+收入	DC_M1	mdr_income	收入主题表	ReportDtTm	'报表时间'	TIMESTAMP	1	报表时间，数据进到主题表的日期时间，用于数据固化	NULL				null
+收入	DC_M1	mdr_income	收入主题表	ChargeDtTm	'生成账单日期时间'	TIMESTAMP	1	生成账单日期时间				账单明细表	fee_billdet_billcreatedttm
+收入	DC_M1	mdr_income	收入主题表	Chargedate	'生成账单日期'	"TIMESTAMP	1	实收统计时间--缴费时间"	1	生成账单日期				账单明细表	fee_billdet_billcreatedttm
+收入	DC_M1	mdr_income	收入主题表	Chargetime	'生成账单时间'	"TIMESTAMP	1	实收统计时间--缴费时间"	1	生成账单时间				账单明细表	fee_billdet_billcreatedttm
+收入	DC_M1	mdr_income	收入主题表	BillDtTm	'实收日期时间'	TIMESTAMP	1	实收统计时间--缴费日期时间（看医嘱是开单计费还是执行计费，发药计费）				账单明细表	fee_billdet_billdttm
+收入	DC_M1	mdr_income	收入主题表	Billdate	'实收日期'	TIMESTAMP	1	实收统计时间--缴费日期（看医嘱是开单计费还是执行计费，发药计费）				账单明细表	fee_billdet_billdttm
+收入	DC_M1	mdr_income	收入主题表	Billtime	'实收时间'	TIMESTAMP	1	实收统计时间--缴费时间（看医嘱是开单计费还是执行计费，发药计费）				账单明细表	fee_billdet_billdttm
+收入	DC_M1	mdr_income	收入主题表	ExecDtTm	'执行时间'	TIMESTAMP	1	医嘱执行时间				医嘱主表	order_main_execdttm
+收入	DC_M1	mdr_income	收入主题表	MakePrescDtTm	'开医嘱时间'	TIMESTAMP	1	开医嘱时间				医嘱主表	order_main_orderdttm
+收入	DC_M1	mdr_income	收入主题表	BillCreateDtTm	'账单创建时间'	TIMESTAMP	0	生成账单日期时间=ChargeDtTm				账单明细表	fee_billdet_billcreatedttm
+收入	DC_M1	mdr_income	收入主题表	billreceiptmonth	'账单结算月'	TIMESTAMP	0	账单结算月,统计报表用的结算月	NULL				null
+收入	DC_M1	mdr_income	收入主题表	billreceiptdate	'账单结算日期'	TIMESTAMP	0	账单结算日期-实收费用日期，统计报表用的结算日	NULL				null
+收入	DC_M1	mdr_income	收入主题表	BillNo	'账单号'	STRING	0	账单号	NULL				null
+收入	DC_M1	mdr_income	收入主题表	billid	'账单ID'	STRING	0	账单ID				账单明细表	fee_billdet_billid
+收入	DC_M1	mdr_income	收入主题表	billstatuscode	账单状态代码	"STRING	0	账单ID"	0	账单状态代码	NULL				null
+收入	DC_M1	mdr_income	收入主题表	billdetid	'账单明细ID'	STRING	0	账单明细ID				账单明细表	fee_billdet_billdetid
+收入	DC_M1	mdr_income	收入主题表	billdetstatuscode	账单明细状态代码	"STRING	0	账单ID"	0	账单明细状态代码	B（账单） P（支付） R（退费）			账单明细表	fee_billdet_billdetstatuscode
+收入	DC_M1	mdr_income	收入主题表	OrderNo	'医嘱号'	STRING	1	医嘱号				账单明细表	fee_billdet_orderdetid
+收入	DC_M1	mdr_income	收入主题表	VisitDeptID	'就诊科室ID'	STRING	0	'就诊科室ID'	NULL				null
+收入	DC_M1	mdr_income	收入主题表	VisitDeptCode	'就诊科室代码'	STRING	1	就诊记录表'就诊科室代码'				华西_科室字典	visit_record_visitdeptcode
+收入	DC_M1	mdr_income	收入主题表	VisitDeptName	'就诊科室名称'	STRING	1	就诊记录表'就诊科室名称'				华西_科室字典	visit_record_visitdeptname
+收入	DC_M1	mdr_income	收入主题表	VisitwardCode	'就诊护理单元代码'	STRING	1	就诊记录表'就诊护理单元代码'					visit_record_visitwardcode
+收入	DC_M1	mdr_income	收入主题表	VisitwardName	'就诊护理单元名称'	STRING	1	就诊记录表'就诊护理单元名称'					visit_record_visitwardname
+收入	DC_M1	mdr_income	收入主题表	VisitDoctID	'就诊医生ID'	STRING	0	'就诊医生ID'	NULL				null
+收入	DC_M1	mdr_income	收入主题表	VisitDoctCode	'就诊医生代码'	STRING	1	就诊医生代码				华西_医护人员字典	visit_record_attendingdoctcode
+收入	DC_M1	mdr_income	收入主题表	VisitDoctName	'就诊医生名称'	STRING	1	就诊医生名称				华西_医护人员字典	visit_record_attendingdoctname
+收入	DC_M1	mdr_income	收入主题表	MakePrescDeptID	'开单科室ID'	STRING	0	开单科室ID	NULL				null
+收入	DC_M1	mdr_income	收入主题表	MakePrescDeptCode	'开单科室代码'	STRING	1	开单科室代码		USER		医嘱主表	order_main_deptcode
+收入	DC_M1	mdr_income	收入主题表	MakePrescDeptName	'开单科室名称'	STRING	1	开单科室代码		USER		医嘱主表	order_main_deptname
+收入	DC_M1	mdr_income	收入主题表	MakePrescPersID	'开单人ID'	STRING	0	开单人ID	NULL				null
+收入	DC_M1	mdr_income	收入主题表	MakePrescPersCode	'开单人代码'	STRING	1	开单人代码		USER	SSUSER	医嘱主表	order_main_orderdoctcode
+收入	DC_M1	mdr_income	收入主题表	MakePrescPersName	'开单人名称'	STRING	1	开单人名称		USER	SSUSER	医嘱主表	order_main_orderdoctname
+收入	DC_M1	mdr_income	收入主题表	RecDeptID	'接收科室ID'	STRING	0	接收科室ID		USER	CTLOC	医嘱主表	order_main_recdeptid
+收入	DC_M1	mdr_income	收入主题表	RecDeptCode	'接收科室代码'	STRING	1	接收科室代码		USER	CTLOC	医嘱主表	order_main_recdeptcode
+收入	DC_M1	mdr_income	收入主题表	RecDeptName	'接收科室名称'	STRING	1	接收科室名称		USER	CTLOC	医嘱主表	order_main_recdeptname
+收入	DC_M1	mdr_income	收入主题表	ExecPersID	'执行人ID'	STRING	0	执行人ID	NULL				null
+收入	DC_M1	mdr_income	收入主题表	ExecPersCode	'执行人代码'	STRING	1	执行人代码		USER		医嘱主表	order_main_execperscode
+收入	DC_M1	mdr_income	收入主题表	ExecPersDesc	'执行人名称'	STRING	1	执行人名称		USER		医嘱主表	order_main_execpersname
+收入	DC_M1	mdr_income	收入主题表	PatWardID	'开单护理单元ID'	STRING	0	开单护理单元ID	NULL				null
+收入	DC_M1	mdr_income	收入主题表	PatWardCode	'开单护理单元代码'	STRING	1	开单护理单元代码	--	USER	order_main	医嘱主表	order_main_wardcode
+收入	DC_M1	mdr_income	收入主题表	PatWardName	'开单护理单元名称'	STRING	1	开单护理单元名称	--	USER	order_main	医嘱主表	order_main_wardname
+收入	DC_M1	mdr_income	收入主题表	OrderID	'医嘱项ID'	STRING	0	医嘱项ID	--	USER	ARCITMMAST	华西_医嘱项字典	fee_billdet_orderitemid
+收入	DC_M1	mdr_income	收入主题表	OrderCode	'医嘱项代码'	STRING	1	医嘱项代码	--	USER	ARCITMMAST	华西_医嘱项字典	fee_billdet_orderitemcode
+收入	DC_M1	mdr_income	收入主题表	OrderName	'医嘱项名称'	STRING	1	医嘱项名称	--	USER	ARCITMMAST	华西_医嘱项字典	fee_billdet_orderitemname
+收入	DC_M1	mdr_income	收入主题表	ChargeID	'收费项ID'	STRING	0	收费项ID	--	USER	DHCTARITEM	华西_收费项字典	fee_billdet_chargeitemid
+收入	DC_M1	mdr_income	收入主题表	ChargeCode	'收费项代码'	STRING	1	收费项代码	--	USER	DHCTARITEM	华西_收费项字典	fee_billdet_chargeitemcode
+收入	DC_M1	mdr_income	收入主题表	ChargeName	'收费项名称'	STRING	1	收费项名称	--	USER	DHCTARITEM	华西_收费项字典	fee_billdet_chargeitemname
+收入	DC_M1	mdr_income	收入主题表	CheckSClassID	'核算子类ID'	STRING	0	核算子类ID		USER	DHCTAREMCCATE	华西_核算子类字典	tarec_rowid
+收入	DC_M1	mdr_income	收入主题表	CheckSClassCode	'核算子类代码'	STRING	1	核算子类代码		USER	DHCTAREMCCATE	华西_核算子类字典	tarec_code
+收入	DC_M1	mdr_income	收入主题表	CheckSClassName	'核算子类名称'	STRING	1	核算子类名称		USER	DHCTAREMCCATE	华西_核算子类字典	tarec_desc
+收入	DC_M1	mdr_income	收入主题表	CheckPClassID	'核算大类ID'	STRING	0	核算大类ID		USER	DHCTAREC	华西_核算大类字典	tartec_rowid
+收入	DC_M1	mdr_income	收入主题表	CheckPClassCode	'核算大类代码'	STRING	1	核算大类代码		USER	DHCTAREC	华西_核算大类字典	tartec_code
+收入	DC_M1	mdr_income	收入主题表	CheckPClassName	'核算大类名称'	STRING	1	核算大类名称		USER	DHCTAREC	华西_核算大类字典	tartec_desc
+收入	DC_M1	mdr_income	收入主题表	AccountSClassID	'会计子类ID'	STRING	0	会计子类ID		USER	DHCTARACCTCATE	华西_会计子类字典	tarac_rowid
+收入	DC_M1	mdr_income	收入主题表	AccountSClassCode	'会计子类代码'	STRING	1	会计子类代码		USER	DHCTARACCTCATE	华西_会计子类字典	tarac_code
+收入	DC_M1	mdr_income	收入主题表	AccountSClassName	'会计子类名称'	STRING	1	会计子类名称		USER	DHCTARACCTCATE	华西_会计子类字典	tarac_desc
+收入	DC_M1	mdr_income	收入主题表	AccountPClassID	'会计大类ID'	STRING	0	会计大类ID		USER	DHCTARAC	华西_会计大类字典	tartac_rowid
+收入	DC_M1	mdr_income	收入主题表	AccountPClassCode	'会计大类代码'	STRING	"1
+"	会计大类代码		USER	DHCTARAC	华西_会计大类字典	tartac_code
+收入	DC_M1	mdr_income	收入主题表	AccountPClassName	'会计大类名称'	STRING	1	会计大类名称		USER	DHCTARAC	华西_会计大类字典	tartac_desc
+收入	DC_M1	mdr_income	收入主题表	ChargeSClassID	'收费子类ID'	STRING	0	收费子类ID		USER	DHCTARSUBCATE	华西_收费子类字典	tarsc_rowid
+收入	DC_M1	mdr_income	收入主题表	ChargeSClassCode	'收费子类代码'	STRING	1	收费子类代码		USER	DHCTARSUBCATE	华西_收费子类字典	tarsc_code
+收入	DC_M1	mdr_income	收入主题表	ChargeSClassName	'收费子类名称'	STRING	1	收费子类名称		USER	DHCTARSUBCATE	华西_收费子类字典	tarsc_desc
+收入	DC_M1	mdr_income	收入主题表	ChargePClassID	'收费大类ID'	STRING	0	收费大类ID		USER	DHCTARCATE	华西_收费大类字典	tarc_rowid
+收入	DC_M1	mdr_income	收入主题表	ChargePClassCode	'收费大类代码'	STRING	1	收费大类代码		USER	DHCTARCATE	华西_收费大类字典	tarc_code
+收入	DC_M1	mdr_income	收入主题表	ChargePClassName	'收费大类名称'	STRING	1	收费大类名称		USER	DHCTARCATE	华西_收费大类字典	tarc_desc
+收入	DC_M1	mdr_income	收入主题表	OPSClassID	'门诊子类ID'	STRING	0	门诊子类ID		USER	DHCTAROUTPATCATE	华西_门诊子类字典	taroc_rowid
+收入	DC_M1	mdr_income	收入主题表	OPSClassCode	'门诊子类代码'	STRING	1	门诊子类代码		USER	DHCTAROUTPATCATE	华西_门诊子类字典	taroc_code
+收入	DC_M1	mdr_income	收入主题表	OPSClassName	'门诊子类名称'	STRING	1	门诊子类名称		USER	DHCTAROUTPATCATE	华西_门诊子类字典	taroc_desc
+收入	DC_M1	mdr_income	收入主题表	OPPClassID	'门诊大类ID'	STRING	0	门诊大类ID		USER	DHCTAROC	华西_门诊大类字典	tartoc_rowid
+收入	DC_M1	mdr_income	收入主题表	OPPClassCode	'门诊大类编码'	STRING	1	门诊大类编码		USER	DHCTAROC	华西_门诊大类字典	tartoc_code
+收入	DC_M1	mdr_income	收入主题表	OPPClassName	'门诊大类名称'	STRING	1	门诊大类名称		USER	DHCTAROC	华西_门诊大类字典	tartoc_desc
+收入	DC_M1	mdr_income	收入主题表	IPSClassID	'住院子类ID'	STRING	0	住院子类ID		USER	DHCTARINPATCATE	华西_住院子类字典	taric_rowid
+收入	DC_M1	mdr_income	收入主题表	IPSClassCode	'住院子类代码'	STRING	1	住院子类代码		USER	DHCTARINPATCATE	华西_住院子类字典	taric_code
+收入	DC_M1	mdr_income	收入主题表	IPSClassName	'住院子类名称'	STRING	1	住院子类名称		USER	DHCTARINPATCATE	华西_住院子类字典	taric_desc
+收入	DC_M1	mdr_income	收入主题表	IPPClassID	'住院大类ID'	STRING	0	住院大类ID		USER	DHCTARIC	华西_住院大类字典	tartic_rowid
+收入	DC_M1	mdr_income	收入主题表	IPPClassCode	'住院大类代码'	STRING	1	住院大类代码		USER	DHCTARIC	华西_住院大类字典	tartic_code
+收入	DC_M1	mdr_income	收入主题表	IPPClassName	'住院大类名称'	STRING	1	住院大类名称		USER	DHCTARIC	华西_住院大类字典	tartic_desc
+收入	DC_M1	mdr_income	收入主题表	MRSClassID	'病案子类ID'	STRING	0	病案子类ID		USER	DHCTARMRCATE	华西_病案子类字典	tarmc_rowid
+收入	DC_M1	mdr_income	收入主题表	MRSClassCode	'病案子类代码'	STRING	1	病案子类代码		USER	DHCTARMRCATE	华西_病案子类字典	tarmc_code
+收入	DC_M1	mdr_income	收入主题表	MRSClassName	'病案子类名称'	STRING	1	病案子类名称		USER	DHCTARMRCATE	华西_病案子类字典	tarmc_desc
+收入	DC_M1	mdr_income	收入主题表	MRPClassID	'病案大类ID'	STRING	0	病案大类ID		USER	DHCTARMC	华西_病案大类字典	tartmc_rowid
+收入	DC_M1	mdr_income	收入主题表	MRPClassCode	'病案大类代码'	STRING	1	病案大类代码		USER	DHCTARMC	华西_病案大类字典	tartmc_code
+收入	DC_M1	mdr_income	收入主题表	MRPClassName	'病案大类名称'	STRING	1	病案大类名称		USER	DHCTARMC	华西_病案大类字典	tartmc_desc
+收入	DC_M1	mdr_income	收入主题表	BillSClassID	'账单子类ID'	STRING	0	账单子类ID	NULL				null
+收入	DC_M1	mdr_income	收入主题表	BillSClassCode	'账单子类代码'	STRING	1	账单子类代码	NULL				null
+收入	DC_M1	mdr_income	收入主题表	BillSClassName	'账单子类名称'	STRING	1	账单子类名称	NULL				null
+收入	DC_M1	mdr_income	收入主题表	BillPClassID	'账单大类ID'	STRING	0	账单大类ID	NULL				null
+收入	DC_M1	mdr_income	收入主题表	BillPClassCode	'账单大类代码'	STRING	1	账单大类代码	NULL				null
+收入	DC_M1	mdr_income	收入主题表	BillPClassName	'账单大类名称'	STRING	1	账单大类名称	NULL				null
+收入	DC_M1	mdr_income	收入主题表	OrderSClassID	'医嘱子类ID'	STRING	0	医嘱子类ID	NULL				null
+收入	DC_M1	mdr_income	收入主题表	OrderSClassCode	'医嘱子类代码'	STRING	1	医嘱子类代码	NULL	USER	ARCITEMCAT	华西_医嘱子类字典	ordersclasscode
+收入	DC_M1	mdr_income	收入主题表	OrderSClassName	'医嘱子类名称'	STRING	1	医嘱子类名称	NULL	USER	ARCITEMCAT	华西_医嘱子类字典	ordersclassname
+收入	DC_M1	mdr_income	收入主题表	OrderPClassID	'医嘱大类ID'	STRING	0	医嘱大类ID	NULL				null
+收入	DC_M1	mdr_income	收入主题表	OrderPClassCode	'医嘱大类代码'	STRING	1	医嘱大类代码	NULL	USER	OECORDERCATEGORY	华西_医嘱大类字典	orderpclasscode
+收入	DC_M1	mdr_income	收入主题表	OrderPClassName	'医嘱大类名称'	STRING	1	医嘱大类名称	NULL	USER	OECORDERCATEGORY	华西_医嘱大类字典	orderpclassname
+收入	DC_M1	mdr_income	收入主题表	InsuItemID	'医保项目ID'	STRING	0	医保项目ID	NULL				null
+收入	DC_M1	mdr_income	收入主题表	InsuItemCode	'医保项目代码'	STRING	1	医保项目代码	NULL				null
+收入	DC_M1	mdr_income	收入主题表	InsuItemName	'医保项目名称'	STRING	1	医保项目名称	NULL				null
+收入	DC_M1	mdr_income	收入主题表	BillDetStatus	'账单明细状态'	STRING	1	账单明细状态				账单明细表	fee_billdet_billdetstatuscode
+收入	DC_M1	mdr_income	收入主题表	ABTFlag	'抗菌药物标识'	STRING	1	抗菌药物标识					null
+收入	DC_M1	mdr_income	收入主题表	ABTGiveStrength	'抗菌药物用药强度'	DECIMAL(20,4)	1	ddds					null
+收入	DC_M1	mdr_income	收入主题表	Unit	'单位'	STRING	1	单位				账单明细表	fee_billdet_unit
+收入	DC_M1	mdr_income	收入主题表	UnitPrice	'单价'	DECIMAL(20,8)	1	单价				账单明细表	fee_billdet_unitprice
+收入	DC_M1	mdr_income	收入主题表	Quantity	'数量'	DECIMAL(20,4)	1	数量				账单明细表	fee_billdet_quantity
+收入	DC_M1	mdr_income	收入主题表	TotalFee	'总费用'	DECIMAL(20,4)	1	总费用				账单明细表	fee_billdet_totalfee_new
+收入	DC_M1	mdr_income	收入主题表	billdettotalfee	账单明细费用	DECIMAL(20,4)	1	总费用				账单明细表	fee_billdet_totalfee
+收入	DC_M1	mdr_income	收入主题表	billdetdiscountrate	账单明细扣率	DECIMAL(20,4)	1	总费用扣率				账单明细表	fee_billdet_discountrate
+收入	DC_M1	mdr_income	收入主题表	RebateFee	'加成或折扣'	DECIMAL(20,4)	1	加成或折扣				账单明细表	fee_billdet_rebatefee
+收入	DC_M1	mdr_income	收入主题表	FactTotalFee	'实际总费用'	DECIMAL(20,4)	1	实际总费用	NULL				null
+收入	DC_M1	mdr_income	收入主题表	InsuFundPayLimitPrice	'医保基金支付限价'	DECIMAL(20,4)	1	医保基金支付限价				账单明细表	fee_billdet_insufundpaylimitprice
+收入	DC_M1	mdr_income	收入主题表	InsuPayRatio	'医保支付比例'	DECIMAL(20,4)	1	医保支付比例				账单明细表	fee_billdet_insupayratio
+收入	DC_M1	mdr_income	收入主题表	ReimburseFee	'医保分类自付'	DECIMAL(20,4)	1	医保分类自付	NULL				null
+收入	DC_M1	mdr_income	收入主题表	SelfPayFee	'医保自费费用'	DECIMAL(20,4)	1	医保自费费用				账单明细表	fee_billdet_selfpayfee
+收入	DC_M1	mdr_income	收入主题表	CityOPSpecialPostFlag	'市门特记账标识'	STRING	1	市门特记账标识	NULL				null
+收入	DC_M1	mdr_income	收入主题表	DataSourceFlag	'数据来源标识'	STRING	0	数据来源标识				账单明细表	fee_billdet_datasourceflag
+收入	DC_M1	mdr_income	收入主题表	DSTable	'接入数据源的表'	STRING	0	接入数据源的表				账单明细表	fee_billdet'
+收入	DC_M1	mdr_income	收入主题表	DSTableKey	'接入数据源的KEY'	STRING	0	接入数据源的KEY				账单明细表	fee_billdet_billdetid'
+收入	DC_M1	mdr_income	收入主题表	DSTableValue	'接入数据源的KEY值'	STRING	0	接入数据源的KEY值				账单明细表	fee_billdet_billdetid
+收入	DC_M1	mdr_income	收入主题表	IsDeleted	'是否物理删除'	INT	1	是否物理删除	 0=否 1=是			账单明细表	fee_billdet_isdeleted
+收入	DC_M1	mdr_income	收入主题表	LastUpdateDtTm	'最后更新时间'	TIMESTAMP	0	最后更新时间				账单明细表	fee_billdet_lastupdatedttm
+收入	DC_M1	mdr_income	收入主题表	DataCreateDtTm	'数据创建时间'	TIMESTAMP	0	数据创建时间					now()
+收入	DC_M1	mdr_income	收入主题表	FeeOfCailiaoTotal	'材料费'	DECIMAL(18,4)	1	材料费				账单明细表	case when tartec_desc ='材料收入' then  fee_billdet_totalfee_new else null end
+收入	DC_M1	mdr_income	收入主题表	FeeOfCailiaoNativeLoc	'本科室开单的材料费用'	DECIMAL(18,4)	1	本科室开单的材料费用	NULL				null
+收入	DC_M1	mdr_income	收入主题表	FeeOfCailiaoMaZuiLoc	'麻醉科开单材料费'	DECIMAL(18,4)	1	麻醉科开单材料费				账单明细表、医嘱主表	(case when tartec_desc ='材料收入' and tarec_desc <>'血材料' and order_main_deptname like '%%麻醉%%' then  fee_billdet_totalfee_new else null end)
+收入	DC_M1	mdr_income	收入主题表	FeeOfCailiaoBloodOtherLloc	'任意科室开单血材料费用'	DECIMAL(18,4)	1	任意科室开单血材料费用				账单明细表	(case when  tarec_desc ='血材料' then  fee_billdet_totalfee_new else null end)
+收入	DC_M1	mdr_income	收入主题表	FeeOfDrugTotal	'核算大类药品收入'	DECIMAL(18,4)	1	核算大类药品收入				账单明细表	(case when  tarec_desc ='药品收入' then  fee_billdet_totalfee_new else null end)
+收入	DC_M1	mdr_income	收入主题表	FeeOfDrugNativeLoc	'本科室开单的药品费用'	DECIMAL(18,4)	1	本科室开单的药品费用	NULL				null
+收入	DC_M1	mdr_income	收入主题表	FeeOfDrugFangsheLoc	'放射科药品费用'	DECIMAL(18,4)	1	放射科药品费用	NULL				null
+收入	DC_M1	mdr_income	收入主题表	FeeOfDrugMaZuiLoc	'麻醉科药品费用'	DECIMAL(18,4)	1	麻醉科药品费用				账单明细表、医嘱主表	(case when tartec_desc ='药品收入' and order_main_deptname like '%%麻醉%%' then  fee_billdet_totalfee_new else null end)
+收入	DC_M1	mdr_income	收入主题表	FeeOfDrugExceptMaZuiFangshe	'除麻醉放射外的药品费用'	DECIMAL(18,4)	1	除麻醉放射外的药品费用	NULL				null
+收入	DC_M1	mdr_income	收入主题表	ReportMonth	报表月	int	1	报表月，数据进到主题表的月份，用于数据固化					%s
+收入	DC_M1	mdr_income	收入主题表	"omvisitdeptid
+"	就诊运管科室ID	STRING	0	"就诊运管科室ID
+"					omvisitdeptid
+收入	DC_M1	mdr_income	收入主题表	omvisitdeptcode	就诊运管科室编码	STRING	1	就诊运管科室编码					omvisitdeptcode
+收入	DC_M1	mdr_income	收入主题表	omvisitdeptname	就诊运管科室名称	STRING	1	就诊运管科室名称					omvisitdeptname
+收入	DC_M1	mdr_income	收入主题表	omrecdeptid	接收运管科室ID	STRING	0	接收运管科室ID					omrecdeptid
+收入	DC_M1	mdr_income	收入主题表	omrecdeptcode	接收运管科室编码	STRING	1	接收运管科室编码					omrecdeptcode
+收入	DC_M1	mdr_income	收入主题表	omrecdeptname	接收运管科室名称	STRING	1	接收运管科室名称					omrecdeptname
+收入	DC_M2	mdr_income	收入主题表		"开单运管科室ID
+"			对标就诊运管科室的规则					
+收入	DC_M3	mdr_income	收入主题表		开单运管科室编码			对标就诊运管科室的规则					
+收入	DC_M4	mdr_income	收入主题表		开单运管科室名称			对标就诊运管科室的规则					
+收入	DC_M5	mdr_income	收入主题表		开单院区编码			门急诊按照开单科室判断所属院区，住院按照开单护理单元判断所属院区，如果开单护理单元为空就判断就诊护理单元所在院区					
+收入	DC_M6	mdr_income	收入主题表		开单院区名称			门急诊按照开单科室判断所属院区，住院按照开单护理单元判断所属院区，如果开单护理单元为空就判断就诊护理单元所在院区					
+收入	DC_M7	mdr_income	收入主题表		"接收院区编码
+"			按照接收科室判断所属院区					
+收入	DC_M8	mdr_income	收入主题表		接收院区名称			按照接收科室判断所属院区					
+收入	DC_M9	mdr_income	收入主题表		"就诊院区编码
+"			门急诊按照就诊科室判断所属院区，住院按照护理单元判断所属院区					
+收入	DC_M10	mdr_income	收入主题表		就诊院区名称			门急诊按照就诊科室判断所属院区，住院按照护理单元判断所属院区					
+m1.mdr_income
+
+
+
+
