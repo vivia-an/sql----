@@ -1,6 +1,5 @@
 ---- create view m1.om_bl_report as  
-
-
+with final_total as (
 select * from (
 -- 病理收入统计报表 - 多期对比分析
 
@@ -196,10 +195,44 @@ last_year_physical AS (
   ) t3
 ),
 
+-- 本月领用材料试剂费
+current_month_material AS (
+  SELECT SUM(CAST("amountmoney" AS DOUBLE)) AS cost_value 
+  FROM datacenter_db.inventory_del_dets
+  WHERE "hosp_code" = 'HID0101' 
+    AND "dept_name" LIKE '%病理科%'
+    AND SUBSTRING("del_date", 1, 7) = 
+        FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM')
+    AND isdeleted = '0'
+),
+
+-- 上月领用材料试剂费
+last_month_material AS (
+  SELECT SUM(CAST("amountmoney" AS DOUBLE)) AS cost_value 
+  FROM datacenter_db.inventory_del_dets
+  WHERE "hosp_code" = 'HID0101' 
+    AND "dept_name" LIKE '%病理科%'
+    AND SUBSTRING("del_date", 1, 7) = 
+        FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '2' MONTH), 'yyyy-MM')
+    AND isdeleted = '0'
+),
+
+-- 去年同期领用材料试剂费
+last_year_material AS (
+  SELECT SUM(CAST("amountmoney" AS DOUBLE)) AS cost_value 
+  FROM datacenter_db.inventory_del_dets
+  WHERE "hosp_code" = 'HID0101' 
+    AND "dept_name" LIKE '%病理科%'
+    AND SUBSTRING("del_date", 1, 7) = 
+        FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '13' MONTH), 'yyyy-MM')
+    AND isdeleted = '0'
+),
+
 -- 最终结果汇总
 final_results AS (
   -- 1. 检查治疗人次/项次
   SELECT 
+    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
     '主院区' AS "单位",
     '检查治疗人次/项次' AS "项目",
     COALESCE((SELECT count_value FROM current_month_count), 0) AS "本月",
@@ -218,6 +251,7 @@ final_results AS (
   
   -- 2. 检查治疗收入(元)
   SELECT 
+    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
     '主院区' AS "单位",
     '检查治疗收入(元)' AS "项目",
     COALESCE((SELECT income_value FROM current_month_income), 0) AS "本月",
@@ -236,6 +270,7 @@ final_results AS (
   
   -- 3. 穿刺中心细胞病理收入(元)
   SELECT 
+    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
     '主院区' AS "单位",
     '穿刺中心细胞病理收入(元)' AS "项目",
     COALESCE((SELECT income_value FROM current_month_puncture), 0) AS "本月",
@@ -254,6 +289,7 @@ final_results AS (
   
   -- 4. 本部温江第三方体检病理收入(元)
   SELECT 
+    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
     '主院区' AS "单位",
     '本部温江第三方体检病理收入(元)' AS "项目",
     COALESCE((SELECT income_value FROM current_month_physical), 0) AS "本月",
@@ -272,6 +308,7 @@ final_results AS (
   
   -- 5. 其他收入(元)
   SELECT 
+    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
     '主院区' AS "单位",
     '其他收入(元)' AS "项目",
     0 AS "本月",
@@ -284,6 +321,7 @@ final_results AS (
   
   -- 6. 本部收入合计
   SELECT 
+    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
     '主院区' AS "单位",
     '本部收入合计' AS "项目",
     COALESCE((SELECT income_value FROM current_month_income), 0) + 
@@ -325,6 +363,62 @@ final_results AS (
            COALESCE((SELECT income_value FROM last_year_puncture), 0) + 
            COALESCE((SELECT income_value FROM last_year_physical), 0))) * 100, 2)
     END AS "与同期差异%"
+  
+  UNION ALL
+  
+  -- 7. 领用材料试剂费(元)
+  SELECT 
+    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
+    '主院区' AS "单位",
+    '领用材料试剂费(元)' AS "项目",
+    COALESCE((SELECT cost_value FROM current_month_material), 0) AS "本月",
+    COALESCE((SELECT cost_value FROM last_month_material), 0) AS "上月",
+    COALESCE((SELECT cost_value FROM last_year_material), 0) AS "去年同期",
+    CASE 
+      WHEN COALESCE((SELECT cost_value FROM last_month_material), 0) = 0 THEN NULL
+      ELSE ROUND(((COALESCE((SELECT cost_value FROM current_month_material), 0) - COALESCE((SELECT cost_value FROM last_month_material), 0)) / COALESCE((SELECT cost_value FROM last_month_material), 0)) * 100, 2)
+    END AS "与上月差异%",
+    CASE 
+      WHEN COALESCE((SELECT cost_value FROM last_year_material), 0) = 0 THEN NULL
+      ELSE ROUND(((COALESCE((SELECT cost_value FROM current_month_material), 0) - COALESCE((SELECT cost_value FROM last_year_material), 0)) / COALESCE((SELECT cost_value FROM last_year_material), 0)) * 100, 2)
+    END AS "与同期差异%"
+  
+  UNION ALL
+  
+  -- 8. 领用材料试剂费占收入比例(%)
+  SELECT 
+    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
+    '主院区' AS "单位",
+    '领用材料试剂费占收入比例(%)' AS "项目",
+    CASE 
+      WHEN (COALESCE((SELECT income_value FROM current_month_income), 0) + 
+            COALESCE((SELECT income_value FROM current_month_puncture), 0) + 
+            COALESCE((SELECT income_value FROM current_month_physical), 0)) = 0 THEN 0
+      ELSE ROUND((COALESCE((SELECT cost_value FROM current_month_material), 0) / 
+                 (COALESCE((SELECT income_value FROM current_month_income), 0) + 
+                  COALESCE((SELECT income_value FROM current_month_puncture), 0) + 
+                  COALESCE((SELECT income_value FROM current_month_physical), 0))) * 100, 2)
+    END AS "本月",
+    CASE 
+      WHEN (COALESCE((SELECT income_value FROM last_month_income), 0) + 
+            COALESCE((SELECT income_value FROM last_month_puncture), 0) + 
+            COALESCE((SELECT income_value FROM last_month_physical), 0)) = 0 THEN 0
+      ELSE ROUND((COALESCE((SELECT cost_value FROM last_month_material), 0) / 
+                 (COALESCE((SELECT income_value FROM last_month_income), 0) + 
+                  COALESCE((SELECT income_value FROM last_month_puncture), 0) + 
+                  COALESCE((SELECT income_value FROM last_month_physical), 0))) * 100, 2)
+    END AS "上月",
+    CASE 
+      WHEN (COALESCE((SELECT income_value FROM last_year_income), 0) + 
+            COALESCE((SELECT income_value FROM last_year_puncture), 0) + 
+            COALESCE((SELECT income_value FROM last_year_physical), 0)) = 0 THEN 0
+      ELSE ROUND((COALESCE((SELECT cost_value FROM last_year_material), 0) / 
+                 (COALESCE((SELECT income_value FROM last_year_income), 0) + 
+                  COALESCE((SELECT income_value FROM last_year_puncture), 0) + 
+                  COALESCE((SELECT income_value FROM last_year_physical), 0))) * 100, 2)
+    END AS "去年同期",
+    NULL AS "与上月差异%",
+    NULL AS "与同期差异%"
 )
 
 -- 最终输出结果
@@ -337,7 +431,9 @@ ORDER BY
     WHEN '本部温江第三方体检病理收入(元)' THEN 4
     WHEN '其他收入(元)' THEN 5
     WHEN '本部收入合计' THEN 6
-    ELSE 7
+    WHEN '领用材料试剂费(元)' THEN 7
+    WHEN '领用材料试剂费占收入比例(%)' THEN 8
+    ELSE 9
   END
 
 
@@ -502,6 +598,7 @@ last_year_physical AS (
 final_results AS (
   -- 1. 检查治疗人次/项次（上锦）
   SELECT 
+    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
     '上锦院区' AS "单位",
     '检查治疗人次/项次' AS "项目",
     COALESCE((SELECT count_value FROM current_month_count), 0) AS "本月",
@@ -520,6 +617,7 @@ final_results AS (
   
   -- 2. 上锦检查治疗收入(元)
   SELECT 
+    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
     '上锦院区' AS "单位",
     '上锦检查治疗收入(元)' AS "项目",
     COALESCE((SELECT income_value FROM current_month_income), 0) AS "本月",
@@ -538,6 +636,7 @@ final_results AS (
   
   -- 3. 上锦体检病理收入(元)
   SELECT 
+    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
     '上锦院区' AS "单位",
     '上锦体检病理收入(元)' AS "项目",
     COALESCE((SELECT income_value FROM current_month_physical), 0) AS "本月",
@@ -556,6 +655,7 @@ final_results AS (
   
   -- 4. 上锦收入合计
   SELECT 
+    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
     '上锦院区' AS "单位",
     '上锦收入合计' AS "项目",
     COALESCE((SELECT income_value FROM current_month_income), 0) + 
@@ -761,6 +861,7 @@ last_year_physical AS (
 final_results AS (
   -- 1. 检查治疗人次/项次（天府）
   SELECT 
+    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
     '天府院区' AS "单位",
     '检查治疗人次/项次' AS "项目",
     COALESCE((SELECT count_value FROM current_month_count), 0) AS "本月",
@@ -779,6 +880,7 @@ final_results AS (
   
   -- 2. 天府检查治疗收入(元)
   SELECT 
+    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
     '天府院区' AS "单位",
     '天府检查治疗收入(元)' AS "项目",
     COALESCE((SELECT income_value FROM current_month_income), 0) AS "本月",
@@ -797,6 +899,7 @@ final_results AS (
   
   -- 3. 天府体检病理收入(元)
   SELECT 
+    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
     '天府院区' AS "单位",
     '天府体检病理收入(元)' AS "项目",
     COALESCE((SELECT income_value FROM current_month_physical), 0) AS "本月",
@@ -815,6 +918,7 @@ final_results AS (
   
   -- 4. 天府收入合计
   SELECT 
+    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
     '天府院区' AS "单位",
     '天府收入合计' AS "项目",
     COALESCE((SELECT income_value FROM current_month_income), 0) + 
@@ -860,20 +964,30 @@ ORDER BY
   
 )
 
+)
+
+,
+-- ====================total query 
 
 
-
-====================total query 
-
-
-WITH base_report AS (
-  -- 原始视图数据
-  SELECT * FROM m1.om_bl_report
+base_report AS (
+  -- 原始视图数据，添加统计月字段以匹配其他查询
+  SELECT 
+    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
+    "单位",
+    "项目", 
+    "本月",
+    "上月",
+    "去年同期",
+    "与上月差异%",
+    "与同期差异%"
+  FROM final_total
 ),
 
 -- 计算检查治疗人次/项次总合计
 total_count AS (
   SELECT 
+    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
     '合计' AS "单位",
     '检查治疗人次/项次合计' AS "项目",
     SUM(CASE WHEN "项目" = '检查治疗人次/项次' THEN "本月" ELSE 0 END) AS "本月",
@@ -897,6 +1011,7 @@ total_count AS (
 -- 计算总收入合计
 total_income AS (
   SELECT 
+    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
     '合计' AS "单位",
     '总收入合计(元)' AS "项目",
     SUM(CASE 
@@ -931,7 +1046,15 @@ total_income AS (
 
 -- 合并原始报表和总计行，并按单位和项目排序
 SELECT * FROM (
-  SELECT *, 
+  SELECT 
+    "统计月",
+    "单位",
+    "项目", 
+    "本月",
+    "上月",
+    "去年同期",
+    "与上月差异%",
+    "与同期差异%",
     CASE "单位"
       WHEN '主院区' THEN 1
       WHEN '上锦院区' THEN 2
@@ -946,15 +1069,17 @@ SELECT * FROM (
       WHEN '本部温江第三方体检病理收入(元)' THEN 4
       WHEN '其他收入(元)' THEN 5
       WHEN '本部收入合计' THEN 6
+      WHEN '领用材料试剂费(元)' THEN 7
+      WHEN '领用材料试剂费占收入比例(%)' THEN 8
       WHEN '上锦检查治疗收入(元)' THEN 2
       WHEN '上锦体检病理收入(元)' THEN 3
       WHEN '上锦收入合计' THEN 6
       WHEN '天府检查治疗收入(元)' THEN 2
       WHEN '天府体检病理收入(元)' THEN 3
       WHEN '天府收入合计' THEN 6
-      WHEN '检查治疗人次/项次合计' THEN 7
-      WHEN '总收入合计(元)' THEN 8
-      ELSE 9
+      WHEN '检查治疗人次/项次合计' THEN 9
+      WHEN '总收入合计(元)' THEN 10
+      ELSE 11
     END AS item_order
   FROM (
     SELECT * FROM base_report
@@ -964,4 +1089,4 @@ SELECT * FROM (
     SELECT * FROM total_income
   ) t
 ) result
-ORDER BY unit_order, item_order
+ORDER BY "统计月", unit_order, item_order

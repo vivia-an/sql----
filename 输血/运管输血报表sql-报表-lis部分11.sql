@@ -1,9 +1,15 @@
+SET SESSION query_max_stage_count = 2500;
+
+
 WITH base_result AS (
     -- 输血科综合统计报表（行转列版本）
 SELECT 
 date_format(date_add('month', -1, current_date), '%Y-%m') as "周期",
 '上月' as "周期名称",
 1 as "排序",
+date_format(date_add('month', -1, current_date), '%Y年-%m月') as "统计月",
+'主院区' as "院区分类",
+'输血科' as "运管科室",
    
 
 -- 样本数（合并多个项目）
@@ -385,6 +391,9 @@ SELECT
 date_format(date_add('month', -2, current_date), '%Y-%m') as "周期",
 '上上月' as "周期名称",
 2 as "排序",
+date_format(date_add('month', -2, current_date), '%Y年-%m月') as "统计月",
+'主院区' as "院区分类",
+'输血科' as "运管科室",
 -- 样本数（合并多个项目）
     SUM(CASE WHEN "XM" IN (
         '血型单特异性抗体鉴定',
@@ -764,6 +773,9 @@ SELECT
 date_format(date_add('month', -13, current_date), '%Y-%m') as "周期",
 '去年同期' as "周期名称",
 3 as "排序",
+date_format(date_add('month', -13, current_date), '%Y年-%m月') as "统计月",
+'主院区' as "院区分类",
+'输血科' as "运管科室",
 -- 样本数（合并多个项目）
     SUM(CASE WHEN "XM" IN (
         '血型单特异性抗体鉴定',
@@ -1147,6 +1159,13 @@ union all
         ) as "周期",
         '同比' as "周期名称",
         4 as "排序",
+        CONCAT(
+            MAX(CASE WHEN "排序" = 1 THEN "统计月" END),
+            ' vs ',
+            MAX(CASE WHEN "排序" = 2 THEN "统计月" END)
+        ) as "统计月",
+        '主院区' as "院区分类",
+        '输血科' as "运管科室",
         -- 样本数环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "样本数" END) > 0 
              THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "样本数" END) - 
@@ -1277,6 +1296,13 @@ union all
         ) as "周期",
         '环比' as "周期名称",
         5 as "排序",
+        CONCAT(
+            MAX(CASE WHEN "排序" = 1 THEN "统计月" END),
+            ' vs ',
+            MAX(CASE WHEN "排序" = 3 THEN "统计月" END)
+        ) as "统计月",
+        '主院区' as "院区分类",
+        '输血科' as "运管科室",
         -- 样本数环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "样本数" END) > 0 
              THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "样本数" END) - 

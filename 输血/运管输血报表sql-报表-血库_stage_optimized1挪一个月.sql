@@ -4,26 +4,26 @@
 WITH 
 -- 当前统计月份
 current_stats_month AS (
-    SELECT date_format(date_add('month', -1, current_date), '%Y年-%m月') as "统计月"
+    SELECT date_format(date_add('month', -2, current_date), '%Y年-%m月') as "统计月"
 ), 
 -- 时间范围定义
 time_ranges AS (
     SELECT 1 as period_id, 
-           date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d') as start_date,
+           date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d') as start_date,
            date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d') as end_date,
-           date_format(date_add('month', -1, current_date), '%Y-%m') as period_label,
+           date_format(date_add('month', -2, current_date), '%Y-%m') as period_label,
            '上月' as period_name
     UNION ALL
     SELECT 2 as period_id,
-           date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d') as start_date,
-           date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d') as end_date,
-           date_format(date_add('month', -2, current_date), '%Y-%m') as period_label,
+           date_format(date_trunc('month', date_add('month', -3, current_date)), '%Y-%m-%d') as start_date,
+           date_format(date_add('day', -1, date_trunc('month', date_add('month', -2, current_date))), '%Y-%m-%d') as end_date,
+           date_format(date_add('month', -3, current_date), '%Y-%m') as period_label,
            '上上月' as period_name
     UNION ALL  
     SELECT 3 as period_id,
-           date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d') as start_date,
+           date_format(date_trunc('month', date_add('month', -14, current_date)), '%Y-%m-%d') as start_date,
            date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d') as end_date,
-           date_format(date_add('month', -13, current_date), '%Y-%m') as period_label,
+           date_format(date_add('month', -14, current_date), '%Y-%m') as period_label,
            '去年同期' as period_name
 ),
 
