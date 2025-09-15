@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1400" height="800" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景 -->
+  <rect width="1400" height="800" fill="#ffffff" stroke="none"/>
+  
+  <!-- 标题栏 -->
+  <rect x="0" y="0" width="1400" height="80" fill="#ffffff" stroke="#b85450" stroke-width="3"/>
+  <text x="50" y="35" font-family="Microsoft YaHei, Arial" font-size="28" font-weight="bold" fill="#b85450">
+    StarRocks弹性计算平台建设方案 Powerpoint Template
+  </text>
+  <text x="1250" y="35" font-family="Microsoft YaHei, Arial" font-size="20" fill="#b85450">
+    Technology Platform
+  </text>
+  <line x1="50" y1="50" x2="1350" y2="50" stroke="#b85450" stroke-width="2"/>
+
+  <!-- 左侧区域标题 -->
+  <rect x="50" y="120" width="240" height="160" fill="#ffffff" stroke="#333333" stroke-width="2"/>
+  <text x="170" y="180" font-family="Microsoft YaHei, Arial" font-size="32" font-weight="bold" text-anchor="middle" fill="#333333">
+    技术
+  </text>
+  <text x="170" y="220" font-family="Microsoft YaHei, Arial" font-size="32" font-weight="bold" text-anchor="middle" fill="#333333">
+    架构
+  </text>
+
+  <!-- 左上角图标区域 - 核心优势 -->
+  <rect x="50" y="300" width="240" height="180" fill="#b85450" stroke="none" rx="10"/>
+  <circle cx="170" cy="360" r="35" fill="none" stroke="#ffffff" stroke-width="4"/>
+  <circle cx="170" cy="360" r="25" fill="none" stroke="#ffffff" stroke-width="3"/>
+  <polygon points="155,360 165,370 185,350" fill="#ffffff"/>
+  <text x="170" y="420" font-family="Microsoft YaHei, Arial" font-size="20" font-weight="bold" text-anchor="middle" fill="#ffffff">
+    核心引擎
+  </text>
+
+  <!-- 左下角图标区域 - 应用场景 -->
+  <rect x="50" y="500" width="240" height="180" fill="#555555" stroke="none" rx="10"/>
+  <circle cx="170" cy="560" r="35" fill="none" stroke="#ffffff" stroke-width="4"/>
+  <circle cx="170" cy="560" r="25" fill="none" stroke="#ffffff" stroke-width="3"/>
+  <polygon points="155,560 165,570 185,550" fill="#ffffff"/>
+  <text x="170" y="620" font-family="Microsoft YaHei, Arial" font-size="20" font-weight="bold" text-anchor="middle" fill="#ffffff">
+    应用场景
+  </text>
+
+  <!-- 右侧表格区域 -->
+  <!-- 第一行标题 -->
+  <rect x="320" y="120" width="260" height="60" fill="#b85450" stroke="#ffffff" stroke-width="2"/>
+  <text x="450" y="155" font-family="Microsoft YaHei, Arial" font-size="18" font-weight="bold" text-anchor="middle" fill="#ffffff">
+    技术优势
+  </text>
+
+  <rect x="600" y="120" width="260" height="60" fill="#c67570" stroke="#ffffff" stroke-width="2"/>
+  <text x="730" y="155" font-family="Microsoft YaHei, Arial" font-size="18" font-weight="bold" text-anchor="middle" fill="#ffffff">
+    性能表现
+  </text>
+
+  <rect x="880" y="120" width="260" height="60" fill="#ffffff" stroke="#b85450" stroke-width="2"/>
+  <text x="1010" y="155" font-family="Microsoft YaHei, Arial" font-size="18" font-weight="bold" text-anchor="middle" fill="#b85450">
+    成本效益
+  </text>
+
+  <rect x="1160" y="120" width="240" height="60" fill="#b85450" stroke="#ffffff" stroke-width="2"/>
+  <text x="1280" y="155" font-family="Microsoft YaHei, Arial" font-size="18" font-weight="bold" text-anchor="middle" fill="#ffffff">
+    生态兼容
+  </text>
+
+  <!-- 第二行内容 -->
+  <rect x="320" y="200" width="260" height="120" fill="#ffffff" stroke="#cccccc" stroke-width="1"/>
+  <text x="450" y="230" font-family="Microsoft YaHei, Arial" font-size="16" font-weight="bold" text-anchor="middle" fill="#b85450">
+    高并发处理
+  </text>
+  <text x="370" y="260" font-family="Microsoft YaHei, Arial" font-size="14" fill="#333333">
+    • 分布式MPP架构
+  </text>
+  <text x="370" y="280" font-family="Microsoft YaHei, Arial" font-size="14" fill="#333333">
+    • 向量化执行引擎
+  </text>
+  <text x="370" y="300" font-family="Microsoft YaHei, Arial" font-size="14" fill="#333333">
+    • 智能查询优化
+  </text>
+
+  <rect x="600" y="200" width="260" height="120" fill="#ffffff" stroke="#cccccc" stroke-width="1"/>
+  <text x="730" y="230" font-family="Microsoft YaHei, Arial" font-size="16" font-weight="bold" text-anchor="middle" fill="#c67570">
+    性能提升
+  </text>
+  <text x="650" y="260" font-family="Microsoft YaHei, Arial" font-size="14" fill="#333333">
+    • 查询速度提升10倍
+  </text>
+  <text x="650" y="280" font-family="Microsoft YaHei, Arial" font-size="14" fill="#333333">
+    • 并发能力提升5倍
+  </text>
+  <text x="650" y="300" font-family="Microsoft YaHei, Arial" font-size="14" fill="#333333">
+    • 资源利用率90%+
+  </text>
+
+  <rect x="880" y="200" width="260" height="120" fill="#ffffff" stroke="#cccccc" stroke-width="1"/>
+  <text x="1010" y="230" font-family="Microsoft YaHei, Arial" font-size="16" font-weight="bold" text-anchor="middle" fill="#b85450">
+    成本优化
+  </text>
+  <text x="930" y="260" font-family="Microsoft YaHei, Arial" font-size="14" fill="#333333">
+    • 硬件成本降低60%
+  </text>
+  <text x="930" y="280" font-family="Microsoft YaHei, Arial" font-size="14" fill="#333333">
+    • 运维成本降低50%
+  </text>
+  <text x="930" y="300" font-family="Microsoft YaHei, Arial" font-size="14" fill="#333333">
+    • 弹性扩缩容
+  </text>
+
+  <rect x="1160" y="200" width="240" height="120" fill="#ffffff" stroke="#cccccc" stroke-width="1"/>
+  <text x="1280" y="230" font-family="Microsoft YaHei, Arial" font-size="16" font-weight="bold" text-anchor="middle" fill="#b85450">
+    生态兼容
+  </text>
+  <text x="1200" y="260" font-family="Microsoft YaHei, Arial" font-size="14" fill="#333333">
+    • 支持Kafka
+  </text>
+  <text x="1200" y="280" font-family="Microsoft YaHei, Arial" font-size="14" fill="#333333">
+    • 兼容MySQL
+  </text>
+  <text x="1200" y="300" font-family="Microsoft YaHei, Arial" font-size="14" fill="#333333">
+    • 集成Flink
+  </text>
+
+  <!-- 第三行标题 -->
+  <rect x="500" y="340" width="400" height="50" fill="#555555" stroke="#ffffff" stroke-width="2"/>
+  <text x="700" y="370" font-family="Microsoft YaHei, Arial" font-size="18" font-weight="bold" text-anchor="middle" fill="#ffffff">
+    互联网行业案例
+  </text>
+
+  <rect x="920" y="340" width="480" height="50" fill="#555555" stroke="#ffffff" stroke-width="2"/>
+  <text x="1160" y="370" font-family="Microsoft YaHei, Arial" font-size="18" font-weight="bold" text-anchor="middle" fill="#ffffff">
+    医疗行业案例
+  </text>
+
+  <!-- 第四行内容 -->
+  <rect x="320" y="410" width="260" height="120" fill="#ffffff" stroke="#cccccc" stroke-width="1"/>
+  <text x="450" y="440" font-family="Microsoft YaHei, Arial" font-size="16" font-weight="bold" text-anchor="middle" fill="#555555">
+    阿里巴巴
+  </text>
+  <text x="370" y="470" font-family="Microsoft YaHei, Arial" font-size="14" fill="#333333">
+    • 实时数据分析平台
+  </text>
+  <text x="370" y="490" font-family="Microsoft YaHei, Arial" font-size="14" fill="#333333">
+    • 支撑千万级QPS
+  </text>
+  <text x="370" y="510" font-family="Microsoft YaHei, Arial" font-size="14" fill="#333333">
+    • 毫秒级响应
+  </text>
+
+  <rect x="600" y="410" width="260" height="120" fill="#ffffff" stroke="#cccccc" stroke-width="1"/>
+  <text x="730" y="440" font-family="Microsoft YaHei, Arial" font-size="16" font-weight="bold" text-anchor="middle" fill="#555555">
+    腾讯游戏
+  </text>
+  <text x="650" y="470" font-family="Microsoft YaHei, Arial" font-size="14" fill="#333333">
+    • 游戏数据实时分析
+  </text>
+  <text x="650" y="490" font-family="Microsoft YaHei, Arial" font-size="14" fill="#333333">
+    • 用户行为分析
+  </text>
+  <text x="650" y="510" font-family="Microsoft YaHei, Arial" font-size="14" fill="#333333">
+    • 运营数据看板
+  </text>
+
+  <rect x="880" y="410" width="260" height="120" fill="#ffffff" stroke="#cccccc" stroke-width="1"/>
+  <text x="1010" y="440" font-family="Microsoft YaHei, Arial" font-size="16" font-weight="bold" text-anchor="middle" fill="#555555">
+    浙大一院
+  </text>
+  <text x="930" y="470" font-family="Microsoft YaHei, Arial" font-size="14" fill="#333333">
+    • 全国首个云原生医院
+  </text>
+  <text x="930" y="490" font-family="Microsoft YaHei, Arial" font-size="14" fill="#333333">
+    • 医疗数据实时分析
+  </text>
+  <text x="930" y="510" font-family="Microsoft YaHei, Arial" font-size="14" fill="#333333">
+    • 智慧医疗平台
+  </text>
+
+  <rect x="1160" y="410" width="240" height="120" fill="#ffffff" stroke="#cccccc" stroke-width="1"/>
+  <text x="1280" y="440" font-family="Microsoft YaHei, Arial" font-size="16" font-weight="bold" text-anchor="middle" fill="#555555">
+    贵州省医
+  </text>
+  <text x="1200" y="470" font-family="Microsoft YaHei, Arial" font-size="14" fill="#333333">
+    • 省级医院数字化
+  </text>
+  <text x="1200" y="490" font-family="Microsoft YaHei, Arial" font-size="14" fill="#333333">
+    • 多院区数据整合
+  </text>
+  <text x="1200" y="510" font-family="Microsoft YaHei, Arial" font-size="14" fill="#333333">
+    • 临床决策支持
+  </text>
+
+  <!-- 第五行内容 -->
+  <rect x="320" y="550" width="260" height="120" fill="#ffffff" stroke="#cccccc" stroke-width="1"/>
+  <text x="450" y="580" font-family="Microsoft YaHei, Arial" font-size="16" font-weight="bold" text-anchor="middle" fill="#555555">
+    同程旅行
+  </text>
+  <text x="370" y="610" font-family="Microsoft YaHei, Arial" font-size="14" fill="#333333">
+    • StarRocks+Paimon
+  </text>
+  <text x="370" y="630" font-family="Microsoft YaHei, Arial" font-size="14" fill="#333333">
+    • 性能提升10倍
+  </text>
+  <text x="370" y="650" font-family="Microsoft YaHei, Arial" font-size="14" fill="#e74c3c">
+    • 实时湖仓架构
+  </text>
+
+  <rect x="600" y="550" width="260" height="120" fill="#ffffff" stroke="#cccccc" stroke-width="1"/>
+  <text x="730" y="580" font-family="Microsoft YaHei, Arial" font-size="16" font-weight="bold" text-anchor="middle" fill="#555555">
+    喜马拉雅
+  </text>
+  <text x="650" y="610" font-family="Microsoft YaHei, Arial" font-size="14" fill="#333333">
+    • 实时推荐系统
+  </text>
+  <text x="650" y="630" font-family="Microsoft YaHei, Arial" font-size="14" fill="#333333">
+    • 三高两低架构
+  </text>
+  <text x="650" y="650" font-family="Microsoft YaHei, Arial" font-size="14" fill="#e74c3c">
+    • 亿级用户支撑
+  </text>
+
+  <rect x="880" y="550" width="260" height="120" fill="#ffffff" stroke="#cccccc" stroke-width="1"/>
+  <text x="1010" y="580" font-family="Microsoft YaHei, Arial" font-size="16" font-weight="bold" text-anchor="middle" fill="#555555">
+    犀牛云
+  </text>
+  <text x="930" y="610" font-family="Microsoft YaHei, Arial" font-size="14" fill="#333333">
+    • 医疗数据服务生态
+  </text>
+  <text x="930" y="630" font-family="Microsoft YaHei, Arial" font-size="14" fill="#333333">
+    • 云原生架构
+  </text>
+  <text x="930" y="650" font-family="Microsoft YaHei, Arial" font-size="14" fill="#e74c3c">
+    • 多医院接入
+  </text>
+
+  <rect x="1160" y="550" width="240" height="120" fill="#ffffff" stroke="#cccccc" stroke-width="1"/>
+  <text x="1280" y="580" font-family="Microsoft YaHei, Arial" font-size="16" font-weight="bold" text-anchor="middle" fill="#555555">
+    龙岗集团
+  </text>
+  <text x="1200" y="610" font-family="Microsoft YaHei, Arial" font-size="14" fill="#333333">
+    • 区域医疗互联
+  </text>
+  <text x="1200" y="630" font-family="Microsoft YaHei, Arial" font-size="14" fill="#333333">
+    • 三院区整合
+  </text>
+  <text x="1200" y="650" font-family="Microsoft YaHei, Arial" font-size="14" fill="#e74c3c">
+    • 数据实时传输
+  </text>
+
+  <!-- 底部推荐框 -->
+  <rect x="320" y="690" width="1080" height="80" fill="#f8f9fa" stroke="#b85450" stroke-width="3" rx="10"/>
+  <text x="860" y="720" font-family="Microsoft YaHei, Arial" font-size="20" font-weight="bold" text-anchor="middle" fill="#b85450">
+    💡 建议方案
+  </text>
+  <text x="860" y="750" font-family="Microsoft YaHei, Arial" font-size="16" text-anchor="middle" fill="#333333">
+    基于StarRocks的弹性计算平台，具备成熟的技术架构、丰富的行业实践经验，是医院数字化转型的最佳选择
+  </text>
+</svg> 

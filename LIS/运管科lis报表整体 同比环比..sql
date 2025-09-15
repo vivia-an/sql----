@@ -216,6 +216,8 @@ group_level AS (
 
             WHEN cw."亚专业组代码" IN ('G112', 'G113') THEN '天府院区'
 
+            WHEN cw."亚专业组代码" IN ('G115', 'G116', 'G077', 'G104', 'G101', 'G103', 'G102') THEN '锦江院区'
+
             ELSE '其他'
 
         END as "亚专业组",
@@ -307,6 +309,8 @@ summary_with_totals AS (
             WHEN "亚专业组" IN ('温江院区') THEN '温江院区'
 
             WHEN "亚专业组" IN ('天府院区') THEN '天府院区'
+
+            WHEN "亚专业组" IN ('锦江院区') THEN '锦江院区'
 
             ELSE '主院区'
 

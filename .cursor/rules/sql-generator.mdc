@@ -11,3 +11,9 @@ alwaysApply: true
 
 当前系统表结构的表已集成到大数据平台，所有查询都适配presto查询，所有库名都 涉及到 手术麻醉的，修改为 hid0101_orcl_operaanesthisa_emrhis 没有明确说是手术麻醉的不用修改，所有表都添加逻辑删除字段的帅选  isdeleted = '0' 的筛选条件，然后生成可执行presto sql,优先按照血缘查询，如果血缘查询不到，再按照表结构查询，注意，集成到大数据的字段全都是varchar类型，注意日期 等的处理。标注字段最终来源，Presto对于中文字段名需要用双引号包围，然后再满足以下需求：
 
+日期和时间，使用presto查询的时候都是varchar 类型
+
+presto 日期都是 varchar类型包括 lastupdatedttm 也是varchar类型。
+
+datacenter 表结构查询的时候需要插入一下 prompt :
+参照的sql，然后通过 @datacenter如下需求，分析需求血缘，如果不能只通过 @datacenter 输出请跟我沟通，如果可以直接输出到 his目录下  创建新文件写入即可：

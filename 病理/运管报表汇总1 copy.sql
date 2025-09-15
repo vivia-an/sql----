@@ -25,10 +25,10 @@ last_year_same_month_range AS (
 -- 本月检查治疗人次/项次
 current_month_count AS (
   SELECT COUNT(1) AS count_value FROM hid0101_mssql_bl_rep.t_jcxx, last_month_range
-  WHERE f_blk IN ('锦江冰冻','冰冻','普通外检','加快') 
+  WHERE f_blk IN ('普通外检','加快','冰冻','术后石蜡','尸解','细胞学','细针','体检','外院会诊','肝穿','肾穿','骨髓','淋巴结','眼科','肌肉','前列腺','ESD','电镜','心肌','普通会诊加急','普通会诊常规','锦江普通外检','锦江加快','锦江冰冻','锦江术后石蜡','锦江尸解','锦江细胞学','锦江细针','锦江体检','锦江外院会诊','锦江肝穿','锦江肾穿','锦江骨髓','锦江淋巴结','锦江眼科','锦江肌肉','锦江前列腺','锦江ESD','锦江电镜','锦江心肌','锦江普通会诊加急','锦江普通会诊常规') 
     AND f_bgzt = '已审核' 
-    AND f_bgrq >= start_date 
-    AND f_bgrq <= end_date
+    AND f_sdrq >= start_date 
+    AND f_sdrq <= end_date
     AND isdeleted = '0'
 
 ),
@@ -36,10 +36,10 @@ current_month_count AS (
 -- 上月检查治疗人次/项次
 last_month_count AS (
   SELECT COUNT(1) AS count_value FROM hid0101_mssql_bl_rep.t_jcxx, last_last_month_range
-  WHERE f_blk IN ('锦江冰冻','冰冻','普通外检','加快') 
+  WHERE f_blk IN ('普通外检','加快','冰冻','术后石蜡','尸解','细胞学','细针','体检','外院会诊','肝穿','肾穿','骨髓','淋巴结','眼科','肌肉','前列腺','ESD','电镜','心肌','普通会诊加急','普通会诊常规','锦江普通外检','锦江加快','锦江冰冻','锦江术后石蜡','锦江尸解','锦江细胞学','锦江细针','锦江体检','锦江外院会诊','锦江肝穿','锦江肾穿','锦江骨髓','锦江淋巴结','锦江眼科','锦江肌肉','锦江前列腺','锦江ESD','锦江电镜','锦江心肌','锦江普通会诊加急','锦江普通会诊常规') 
     AND f_bgzt = '已审核' 
-    AND f_bgrq >= start_date 
-    AND f_bgrq <= end_date
+    AND f_sdrq >= start_date 
+    AND f_sdrq <= end_date
     AND isdeleted = '0'
 
 ),
@@ -47,10 +47,10 @@ last_month_count AS (
 -- 去年同期检查治疗人次/项次
 last_year_count AS (
   SELECT COUNT(1) AS count_value FROM hid0101_mssql_bl_rep.t_jcxx, last_year_same_month_range
-  WHERE f_blk IN ('锦江冰冻','冰冻','普通外检','加快') 
+  WHERE f_blk IN ('普通外检','加快','冰冻','术后石蜡','尸解','细胞学','细针','体检','外院会诊','肝穿','肾穿','骨髓','淋巴结','眼科','肌肉','前列腺','ESD','电镜','心肌','普通会诊加急','普通会诊常规','锦江普通外检','锦江加快','锦江冰冻','锦江术后石蜡','锦江尸解','锦江细胞学','锦江细针','锦江体检','锦江外院会诊','锦江肝穿','锦江肾穿','锦江骨髓','锦江淋巴结','锦江眼科','锦江肌肉','锦江前列腺','锦江ESD','锦江电镜','锦江心肌','锦江普通会诊加急','锦江普通会诊常规') 
     AND f_bgzt = '已审核' 
-    AND f_bgrq >= start_date 
-    AND f_bgrq <= end_date
+    AND f_sdrq >= start_date 
+    AND f_sdrq <= end_date
     AND isdeleted = '0'
 
 ),
@@ -378,30 +378,30 @@ last_year_same_month_range AS (
 -- 本月检查治疗人次/项次（上锦）
 current_month_count AS (
   SELECT COUNT(1) AS count_value FROM hid0101_mssql_bl_rep.t_jcxx, last_month_range
-  WHERE f_blk IN ('上锦锦江冰冻','上锦冰冻','上锦普通外检','上锦加快') 
+  WHERE f_blk IN ('上锦普通外检','上锦加快','上锦冰冻','上锦术后石蜡','上锦尸解','上锦细胞学','上锦细针','上锦体检','上锦外院会诊','上锦肝穿','上锦肾穿','上锦骨髓','上锦淋巴结','上锦眼科','上锦肌肉','上锦前列腺','上锦ESD','上锦电镜','上锦心肌','上锦普通会诊加急','上锦普通会诊常规') 
     AND f_bgzt = '已审核' 
-    AND f_bgrq >= start_date 
-    AND f_bgrq <= end_date
+    AND f_sdrq >= start_date 
+    AND f_sdrq <= end_date
     AND isdeleted = '0'
 ),
 
 -- 上月检查治疗人次/项次（上锦）
 last_month_count AS (
   SELECT COUNT(1) AS count_value FROM hid0101_mssql_bl_rep.t_jcxx, last_last_month_range
-  WHERE f_blk IN ('上锦锦江冰冻','上锦冰冻','上锦普通外检','上锦加快') 
+  WHERE f_blk IN ('上锦普通外检','上锦加快','上锦冰冻','上锦术后石蜡','上锦尸解','上锦细胞学','上锦细针','上锦体检','上锦外院会诊','上锦肝穿','上锦肾穿','上锦骨髓','上锦淋巴结','上锦眼科','上锦肌肉','上锦前列腺','上锦ESD','上锦电镜','上锦心肌','上锦普通会诊加急','上锦普通会诊常规') 
     AND f_bgzt = '已审核' 
-    AND f_bgrq >= start_date 
-    AND f_bgrq <= end_date
+    AND f_sdrq >= start_date 
+    AND f_sdrq <= end_date
     AND isdeleted = '0'
 ),
 
 -- 去年同期检查治疗人次/项次（上锦）
 last_year_count AS (
   SELECT COUNT(1) AS count_value FROM hid0101_mssql_bl_rep.t_jcxx, last_year_same_month_range
-  WHERE f_blk IN ('上锦锦江冰冻','上锦冰冻','上锦普通外检','上锦加快') 
+  WHERE f_blk IN ('上锦普通外检','上锦加快','上锦冰冻','上锦术后石蜡','上锦尸解','上锦细胞学','上锦细针','上锦体检','上锦外院会诊','上锦肝穿','上锦肾穿','上锦骨髓','上锦淋巴结','上锦眼科','上锦肌肉','上锦前列腺','上锦ESD','上锦电镜','上锦心肌','上锦普通会诊加急','上锦普通会诊常规') 
     AND f_bgzt = '已审核' 
-    AND f_bgrq >= start_date 
-    AND f_bgrq <= end_date
+    AND f_sdrq >= start_date 
+    AND f_sdrq <= end_date
     AND isdeleted = '0'
 ),
 
@@ -641,7 +641,7 @@ last_year_same_month_range AS (
 -- 本月检查治疗人次/项次（天府）
 current_month_count AS (
   SELECT COUNT(1) AS count_value FROM hid0101_mssql_bl_rep.t_jcxx, last_month_range
-  WHERE f_blk IN ('天府锦江冰冻','天府冰冻','天府普通外检','天府加快') 
+  WHERE f_blk IN ('天府冰冻','天府冰冻','天府普通外检','天府加快') 
     AND f_bgzt = '已审核' 
     AND f_bgrq >= start_date 
     AND f_bgrq <= end_date
@@ -874,13 +874,13 @@ ORDER BY
   
 )
 
+)
+
+,
 
 
 
-====================total query 
-
-
-WITH base_report AS (
+base_report AS (
   -- 原始视图数据，添加统计月字段以匹配其他查询
   SELECT 
     FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
@@ -891,7 +891,7 @@ WITH base_report AS (
     "去年同期",
     "与上月差异%",
     "与同期差异%"
-  FROM m1.om_bl_report
+  FROM final_total
 ),
 
 -- 计算检查治疗人次/项次总合计
@@ -979,15 +979,17 @@ SELECT * FROM (
       WHEN '本部温江第三方体检病理收入(元)' THEN 4
       WHEN '其他收入(元)' THEN 5
       WHEN '本部收入合计' THEN 6
+      WHEN '领用材料试剂费(元)' THEN 7
+      WHEN '领用材料试剂费占收入比例(%)' THEN 8
       WHEN '上锦检查治疗收入(元)' THEN 2
       WHEN '上锦体检病理收入(元)' THEN 3
       WHEN '上锦收入合计' THEN 6
       WHEN '天府检查治疗收入(元)' THEN 2
       WHEN '天府体检病理收入(元)' THEN 3
       WHEN '天府收入合计' THEN 6
-      WHEN '检查治疗人次/项次合计' THEN 7
-      WHEN '总收入合计(元)' THEN 8
-      ELSE 9
+      WHEN '检查治疗人次/项次合计' THEN 9
+      WHEN '总收入合计(元)' THEN 10
+      ELSE 11
     END AS item_order
   FROM (
     SELECT * FROM base_report
