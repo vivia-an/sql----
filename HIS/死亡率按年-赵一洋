@@ -1,0 +1,97 @@
+
+
+● 现在我修正死亡判断逻辑，使用您验证过的LIKE模糊匹配方式：
+
+  -- 2024年、2025年三级四级手术死亡率统计（修正版）
+  -- 死亡标识：使用LIKE模糊匹配离院方式中包含"死亡"或"亡"的情况
+  -- 统计基准：按手术时间年份划分
+
+  WITH
+  -- 基础手术数据
+  base_surgery_data AS (
+      SELECT
+          SUBSTRING(CAST(ops."MR_FPOPS_OPSDtTm" AS VARCHAR), 1, 4) AS "统计年份",
+          ops."MR_FPOPS_VisitID",
+          ops."MR_FPOPS_MROPSID",
+          ops."MR_FPOPS_OPSLevelCode" AS "手术级别代码",
+          ops."MR_FPOPS_OPSLevelName" AS "手术级别名称",
+          ops."MR_FPOPS_PlanOPSName" AS "手术名称",
+
+          -- 死亡标识：使用LIKE模糊匹配（按您验证的逻辑）
+          CASE
+              WHEN (fp."MR_FP_OutHospModeName" LIKE '%死亡%'
+                    OR fp."MR_FP_OutHospModeCode" LIKE '%死亡%'
+                    OR fp."MR_FP_OutHospModeName" LIKE '%亡%')
+              THEN 1
+              ELSE 0
+          END AS "死亡标识",
+
+          fp."MR_FP_OutHospModeName" AS "离院方式名称",
+          fp."MR_FP_OutHospModeCode" AS "离院方式代码"
+
+      FROM datacenter_db.MR_FPOPS ops
+      INNER JOIN datacenter_db.MR_FP fp ON ops."MR_FPOPS_VisitID" = fp."MR_FP_VisitID"
+
+      WHERE ops."MR_FPOPS_OPSDtTm" IS NOT NULL                    -- 手术时间不为空
+          AND ops."MR_FPOPS_OPSLevelCode" IN ('3', '4')          -- 三级和四级手术
+          AND SUBSTRING(CAST(ops."MR_FPOPS_OPSDtTm" AS VARCHAR), 1, 4) IN ('2024', '2025')  -- 2024年和2025年
+          AND ops."MR_FPOPS_IsDeleted" = '0'                     -- 逻辑删除筛选
+          AND fp."MR_FP_IsDeleted" = '0'                         -- 病案首页逻辑删除筛选
+  ),
+
+  -- 按年份、手术级别统计
+  yearly_surgery_stats AS (
+      SELECT
+          "统计年份",
+          "手术级别代码",
+          "手术级别名称",
+          COUNT(DISTINCT "MR_FPOPS_MROPSID") AS "手术总数",
+          SUM("死亡标识") AS "死亡人数"
+      FROM base_surgery_data
+      GROUP BY "统计年份", "手术级别代码", "手术级别名称"
+  ),
+
+  -- 计算各级别手术死亡率
+  yearly_rates AS (
+      SELECT
+          "统计年份",
+          "手术级别代码",
+          "手术级别名称",
+          "手术总数",
+          "死亡人数",
+          CASE
+              WHEN "手术总数" > 0 THEN
+                  ROUND(CAST("死亡人数" AS DOUBLE) / CAST("手术总数" AS DOUBLE) * 100, 4)
+              ELSE 0
+          END AS "死亡率(%)"
+      FROM yearly_surgery_stats
+  )
+
+  -- 最终结果输出：分别显示2024年和2025年的统计
+  SELECT
+      "统计年份",
+      -- 三级手术统计
+      COALESCE(MAX(CASE WHEN "手术级别代码" = '3' THEN "手术总数" END), 0) AS "分母_三级手术总数",
+      COALESCE(MAX(CASE WHEN "手术级别代码" = '3' THEN "死亡人数" END), 0) AS "分子_三级手术死亡数",
+      COALESCE(MAX(CASE WHEN "手术级别代码" = '3' THEN "死亡率(%)" END), 0) AS "三级手术死亡率(%)",
+
+      -- 四级手术统计
+      COALESCE(MAX(CASE WHEN "手术级别代码" = '4' THEN "手术总数" END), 0) AS "分母_四级手术总数",
+      COALESCE(MAX(CASE WHEN "手术级别代码" = '4' THEN "死亡人数" END), 0) AS "分子_四级手术死亡数",
+      COALESCE(MAX(CASE WHEN "手术级别代码" = '4' THEN "死亡率(%)" END), 0) AS "四级手术死亡率(%)"
+
+  FROM yearly_rates
+  GROUP BY "统计年份"
+  ORDER BY "统计年份" DESC;
+
+  -- 字段来源说明：
+  -- 1. 手术时间：MR_FPOPS.MR_FPOPS_OPSDtTm (用于年份统计)
+  -- 2. 手术级别：MR_FPOPS.MR_FPOPS_OPSLevelCode ('3'=三级, '4'=四级)
+  -- 3. 死亡标识：MR_FP.MR_FP_OutHospModeName/MR_FP_OutHospModeCode LIKE '%死亡%' OR LIKE '%亡%'
+  -- 4. 关联关系：MR_FPOPS.MR_FPOPS_VisitID = MR_FP.MR_FP_VisitID
+
+● 这个修正后的SQL应该能正确统计出死亡率了。主要改进：
+
+  1. 死亡判断逻辑修正: 使用您验证过的LIKE模糊匹配方式
+  2. 保留小数位数: 死亡率保留4位小数，提高精度
+  3. 简化输出: 专注于死亡率统计，移除并发症相关字段
