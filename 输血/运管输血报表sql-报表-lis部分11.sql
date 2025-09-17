@@ -137,13 +137,12 @@ WHERE Order_Main_RecDeptName like '%输血%'
     -- 院区筛选条件 (需要根据实际需求替换)  
     -- AND a."AREA_ID" = '院区编码')
     as "工作量" ,
- -- 献血员血型复查
+ -- 卡查血型
     SUM(CASE WHEN "XM" = 'ABO血型+Rh血型' THEN "GZL" ELSE 0 END) as "卡查血型",
- -- 献血员血型复查
+ -- 抗A、抗B血清查血型
     SUM(CASE WHEN "XM" = 'ABO血型鉴定' THEN "GZL" ELSE 0 END) as "抗A、抗B血清查血型",
-
-    -- 献血员血型复查
-    SUM(CASE WHEN "XM" = 'ABO血型鉴定（微柱凝胶法）' THEN "GZL" ELSE 0 END) as "献血员血型复查",
+ -- 红细胞血型复查
+    SUM(CASE WHEN "XM" = 'ABO血型鉴定（微柱凝胶法）' THEN "GZL" ELSE 0 END) as "红细胞血型复查",
     
     -- 抗体筛查  
     SUM(CASE WHEN "XM" = '血型单特异性抗体鉴定' THEN "GZL" ELSE 0 END) as "抗体筛查",
@@ -187,7 +186,7 @@ WHERE a."isdeleted" = '0'
 ) as "抗体鉴定",
     
     -- 血小板交叉
-    SUM(CASE WHEN "XM" = '血小板交叉配合实验' THEN "GZL" ELSE 0 END) as "血小板交叉",
+    SUM(CASE WHEN "XM" = '血小板交叉配合实验' THEN "RC" ELSE 0 END) as "血小板交叉",
     
     -- 血小板抗体
     SUM(CASE WHEN "XM" = '血小板特异性和组织相关融性(HLA)抗体检测' THEN "GZL" ELSE 0 END) as "血小板抗体",
@@ -363,7 +362,7 @@ FROM (
         COUNT(a."MATCH_ID") as "RC",
         SUM(COALESCE(CAST(e."method_charge" AS DOUBLE), 0)) as "FY",
         COUNT(a."MATCH_ID") as "GZL"
-    FROM hid0101_orcl_lis_bis6.bis6_bloodbag_match a
+    FROM hid0101_orcl_lis_xhbis.bis6_bloodbag_match a
     INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT d
         ON a."BLOODBAG_ID" = d."BLOODBAG_ID"
         AND d."isdeleted" = '0'
@@ -519,13 +518,13 @@ WHERE Order_Main_RecDeptName like '%输血%'
     -- 院区筛选条件 (需要根据实际需求替换)  
     -- AND a."AREA_ID" = '院区编码')
     as "工作量" ,
- -- 献血员血型复查
+ -- 卡查血型
     SUM(CASE WHEN "XM" = 'ABO血型+Rh血型' THEN "GZL" ELSE 0 END) as "卡查血型",
- -- 献血员血型复查
+ -- 抗A、抗B血清查血型
     SUM(CASE WHEN "XM" = 'ABO血型鉴定' THEN "GZL" ELSE 0 END) as "抗A、抗B血清查血型",
 
-    -- 献血员血型复查
-    SUM(CASE WHEN "XM" = 'ABO血型鉴定（微柱凝胶法）' THEN "GZL" ELSE 0 END) as "献血员血型复查",
+    -- 红细胞血型复查
+    SUM(CASE WHEN "XM" = 'ABO血型鉴定（微柱凝胶法）' THEN "GZL" ELSE 0 END) as "红细胞血型复查",
     
     -- 抗体筛查  
     SUM(CASE WHEN "XM" = '血型单特异性抗体鉴定' THEN "GZL" ELSE 0 END) as "抗体筛查",
@@ -569,7 +568,7 @@ WHERE a."isdeleted" = '0'
 ) as "抗体鉴定",
     
     -- 血小板交叉
-    SUM(CASE WHEN "XM" = '血小板交叉配合实验' THEN "GZL" ELSE 0 END) as "血小板交叉",
+    SUM(CASE WHEN "XM" = '血小板交叉配合实验' THEN "RC" ELSE 0 END) as "血小板交叉",
     
     -- 血小板抗体
     SUM(CASE WHEN "XM" = '血小板特异性和组织相关融性(HLA)抗体检测' THEN "GZL" ELSE 0 END) as "血小板抗体",
@@ -745,7 +744,7 @@ FROM (
         COUNT(a."MATCH_ID") as "RC",
         SUM(COALESCE(CAST(e."method_charge" AS DOUBLE), 0)) as "FY",
         COUNT(a."MATCH_ID") as "GZL"
-    FROM hid0101_orcl_lis_bis6.bis6_bloodbag_match a
+    FROM hid0101_orcl_lis_xhbis.bis6_bloodbag_match a
     INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT d
         ON a."BLOODBAG_ID" = d."BLOODBAG_ID"
         AND d."isdeleted" = '0'
@@ -901,13 +900,13 @@ WHERE Order_Main_RecDeptName like '%输血%'
     -- 院区筛选条件 (需要根据实际需求替换)  
     -- AND a."AREA_ID" = '院区编码')
     as "工作量" ,
- -- 献血员血型复查
+ -- 卡查血型
     SUM(CASE WHEN "XM" = 'ABO血型+Rh血型' THEN "GZL" ELSE 0 END) as "卡查血型",
- -- 献血员血型复查
+ -- 抗A、抗B血清查血型
     SUM(CASE WHEN "XM" = 'ABO血型鉴定' THEN "GZL" ELSE 0 END) as "抗A、抗B血清查血型",
 
-    -- 献血员血型复查
-    SUM(CASE WHEN "XM" = 'ABO血型鉴定（微柱凝胶法）' THEN "GZL" ELSE 0 END) as "献血员血型复查",
+    -- 红细胞血型复查
+    SUM(CASE WHEN "XM" = 'ABO血型鉴定（微柱凝胶法）' THEN "GZL" ELSE 0 END) as "红细胞血型复查",
     
     -- 抗体筛查  
     SUM(CASE WHEN "XM" = '血型单特异性抗体鉴定' THEN "GZL" ELSE 0 END) as "抗体筛查",
@@ -1127,7 +1126,7 @@ FROM (
         COUNT(a."MATCH_ID") as "RC",
         SUM(COALESCE(CAST(e."method_charge" AS DOUBLE), 0)) as "FY",
         COUNT(a."MATCH_ID") as "GZL"
-    FROM hid0101_orcl_lis_bis6.bis6_bloodbag_match a
+    FROM hid0101_orcl_lis_xhbis.bis6_bloodbag_match a
     INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT d
         ON a."BLOODBAG_ID" = d."BLOODBAG_ID"
         AND d."isdeleted" = '0'
@@ -1201,13 +1200,13 @@ union all
                         MAX(CASE WHEN "排序" = 2 THEN "抗A、抗B血清查血型" END), 2)
              ELSE NULL 
         END as "抗A、抗B血清查血型",
-        -- 献血员血型复查环比
-        CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "献血员血型复查" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "献血员血型复查" END) - 
-                        MAX(CASE WHEN "排序" = 2 THEN "献血员血型复查" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "献血员血型复查" END), 2)
+        -- 红细胞血型复查环比
+        CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "红细胞血型复查" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "红细胞血型复查" END) - 
+                        MAX(CASE WHEN "排序" = 2 THEN "红细胞血型复查" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 2 THEN "红细胞血型复查" END), 2)
              ELSE NULL 
-        END as "献血员血型复查",
+        END as "红细胞血型复查",
         -- 抗体筛查环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "抗体筛查" END) > 0 
              THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "抗体筛查" END) - 
@@ -1338,13 +1337,13 @@ union all
                         MAX(CASE WHEN "排序" = 3 THEN "抗A、抗B血清查血型" END), 3)
              ELSE NULL 
         END as "抗A、抗B血清查血型",
-        -- 献血员血型复查环比
-        CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "献血员血型复查" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "献血员血型复查" END) - 
-                        MAX(CASE WHEN "排序" = 3 THEN "献血员血型复查" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "献血员血型复查" END), 3)
+        -- 红细胞血型复查环比
+        CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "红细胞血型复查" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "红细胞血型复查" END) - 
+                        MAX(CASE WHEN "排序" = 3 THEN "红细胞血型复查" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 3 THEN "红细胞血型复查" END), 3)
              ELSE NULL 
-        END as "献血员血型复查",
+        END as "红细胞血型复查",
         -- 抗体筛查环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "抗体筛查" END) > 0 
              THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "抗体筛查" END) - 
