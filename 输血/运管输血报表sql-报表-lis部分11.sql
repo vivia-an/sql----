@@ -195,10 +195,27 @@ WHERE a."isdeleted" = '0'
     SUM(CASE WHEN "XM" = '血型抗体效价测定（IgG+IgM）' THEN "GZL" ELSE 0 END) * 4 as "抗体效价",
     
     -- Rh分型
-    SUM(CASE WHEN "XM" = 'RH分型(4个RH其他抗原+1个RHD抗原)' THEN "GZL" ELSE 0 END) as "Rh分型",
+    SUM(CASE WHEN "XM" = 'RH分型(4个RH其他抗原+1个RHD抗原)' THEN "RC" ELSE 0 END) as "Rh分型",
     
     -- 血小板血型复查
-    SUM(CASE WHEN "XM" = 'ABO红细胞定型（微柱凝胶法）' THEN "GZL" ELSE 0 END) as "血小板血型复查"
+    SUM(CASE WHEN "XM" = 'ABO红细胞定型（微柱凝胶法）' THEN "GZL" ELSE 0 END) as "血小板血型复查",
+
+    -- 吸收放散试验
+    (SUM(CASE WHEN "XM" = '血型抗体特异性鉴定（放散）' THEN "GZL" ELSE 0 END) +
+     SUM(CASE WHEN "XM" = '血型抗体特异性鉴定（吸收试验）' THEN "GZL" ELSE 0 END)) as "吸收放散试验",
+
+    -- 治疗性单采例数
+    (SELECT COUNT(DISTINCT "Order_Main_OrderID")
+     FROM datacenter_db.Order_Main
+     WHERE "Order_Main_RecDeptName" in ('输血科','锦江输血科')
+         AND "Order_Main_OrderItemCode" IN ('666600613','666000570','666000571','666600598','666000510')
+         AND "Order_Main_OrderBeginDtTm" BETWEEN
+             date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d')
+             AND date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d')
+         AND isdeleted = '0') as "治疗性单采例数",
+
+    -- 特殊血型抗原鉴定
+    SUM(CASE WHEN "XM" = '特殊血型抗原鉴定' THEN "GZL" ELSE 0 END) as "特殊血型抗原鉴定"
 
 FROM (
     -- 第一部分：LIS检验收费统计
@@ -577,10 +594,27 @@ WHERE a."isdeleted" = '0'
     SUM(CASE WHEN "XM" = '血型抗体效价测定（IgG+IgM）' THEN "GZL" ELSE 0 END) * 4 as "抗体效价",
     
     -- Rh分型
-    SUM(CASE WHEN "XM" = 'RH分型(4个RH其他抗原+1个RHD抗原)' THEN "GZL" ELSE 0 END) as "Rh分型",
+    SUM(CASE WHEN "XM" = 'RH分型(4个RH其他抗原+1个RHD抗原)' THEN "RC" ELSE 0 END) as "Rh分型",
     
     -- 血小板血型复查
-    SUM(CASE WHEN "XM" = 'ABO红细胞定型（微柱凝胶法）' THEN "GZL" ELSE 0 END) as "血小板血型复查"
+    SUM(CASE WHEN "XM" = 'ABO红细胞定型（微柱凝胶法）' THEN "GZL" ELSE 0 END) as "血小板血型复查",
+
+    -- 吸收放散试验
+    (SUM(CASE WHEN "XM" = '血型抗体特异性鉴定（放散）' THEN "GZL" ELSE 0 END) +
+     SUM(CASE WHEN "XM" = '血型抗体特异性鉴定（吸收试验）' THEN "GZL" ELSE 0 END)) as "吸收放散试验",
+
+    -- 治疗性单采例数
+    (SELECT COUNT(DISTINCT "Order_Main_OrderID")
+     FROM datacenter_db.Order_Main
+     WHERE "Order_Main_RecDeptName" in ('输血科','锦江输血科')
+         AND "Order_Main_OrderItemCode" IN ('666600613','666000570','666000571','666600598','666000510')
+         AND "Order_Main_OrderBeginDtTm" BETWEEN
+             date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d')
+             AND date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d')
+         AND isdeleted = '0') as "治疗性单采例数",
+
+    -- 特殊血型抗原鉴定
+    SUM(CASE WHEN "XM" = '特殊血型抗原鉴定' THEN "GZL" ELSE 0 END) as "特殊血型抗原鉴定"
 
 FROM (
     -- 第一部分：LIS检验收费统计
@@ -959,10 +993,24 @@ WHERE a."isdeleted" = '0'
     SUM(CASE WHEN "XM" = '血型抗体效价测定（IgG+IgM）' THEN "GZL" ELSE 0 END) * 4 as "抗体效价",
     
     -- Rh分型
-    SUM(CASE WHEN "XM" = 'RH分型(4个RH其他抗原+1个RHD抗原)' THEN "GZL" ELSE 0 END) as "Rh分型",
+    SUM(CASE WHEN "XM" = 'RH分型(4个RH其他抗原+1个RHD抗原)' THEN "RC" ELSE 0 END) as "Rh分型",
     
     -- 血小板血型复查
-    SUM(CASE WHEN "XM" = 'ABO红细胞定型（微柱凝胶法）' THEN "GZL" ELSE 0 END) as "血小板血型复查"
+    SUM(CASE WHEN "XM" = 'ABO红细胞定型（微柱凝胶法）' THEN "GZL" ELSE 0 END) as "血小板血型复查",
+
+    -- 吸收放散试验
+    (SUM(CASE WHEN "XM" = '血型抗体特异性鉴定（放散）' THEN "GZL" ELSE 0 END) +
+     SUM(CASE WHEN "XM" = '血型抗体特异性鉴定（吸收试验）' THEN "GZL" ELSE 0 END)) as "吸收放散试验",
+
+    -- 治疗性单采例数
+    (SELECT COUNT(DISTINCT "Order_Main_OrderID")
+     FROM datacenter_db.Order_Main
+     WHERE "Order_Main_RecDeptName" in ('输血科','锦江输血科')
+         AND "Order_Main_OrderItemCode" IN ('666600613','666000570','666000571','666600598','666000510')
+         AND "Order_Main_OrderBeginDtTm" BETWEEN
+             date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d')
+             AND date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d')
+         And isdeleted = '0') as "治疗性单采例数"
 
 FROM (
     -- 第一部分：LIS检验收费统计
