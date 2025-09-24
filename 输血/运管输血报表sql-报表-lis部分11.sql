@@ -116,9 +116,9 @@ WHERE a."isdeleted" = '0'
  AND a."INPUT_TIME" BETWEEN date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d') AND date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d'))
  +
  (SELECT 
-    COUNT(*) as "治疗性单采例数总计"
+    COUNT(DISTINCT order_main_orderid) 
 FROM datacenter_db.Order_Main 
-WHERE Order_Main_RecDeptName like '%输血%'
+WHERE Order_Main_RecDeptName in ( '输血科','锦江输血科' )
     AND Order_Main_OrderItemCode IN (
         '666600613',  -- 血液稀释疗法
         '666000570',  -- 拟：全血
@@ -205,17 +205,17 @@ WHERE a."isdeleted" = '0'
      SUM(CASE WHEN "XM" = '血型抗体特异性鉴定（吸收试验）' THEN "GZL" ELSE 0 END)) as "吸收放散试验",
 
     -- 治疗性单采例数
-    (SELECT COUNT(DISTINCT "Order_Main_OrderID")
+    (SELECT COUNT(DISTINCT "Order_Main_OrderID") 
      FROM datacenter_db.Order_Main
      WHERE "Order_Main_RecDeptName" in ('输血科','锦江输血科')
          AND "Order_Main_OrderItemCode" IN ('666600613','666000570','666000571','666600598','666000510')
          AND "Order_Main_OrderBeginDtTm" BETWEEN
              date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d')
              AND date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d')
-         AND isdeleted = '0') as "治疗性单采例数",
+         ) as "治疗性单采例数",
 
     -- 特殊血型抗原鉴定
-    SUM(CASE WHEN "XM" = '特殊血型抗原鉴定' THEN "GZL" ELSE 0 END) as "特殊血型抗原鉴定"
+    SUM(CASE WHEN "XM" = '特殊血型抗原鉴定' THEN "RC" ELSE 0 END) as "特殊血型抗原鉴定"
 
 FROM (
     -- 第一部分：LIS检验收费统计
@@ -514,9 +514,9 @@ WHERE a."isdeleted" = '0'
  AND a."INPUT_TIME" BETWEEN date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d') AND date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d'))
  +
  (SELECT 
-    COUNT(*) as "治疗性单采例数总计"
+    COUNT(DISTINCT order_main_orderid) 
 FROM datacenter_db.Order_Main 
-WHERE Order_Main_RecDeptName like '%输血%'
+WHERE Order_Main_RecDeptName in ('输血科','锦江输血科')
     AND Order_Main_OrderItemCode IN (
         '666600613',  -- 血液稀释疗法
         '666000570',  -- 拟：全血
@@ -610,11 +610,10 @@ WHERE a."isdeleted" = '0'
          AND "Order_Main_OrderItemCode" IN ('666600613','666000570','666000571','666600598','666000510')
          AND "Order_Main_OrderBeginDtTm" BETWEEN
              date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d')
-             AND date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d')
-         AND isdeleted = '0') as "治疗性单采例数",
+             AND date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d')) as "治疗性单采例数",
 
     -- 特殊血型抗原鉴定
-    SUM(CASE WHEN "XM" = '特殊血型抗原鉴定' THEN "GZL" ELSE 0 END) as "特殊血型抗原鉴定"
+    SUM(CASE WHEN "XM" = '特殊血型抗原鉴定' THEN "RC" ELSE 0 END) as "特殊血型抗原鉴定"
 
 FROM (
     -- 第一部分：LIS检验收费统计
@@ -913,7 +912,7 @@ WHERE a."isdeleted" = '0'
  AND a."INPUT_TIME" BETWEEN date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d') AND date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d'))
  +
  (SELECT 
-    COUNT(*) as "治疗性单采例数总计"
+    COUNT(DISTINCT order_main_orderid) 
 FROM datacenter_db.Order_Main 
 WHERE Order_Main_RecDeptName like '%输血%'
     AND Order_Main_OrderItemCode IN (
@@ -1003,14 +1002,16 @@ WHERE a."isdeleted" = '0'
      SUM(CASE WHEN "XM" = '血型抗体特异性鉴定（吸收试验）' THEN "GZL" ELSE 0 END)) as "吸收放散试验",
 
     -- 治疗性单采例数
-    (SELECT COUNT(DISTINCT "Order_Main_OrderID")
+    (SELECT COUNT(DISTINCT "Order_Main_OrderID") 
      FROM datacenter_db.Order_Main
      WHERE "Order_Main_RecDeptName" in ('输血科','锦江输血科')
          AND "Order_Main_OrderItemCode" IN ('666600613','666000570','666000571','666600598','666000510')
          AND "Order_Main_OrderBeginDtTm" BETWEEN
              date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d')
-             AND date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d')
-         And isdeleted = '0') as "治疗性单采例数"
+             AND date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d')) as "治疗性单采例数",
+
+    -- 特殊血型抗原鉴定
+    SUM(CASE WHEN "XM" = '特殊血型抗原鉴定' THEN "RC" ELSE 0 END) as "特殊血型抗原鉴定"
 
 FROM (
     -- 第一部分：LIS检验收费统计
@@ -1324,7 +1325,28 @@ union all
                         MAX(CASE WHEN "排序" = 2 THEN "血小板血型复查" END)) * 100.0 / 
                         MAX(CASE WHEN "排序" = 2 THEN "血小板血型复查" END), 2)
              ELSE NULL 
-        END as "血小板血型复查"
+        END as "血小板血型复查",
+        -- 吸收放散试验环比
+        CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "吸收放散试验" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "吸收放散试验" END) - 
+                        MAX(CASE WHEN "排序" = 2 THEN "吸收放散试验" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 2 THEN "吸收放散试验" END), 2)
+             ELSE NULL 
+        END as "吸收放散试验",
+        -- 治疗性单采例数环比
+        CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "治疗性单采例数" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "治疗性单采例数" END) - 
+                        MAX(CASE WHEN "排序" = 2 THEN "治疗性单采例数" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 2 THEN "治疗性单采例数" END), 2)
+             ELSE NULL 
+        END as "治疗性单采例数",
+        -- 特殊血型抗原鉴定环比
+        CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "特殊血型抗原鉴定" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "特殊血型抗原鉴定" END) - 
+                        MAX(CASE WHEN "排序" = 2 THEN "特殊血型抗原鉴定" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 2 THEN "特殊血型抗原鉴定" END), 2)
+             ELSE NULL 
+        END as "特殊血型抗原鉴定"
     FROM base_result
     WHERE "排序" <= 2
     
@@ -1461,7 +1483,28 @@ union all
                         MAX(CASE WHEN "排序" = 3 THEN "血小板血型复查" END)) * 100.0 / 
                         MAX(CASE WHEN "排序" = 3 THEN "血小板血型复查" END), 3)
              ELSE NULL 
-        END as "血小板血型复查"
+        END as "血小板血型复查",
+        -- 吸收放散试验环比
+        CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "吸收放散试验" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "吸收放散试验" END) - 
+                        MAX(CASE WHEN "排序" = 3 THEN "吸收放散试验" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 3 THEN "吸收放散试验" END), 3)
+             ELSE NULL 
+        END as "吸收放散试验",
+        -- 治疗性单采例数环比
+        CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "治疗性单采例数" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "治疗性单采例数" END) - 
+                        MAX(CASE WHEN "排序" = 3 THEN "治疗性单采例数" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 3 THEN "治疗性单采例数" END), 3)
+             ELSE NULL 
+        END as "治疗性单采例数",
+        -- 特殊血型抗原鉴定环比
+        CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "特殊血型抗原鉴定" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "特殊血型抗原鉴定" END) - 
+                        MAX(CASE WHEN "排序" = 3 THEN "特殊血型抗原鉴定" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 3 THEN "特殊血型抗原鉴定" END), 3)
+             ELSE NULL 
+        END as "特殊血型抗原鉴定"
     FROM base_result
     WHERE "排序" <= 3
 
