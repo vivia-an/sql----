@@ -61,7 +61,36 @@ SET SESSION query_max_stage_count = 2500;
              AND T."xx4" = '合计' AND T."js4" = '袋'
         THEN T."lcd1"  
         ELSE 0 END) as "冷沉淀入库",
+
+
         
+        SUM(CASE WHEN T."kcjl" = '入库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '袋'
+             AND T."xx2" = '合计' AND T."js2" = '袋'  
+             AND T."xx3" = '合计' AND T."js3" = '袋'
+             AND T."xx4" = '合计' AND T."js4" = '袋'
+        THEN T."lcd1" + T."xj1"  
+        ELSE 0 END) as "血浆冷沉淀入库",
+        
+        
+        SUM(CASE WHEN T."kcjl" = '出库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '袋'
+             AND T."xx2" = '合计' AND T."js2" = '袋'  
+             AND T."xx3" = '合计' AND T."js3" = '袋'
+             AND T."xx4" = '合计' AND T."js4" = '袋'
+        THEN T."lcd1" + T."xj1"  
+        ELSE 0 END) as "血浆冷沉淀出库",
+        
+        SUM(CASE WHEN T."kcjl" = '出库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '量'
+             AND T."xx2" = '合计' AND T."js2" = '量'  
+             AND T."xx3" = '合计' AND T."js3" = '量'
+             AND T."xx4" = '合计' AND T."js4" = '量'
+        THEN  T."xj1"  
+        ELSE 0 END) as "血浆出库-量",
+        
+
+
         
         SUM(CASE WHEN T."kcjl" = '入库记录' 
              AND T."xx1" = '合计' AND T."js1" = '量'
@@ -1233,6 +1262,33 @@ union all
              AND T."xx4" = '合计' AND T."js4" = '袋'
         THEN T."lcd1"  
         ELSE 0 END) as "冷沉淀入库",
+
+        
+        SUM(CASE WHEN T."kcjl" = '入库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '袋'
+             AND T."xx2" = '合计' AND T."js2" = '袋'  
+             AND T."xx3" = '合计' AND T."js3" = '袋'
+             AND T."xx4" = '合计' AND T."js4" = '袋'
+        THEN T."lcd1" + T."xj1"  
+        ELSE 0 END) as "血浆冷沉淀入库",
+        
+        
+        SUM(CASE WHEN T."kcjl" = '出库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '袋'
+             AND T."xx2" = '合计' AND T."js2" = '袋'  
+             AND T."xx3" = '合计' AND T."js3" = '袋'
+             AND T."xx4" = '合计' AND T."js4" = '袋'
+        THEN T."lcd1" + T."xj1"  
+        ELSE 0 END) as "血浆冷沉淀出库",
+        
+        SUM(CASE WHEN T."kcjl" = '出库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '量'
+             AND T."xx2" = '合计' AND T."js2" = '量'  
+             AND T."xx3" = '合计' AND T."js3" = '量'
+             AND T."xx4" = '合计' AND T."js4" = '量'
+        THEN  T."xj1"  
+        ELSE 0 END) as "血浆出库-量",
+
         
         
         SUM(CASE WHEN T."kcjl" = '入库记录' 
@@ -2403,6 +2459,33 @@ union all
              AND T."xx4" = '合计' AND T."js4" = '袋'
         THEN T."lcd1"  
         ELSE 0 END) as "冷沉淀入库",
+
+        
+        SUM(CASE WHEN T."kcjl" = '入库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '袋'
+             AND T."xx2" = '合计' AND T."js2" = '袋'  
+             AND T."xx3" = '合计' AND T."js3" = '袋'
+             AND T."xx4" = '合计' AND T."js4" = '袋'
+        THEN T."lcd1" + T."xj1"  
+        ELSE 0 END) as "血浆冷沉淀入库",
+        
+        
+        SUM(CASE WHEN T."kcjl" = '出库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '袋'
+             AND T."xx2" = '合计' AND T."js2" = '袋'  
+             AND T."xx3" = '合计' AND T."js3" = '袋'
+             AND T."xx4" = '合计' AND T."js4" = '袋'
+        THEN T."lcd1" + T."xj1"  
+        ELSE 0 END) as "血浆冷沉淀出库",
+        
+        SUM(CASE WHEN T."kcjl" = '出库记录' 
+             AND T."xx1" = '合计' AND T."js1" = '量'
+             AND T."xx2" = '合计' AND T."js2" = '量'  
+             AND T."xx3" = '合计' AND T."js3" = '量'
+             AND T."xx4" = '合计' AND T."js4" = '量'
+        THEN  T."xj1"  
+        ELSE 0 END) as "血浆出库-量",
+
         
         
         SUM(CASE WHEN T."kcjl" = '入库记录' 
@@ -3573,6 +3656,27 @@ union all
                         MAX(CASE WHEN "排序" = 2 THEN "冷沉淀入库" END), 2)
              ELSE NULL 
         END as "冷沉淀入库",
+
+        CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "血浆冷沉淀入库" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血浆冷沉淀入库" END) - 
+                        MAX(CASE WHEN "排序" = 2 THEN "血浆冷沉淀入库" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 2 THEN "血浆冷沉淀入库" END), 2)
+             ELSE NULL 
+        END as "血浆冷沉淀入库",
+        CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "血浆冷沉淀出库" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血浆冷沉淀出库" END) - 
+                        MAX(CASE WHEN "排序" = 2 THEN "血浆冷沉淀出库" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 2 THEN "血浆冷沉淀出库" END), 2)
+             ELSE NULL 
+        END as "血浆冷沉淀出库",
+        CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "血浆出库-量" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血浆出库-量" END) - 
+                        MAX(CASE WHEN "排序" = 2 THEN "血浆出库-量" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 2 THEN "血浆出库-量" END), 2)
+             ELSE NULL 
+        END as "血浆出库-量",
+        
+
         -- 血浆入库-量环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "血浆入库-量" END) > 0 
              THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血浆入库-量" END) - 
@@ -3691,6 +3795,25 @@ union all
                         MAX(CASE WHEN "排序" = 3 THEN "冷沉淀入库" END), 3)
              ELSE NULL 
         END as "冷沉淀入库",
+
+        CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "血浆冷沉淀入库" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血浆冷沉淀入库" END) - 
+                        MAX(CASE WHEN "排序" = 3 THEN "血浆冷沉淀入库" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 3 THEN "血浆冷沉淀入库" END), 3)
+             ELSE NULL 
+        END as "血浆冷沉淀入库",
+        CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "血浆冷沉淀出库" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血浆冷沉淀出库" END) - 
+                        MAX(CASE WHEN "排序" = 3 THEN "血浆冷沉淀出库" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 3 THEN "血浆冷沉淀出库" END), 3)
+             ELSE NULL 
+        END as "血浆冷沉淀出库",
+        CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "血浆出库-量" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血浆出库-量" END) - 
+                        MAX(CASE WHEN "排序" = 3 THEN "血浆出库-量" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 3 THEN "血浆出库-量" END), 3)
+             ELSE NULL 
+        END as "血浆出库-量",
         -- 血浆入库-量环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "血浆入库-量" END) > 0 
              THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血浆入库-量" END) - 
