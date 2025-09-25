@@ -13,21 +13,55 @@ date_format(date_add('month', -1, current_date), '%Y年-%m月') as "统计月",
    
 
 -- 样本数（合并多个项目）
-    SUM(CASE WHEN "XM" IN (
-        '血型单特异性抗体鉴定',
-        '拟:冷沉淀凝血因子',
-        '血型抗体效价测定（IgG+IgM）',
-        '血小板特异性和组织相关融性(HLA)抗体检测',
-        '拟:血浆',
-        'ABO血型+Rh血型',
-        '拟:悬浮红细胞',
-        '拟:辐照悬浮红细胞',
-        '拟:去白细胞悬浮红细胞',
-        '拟:辐照单采血小板',
-        '拟:Rh(-)悬浮红细胞',
-        '拟:洗涤红细胞',
-        '直接抗人球蛋白试验' -- "RC"  "GZL"
-    ) THEN "RC" ELSE 0 END) as "样本数",
+    (SELECT SUM("工作量") FROM (
+        SELECT "XM" as "项目名称",
+               SUM(T."RC") as "人次",
+               SUM(T."FY") as "费用",
+               SUM(T."GZL") as "工作量"
+        FROM ( 
+            -- 第一部分：检验项目统计
+            SELECT DISTINCT  
+                   b."chinese_name_short" as "XM",
+                   count(a."inspection_id") as "RC",
+                   sum(COALESCE(CAST(b."charge" AS DOUBLE), 0)) as "FY",
+                   sum(COALESCE(
+                       CASE WHEN CAST(b."workload" AS INTEGER) = 0 THEN 1 
+                            ELSE CAST(b."workload" AS INTEGER) 
+                       END, 1)) as "GZL"
+            FROM hid0101_orcl_lis_xhdata.lis6_inspect_sample a
+            INNER JOIN hid0101_orcl_lis_dbo.lis_inspection_sample_charge b
+                ON a."inspection_id" = b."inspection_id"
+                AND b."isdeleted" = '0'
+            WHERE a."isdeleted" = '0'
+              AND a."input_time" >= date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d')
+              AND a."input_time" < date_format(date_trunc('month', current_date), '%Y-%m-%d')
+              AND a."group_id" IN ('G013','G053','G105','G111')     
+            GROUP BY b."chinese_name_short"
+            
+            UNION ALL
+            
+            -- 第二部分：输血申请统计
+            SELECT DISTINCT
+                   c."blood_type_name" as "XM",
+                   count(a."inspection_id") as "RC",
+                   0 as "FY",
+                   count(a."inspection_id") as "GZL"
+            FROM hid0101_orcl_lis_xhdata.lis6_inspect_sample a
+            INNER JOIN hid0101_orcl_lis_xhbis.bis6_req_info b
+                ON a."requisition_id" = b."req_id"
+                AND b."isdeleted" = '0'
+            INNER JOIN hid0101_orcl_lis_xhbis.bis6_req_blood c
+                ON b."req_id" = c."req_id"
+                AND c."isdeleted" = '0'
+            WHERE a."isdeleted" = '0'
+              AND a."input_time" >= date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d')
+              AND a."input_time" < date_format(date_trunc('month', current_date), '%Y-%m-%d')
+              AND a."group_id" IN ('G013','G053','G105','G111') 
+            GROUP BY c."blood_type_name"
+        ) T 
+        GROUP BY "XM"
+        ORDER BY "XM"
+    ) t) as "样本数",
     
     SUM(CASE WHEN "XM" IN (
        'ABO红细胞定型（微柱凝胶法）',
@@ -407,25 +441,59 @@ SELECT
 date_format(date_add('month', -2, current_date), '%Y-%m') as "周期",
 '上上月' as "周期名称",
 2 as "排序",
-date_format(date_add('month', -2, current_date), '%Y年-%m月') as "统计月",
+date_format(date_add('month', -1, current_date), '%Y年-%m月') as "统计月",
 '主院区' as "院区分类",
 '输血科' as "运管科室",
 -- 样本数（合并多个项目）
-    SUM(CASE WHEN "XM" IN (
-        '血型单特异性抗体鉴定',
-        '拟:冷沉淀凝血因子',
-        '血型抗体效价测定（IgG+IgM）',
-        '血小板特异性和组织相关融性(HLA)抗体检测',
-        '拟:血浆',
-        'ABO血型+Rh血型',
-        '拟:悬浮红细胞',
-        '拟:辐照悬浮红细胞',
-        '拟:去白细胞悬浮红细胞',
-        '拟:辐照单采血小板',
-        '拟:Rh(-)悬浮红细胞',
-        '拟:洗涤红细胞',
-        '直接抗人球蛋白试验' -- "RC"  "GZL"
-    ) THEN "RC" ELSE 0 END) as "样本数",
+    (SELECT SUM("工作量") FROM (
+        SELECT "XM" as "项目名称",
+               SUM(T."RC") as "人次",
+               SUM(T."FY") as "费用",
+               SUM(T."GZL") as "工作量"
+        FROM ( 
+            -- 第一部分：检验项目统计
+            SELECT DISTINCT  
+                   b."chinese_name_short" as "XM",
+                   count(a."inspection_id") as "RC",
+                   sum(COALESCE(CAST(b."charge" AS DOUBLE), 0)) as "FY",
+                   sum(COALESCE(
+                       CASE WHEN CAST(b."workload" AS INTEGER) = 0 THEN 1 
+                            ELSE CAST(b."workload" AS INTEGER) 
+                       END, 1)) as "GZL"
+            FROM hid0101_orcl_lis_xhdata.lis6_inspect_sample a
+            INNER JOIN hid0101_orcl_lis_dbo.lis_inspection_sample_charge b
+                ON a."inspection_id" = b."inspection_id"
+                AND b."isdeleted" = '0'
+            WHERE a."isdeleted" = '0'
+              AND a."input_time" >= date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d')
+              AND a."input_time" < date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d')
+              AND a."group_id" IN ('G013','G053','G105','G111')     
+            GROUP BY b."chinese_name_short"
+            
+            UNION ALL
+            
+            -- 第二部分：输血申请统计
+            SELECT DISTINCT
+                   c."blood_type_name" as "XM",
+                   count(a."inspection_id") as "RC",
+                   0 as "FY",
+                   count(a."inspection_id") as "GZL"
+            FROM hid0101_orcl_lis_xhdata.lis6_inspect_sample a
+            INNER JOIN hid0101_orcl_lis_xhbis.bis6_req_info b
+                ON a."requisition_id" = b."req_id"
+                AND b."isdeleted" = '0'
+            INNER JOIN hid0101_orcl_lis_xhbis.bis6_req_blood c
+                ON b."req_id" = c."req_id"
+                AND c."isdeleted" = '0'
+            WHERE a."isdeleted" = '0'
+              AND a."input_time" >= date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d')
+              AND a."input_time" < date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d')
+              AND a."group_id" IN ('G013','G053','G105','G111') 
+            GROUP BY c."blood_type_name"
+        ) T 
+        GROUP BY "XM"
+        ORDER BY "XM"
+    ) t) as "样本数",
     
     SUM(CASE WHEN "XM" IN (
        'ABO红细胞定型（微柱凝胶法）',
@@ -805,25 +873,59 @@ SELECT
 date_format(date_add('month', -13, current_date), '%Y-%m') as "周期",
 '去年同期' as "周期名称",
 3 as "排序",
-date_format(date_add('month', -13, current_date), '%Y年-%m月') as "统计月",
+date_format(date_add('month', -1, current_date), '%Y年-%m月') as "统计月",
 '主院区' as "院区分类",
 '输血科' as "运管科室",
--- 样本数（合并多个项目）
-    SUM(CASE WHEN "XM" IN (
-        '血型单特异性抗体鉴定',
-        '拟:冷沉淀凝血因子',
-        '血型抗体效价测定（IgG+IgM）',
-        '血小板特异性和组织相关融性(HLA)抗体检测',
-        '拟:血浆',
-        'ABO血型+Rh血型',
-        '拟:悬浮红细胞',
-        '拟:辐照悬浮红细胞',
-        '拟:去白细胞悬浮红细胞',
-        '拟:辐照单采血小板',
-        '拟:Rh(-)悬浮红细胞',
-        '拟:洗涤红细胞',
-        '直接抗人球蛋白试验' -- "RC"  "GZL"
-    ) THEN "RC" ELSE 0 END) as "样本数",
+-- 样本数（使用新的统计逻辑）
+    (SELECT SUM("工作量") FROM (
+        SELECT "XM" as "项目名称",
+               SUM(T."RC") as "人次",
+               SUM(T."FY") as "费用",
+               SUM(T."GZL") as "工作量"
+        FROM ( 
+            -- 第一部分：检验项目统计
+            SELECT DISTINCT  
+                   b."chinese_name_short" as "XM",
+                   count(a."inspection_id") as "RC",
+                   sum(COALESCE(CAST(b."charge" AS DOUBLE), 0)) as "FY",
+                   sum(COALESCE(
+                       CASE WHEN CAST(b."workload" AS INTEGER) = 0 THEN 1 
+                            ELSE CAST(b."workload" AS INTEGER) 
+                       END, 1)) as "GZL"
+            FROM hid0101_orcl_lis_xhdata.lis6_inspect_sample a
+            INNER JOIN hid0101_orcl_lis_dbo.lis_inspection_sample_charge b
+                ON a."inspection_id" = b."inspection_id"
+                AND b."isdeleted" = '0'
+            WHERE a."isdeleted" = '0'
+              AND a."input_time" >= date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d')
+              AND a."input_time" < date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d')
+              AND a."group_id" IN ('G013','G053','G105','G111')     
+            GROUP BY b."chinese_name_short"
+            
+            UNION ALL
+            
+            -- 第二部分：输血申请统计
+            SELECT DISTINCT
+                   c."blood_type_name" as "XM",
+                   count(a."inspection_id") as "RC",
+                   0 as "FY",
+                   count(a."inspection_id") as "GZL"
+            FROM hid0101_orcl_lis_xhdata.lis6_inspect_sample a
+            INNER JOIN hid0101_orcl_lis_xhbis.bis6_req_info b
+                ON a."requisition_id" = b."req_id"
+                AND b."isdeleted" = '0'
+            INNER JOIN hid0101_orcl_lis_xhbis.bis6_req_blood c
+                ON b."req_id" = c."req_id"
+                AND c."isdeleted" = '0'
+            WHERE a."isdeleted" = '0'
+              AND a."input_time" >= date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d')
+              AND a."input_time" < date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d')
+              AND a."group_id" IN ('G013','G053','G105','G111') 
+            GROUP BY c."blood_type_name"
+        ) T 
+        GROUP BY "XM"
+        ORDER BY "XM"
+    ) t) as "样本数",
     
     SUM(CASE WHEN "XM" IN (
        'ABO红细胞定型（微柱凝胶法）',
