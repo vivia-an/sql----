@@ -132,6 +132,14 @@ SET SESSION query_max_stage_count = 2500;
         THEN T."xxb1"  
         ELSE 0 END) *3 as "全院调剂血小板次数",
         
+        COALESCE((
+            SELECT SUM(CAST(inv.finished_amount AS DOUBLE))
+            FROM hid0101_orcl_lis_xhbis.bis6_blood_inventory inv
+            WHERE inv.inventory_time >= date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d')
+                AND inv.inventory_time <= date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d')
+                AND inv.isdeleted = '0'
+        ), 0) as "盘库" ,
+        
         
         (WITH surgery_blood AS (
     SELECT 
@@ -1199,11 +1207,11 @@ from    (-- ================================
         AND a."out_date" <= date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d')
 
 ) T
-
-
+    
+    
 union all 
 
- SELECT 
+    SELECT 
     date_format(date_add('month', -2, current_date), '%Y-%m')  as "周期",
     '上上月' as "周期名称",
     2 as "排序",
@@ -1307,7 +1315,7 @@ union all
         THEN T."xxb1"  
         ELSE 0 END) as "血小板出库-量",
         
-            SUM(CASE WHEN T."kcjl" = '出库记录' 
+        SUM(CASE WHEN T."kcjl" = '出库记录' 
              AND T."xx1" = '合计' AND T."js1" = '袋'
              AND T."xx2" = '合计' AND T."js2" = '袋'  
              AND T."xx3" = '合计' AND T."js3" = '袋'
@@ -1315,7 +1323,7 @@ union all
         THEN T."lcd1"  
         ELSE 0 END) as "冷沉淀出库",
         
-                SUM(CASE WHEN T."kcjl" = '出库记录' 
+        SUM(CASE WHEN T."kcjl" = '出库记录' 
              AND T."xx1" = '合计' AND T."js1" = '袋'
              AND T."xx2" = '合计' AND T."js2" = '袋'  
              AND T."xx3" = '合计' AND T."js3" = '袋'
@@ -1323,13 +1331,20 @@ union all
         THEN T."xj1"  
         ELSE 0 END) as "血浆出库",
         
-                    SUM(CASE WHEN T."kcjl" = '出库记录' 
+        SUM(CASE WHEN T."kcjl" = '出库记录' 
              AND T."xx1" = '合计' AND T."js1" = '袋'
              AND T."xx2" = '合计' AND T."js2" = '袋'  
              AND T."xx3" = '合计' AND T."js3" = '袋'
              AND T."xx4" = '合计' AND T."js4" = '袋'
         THEN T."xxb1"  
         ELSE 0 END) *3 as "全院调剂血小板次数",
+        COALESCE((
+            SELECT SUM(CAST(inv.finished_amount AS DOUBLE))
+            FROM hid0101_orcl_lis_xhbis.bis6_blood_inventory inv
+            WHERE inv.inventory_time >= date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d') 
+                AND inv.inventory_time <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d')
+                AND inv.isdeleted = '0'
+        ), 0) as "盘库" ,
         
         
         (WITH surgery_blood AS (
@@ -2504,7 +2519,7 @@ union all
         THEN T."xxb1"  
         ELSE 0 END) as "血小板出库-量",
         
-            SUM(CASE WHEN T."kcjl" = '出库记录' 
+        SUM(CASE WHEN T."kcjl" = '出库记录' 
              AND T."xx1" = '合计' AND T."js1" = '袋'
              AND T."xx2" = '合计' AND T."js2" = '袋'  
              AND T."xx3" = '合计' AND T."js3" = '袋'
@@ -2512,7 +2527,7 @@ union all
         THEN T."lcd1"  
         ELSE 0 END) as "冷沉淀出库",
         
-                SUM(CASE WHEN T."kcjl" = '出库记录' 
+        SUM(CASE WHEN T."kcjl" = '出库记录' 
              AND T."xx1" = '合计' AND T."js1" = '袋'
              AND T."xx2" = '合计' AND T."js2" = '袋'  
              AND T."xx3" = '合计' AND T."js3" = '袋'
@@ -2520,13 +2535,21 @@ union all
         THEN T."xj1"  
         ELSE 0 END) as "血浆出库",
         
-                    SUM(CASE WHEN T."kcjl" = '出库记录' 
+        SUM(CASE WHEN T."kcjl" = '出库记录' 
              AND T."xx1" = '合计' AND T."js1" = '袋'
              AND T."xx2" = '合计' AND T."js2" = '袋'  
              AND T."xx3" = '合计' AND T."js3" = '袋'
              AND T."xx4" = '合计' AND T."js4" = '袋'
         THEN T."xxb1"  
         ELSE 0 END) *3 as "全院调剂血小板次数",
+
+        COALESCE((
+            SELECT SUM(CAST(inv.finished_amount AS DOUBLE))
+            FROM hid0101_orcl_lis_xhbis.bis6_blood_inventory inv
+            WHERE inv.inventory_time >= date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d') 
+                AND inv.inventory_time <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d')
+                AND inv.isdeleted = '0'
+        ), 0) as "盘库" ,
         
         
         (WITH surgery_blood AS (
@@ -2563,13 +2586,13 @@ WHERE is_weekend = 1) "周末加班手术台次",
         
         
 -- 输血科综合统计报表（基于输血血缘文档修正版）
-(select sum(t."费用")- (select case when sum( case when t."费用" is null then 0 else t."费用" end) is null then 0 else sum( case when t."费用" is null then 0 else t."费用" end) end  from   (SELECT 
-    B.BLOOD_NAME as "血液项目名称",
-    SUM(CAST(A.BLOOD_AMOUNT as DOUBLE)) as "数量",
-    SUM(COALESCE(CAST(e.charge AS DOUBLE), 0)) as "费用"
-from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT A
+    (select sum(t."费用")- (select case when sum( case when t."费用" is null then 0 else t."费用" end) is null then 0 else sum( case when t."费用" is null then 0 else t."费用" end) end  from   (SELECT 
+        B.BLOOD_NAME as "血液项目名称",
+        SUM(CAST(A.BLOOD_AMOUNT as DOUBLE)) as "数量",
+        SUM(COALESCE(CAST(e.charge AS DOUBLE), 0)) as "费用"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT A
 INNER JOIN hid0101_orcl_lis_xhbis.BIS6_MATCH_BLOOD_TYPE B 
-    ON A.BLOOD_TYPE_ID = B.BLOOD_TYPE_ID
+        ON A.BLOOD_TYPE_ID = B.BLOOD_TYPE_ID
     AND A.isdeleted = '0'
     AND B.isdeleted = '0'
 INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE C
@@ -2610,9 +2633,9 @@ from   (
         AND a."group_id" IN ('G013','G053','G105','G111')
         AND a."input_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d'), ' 23:59:59')
     GROUP BY c."chinese_name"
-
+    
     UNION ALL
-
+    
     -- 第二部分：血型统计（通过申请信息关联）
     SELECT DISTINCT
         c."blood_type_name" as "XM",
@@ -2656,9 +2679,9 @@ from   (
         AND e."his_id" IN ('LIS07068','LIS0300114','LIS0300255')
         AND d."charge_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d'), ' 23:59:59')
     GROUP BY e."charge_item_name"
-
+    
     UNION ALL
-
+    
     -- 第四部分：收费信息统计（使用正确的库名）
     SELECT
         b."charge_item_name" as "XM",
@@ -2691,9 +2714,9 @@ from   (
         AND a."sample_charge_id" NOT IN ('LIS023141','LIS023137','LIS07142','LIS07140','LIS07139','LIS07138','LIS07137','LIS07134','LIS07131',
                                        'LIS07127','LIS017635','LIS07123','LIS0300114','LIS0300255')
     GROUP BY a."charge_item_name"
-
+    
     UNION ALL
-
+    
     -- 第六部分：补费统计（包含特定项目）
     SELECT
         a."charge_item_name" as "XM",
@@ -2780,17 +2803,17 @@ ORDER BY T."XM"
         
         
          (select case when sum( case when t."费用" is null then 0 else t."费用" end) is null then 0 else sum( case when t."费用" is null then 0 else t."费用" end) end  from   (SELECT 
-    B.BLOOD_NAME as "血液项目名称",
-    SUM(CAST(A.BLOOD_AMOUNT as DOUBLE)) as "数量",
-    SUM(COALESCE(CAST(e.charge AS DOUBLE), 0)) as "费用"
+        B.BLOOD_NAME as "血液项目名称",
+        SUM(CAST(A.BLOOD_AMOUNT as DOUBLE)) as "数量",
+        SUM(COALESCE(CAST(e.charge AS DOUBLE), 0)) as "费用"
 
 
 
 
 
-from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT A
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT A
 INNER JOIN hid0101_orcl_lis_xhbis.BIS6_MATCH_BLOOD_TYPE B 
-    ON A.BLOOD_TYPE_ID = B.BLOOD_TYPE_ID
+        ON A.BLOOD_TYPE_ID = B.BLOOD_TYPE_ID
     AND A.isdeleted = '0'
     AND B.isdeleted = '0'
 INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE C
@@ -2837,7 +2860,7 @@ from    (-- ================================
         AND a."isdeleted" = '0'
         -- ⚠️ 院区条件暂时注释，根据需要取消注释
         -- AND a."area_id" = 'A001'
-
+    
     UNION ALL
     
     -- 02. O型库存血量统计
@@ -3712,6 +3735,13 @@ union all
                         MAX(CASE WHEN "排序" = 2 THEN "全院调剂血小板次数" END), 2)
              ELSE NULL 
         END as "全院调剂血小板次数",
+        -- 盘库环比
+        CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "盘库" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "盘库" END) - 
+                        MAX(CASE WHEN "排序" = 2 THEN "盘库" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 2 THEN "盘库" END), 2)
+             ELSE NULL 
+        END as "盘库",
         -- 周末加班手术台次环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "周末加班手术台次" END) > 0 
              THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "周末加班手术台次" END) - 
@@ -3849,6 +3879,13 @@ union all
                         MAX(CASE WHEN "排序" = 3 THEN "全院调剂血小板次数" END), 3)
              ELSE NULL 
         END as "全院调剂血小板次数",
+        -- 盘库环比
+        CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "盘库" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "盘库" END) - 
+                        MAX(CASE WHEN "排序" = 3 THEN "盘库" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 3 THEN "盘库" END), 3)
+             ELSE NULL 
+        END as "盘库",
         -- 周末加班手术台次环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "周末加班手术台次" END) > 0 
              THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "周末加班手术台次" END) - 
