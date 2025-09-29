@@ -141,37 +141,24 @@ SET SESSION query_max_stage_count = 2500;
         ), 0) as "盘库" ,
         
         
-        (WITH surgery_blood AS (
-    SELECT 
-        t.id,
-        -- 使用presto的日期函数判断是否周末
-        CASE 
-            WHEN day_of_week(CAST(t.scheduled_date AS TIMESTAMP)) IN (6,7) THEN 1 
-            ELSE 0 
-        END as is_weekend
-    from   hid0101_orcl_operaanesthisa_emrhis.sam_apply t
-    -- 关联手术登记表获取实际手术信息
-    LEFT JOIN hid0101_orcl_operaanesthisa_emrhis.sam_reg reg 
-        ON t.id = reg.sam_apply_id 
-        AND reg.isdeleted = '0'
-    -- 关联麻醉事件表获取输血信息
-    INNER JOIN hid0101_orcl_operaanesthisa_emrhis.sam_anar_enent en 
-        ON t.id = en.sam_apply_id 
-        AND en.isdeleted = '0'
-        AND en.s_mzsjlb_dm = '31'  -- 输血事件
---        AND en.event_text LIKE '%手术%'  -- 用血目的是手术
-    WHERE t.health_service_org_id = 'HXSSMZK'
-        AND t.oper_type = 'ROOM_OPER'  -- 手术间手术
-        AND t.is_reject = '2'  -- 已通过申请
-        AND t.s_sssyzt_dm = '90'  -- 已完成手术
-        AND t.isdeleted = '0'
-        AND t.scheduled_date >= date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d')
-        AND t.scheduled_date <= date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d')
-)
-SELECT 
-    COUNT(DISTINCT id) as "周末手术用血台次"
-from   surgery_blood 
-WHERE is_weekend = 1) "周末加班手术台次",
+        (
+  SELECT 
+    count(1)
+FROM hid0101_orcl_lis_xhbis.bis6_req_info A
+INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE B
+    ON A."REQ_ID" = B."REQ_ID"     -- 血库申请信息表与检验标本信息表关联
+WHERE A."isdeleted" = '0'          -- 逻辑删除条件：血库申请信息表
+    AND B."isdeleted" = '0'        -- 逻辑删除条件：检验标本信息表
+    AND B."SAMPLE_NUMBER" >= '0201'          -- 标本编号下限 (varchar类型)
+    AND B."SAMPLE_NUMBER" <= '0500'          -- 标本编号上限 (varchar类型)
+    AND B."INSPECTION_STATE" NOT IN ('return','returned')  -- 排除退回状态
+    -- 上个月日期范围条件（从上个月第一天到上个月最后一天）
+    AND B."INSPECTION_DATE" >= date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y%m%d')
+    AND B."INSPECTION_DATE" <= date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y%m%d')
+    -- 周五周六条件 (Presto中: 5=周五, 6=周六)
+    AND day_of_week(date_parse(B."INSPECTION_DATE", '%Y%m%d')) IN (5, 6)
+
+        ) "周末加班手术台次",
         
         
 -- 输血科综合统计报表（基于输血血缘文档修正版）
@@ -1347,37 +1334,22 @@ union all
         ), 0) as "盘库" ,
         
         
-        (WITH surgery_blood AS (
-    SELECT 
-        t.id,
-        -- 使用presto的日期函数判断是否周末
-        CASE 
-            WHEN day_of_week(CAST(t.scheduled_date AS TIMESTAMP)) IN (6,7) THEN 1 
-            ELSE 0 
-        END as is_weekend
-    from   hid0101_orcl_operaanesthisa_emrhis.sam_apply t
-    -- 关联手术登记表获取实际手术信息
-    LEFT JOIN hid0101_orcl_operaanesthisa_emrhis.sam_reg reg 
-        ON t.id = reg.sam_apply_id 
-        AND reg.isdeleted = '0'
-    -- 关联麻醉事件表获取输血信息
-    INNER JOIN hid0101_orcl_operaanesthisa_emrhis.sam_anar_enent en 
-        ON t.id = en.sam_apply_id 
-        AND en.isdeleted = '0'
-        AND en.s_mzsjlb_dm = '31'  -- 输血事件
---        AND en.event_text LIKE '%手术%'  -- 用血目的是手术
-    WHERE t.health_service_org_id = 'HXSSMZK'
-        AND t.oper_type = 'ROOM_OPER'  -- 手术间手术
-        AND t.is_reject = '2'  -- 已通过申请
-        AND t.s_sssyzt_dm = '90'  -- 已完成手术
-        AND t.isdeleted = '0'
-        AND t.scheduled_date >= date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d')
-        AND t.scheduled_date <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d')
-)
-SELECT 
-    COUNT(DISTINCT id) as "周末手术用血台次"
-from   surgery_blood 
-WHERE is_weekend = 1) "周末加班手术台次",
+        (
+  SELECT 
+    count(1)
+FROM hid0101_orcl_lis_xhbis.bis6_req_info A
+INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE B
+    ON A."REQ_ID" = B."REQ_ID"     -- 血库申请信息表与检验标本信息表关联
+WHERE A."isdeleted" = '0'          -- 逻辑删除条件：血库申请信息表
+    AND B."isdeleted" = '0'        -- 逻辑删除条件：检验标本信息表
+    AND B."SAMPLE_NUMBER" >= '0201'          -- 标本编号下限 (varchar类型)
+    AND B."SAMPLE_NUMBER" <= '0500'          -- 标本编号上限 (varchar类型)
+    AND B."INSPECTION_STATE" NOT IN ('return','returned')  -- 排除退回状态
+    AND B."INSPECTION_DATE" >= date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y%m%d')
+    AND B."INSPECTION_DATE" < date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y%m%d')
+    AND day_of_week(date_parse(B."INSPECTION_DATE", '%Y%m%d')) IN (5, 6)
+
+) "周末加班手术台次",
         
         
 -- 输血科综合统计报表（基于输血血缘文档修正版）
@@ -2552,37 +2524,26 @@ union all
         ), 0) as "盘库" ,
         
         
-        (WITH surgery_blood AS (
-    SELECT 
-        t.id,
-        -- 使用presto的日期函数判断是否周末
-        CASE 
-            WHEN day_of_week(CAST(t.scheduled_date AS TIMESTAMP)) IN (6,7) THEN 1 
-            ELSE 0 
-        END as is_weekend
-    from   hid0101_orcl_operaanesthisa_emrhis.sam_apply t
-    -- 关联手术登记表获取实际手术信息
-    LEFT JOIN hid0101_orcl_operaanesthisa_emrhis.sam_reg reg 
-        ON t.id = reg.sam_apply_id 
-        AND reg.isdeleted = '0'
-    -- 关联麻醉事件表获取输血信息
-    INNER JOIN hid0101_orcl_operaanesthisa_emrhis.sam_anar_enent en 
-        ON t.id = en.sam_apply_id 
-        AND en.isdeleted = '0'
-        AND en.s_mzsjlb_dm = '31'  -- 输血事件
---        AND en.event_text LIKE '%手术%'  -- 用血目的是手术
-    WHERE t.health_service_org_id = 'HXSSMZK'
-        AND t.oper_type = 'ROOM_OPER'  -- 手术间手术
-        AND t.is_reject = '2'  -- 已通过申请
-        AND t.s_sssyzt_dm = '90'  -- 已完成手术
-        AND t.isdeleted = '0'
-        AND t.scheduled_date >= date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d')
-        AND t.scheduled_date <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d')
-)
+        (
+
+
 SELECT 
-    COUNT(DISTINCT id) as "周末手术用血台次"
-from   surgery_blood 
-WHERE is_weekend = 1) "周末加班手术台次",
+    count(1)
+FROM hid0101_orcl_lis_xhbis.bis6_req_info A
+INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE B
+    ON A."REQ_ID" = B."REQ_ID"     -- 血库申请信息表与检验标本信息表关联
+WHERE A."isdeleted" = '0'          -- 逻辑删除条件：血库申请信息表
+    AND B."isdeleted" = '0'        -- 逻辑删除条件：检验标本信息表
+    AND B."SAMPLE_NUMBER" >= '0201'          -- 标本编号下限 (varchar类型)
+    AND B."SAMPLE_NUMBER" <= '0500'          -- 标本编号上限 (varchar类型)
+    AND B."INSPECTION_STATE" NOT IN ('return','returned')  -- 排除退回状态
+    -- 上一年同期月份范围条件（从上一年同期月份第一天到最后一天）
+    AND B."INSPECTION_DATE" >= date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y%m%d')
+    AND B."INSPECTION_DATE" <= date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y%m%d')
+    -- 周五周六条件 (Presto中: 5=周五, 6=周六)
+    AND day_of_week(date_parse(B."INSPECTION_DATE", '%Y%m%d')) IN (5, 6)
+
+        ) "周末加班手术台次",
         
         
 -- 输血科综合统计报表（基于输血血缘文档修正版）
