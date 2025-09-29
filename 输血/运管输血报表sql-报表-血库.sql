@@ -1,5 +1,5 @@
 SET SESSION query_max_stage_count = 5000;
- 
+
 
 
  WITH base_result AS (SELECT 
@@ -4125,9 +4125,19 @@ from    (-- ================================
 
 ) T)
 
-SELECT * FROM base_result
+-- 最终输出结果，添加统计月、院区分类、运管科室三个字段
+SELECT 
+    date_format(date_add('month', -1, current_date), '%Y-%m') as "统计月",
+    '主院区' as "院区分类",
+    '输血科' as "运管科室",
+    * 
+FROM base_result
 union all 
  SELECT 
+        -- 环比计算行，同样添加三个字段
+        date_format(date_add('month', -1, current_date), '%Y-%m') as "统计月",
+        '主院区' as "院区分类", 
+        '输血科' as "运管科室",
         -- 环比计算
         CONCAT(
             MAX(CASE WHEN "排序" = 1 THEN "周期" END),
@@ -4282,13 +4292,17 @@ union all
    union all
 
      SELECT 
-        -- 环比计算
+        -- 同比计算行，同样添加三个字段
+        date_format(date_add('month', -1, current_date), '%Y-%m') as "统计月",
+        '主院区' as "院区分类", 
+        '输血科' as "运管科室",
+        -- 同比计算
         CONCAT(
             MAX(CASE WHEN "排序" = 1 THEN "周期" END),
             ' vs ',
             MAX(CASE WHEN "排序" = 3 THEN "周期" END)
         ) as "周期",
-        '环比' as "周期名称",
+        '同比' as "周期名称",
         5 as "排序",
         -- 入库血液环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "入库血液" END) > 0 
