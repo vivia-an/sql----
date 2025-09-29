@@ -1,4 +1,4 @@
-SET SESSION query_max_stage_count = 2500;
+SET SESSION query_max_stage_count = 5000;
  
 
 
@@ -162,27 +162,25 @@ WHERE A."isdeleted" = '0'          -- 逻辑删除条件：血库申请信息表
         
         
 -- 输血科综合统计报表（基于输血血缘文档修正版）
-(select sum(t."费用")- (select case when sum( case when t."费用" is null then 0 else t."费用" end) is null then 0 else sum( case when t."费用" is null then 0 else t."费用" end) end  from   (SELECT 
-    B.BLOOD_NAME as "血液项目名称",
-    SUM(CAST(A.BLOOD_AMOUNT as DOUBLE)) as "数量",
-    SUM(COALESCE(CAST(e.charge AS DOUBLE), 0)) as "费用"
-from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT A
-INNER JOIN hid0101_orcl_lis_xhbis.BIS6_MATCH_BLOOD_TYPE B 
-    ON A.BLOOD_TYPE_ID = B.BLOOD_TYPE_ID
-    AND A.isdeleted = '0'
-    AND B.isdeleted = '0'
+(select sum(t."费用")- (select sum(BLOOD_CHARGE) from (SELECT   
+    B."BLOOD_NAME",                                    -- 血液名称 (来源：hid0101_orcl_lis_xhbis.bis6_match_blood_type.BLOOD_NAME)
+    SUM(CAST(A."BLOOD_CHARGE" AS DOUBLE)) AS "BLOOD_CHARGE",  -- 血液收费金额汇总 (来源：hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT.BLOOD_CHARGE)
+    COUNT(*) AS "记录数量",                             -- 统计记录数量
+    date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m') AS "统计月份"  -- 显示统计月份
+FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT A     -- 主表：血袋入库记录表
+INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type B 
+    ON A."BLOOD_TYPE_ID" = B."BLOOD_TYPE_ID"           -- 血液类型关联
+    AND A."HOSPITAL_ID" = B."HOSPITAL_ID"              -- 医院ID关联
+    AND B."isdeleted" = '0'                            -- 逻辑删除条件：血型匹配表
 INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE C
-    ON A.INSPECTION_ID = C.INSPECTION_ID
-    AND C.isdeleted = '0'
-INNER JOIN hid0101_orcl_lis_xhbis.bis6_charged_info d
-    ON A.BLOODBAG_ID = d.sample_charge_id
-    AND d.isdeleted = '0'
-INNER JOIN hid0101_orcl_lis_xhinterface.xinghe_charged_list e
-    ON d.sample_charge_id = e.sample_charge_id
-    AND e.isdeleted = '0'
-WHERE A.BLOODBAG_STATE NOT IN ('1','2')
-    AND A.SENDBLOOD_TIME between  date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d') and date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d') 
-GROUP BY B.BLOOD_NAME) t) as "配血检收入"
+    ON A."INSPECTION_ID" = C."INSPECTION_ID"           -- 检验标本关联
+    AND C."isdeleted" = '0'                            -- 逻辑删除条件：检验标本表
+WHERE A."isdeleted" = '0'                              -- 逻辑删除条件：血袋入库表
+    AND A."BLOODBAG_STATE" NOT IN ('1','2')           -- 排除入库(1)和出库(2)状态
+    -- 上个月时间范围条件（月初到月末）
+    AND A."SENDBLOOD_TIME" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d'), ' 23:59:59')
+GROUP BY B."BLOOD_NAME"
+ORDER BY "BLOOD_CHARGE" DESC   ) t) as "配血检收入"
 
 
 from    (
@@ -376,34 +374,217 @@ ORDER BY T."XM"
 ) t) as "配血检收入"
 ,
 
+(select sum(t."费用") as "总收入" from    (
+SELECT 
+    "XM" as "项目名称",
+    SUM("RC") as "人次",
+    SUM("FY") as "费用",
+    SUM("GZL") as "工作量"
+from   (
+    -- 第一部分：LIS检验收费统计
+    SELECT DISTINCT
+        c."chinese_name" as "XM",
+        COUNT(a."inspection_id") as "RC",
+        SUM(COALESCE(CAST(b."charge" AS DOUBLE), 0)) as "FY",
+        SUM(COALESCE(CASE WHEN CAST(b."workload" AS DOUBLE) = 0 THEN 1 ELSE CAST(b."workload" AS DOUBLE) END, 1)) as "GZL"
+    from   hid0101_orcl_lis_dbo.lis_inspection_sample a
+    INNER JOIN hid0101_orcl_lis_dbo.lis_inspection_sample_charge b
+        ON a."inspection_id" = b."inspection_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhsystem1.lis_charge_item c
+        ON b."charge_item_id" = c."charge_item_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."group_id" IN ('G013','G053','G105','G111')
+        AND a."input_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d'), ' 23:59:59')
+    GROUP BY c."chinese_name"
+
+    UNION ALL
+
+    -- 第二部分：血型统计（通过申请信息关联）
+    SELECT DISTINCT
+        c."blood_type_name" as "XM",
+        COUNT(a."inspection_id") as "RC",
+        0 as "FY",
+        COUNT(a."inspection_id") as "GZL"
+    from   hid0101_orcl_lis_dbo.lis_inspection_sample a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_req_info b
+        ON a."requisition_id" = b."req_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_req_blood c
+        ON b."req_id" = c."req_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."group_id" IN ('G013','G053','G105','G111')
+        AND a."input_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d'), ' 23:59:59')
+    GROUP BY c."blood_type_name"
+
+    UNION ALL
+
+    -- 第三部分：血袋收费统计（修正库名和表结构）
+    SELECT 
+        e."charge_item_name" as "XM",
+        COUNT(b."BLOODBAG_ID") as "RC",
+        SUM(COALESCE(CAST(e."charge" AS DOUBLE), 0)) as "FY",
+        COUNT(b."BLOODBAG_ID") as "GZL"
+    from   hid0101_orcl_lis_xhdata.lis6_inspect_sample a
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT b
+        ON a."inspection_id" = b."INSPECTION_ID"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type c
+        ON b."BLOOD_TYPE_ID" = c."BLOOD_TYPE_ID"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_charged_info d
+        ON b."BLOODBAG_ID" = d."sample_charge_id"
+        AND d."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhinterface.xinghe_charged_list e
+        ON d."sample_charge_id" = e."sample_charge_id"
+        AND e."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND e."his_id" IN ('LIS07068','LIS0300114','LIS0300255')
+        AND d."charge_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d'), ' 23:59:59')
+    GROUP BY e."charge_item_name"
+
+    UNION ALL
+
+    -- 第四部分：收费信息统计（使用正确的库名）
+    SELECT
+        b."charge_item_name" as "XM",
+        SUM(COALESCE(CAST(b."charge_num" AS DOUBLE), 0)) as "RC",
+        SUM(COALESCE(CAST(b."charge" AS DOUBLE), 0)) as "FY",
+        COUNT(a."charged_id") as "GZL"
+    from   hid0101_orcl_lis_xhbis.bis6_charged_info a
+    INNER JOIN hid0101_orcl_lis_xhinterface.xinghe_charged_list b
+        ON a."sample_charge_id" = b."sample_charge_id"
+        AND b."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."charge_state" IN ('charged','uncharged')
+        AND a."charge_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d'), ' 23:59:59')
+        AND a."sample_charge_id" LIKE 'H%'
+    GROUP BY b."charge_item_name"
+
+    UNION ALL
+
+    -- 第五部分：补费统计（排除特定项目）
+    SELECT
+        a."charge_item_name" as "XM",
+        SUM(COALESCE(CAST(a."charge_num" AS DOUBLE), 0)) as "RC",
+        SUM(COALESCE(CAST(a."charge" AS DOUBLE), 0)) as "FY",
+        COUNT(a."charged_id") as "GZL"
+    from   hid0101_orcl_lis_xhbis.bis6_charged_info a
+    WHERE a."isdeleted" = '0'
+        AND a."charge_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d'), ' 23:59:59')
+        AND a."charge_state" IN ('charged','uncharged')
+        AND a."charged_type" = '补费'
+        AND a."sample_charge_id" NOT IN ('LIS023141','LIS023137','LIS07142','LIS07140','LIS07139','LIS07138','LIS07137','LIS07134','LIS07131',
+                                       'LIS07127','LIS017635','LIS07123','LIS0300114','LIS0300255')
+    GROUP BY a."charge_item_name"
+
+    UNION ALL
+
+    -- 第六部分：补费统计（包含特定项目）
+    SELECT
+        a."charge_item_name" as "XM",
+        COUNT(a."charged_id") as "RC",
+        SUM(COALESCE(CAST(a."charge" AS DOUBLE), 0)) as "FY",
+        COUNT(a."charged_id") as "GZL"
+    from   hid0101_orcl_lis_xhbis.bis6_charged_info a
+    WHERE a."isdeleted" = '0'
+        AND a."charge_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d'), ' 23:59:59')
+        AND a."charge_state" IN ('charged','uncharged')
+        AND a."charged_type" = '补费'
+        AND a."sample_charge_id" IN ('LIS023141','LIS023137','LIS07142','LIS07140','LIS07139','LIS07138','LIS07137','LIS07134','LIS07131',
+                                   'LIS07127','LIS017635','LIS07123','LIS0300114','LIS0300255')
+    GROUP BY a."charge_item_name"
+
+    UNION ALL
+
+    -- 第七部分：申请单统计（使用正确的库名和表名）
+    SELECT 
+        a."charge_name" as "XM",
+        COUNT(DISTINCT b."req_id") as "RC",
+        SUM(COALESCE(CAST(a."charge" AS DOUBLE), 0)) as "FY",
+        COUNT(DISTINCT b."req_id") as "GZL"
+    from   hid0101_orcl_lis_bis.his_requisition a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_req_info b
+        ON a."rep_id" = b."req_id"
+        AND b."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND b."req_type" = '4'
+        AND b."patient_dept_name" NOT LIKE '%测试%'
+        AND b."req_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d'), ' 23:59:59')
+    GROUP BY a."charge_name"
+
+    UNION ALL
+
+    -- 第八部分：血袋输入统计（使用文档中的正确表结构）
+    SELECT DISTINCT
+        b."BLOOD_NAME" as "XM",
+        COUNT(a."BLOODBAG_ID") as "RC",
+        SUM(COALESCE(CAST(a."BLOOD_CHARGE" AS DOUBLE), 0)) as "FY",
+        COUNT(a."BLOODBAG_ID") as "GZL"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."BLOOD_TYPE_ID" = b."BLOOD_TYPE_ID"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.lis6_inspect_sample c
+        ON a."INSPECTION_ID" = c."inspection_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."SENDBLOOD_TIME" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d'), ' 23:59:59')
+    GROUP BY b."BLOOD_NAME"
+
+    UNION ALL
+
+    -- 第九部分：配血方法统计（使用血缘文档中的表结构）
+    SELECT DISTINCT
+        e."method_name" as "XM",
+        COUNT(a."MATCH_ID") as "RC",
+        SUM(COALESCE(CAST(e."method_charge" AS DOUBLE), 0)) as "FY",
+        COUNT(a."MATCH_ID") as "GZL"
+    from   hid0101_orcl_lis_xhbis.bis6_bloodbag_match a
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT d
+        ON a."BLOODBAG_ID" = d."BLOODBAG_ID"
+        AND d."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON d."BLOOD_TYPE_ID" = b."BLOOD_TYPE_ID"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.lis6_inspect_sample c
+        ON a."INSPECTION_ID" = c."inspection_id"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_method e
+        ON a."METHOD_TYPE_ID" = e."method_id"
+        AND e."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."MACTH_DATE" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d'), ' 23:59:59')
+        AND e."method_id" NOT IN ('00000004','00000006','00000007','4')
+    GROUP BY e."method_name"
+) T
+GROUP BY T."XM"
+ORDER BY T."XM"
+) t) as "总收入",
         
         
-         (select case when sum( case when t."费用" is null then 0 else t."费用" end) is null then 0 else sum( case when t."费用" is null then 0 else t."费用" end) end  from   (SELECT 
-    B.BLOOD_NAME as "血液项目名称",
-    SUM(CAST(A.BLOOD_AMOUNT as DOUBLE)) as "数量",
-    SUM(COALESCE(CAST(e.charge AS DOUBLE), 0)) as "费用"
-
-
-
-
-
-from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT A
-INNER JOIN hid0101_orcl_lis_xhbis.BIS6_MATCH_BLOOD_TYPE B 
-    ON A.BLOOD_TYPE_ID = B.BLOOD_TYPE_ID
-    AND A.isdeleted = '0'
-    AND B.isdeleted = '0'
+         (select sum(BLOOD_CHARGE) from (SELECT   
+    B."BLOOD_NAME",                                    -- 血液名称 (来源：hid0101_orcl_lis_xhbis.bis6_match_blood_type.BLOOD_NAME)
+    SUM(CAST(A."BLOOD_CHARGE" AS DOUBLE)) AS "BLOOD_CHARGE",  -- 血液收费金额汇总 (来源：hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT.BLOOD_CHARGE)
+    COUNT(*) AS "记录数量",                             -- 统计记录数量
+    date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m') AS "统计月份"  -- 显示统计月份
+FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT A     -- 主表：血袋入库记录表
+INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type B 
+    ON A."BLOOD_TYPE_ID" = B."BLOOD_TYPE_ID"           -- 血液类型关联
+    AND A."HOSPITAL_ID" = B."HOSPITAL_ID"              -- 医院ID关联
+    AND B."isdeleted" = '0'                            -- 逻辑删除条件：血型匹配表
 INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE C
-    ON A.INSPECTION_ID = C.INSPECTION_ID
-    AND C.isdeleted = '0'
-INNER JOIN hid0101_orcl_lis_xhbis.bis6_charged_info d
-    ON A.BLOODBAG_ID = d.sample_charge_id
-    AND d.isdeleted = '0'
-INNER JOIN hid0101_orcl_lis_xhinterface.xinghe_charged_list e
-    ON d.sample_charge_id = e.sample_charge_id
-    AND e.isdeleted = '0'
-WHERE A.BLOODBAG_STATE NOT IN ('1','2')
-    AND A.SENDBLOOD_TIME between  date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m-%d') and date_format(date_add('day', -1, date_trunc('month', current_date)), '%Y-%m-%d') 
-GROUP BY B.BLOOD_NAME) t) as "血费收入"
+    ON A."INSPECTION_ID" = C."INSPECTION_ID"           -- 检验标本关联
+    AND C."isdeleted" = '0'                            -- 逻辑删除条件：检验标本表
+WHERE A."isdeleted" = '0'                              -- 逻辑删除条件：血袋入库表
+    AND A."BLOODBAG_STATE" NOT IN ('1','2')           -- 排除入库(1)和出库(2)状态
+    -- 上个月时间范围条件（月初到月末）
+    AND date_parse(A."SENDBLOOD_TIME", '%Y-%m-%d %H:%i:%s') >= date_trunc('month', date_add('month', -1, current_date))
+    AND date_parse(A."SENDBLOOD_TIME", '%Y-%m-%d %H:%i:%s') < date_trunc('month', current_date)
+GROUP BY B."BLOOD_NAME"
+ORDER BY "BLOOD_CHARGE" DESC   ) t) as "血费收入"
         
     
         
@@ -1353,27 +1534,25 @@ WHERE A."isdeleted" = '0'          -- 逻辑删除条件：血库申请信息表
         
         
 -- 输血科综合统计报表（基于输血血缘文档修正版）
-(select sum(t."费用")- (select case when sum( case when t."费用" is null then 0 else t."费用" end) is null then 0 else sum( case when t."费用" is null then 0 else t."费用" end) end  from   (SELECT 
-    B.BLOOD_NAME as "血液项目名称",
-    SUM(CAST(A.BLOOD_AMOUNT as DOUBLE)) as "数量",
-    SUM(COALESCE(CAST(e.charge AS DOUBLE), 0)) as "费用"
-from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT A
-INNER JOIN hid0101_orcl_lis_xhbis.BIS6_MATCH_BLOOD_TYPE B 
-    ON A.BLOOD_TYPE_ID = B.BLOOD_TYPE_ID
-    AND A.isdeleted = '0'
-    AND B.isdeleted = '0'
+(select sum(t."费用")- (select sum(BLOOD_CHARGE) from (SELECT   
+    B."BLOOD_NAME",                                    -- 血液名称 (来源：hid0101_orcl_lis_xhbis.bis6_match_blood_type.BLOOD_NAME)
+    SUM(CAST(A."BLOOD_CHARGE" AS DOUBLE)) AS "BLOOD_CHARGE",  -- 血液收费金额汇总 (来源：hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT.BLOOD_CHARGE)
+    COUNT(*) AS "记录数量",                             -- 统计记录数量
+    date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m') AS "统计月份"  -- 显示统计月份
+FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT A     -- 主表：血袋入库记录表
+INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type B 
+    ON A."BLOOD_TYPE_ID" = B."BLOOD_TYPE_ID"           -- 血液类型关联
+    AND A."HOSPITAL_ID" = B."HOSPITAL_ID"              -- 医院ID关联
+    AND B."isdeleted" = '0'                            -- 逻辑删除条件：血型匹配表
 INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE C
-    ON A.INSPECTION_ID = C.INSPECTION_ID
-    AND C.isdeleted = '0'
-INNER JOIN hid0101_orcl_lis_xhbis.bis6_charged_info d
-    ON A.BLOODBAG_ID = d.sample_charge_id
-    AND d.isdeleted = '0'
-INNER JOIN hid0101_orcl_lis_xhinterface.xinghe_charged_list e
-    ON d.sample_charge_id = e.sample_charge_id
-    AND e.isdeleted = '0'
-WHERE A.BLOODBAG_STATE NOT IN ('1','2')
-    AND A.SENDBLOOD_TIME between  date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d') and date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d') 
-GROUP BY B.BLOOD_NAME) t) as "配血检收入"
+    ON A."INSPECTION_ID" = C."INSPECTION_ID"           -- 检验标本关联
+    AND C."isdeleted" = '0'                            -- 逻辑删除条件：检验标本表
+WHERE A."isdeleted" = '0'                              -- 逻辑删除条件：血袋入库表
+    AND A."BLOODBAG_STATE" NOT IN ('1','2')           -- 排除入库(1)和出库(2)状态
+    -- 上个月时间范围条件（月初到月末）
+    AND A."SENDBLOOD_TIME" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d'), ' 23:59:59')
+GROUP BY B."BLOOD_NAME"
+ORDER BY "BLOOD_CHARGE" DESC   ) t) as "配血检收入"
 
 
 from    (
@@ -1567,34 +1746,217 @@ ORDER BY T."XM"
 ) t) as "配血检收入"
 ,
 
+(select sum(t."费用") as "总收入" from    (
+SELECT 
+    "XM" as "项目名称",
+    SUM("RC") as "人次",
+    SUM("FY") as "费用",
+    SUM("GZL") as "工作量"
+from   (
+    -- 第一部分：LIS检验收费统计
+    SELECT DISTINCT
+        c."chinese_name" as "XM",
+        COUNT(a."inspection_id") as "RC",
+        SUM(COALESCE(CAST(b."charge" AS DOUBLE), 0)) as "FY",
+        SUM(COALESCE(CASE WHEN CAST(b."workload" AS DOUBLE) = 0 THEN 1 ELSE CAST(b."workload" AS DOUBLE) END, 1)) as "GZL"
+    from   hid0101_orcl_lis_dbo.lis_inspection_sample a
+    INNER JOIN hid0101_orcl_lis_dbo.lis_inspection_sample_charge b
+        ON a."inspection_id" = b."inspection_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhsystem1.lis_charge_item c
+        ON b."charge_item_id" = c."charge_item_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."group_id" IN ('G013','G053','G105','G111')
+        AND a."input_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d'), ' 23:59:59')
+    GROUP BY c."chinese_name"
+
+    UNION ALL
+
+    -- 第二部分：血型统计（通过申请信息关联）
+    SELECT DISTINCT
+        c."blood_type_name" as "XM",
+        COUNT(a."inspection_id") as "RC",
+        0 as "FY",
+        COUNT(a."inspection_id") as "GZL"
+    from   hid0101_orcl_lis_dbo.lis_inspection_sample a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_req_info b
+        ON a."requisition_id" = b."req_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_req_blood c
+        ON b."req_id" = c."req_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."group_id" IN ('G013','G053','G105','G111')
+        AND a."input_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d'), ' 23:59:59')
+    GROUP BY c."blood_type_name"
+
+    UNION ALL
+
+    -- 第三部分：血袋收费统计（修正库名和表结构）
+    SELECT 
+        e."charge_item_name" as "XM",
+        COUNT(b."BLOODBAG_ID") as "RC",
+        SUM(COALESCE(CAST(e."charge" AS DOUBLE), 0)) as "FY",
+        COUNT(b."BLOODBAG_ID") as "GZL"
+    from   hid0101_orcl_lis_xhdata.lis6_inspect_sample a
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT b
+        ON a."inspection_id" = b."INSPECTION_ID"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type c
+        ON b."BLOOD_TYPE_ID" = c."BLOOD_TYPE_ID"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_charged_info d
+        ON b."BLOODBAG_ID" = d."sample_charge_id"
+        AND d."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhinterface.xinghe_charged_list e
+        ON d."sample_charge_id" = e."sample_charge_id"
+        AND e."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND e."his_id" IN ('LIS07068','LIS0300114','LIS0300255')
+        AND d."charge_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d'), ' 23:59:59')
+    GROUP BY e."charge_item_name"
+
+    UNION ALL
+
+    -- 第四部分：收费信息统计（使用正确的库名）
+    SELECT
+        b."charge_item_name" as "XM",
+        SUM(COALESCE(CAST(b."charge_num" AS DOUBLE), 0)) as "RC",
+        SUM(COALESCE(CAST(b."charge" AS DOUBLE), 0)) as "FY",
+        COUNT(a."charged_id") as "GZL"
+    from   hid0101_orcl_lis_xhbis.bis6_charged_info a
+    INNER JOIN hid0101_orcl_lis_xhinterface.xinghe_charged_list b
+        ON a."sample_charge_id" = b."sample_charge_id"
+        AND b."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."charge_state" IN ('charged','uncharged')
+        AND a."charge_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d'), ' 23:59:59')
+        AND a."sample_charge_id" LIKE 'H%'
+    GROUP BY b."charge_item_name"
+
+    UNION ALL
+
+    -- 第五部分：补费统计（排除特定项目）
+    SELECT
+        a."charge_item_name" as "XM",
+        SUM(COALESCE(CAST(a."charge_num" AS DOUBLE), 0)) as "RC",
+        SUM(COALESCE(CAST(a."charge" AS DOUBLE), 0)) as "FY",
+        COUNT(a."charged_id") as "GZL"
+    from   hid0101_orcl_lis_xhbis.bis6_charged_info a
+    WHERE a."isdeleted" = '0'
+        AND a."charge_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d'), ' 23:59:59')
+        AND a."charge_state" IN ('charged','uncharged')
+        AND a."charged_type" = '补费'
+        AND a."sample_charge_id" NOT IN ('LIS023141','LIS023137','LIS07142','LIS07140','LIS07139','LIS07138','LIS07137','LIS07134','LIS07131',
+                                       'LIS07127','LIS017635','LIS07123','LIS0300114','LIS0300255')
+    GROUP BY a."charge_item_name"
+
+    UNION ALL
+
+    -- 第六部分：补费统计（包含特定项目）
+    SELECT
+        a."charge_item_name" as "XM",
+        COUNT(a."charged_id") as "RC",
+        SUM(COALESCE(CAST(a."charge" AS DOUBLE), 0)) as "FY",
+        COUNT(a."charged_id") as "GZL"
+    from   hid0101_orcl_lis_xhbis.bis6_charged_info a
+    WHERE a."isdeleted" = '0'
+        AND a."charge_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d'), ' 23:59:59')
+        AND a."charge_state" IN ('charged','uncharged')
+        AND a."charged_type" = '补费'
+        AND a."sample_charge_id" IN ('LIS023141','LIS023137','LIS07142','LIS07140','LIS07139','LIS07138','LIS07137','LIS07134','LIS07131',
+                                   'LIS07127','LIS017635','LIS07123','LIS0300114','LIS0300255')
+    GROUP BY a."charge_item_name"
+
+    UNION ALL
+
+    -- 第七部分：申请单统计（使用正确的库名和表名）
+    SELECT 
+        a."charge_name" as "XM",
+        COUNT(DISTINCT b."req_id") as "RC",
+        SUM(COALESCE(CAST(a."charge" AS DOUBLE), 0)) as "FY",
+        COUNT(DISTINCT b."req_id") as "GZL"
+    from   hid0101_orcl_lis_bis.his_requisition a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_req_info b
+        ON a."rep_id" = b."req_id"
+        AND b."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND b."req_type" = '4'
+        AND b."patient_dept_name" NOT LIKE '%测试%'
+        AND b."req_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d'), ' 23:59:59')
+    GROUP BY a."charge_name"
+
+    UNION ALL
+
+    -- 第八部分：血袋输入统计（使用文档中的正确表结构）
+    SELECT DISTINCT
+        b."BLOOD_NAME" as "XM",
+        COUNT(a."BLOODBAG_ID") as "RC",
+        SUM(COALESCE(CAST(a."BLOOD_CHARGE" AS DOUBLE), 0)) as "FY",
+        COUNT(a."BLOODBAG_ID") as "GZL"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."BLOOD_TYPE_ID" = b."BLOOD_TYPE_ID"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.lis6_inspect_sample c
+        ON a."INSPECTION_ID" = c."inspection_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."SENDBLOOD_TIME" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d'), ' 23:59:59')
+    GROUP BY b."BLOOD_NAME"
+
+    UNION ALL
+
+    -- 第九部分：配血方法统计（使用血缘文档中的表结构）
+    SELECT DISTINCT
+        e."method_name" as "XM",
+        COUNT(a."MATCH_ID") as "RC",
+        SUM(COALESCE(CAST(e."method_charge" AS DOUBLE), 0)) as "FY",
+        COUNT(a."MATCH_ID") as "GZL"
+    from   hid0101_orcl_lis_xhbis.bis6_bloodbag_match a
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT d
+        ON a."BLOODBAG_ID" = d."BLOODBAG_ID"
+        AND d."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON d."BLOOD_TYPE_ID" = b."BLOOD_TYPE_ID"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.lis6_inspect_sample c
+        ON a."INSPECTION_ID" = c."inspection_id"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_method e
+        ON a."METHOD_TYPE_ID" = e."method_id"
+        AND e."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."MACTH_DATE" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d'), ' 23:59:59')
+        AND e."method_id" NOT IN ('00000004','00000006','00000007','4')
+    GROUP BY e."method_name"
+) T
+GROUP BY T."XM"
+ORDER BY T."XM"
+) t) as "总收入",
         
         
-         (select case when sum( case when t."费用" is null then 0 else t."费用" end) is null then 0 else sum( case when t."费用" is null then 0 else t."费用" end) end  from   (SELECT 
-    B.BLOOD_NAME as "血液项目名称",
-    SUM(CAST(A.BLOOD_AMOUNT as DOUBLE)) as "数量",
-    SUM(COALESCE(CAST(e.charge AS DOUBLE), 0)) as "费用"
-
-
-
-
-
-from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT A
-INNER JOIN hid0101_orcl_lis_xhbis.BIS6_MATCH_BLOOD_TYPE B 
-    ON A.BLOOD_TYPE_ID = B.BLOOD_TYPE_ID
-    AND A.isdeleted = '0'
-    AND B.isdeleted = '0'
+         (select sum(BLOOD_CHARGE) from (SELECT   
+    B."BLOOD_NAME",                                    -- 血液名称 (来源：hid0101_orcl_lis_xhbis.bis6_match_blood_type.BLOOD_NAME)
+    SUM(CAST(A."BLOOD_CHARGE" AS DOUBLE)) AS "BLOOD_CHARGE",  -- 血液收费金额汇总 (来源：hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT.BLOOD_CHARGE)
+    COUNT(*) AS "记录数量",                             -- 统计记录数量
+    date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m') AS "统计月份"  -- 显示统计月份
+FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT A     -- 主表：血袋入库记录表
+INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type B 
+    ON A."BLOOD_TYPE_ID" = B."BLOOD_TYPE_ID"           -- 血液类型关联
+    AND A."HOSPITAL_ID" = B."HOSPITAL_ID"              -- 医院ID关联
+    AND B."isdeleted" = '0'                            -- 逻辑删除条件：血型匹配表
 INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE C
-    ON A.INSPECTION_ID = C.INSPECTION_ID
-    AND C.isdeleted = '0'
-INNER JOIN hid0101_orcl_lis_xhbis.bis6_charged_info d
-    ON A.BLOODBAG_ID = d.sample_charge_id
-    AND d.isdeleted = '0'
-INNER JOIN hid0101_orcl_lis_xhinterface.xinghe_charged_list e
-    ON d.sample_charge_id = e.sample_charge_id
-    AND e.isdeleted = '0'
-WHERE A.BLOODBAG_STATE NOT IN ('1','2')
-    AND A.SENDBLOOD_TIME between  date_format(date_trunc('month', date_add('month', -2, current_date)), '%Y-%m-%d') and date_format(date_add('day', -1, date_trunc('month', date_add('month', -1, current_date))), '%Y-%m-%d') 
-GROUP BY B.BLOOD_NAME) t) as "血费收入"
+    ON A."INSPECTION_ID" = C."INSPECTION_ID"           -- 检验标本关联
+    AND C."isdeleted" = '0'                            -- 逻辑删除条件：检验标本表
+WHERE A."isdeleted" = '0'                              -- 逻辑删除条件：血袋入库表
+    AND A."BLOODBAG_STATE" NOT IN ('1','2')           -- 排除入库(1)和出库(2)状态
+    -- 上上个月时间范围条件（月初到月末）
+    AND date_parse(A."SENDBLOOD_TIME", '%Y-%m-%d %H:%i:%s') >= date_trunc('month', date_add('month', -2, current_date))
+    AND date_parse(A."SENDBLOOD_TIME", '%Y-%m-%d %H:%i:%s') < date_trunc('month', date_add('month', -1, current_date))
+GROUP BY B."BLOOD_NAME"
+ORDER BY "BLOOD_CHARGE" DESC   ) t) as "血费收入"
         
     
         
@@ -2547,27 +2909,26 @@ WHERE A."isdeleted" = '0'          -- 逻辑删除条件：血库申请信息表
         
         
 -- 输血科综合统计报表（基于输血血缘文档修正版）
-    (select sum(t."费用")- (select case when sum( case when t."费用" is null then 0 else t."费用" end) is null then 0 else sum( case when t."费用" is null then 0 else t."费用" end) end  from   (SELECT 
-        B.BLOOD_NAME as "血液项目名称",
-        SUM(CAST(A.BLOOD_AMOUNT as DOUBLE)) as "数量",
-        SUM(COALESCE(CAST(e.charge AS DOUBLE), 0)) as "费用"
-    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT A
-INNER JOIN hid0101_orcl_lis_xhbis.BIS6_MATCH_BLOOD_TYPE B 
-        ON A.BLOOD_TYPE_ID = B.BLOOD_TYPE_ID
-    AND A.isdeleted = '0'
-    AND B.isdeleted = '0'
+    (select sum(t."费用")- ( select sum(BLOOD_CHARGE) from (SELECT   
+    B."BLOOD_NAME",                                    -- 血液名称 (来源：hid0101_orcl_lis_xhbis.bis6_match_blood_type.BLOOD_NAME)
+    SUM(CAST(A."BLOOD_CHARGE" AS DOUBLE)) AS "BLOOD_CHARGE",  -- 血液收费金额汇总 (来源：hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT.BLOOD_CHARGE)
+    COUNT(*) AS "记录数量",                             -- 统计记录数量
+    date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m') AS "统计月份"  -- 显示统计月份
+FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT A     -- 主表：血袋入库记录表
+INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type B 
+    ON A."BLOOD_TYPE_ID" = B."BLOOD_TYPE_ID"           -- 血液类型关联
+    AND A."HOSPITAL_ID" = B."HOSPITAL_ID"              -- 医院ID关联
+    AND B."isdeleted" = '0'                            -- 逻辑删除条件：血型匹配表
 INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE C
-    ON A.INSPECTION_ID = C.INSPECTION_ID
-    AND C.isdeleted = '0'
-INNER JOIN hid0101_orcl_lis_xhbis.bis6_charged_info d
-    ON A.BLOODBAG_ID = d.sample_charge_id
-    AND d.isdeleted = '0'
-INNER JOIN hid0101_orcl_lis_xhinterface.xinghe_charged_list e
-    ON d.sample_charge_id = e.sample_charge_id
-    AND e.isdeleted = '0'
-WHERE A.BLOODBAG_STATE NOT IN ('1','2')
-    AND A.SENDBLOOD_TIME between  date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d') and date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d') 
-GROUP BY B.BLOOD_NAME) t) as "配血检收入"
+    ON A."INSPECTION_ID" = C."INSPECTION_ID"           -- 检验标本关联
+    AND C."isdeleted" = '0'                            -- 逻辑删除条件：检验标本表
+WHERE A."isdeleted" = '0'                              -- 逻辑删除条件：血袋入库表
+    AND A."BLOODBAG_STATE" NOT IN ('1','2')           -- 排除入库(1)和出库(2)状态
+    -- 上一年同期时间范围条件（月初到月末）
+    AND date_parse(A."SENDBLOOD_TIME", '%Y-%m-%d %H:%i:%s') >= date_trunc('month', date_add('month', -13, current_date))
+    AND date_parse(A."SENDBLOOD_TIME", '%Y-%m-%d %H:%i:%s') < date_trunc('month', date_add('month', -12, current_date))
+GROUP BY B."BLOOD_NAME"
+ORDER BY "BLOOD_CHARGE" DESC   ) t) as "配血检收入"
 
 
 from    (
@@ -2761,34 +3122,218 @@ ORDER BY T."XM"
 ) t) as "配血检收入"
 ,
 
+(select sum(t."费用") as "总收入" from    (
+SELECT 
+    "XM" as "项目名称",
+    SUM("RC") as "人次",
+    SUM("FY") as "费用",
+    SUM("GZL") as "工作量"
+from   (
+    -- 第一部分：LIS检验收费统计
+    SELECT DISTINCT
+        c."chinese_name" as "XM",
+        COUNT(a."inspection_id") as "RC",
+        SUM(COALESCE(CAST(b."charge" AS DOUBLE), 0)) as "FY",
+        SUM(COALESCE(CASE WHEN CAST(b."workload" AS DOUBLE) = 0 THEN 1 ELSE CAST(b."workload" AS DOUBLE) END, 1)) as "GZL"
+    from   hid0101_orcl_lis_dbo.lis_inspection_sample a
+    INNER JOIN hid0101_orcl_lis_dbo.lis_inspection_sample_charge b
+        ON a."inspection_id" = b."inspection_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhsystem1.lis_charge_item c
+        ON b."charge_item_id" = c."charge_item_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."group_id" IN ('G013','G053','G105','G111')
+        AND a."input_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d'), ' 23:59:59')
+    GROUP BY c."chinese_name"
+    
+    UNION ALL
+    
+    -- 第二部分：血型统计（通过申请信息关联）
+    SELECT DISTINCT
+        c."blood_type_name" as "XM",
+        COUNT(a."inspection_id") as "RC",
+        0 as "FY",
+        COUNT(a."inspection_id") as "GZL"
+    from   hid0101_orcl_lis_dbo.lis_inspection_sample a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_req_info b
+        ON a."requisition_id" = b."req_id"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_req_blood c
+        ON b."req_id" = c."req_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."group_id" IN ('G013','G053','G105','G111')
+        AND a."input_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d'), ' 23:59:59')
+    GROUP BY c."blood_type_name"
+
+    UNION ALL
+
+    -- 第三部分：血袋收费统计（修正库名和表结构）
+    SELECT 
+        e."charge_item_name" as "XM",
+        COUNT(b."BLOODBAG_ID") as "RC",
+        SUM(COALESCE(CAST(e."charge" AS DOUBLE), 0)) as "FY",
+        COUNT(b."BLOODBAG_ID") as "GZL"
+    from   hid0101_orcl_lis_xhdata.lis6_inspect_sample a
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT b
+        ON a."inspection_id" = b."INSPECTION_ID"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type c
+        ON b."BLOOD_TYPE_ID" = c."BLOOD_TYPE_ID"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_charged_info d
+        ON b."BLOODBAG_ID" = d."sample_charge_id"
+        AND d."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhinterface.xinghe_charged_list e
+        ON d."sample_charge_id" = e."sample_charge_id"
+        AND e."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND e."his_id" IN ('LIS07068','LIS0300114','LIS0300255')
+        AND d."charge_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d'), ' 23:59:59')
+    GROUP BY e."charge_item_name"
+    
+    UNION ALL
+    
+    -- 第四部分：收费信息统计（使用正确的库名）
+    SELECT
+        b."charge_item_name" as "XM",
+        SUM(COALESCE(CAST(b."charge_num" AS DOUBLE), 0)) as "RC",
+        SUM(COALESCE(CAST(b."charge" AS DOUBLE), 0)) as "FY",
+        COUNT(a."charged_id") as "GZL"
+    from   hid0101_orcl_lis_xhbis.bis6_charged_info a
+    INNER JOIN hid0101_orcl_lis_xhinterface.xinghe_charged_list b
+        ON a."sample_charge_id" = b."sample_charge_id"
+        AND b."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."charge_state" IN ('charged','uncharged')
+        AND a."charge_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d'), ' 23:59:59')
+        AND a."sample_charge_id" LIKE 'H%'
+    GROUP BY b."charge_item_name"
+
+    UNION ALL
+
+    -- 第五部分：补费统计（排除特定项目）
+    SELECT
+        a."charge_item_name" as "XM",
+        SUM(COALESCE(CAST(a."charge_num" AS DOUBLE), 0)) as "RC",
+        SUM(COALESCE(CAST(a."charge" AS DOUBLE), 0)) as "FY",
+        COUNT(a."charged_id") as "GZL"
+    from   hid0101_orcl_lis_xhbis.bis6_charged_info a
+    WHERE a."isdeleted" = '0'
+        AND a."charge_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d'), ' 23:59:59')
+        AND a."charge_state" IN ('charged','uncharged')
+        AND a."charged_type" = '补费'
+        AND a."sample_charge_id" NOT IN ('LIS023141','LIS023137','LIS07142','LIS07140','LIS07139','LIS07138','LIS07137','LIS07134','LIS07131',
+                                       'LIS07127','LIS017635','LIS07123','LIS0300114','LIS0300255')
+    GROUP BY a."charge_item_name"
+    
+    UNION ALL
+    
+    -- 第六部分：补费统计（包含特定项目）
+    SELECT
+        a."charge_item_name" as "XM",
+        COUNT(a."charged_id") as "RC",
+        SUM(COALESCE(CAST(a."charge" AS DOUBLE), 0)) as "FY",
+        COUNT(a."charged_id") as "GZL"
+    from   hid0101_orcl_lis_xhbis.bis6_charged_info a
+    WHERE a."isdeleted" = '0'
+        AND a."charge_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d'), ' 23:59:59')
+        AND a."charge_state" IN ('charged','uncharged')
+        AND a."charged_type" = '补费'
+        AND a."sample_charge_id" IN ('LIS023141','LIS023137','LIS07142','LIS07140','LIS07139','LIS07138','LIS07137','LIS07134','LIS07131',
+                                   'LIS07127','LIS017635','LIS07123','LIS0300114','LIS0300255')
+    GROUP BY a."charge_item_name"
+
+    UNION ALL
+
+    -- 第七部分：申请单统计（使用正确的库名和表名）
+    SELECT 
+        a."charge_name" as "XM",
+        COUNT(DISTINCT b."req_id") as "RC",
+        SUM(COALESCE(CAST(a."charge" AS DOUBLE), 0)) as "FY",
+        COUNT(DISTINCT b."req_id") as "GZL"
+    from   hid0101_orcl_lis_bis.his_requisition a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_req_info b
+        ON a."rep_id" = b."req_id"
+        AND b."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND b."req_type" = '4'
+        AND b."patient_dept_name" NOT LIKE '%测试%'
+        AND b."req_time" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d'), ' 23:59:59')
+    GROUP BY a."charge_name"
+
+    UNION ALL
+
+    -- 第八部分：血袋输入统计（使用文档中的正确表结构）
+    SELECT DISTINCT
+        b."BLOOD_NAME" as "XM",
+        COUNT(a."BLOODBAG_ID") as "RC",
+        SUM(COALESCE(CAST(a."BLOOD_CHARGE" AS DOUBLE), 0)) as "FY",
+        COUNT(a."BLOODBAG_ID") as "GZL"
+    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT a
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON a."BLOOD_TYPE_ID" = b."BLOOD_TYPE_ID"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.lis6_inspect_sample c
+        ON a."INSPECTION_ID" = c."inspection_id"
+        AND c."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."SENDBLOOD_TIME" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d'), ' 23:59:59')
+    GROUP BY b."BLOOD_NAME"
+
+    UNION ALL
+
+    -- 第九部分：配血方法统计（使用血缘文档中的表结构）
+    SELECT DISTINCT
+        e."method_name" as "XM",
+        COUNT(a."MATCH_ID") as "RC",
+        SUM(COALESCE(CAST(e."method_charge" AS DOUBLE), 0)) as "FY",
+        COUNT(a."MATCH_ID") as "GZL"
+    from   hid0101_orcl_lis_xhbis.bis6_bloodbag_match a
+    INNER JOIN hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT d
+        ON a."BLOODBAG_ID" = d."BLOODBAG_ID"
+        AND d."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type b
+        ON d."BLOOD_TYPE_ID" = b."BLOOD_TYPE_ID"
+        AND b."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhdata.lis6_inspect_sample c
+        ON a."INSPECTION_ID" = c."inspection_id"
+        AND c."isdeleted" = '0'
+    INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_method e
+        ON a."METHOD_TYPE_ID" = e."method_id"
+        AND e."isdeleted" = '0'
+    WHERE a."isdeleted" = '0'
+        AND a."MACTH_DATE" BETWEEN CONCAT(date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d'), ' 00:00:00') AND CONCAT(date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d'), ' 23:59:59')
+        AND e."method_id" NOT IN ('00000004','00000006','00000007','4')
+    GROUP BY e."method_name"
+) T
+GROUP BY T."XM"
+ORDER BY T."XM"
+) t) as "总收入",
+
         
         
-         (select case when sum( case when t."费用" is null then 0 else t."费用" end) is null then 0 else sum( case when t."费用" is null then 0 else t."费用" end) end  from   (SELECT 
-        B.BLOOD_NAME as "血液项目名称",
-        SUM(CAST(A.BLOOD_AMOUNT as DOUBLE)) as "数量",
-        SUM(COALESCE(CAST(e.charge AS DOUBLE), 0)) as "费用"
-
-
-
-
-
-    from   hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT A
-INNER JOIN hid0101_orcl_lis_xhbis.BIS6_MATCH_BLOOD_TYPE B 
-        ON A.BLOOD_TYPE_ID = B.BLOOD_TYPE_ID
-    AND A.isdeleted = '0'
-    AND B.isdeleted = '0'
+        (select sum(BLOOD_CHARGE) from (SELECT   
+    B."BLOOD_NAME",                                    -- 血液名称 (来源：hid0101_orcl_lis_xhbis.bis6_match_blood_type.BLOOD_NAME)
+    SUM(CAST(A."BLOOD_CHARGE" AS DOUBLE)) AS "BLOOD_CHARGE",  -- 血液收费金额汇总 (来源：hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT.BLOOD_CHARGE)
+    COUNT(*) AS "记录数量",                             -- 统计记录数量
+    date_format(date_trunc('month', date_add('month', -1, current_date)), '%Y-%m') AS "统计月份"  -- 显示统计月份
+FROM hid0101_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT A     -- 主表：血袋入库记录表
+INNER JOIN hid0101_orcl_lis_xhbis.bis6_match_blood_type B 
+    ON A."BLOOD_TYPE_ID" = B."BLOOD_TYPE_ID"           -- 血液类型关联
+    AND A."HOSPITAL_ID" = B."HOSPITAL_ID"              -- 医院ID关联
+    AND B."isdeleted" = '0'                            -- 逻辑删除条件：血型匹配表
 INNER JOIN hid0101_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE C
-    ON A.INSPECTION_ID = C.INSPECTION_ID
-    AND C.isdeleted = '0'
-INNER JOIN hid0101_orcl_lis_xhbis.bis6_charged_info d
-    ON A.BLOODBAG_ID = d.sample_charge_id
-    AND d.isdeleted = '0'
-INNER JOIN hid0101_orcl_lis_xhinterface.xinghe_charged_list e
-    ON d.sample_charge_id = e.sample_charge_id
-    AND e.isdeleted = '0'
-WHERE A.BLOODBAG_STATE NOT IN ('1','2')
-    AND A.SENDBLOOD_TIME between  date_format(date_trunc('month', date_add('month', -13, current_date)), '%Y-%m-%d') and date_format(date_add('day', -1, date_trunc('month', date_add('month', -12, current_date))), '%Y-%m-%d') 
-GROUP BY B.BLOOD_NAME) t) as "血费收入"
+    ON A."INSPECTION_ID" = C."INSPECTION_ID"           -- 检验标本关联
+    AND C."isdeleted" = '0'                            -- 逻辑删除条件：检验标本表
+WHERE A."isdeleted" = '0'                              -- 逻辑删除条件：血袋入库表
+    AND A."BLOODBAG_STATE" NOT IN ('1','2')           -- 排除入库(1)和出库(2)状态
+    -- 上个月时间范围条件（月初到月末）
+    AND date_parse(A."SENDBLOOD_TIME", '%Y-%m-%d %H:%i:%s') >= date_trunc('month', date_add('month', -13, current_date))
+    AND date_parse(A."SENDBLOOD_TIME", '%Y-%m-%d %H:%i:%s') < date_trunc('month', date_add('month', -12, current_date))
+GROUP BY B."BLOOD_NAME"
+ORDER BY "BLOOD_CHARGE" DESC   ) t) as "血费收入"
         
     
         
@@ -3717,6 +4262,14 @@ union all
                         MAX(CASE WHEN "排序" = 2 THEN "配血检收入" END), 2)
              ELSE NULL 
         END as "配血检收入",
+        -- 总收入环比
+        CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "总收入" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "总收入" END) - 
+                        MAX(CASE WHEN "排序" = 2 THEN "总收入" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 2 THEN "总收入" END), 2)
+             ELSE NULL 
+        END as "总收入",
+
         -- 血费收入环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "血费收入" END) > 0 
              THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血费收入" END) - 
@@ -3861,6 +4414,13 @@ union all
                         MAX(CASE WHEN "排序" = 3 THEN "配血检收入" END), 3)
              ELSE NULL 
         END as "配血检收入",
+        -- 总收入环比
+        CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "总收入" END) > 0 
+             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "总收入" END) - 
+                        MAX(CASE WHEN "排序" = 3 THEN "总收入" END)) * 100.0 / 
+                        MAX(CASE WHEN "排序" = 3 THEN "总收入" END), 3)
+             ELSE NULL 
+        END as "总收入",
         -- 血费收入环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "血费收入" END) > 0 
              THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血费收入" END) - 
