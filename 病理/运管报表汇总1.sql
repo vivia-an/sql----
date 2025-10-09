@@ -730,32 +730,146 @@ last_year_same_month_range AS (
 
 -- 本月检查治疗人次/项次（天府）
 current_month_count AS (
-  SELECT COUNT(1) AS count_value FROM hid0101_mssql_bl_rep.t_jcxx, last_month_range
-  WHERE f_blk IN ('天府锦江冰冻','天府冰冻','天府普通外检','天府加快') 
-    AND f_bgzt = '已审核' 
-    AND f_bgrq >= start_date 
-    AND f_bgrq <= end_date
-    AND isdeleted = '0'
+  SELECT COUNT(1) AS count_value FROM (
+    SELECT
+      "pathology"."receive_at" AS "接收时间",
+      (CASE
+          WHEN "pathology"."library_detail_id" = '1' OR "pathology"."library_detail_id" = '39' THEN
+              '常规组织病例TZ'
+          WHEN "pathology"."library_detail_id" = '40' THEN
+              '快速TQ'
+          WHEN "pathology"."library_detail_id" = '22' THEN
+              '冷冻TF'
+          WHEN "pathology"."library_detail_id" = '74' THEN
+              '尸解TA'
+          WHEN "pathology"."library_detail_id" = '24' THEN
+              '细胞学TC'
+          WHEN "pathology"."library_detail_id" = '73' THEN
+              '会诊H'
+          WHEN "pathology"."library_detail_id" = '76' THEN
+              '专科病理肾穿K'
+          WHEN "pathology"."library_detail_id" = '32' THEN
+              '专科病理骨髓B'
+          WHEN "pathology"."library_detail_id" = '78' THEN
+              '专科病理淋巴结L'
+          WHEN "pathology"."library_detail_id" = '79' THEN
+              '专科病理眼科E'
+          WHEN "pathology"."library_detail_id" = '80' THEN
+              '专科病理肌肉M'
+          WHEN "pathology"."library_detail_id" = '81' THEN
+              '专科病理前列腺P'
+          WHEN "pathology"."library_detail_id" = '82' THEN
+              '专科病理ESD'
+          WHEN "pathology"."library_detail_id" = '83' THEN
+              '专科病理心肌X'
+          WHEN "pathology"."library_detail_id" = '0' THEN
+              '分子病理ML'
+          ELSE '其他'
+      END) AS "类型"
+    FROM
+      hid0117_mysql_bl_pis."pathology", last_month_range
+    WHERE
+      "pathology"."deleted_at" IS NULL
+      AND "pathology"."library_id" NOT IN ('39', '40', '41', '60', '67', '68', '69', '77', '18')
+      AND "pathology"."receive_at" >= start_date
+      AND "pathology"."receive_at" <= end_date
+  )
 ),
 
 -- 上月检查治疗人次/项次（天府）
 last_month_count AS (
-  SELECT COUNT(1) AS count_value FROM hid0101_mssql_bl_rep.t_jcxx, last_last_month_range
-  WHERE f_blk IN ('天府锦江冰冻','天府冰冻','天府普通外检','天府加快') 
-    AND f_bgzt = '已审核' 
-    AND f_bgrq >= start_date 
-    AND f_bgrq <= end_date
-    AND isdeleted = '0'
+  SELECT COUNT(1) AS count_value FROM (
+    SELECT
+      "pathology"."receive_at" AS "接收时间",
+      (CASE
+          WHEN "pathology"."library_detail_id" = '1' OR "pathology"."library_detail_id" = '39' THEN
+              '常规组织病例TZ'
+          WHEN "pathology"."library_detail_id" = '40' THEN
+              '快速TQ'
+          WHEN "pathology"."library_detail_id" = '22' THEN
+              '冷冻TF'
+          WHEN "pathology"."library_detail_id" = '74' THEN
+              '尸解TA'
+          WHEN "pathology"."library_detail_id" = '24' THEN
+              '细胞学TC'
+          WHEN "pathology"."library_detail_id" = '73' THEN
+              '会诊H'
+          WHEN "pathology"."library_detail_id" = '76' THEN
+              '专科病理肾穿K'
+          WHEN "pathology"."library_detail_id" = '32' THEN
+              '专科病理骨髓B'
+          WHEN "pathology"."library_detail_id" = '78' THEN
+              '专科病理淋巴结L'
+          WHEN "pathology"."library_detail_id" = '79' THEN
+              '专科病理眼科E'
+          WHEN "pathology"."library_detail_id" = '80' THEN
+              '专科病理肌肉M'
+          WHEN "pathology"."library_detail_id" = '81' THEN
+              '专科病理前列腺P'
+          WHEN "pathology"."library_detail_id" = '82' THEN
+              '专科病理ESD'
+          WHEN "pathology"."library_detail_id" = '83' THEN
+              '专科病理心肌X'
+          WHEN "pathology"."library_detail_id" = '0' THEN
+              '分子病理ML'
+          ELSE '其他'
+      END) AS "类型"
+    FROM
+      hid0117_mysql_bl_pis."pathology", last_last_month_range
+    WHERE
+      "pathology"."deleted_at" IS NULL
+      AND "pathology"."library_id" NOT IN ('39', '40', '41', '60', '67', '68', '69', '77', '18')
+      AND "pathology"."receive_at" >= start_date
+      AND "pathology"."receive_at" <= end_date
+  )
 ),
 
 -- 去年同期检查治疗人次/项次（天府）
 last_year_count AS (
-  SELECT COUNT(1) AS count_value FROM hid0101_mssql_bl_rep.t_jcxx, last_year_same_month_range
-  WHERE f_blk IN ('天府锦江冰冻','天府冰冻','天府普通外检','天府加快') 
-    AND f_bgzt = '已审核' 
-    AND f_bgrq >= start_date 
-    AND f_bgrq <= end_date
-    AND isdeleted = '0'
+  SELECT COUNT(1) AS count_value FROM (
+    SELECT
+      "pathology"."receive_at" AS "接收时间",
+      (CASE
+          WHEN "pathology"."library_detail_id" = '1' OR "pathology"."library_detail_id" = '39' THEN
+              '常规组织病例TZ'
+          WHEN "pathology"."library_detail_id" = '40' THEN
+              '快速TQ'
+          WHEN "pathology"."library_detail_id" = '22' THEN
+              '冷冻TF'
+          WHEN "pathology"."library_detail_id" = '74' THEN
+              '尸解TA'
+          WHEN "pathology"."library_detail_id" = '24' THEN
+              '细胞学TC'
+          WHEN "pathology"."library_detail_id" = '73' THEN
+              '会诊H'
+          WHEN "pathology"."library_detail_id" = '76' THEN
+              '专科病理肾穿K'
+          WHEN "pathology"."library_detail_id" = '32' THEN
+              '专科病理骨髓B'
+          WHEN "pathology"."library_detail_id" = '78' THEN
+              '专科病理淋巴结L'
+          WHEN "pathology"."library_detail_id" = '79' THEN
+              '专科病理眼科E'
+          WHEN "pathology"."library_detail_id" = '80' THEN
+              '专科病理肌肉M'
+          WHEN "pathology"."library_detail_id" = '81' THEN
+              '专科病理前列腺P'
+          WHEN "pathology"."library_detail_id" = '82' THEN
+              '专科病理ESD'
+          WHEN "pathology"."library_detail_id" = '83' THEN
+              '专科病理心肌X'
+          WHEN "pathology"."library_detail_id" = '0' THEN
+              '分子病理ML'
+          ELSE '其他'
+      END) AS "类型"
+    FROM
+      hid0117_mysql_bl_pis."pathology", last_year_same_month_range
+    WHERE
+      "pathology"."deleted_at" IS NULL
+      AND "pathology"."library_id" NOT IN ('39', '40', '41', '60', '67', '68', '69', '77', '18')
+      AND "pathology"."receive_at" >= start_date
+      AND "pathology"."receive_at" <= end_date
+  )
 ),
 
 -- 本月检查治疗收入（天府）
