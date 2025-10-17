@@ -143,7 +143,7 @@ current_month_physical AS (
         '体检液基薄层细胞制片术','液基薄层细胞制片术','液基薄层细胞学检查（HPV）（体检）'
       )
       AND SUBSTRING(dateregister, 1, 7) = DATE_FORMAT(DATE_ADD('month', -1, CURRENT_DATE), '%Y-%m')
-      AND medorgcode IN ('HID0101')
+      AND medorgcode IN ('HID0101','HID0118','F0017','F0002')
   ) t1
 ),
 
@@ -167,7 +167,7 @@ last_month_physical AS (
         '体检液基薄层细胞制片术','液基薄层细胞制片术','液基薄层细胞学检查（HPV）（体检）'
       )
       AND SUBSTRING(dateregister, 1, 7) = DATE_FORMAT(DATE_ADD('month', -2, CURRENT_DATE), '%Y-%m')
-      AND medorgcode IN ('HID0101')
+      AND medorgcode IN ('HID0101','HID0118','F0017','F0002')
   ) t2
 ),
 
@@ -191,7 +191,7 @@ last_year_physical AS (
         '体检液基薄层细胞制片术','液基薄层细胞制片术','液基薄层细胞学检查（HPV）（体检）'
       )
       AND SUBSTRING(dateregister, 1, 7) = DATE_FORMAT(DATE_ADD('month', -13, CURRENT_DATE), '%Y-%m')
-      AND medorgcode IN ('HID0101')
+      AND medorgcode IN ('HID0101','HID0118','F0017','F0002')
   ) t3
 ),
 
