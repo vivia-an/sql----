@@ -7,7 +7,7 @@ SELECT
 date_format(date_add('month', -1, current_date), '%Y-%m') as "周期",
 '上月' as "周期名称",
 1 as "排序",
-date_format(date_add('month', -1, current_date), '%Y年-%m月') as "统计月",
+date_format(date_add('month', -1, current_date), '%Y-%m') as "统计月",
 '主院区' as "院区分类",
 '输血科' as "运管科室",
    
@@ -441,7 +441,7 @@ SELECT
 date_format(date_add('month', -2, current_date), '%Y-%m') as "周期",
 '上上月' as "周期名称",
 2 as "排序",
-date_format(date_add('month', -1, current_date), '%Y年-%m月') as "统计月",
+date_format(date_add('month', -1, current_date), '%Y-%m') as "统计月",
 '主院区' as "院区分类",
 '输血科' as "运管科室",
 -- 样本数（合并多个项目）
@@ -873,7 +873,7 @@ SELECT
 date_format(date_add('month', -13, current_date), '%Y-%m') as "周期",
 '去年同期' as "周期名称",
 3 as "排序",
-date_format(date_add('month', -1, current_date), '%Y年-%m月') as "统计月",
+date_format(date_add('month', -1, current_date), '%Y-%m') as "统计月",
 '主院区' as "院区分类",
 '输血科' as "运管科室",
 -- 样本数（使用新的统计逻辑）
@@ -1309,11 +1309,7 @@ union all
         ) as "周期",
         '同比' as "周期名称",
         4 as "排序",
-        CONCAT(
-            MAX(CASE WHEN "排序" = 1 THEN "统计月" END),
-            ' vs ',
-            MAX(CASE WHEN "排序" = 2 THEN "统计月" END)
-        ) as "统计月",
+date_format(date_add('month', -1, current_date), '%Y-%m') as "统计月",
         '主院区' as "院区分类",
         '输血科' as "运管科室",
         -- 样本数环比
@@ -1467,11 +1463,7 @@ union all
         ) as "周期",
         '环比' as "周期名称",
         5 as "排序",
-        CONCAT(
-            MAX(CASE WHEN "排序" = 1 THEN "统计月" END),
-            ' vs ',
-            MAX(CASE WHEN "排序" = 3 THEN "统计月" END)
-        ) as "统计月",
+date_format(date_add('month', -1, current_date), '%Y-%m') as "统计月",
         '主院区' as "院区分类",
         '输血科' as "运管科室",
         -- 样本数环比
