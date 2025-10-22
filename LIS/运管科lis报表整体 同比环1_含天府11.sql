@@ -505,19 +505,19 @@ summary_with_totals AS (
 
         -- 环比增长率
 
-        ROUND(("标本数" - "上月标本数") * 100.0 / NULLIF("上月标本数", 0), 2) as "标本数环比增长率%",
+        CAST(ROUND(("标本数" - "上月标本数") * 100.0 / NULLIF("上月标本数", 0), 2) AS DECIMAL(10,2)) as "标本数环比增长率%",
 
-        ROUND(("项目数" - "上月项目数") * 100.0 / NULLIF("上月项目数", 0), 2) as "项目数环比增长率%",
+        CAST(ROUND(("项目数" - "上月项目数") * 100.0 / NULLIF("上月项目数", 0), 2) AS DECIMAL(10,2)) as "项目数环比增长率%",
 
-        ROUND(("总收入" - "上月总收入") * 100.0 / NULLIF("上月总收入", 0), 2) as "收入环比增长率%",
+        CAST(ROUND(("总收入" - "上月总收入") * 100.0 / NULLIF("上月总收入", 0), 2) AS DECIMAL(10,2)) as "收入环比增长率%",
 
         -- 同比增长率
 
-        ROUND(("标本数" - "去年同期标本数") * 100.0 / NULLIF("去年同期标本数", 0), 2) as "标本数同比增长率%",
+        CAST(ROUND(("标本数" - "去年同期标本数") * 100.0 / NULLIF("去年同期标本数", 0), 2) AS DECIMAL(10,2)) as "标本数同比增长率%",
 
-        ROUND(("项目数" - "去年同期项目数") * 100.0 / NULLIF("去年同期项目数", 0), 2) as "项目数同比增长率%",
+        CAST(ROUND(("项目数" - "去年同期项目数") * 100.0 / NULLIF("去年同期项目数", 0), 2) AS DECIMAL(10,2)) as "项目数同比增长率%",
 
-        ROUND(("总收入" - "去年同期总收入") * 100.0 / NULLIF("去年同期总收入", 0), 2) as "收入同比增长率%"
+        CAST(ROUND(("总收入" - "去年同期总收入") * 100.0 / NULLIF("去年同期总收入", 0), 2) AS DECIMAL(10,2)) as "收入同比增长率%"
 
     FROM final_summary
 
@@ -561,19 +561,19 @@ summary_with_totals AS (
 
         -- 合计行的环比增长率
 
-        ROUND((SUM("标本数") - SUM("上月标本数")) * 100.0 / NULLIF(SUM("上月标本数"), 0), 2),
+        CAST(ROUND((SUM("标本数") - SUM("上月标本数")) * 100.0 / NULLIF(SUM("上月标本数"), 0), 2) AS DECIMAL(10,2)),
 
-        ROUND((SUM("项目数") - SUM("上月项目数")) * 100.0 / NULLIF(SUM("上月项目数"), 0), 2),
+        CAST(ROUND((SUM("项目数") - SUM("上月项目数")) * 100.0 / NULLIF(SUM("上月项目数"), 0), 2) AS DECIMAL(10,2)),
 
-        ROUND((SUM("总收入") - SUM("上月总收入")) * 100.0 / NULLIF(SUM("上月总收入"), 0), 2),
+        CAST(ROUND((SUM("总收入") - SUM("上月总收入")) * 100.0 / NULLIF(SUM("上月总收入"), 0), 2) AS DECIMAL(10,2)),
 
         -- 合计行的同比增长率
 
-        ROUND((SUM("标本数") - SUM("去年同期标本数")) * 100.0 / NULLIF(SUM("去年同期标本数"), 0), 2),
+        CAST(ROUND((SUM("标本数") - SUM("去年同期标本数")) * 100.0 / NULLIF(SUM("去年同期标本数"), 0), 2) AS DECIMAL(10,2)),
 
-        ROUND((SUM("项目数") - SUM("去年同期项目数")) * 100.0 / NULLIF(SUM("去年同期项目数"), 0), 2),
+        CAST(ROUND((SUM("项目数") - SUM("去年同期项目数")) * 100.0 / NULLIF(SUM("去年同期项目数"), 0), 2) AS DECIMAL(10,2)),
 
-        ROUND((SUM("总收入") - SUM("去年同期总收入")) * 100.0 / NULLIF(SUM("去年同期总收入"), 0), 2),
+        CAST(ROUND((SUM("总收入") - SUM("去年同期总收入")) * 100.0 / NULLIF(SUM("去年同期总收入"), 0), 2) AS DECIMAL(10,2)),
 
         -- 合计行收入占比（都是100%）
 
@@ -625,19 +625,19 @@ summary_with_totals AS (
 
         -- 本部实际量的环比增长率
 
-        ROUND((SUM("标本数") - SUM("上月标本数")) * 100.0 / NULLIF(SUM("上月标本数"), 0), 2),
+        CAST(ROUND((SUM("标本数") - SUM("上月标本数")) * 100.0 / NULLIF(SUM("上月标本数"), 0), 2) AS DECIMAL(10,2)),
 
-        ROUND((SUM("项目数") - SUM("上月项目数")) * 100.0 / NULLIF(SUM("上月项目数"), 0), 2),
+        CAST(ROUND((SUM("项目数") - SUM("上月项目数")) * 100.0 / NULLIF(SUM("上月项目数"), 0), 2) AS DECIMAL(10,2)),
 
-        ROUND((SUM("总收入") - SUM("上月总收入")) * 100.0 / NULLIF(SUM("上月总收入"), 0), 2),
+        CAST(ROUND((SUM("总收入") - SUM("上月总收入")) * 100.0 / NULLIF(SUM("上月总收入"), 0), 2) AS DECIMAL(10,2)),
 
         -- 本部实际量的同比增长率
 
-        ROUND((SUM("标本数") - SUM("去年同期标本数")) * 100.0 / NULLIF(SUM("去年同期标本数"), 0), 2),
+        CAST(ROUND((SUM("标本数") - SUM("去年同期标本数")) * 100.0 / NULLIF(SUM("去年同期标本数"), 0), 2) AS DECIMAL(10,2)),
 
-        ROUND((SUM("项目数") - SUM("去年同期项目数")) * 100.0 / NULLIF(SUM("去年同期项目数"), 0), 2),
+        CAST(ROUND((SUM("项目数") - SUM("去年同期项目数")) * 100.0 / NULLIF(SUM("去年同期项目数"), 0), 2) AS DECIMAL(10,2)),
 
-        ROUND((SUM("总收入") - SUM("去年同期总收入")) * 100.0 / NULLIF(SUM("去年同期总收入"), 0), 2),
+        CAST(ROUND((SUM("总收入") - SUM("去年同期总收入")) * 100.0 / NULLIF(SUM("去年同期总收入"), 0), 2) AS DECIMAL(10,2)),
 
         -- 本部实际量收入占比
 
@@ -715,31 +715,31 @@ summary_with_totals AS (
 
         -- 天府医院环比增长率
 
-        ROUND((COALESCE(tf."标本数", 0) - COALESCE(tflm."上月标本数", 0)) * 100.0 / 
+        CAST(ROUND((COALESCE(tf."标本数", 0) - COALESCE(tflm."上月标本数", 0)) * 100.0 / 
 
-            NULLIF(COALESCE(tflm."上月标本数", 0), 0), 2) as "标本数环比增长率%",
+            NULLIF(COALESCE(tflm."上月标本数", 0), 0), 2) AS DECIMAL(10,2)) as "标本数环比增长率%",
 
-        ROUND((COALESCE(tf."工作量", 0) - COALESCE(tflm."上月工作量", 0)) * 100.0 / 
+        CAST(ROUND((COALESCE(tf."工作量", 0) - COALESCE(tflm."上月工作量", 0)) * 100.0 / 
 
-            NULLIF(COALESCE(tflm."上月工作量", 0), 0), 2) as "项目数环比增长率%",
+            NULLIF(COALESCE(tflm."上月工作量", 0), 0), 2) AS DECIMAL(10,2)) as "项目数环比增长率%",
 
-        ROUND((COALESCE(tf."收费金额", 0) - COALESCE(tflm."上月收费金额", 0)) * 100.0 / 
+        CAST(ROUND((COALESCE(tf."收费金额", 0) - COALESCE(tflm."上月收费金额", 0)) * 100.0 / 
 
-            NULLIF(COALESCE(tflm."上月收费金额", 0), 0), 2) as "收入环比增长率%",
+            NULLIF(COALESCE(tflm."上月收费金额", 0), 0), 2) AS DECIMAL(10,2)) as "收入环比增长率%",
 
         -- 天府医院同比增长率
 
-        ROUND((COALESCE(tf."标本数", 0) - COALESCE(tfly."去年同期标本数", 0)) * 100.0 / 
+        CAST(ROUND((COALESCE(tf."标本数", 0) - COALESCE(tfly."去年同期标本数", 0)) * 100.0 / 
 
-            NULLIF(COALESCE(tfly."去年同期标本数", 0), 0), 2) as "标本数同比增长率%",
+            NULLIF(COALESCE(tfly."去年同期标本数", 0), 0), 2) AS DECIMAL(10,2)) as "标本数同比增长率%",
 
-        ROUND((COALESCE(tf."工作量", 0) - COALESCE(tfly."去年同期工作量", 0)) * 100.0 / 
+        CAST(ROUND((COALESCE(tf."工作量", 0) - COALESCE(tfly."去年同期工作量", 0)) * 100.0 / 
 
-            NULLIF(COALESCE(tfly."去年同期工作量", 0), 0), 2) as "项目数同比增长率%",
+            NULLIF(COALESCE(tfly."去年同期工作量", 0), 0), 2) AS DECIMAL(10,2)) as "项目数同比增长率%",
 
-        ROUND((COALESCE(tf."收费金额", 0) - COALESCE(tfly."去年同期收费金额", 0)) * 100.0 / 
+        CAST(ROUND((COALESCE(tf."收费金额", 0) - COALESCE(tfly."去年同期收费金额", 0)) * 100.0 / 
 
-            NULLIF(COALESCE(tfly."去年同期收费金额", 0), 0), 2) as "收入同比增长率%",
+            NULLIF(COALESCE(tfly."去年同期收费金额", 0), 0), 2) AS DECIMAL(10,2)) as "收入同比增长率%",
 
         -- 天府医院收入占比（注：由于数据源不同，暂时设为NULL或0）
 

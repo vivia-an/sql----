@@ -4148,143 +4148,143 @@ union all
         4 as "排序",
         -- 入库血液环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "入库血液" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "入库血液" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "入库血液" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "入库血液" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "入库血液" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "入库血液" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "入库血液",
         -- 出库血液环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "出库血液" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "出库血液" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "出库血液" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "出库血液" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "出库血液" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "出库血液" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "出库血液",
         -- 红细胞入库环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "红细胞入库" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "红细胞入库" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "红细胞入库" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "红细胞入库" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "红细胞入库" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "红细胞入库" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "红细胞入库",
         -- 红细胞出库环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "红细胞出库" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "红细胞出库" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "红细胞出库" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "红细胞出库" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "红细胞出库" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "红细胞出库" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "红细胞出库",
         -- 红细胞入库-量环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "红细胞入库-量" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "红细胞入库-量" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "红细胞入库-量" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "红细胞入库-量" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "红细胞入库-量" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "红细胞入库-量" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "红细胞入库-量",
         -- 红细胞出库-量环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "红细胞出库-量" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "红细胞出库-量" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "红细胞出库-量" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "红细胞出库-量" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "红细胞出库-量" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "红细胞出库-量" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "红细胞出库-量",
         -- 冷沉淀入库环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "冷沉淀入库" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "冷沉淀入库" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "冷沉淀入库" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "冷沉淀入库" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "冷沉淀入库" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "冷沉淀入库" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "冷沉淀入库",
 
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "血浆冷沉淀入库" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血浆冷沉淀入库" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "血浆冷沉淀入库" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "血浆冷沉淀入库" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "血浆冷沉淀入库" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "血浆冷沉淀入库" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "血浆冷沉淀入库",
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "血浆冷沉淀出库" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血浆冷沉淀出库" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "血浆冷沉淀出库" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "血浆冷沉淀出库" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "血浆冷沉淀出库" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "血浆冷沉淀出库" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "血浆冷沉淀出库",
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "血浆出库-量" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血浆出库-量" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "血浆出库-量" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "血浆出库-量" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "血浆出库-量" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "血浆出库-量" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "血浆出库-量",
         
 
         -- 血浆入库-量环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "血浆入库-量" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血浆入库-量" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "血浆入库-量" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "血浆入库-量" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "血浆入库-量" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "血浆入库-量" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "血浆入库-量",
         -- 血小板出库-量环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "血小板出库-量" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血小板出库-量" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "血小板出库-量" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "血小板出库-量" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "血小板出库-量" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "血小板出库-量" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "血小板出库-量",
         -- 冷沉淀出库环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "冷沉淀出库" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "冷沉淀出库" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "冷沉淀出库" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "冷沉淀出库" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "冷沉淀出库" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "冷沉淀出库" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "冷沉淀出库",
         -- 血浆出库环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "血浆出库" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血浆出库" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "血浆出库" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "血浆出库" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "血浆出库" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "血浆出库" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "血浆出库",
         -- 全院调剂血小板次数环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "全院调剂血小板次数" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "全院调剂血小板次数" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "全院调剂血小板次数" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "全院调剂血小板次数" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "全院调剂血小板次数" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "全院调剂血小板次数" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "全院调剂血小板次数",
         -- 盘库环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "盘库" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "盘库" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "盘库" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "盘库" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "盘库" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "盘库" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "盘库",
         -- 周末加班手术台次环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "周末加班手术台次" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "周末加班手术台次" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "周末加班手术台次" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "周末加班手术台次" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "周末加班手术台次" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "周末加班手术台次" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "周末加班手术台次",
         -- 配血检收入环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "配血检收入" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "配血检收入" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "配血检收入" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "配血检收入" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "配血检收入" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "配血检收入" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "配血检收入",
         -- 总收入环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "总收入" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "总收入" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "总收入" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "总收入" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "总收入" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "总收入" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "总收入",
 
         -- 血费收入环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "血费收入" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血费收入" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "血费收入" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "血费收入" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "血费收入" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "血费收入" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "血费收入"
     FROM base_result
@@ -4306,140 +4306,140 @@ union all
         5 as "排序",
         -- 入库血液环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "入库血液" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "入库血液" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "入库血液" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "入库血液" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "入库血液" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "入库血液" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "入库血液",
         -- 出库血液环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "出库血液" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "出库血液" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "出库血液" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "出库血液" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "出库血液" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "出库血液" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "出库血液",
         -- 红细胞入库环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "红细胞入库" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "红细胞入库" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "红细胞入库" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "红细胞入库" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "红细胞入库" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "红细胞入库" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "红细胞入库",
         -- 红细胞出库环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "红细胞出库" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "红细胞出库" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "红细胞出库" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "红细胞出库" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "红细胞出库" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "红细胞出库" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "红细胞出库",
         -- 红细胞入库-量环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "红细胞入库-量" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "红细胞入库-量" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "红细胞入库-量" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "红细胞入库-量" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "红细胞入库-量" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "红细胞入库-量" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "红细胞入库-量",
         -- 红细胞出库-量环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "红细胞出库-量" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "红细胞出库-量" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "红细胞出库-量" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "红细胞出库-量" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "红细胞出库-量" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "红细胞出库-量" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "红细胞出库-量",
         -- 冷沉淀入库环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "冷沉淀入库" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "冷沉淀入库" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "冷沉淀入库" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "冷沉淀入库" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "冷沉淀入库" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "冷沉淀入库" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "冷沉淀入库",
 
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "血浆冷沉淀入库" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血浆冷沉淀入库" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "血浆冷沉淀入库" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "血浆冷沉淀入库" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "血浆冷沉淀入库" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "血浆冷沉淀入库" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "血浆冷沉淀入库",
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "血浆冷沉淀出库" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血浆冷沉淀出库" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "血浆冷沉淀出库" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "血浆冷沉淀出库" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "血浆冷沉淀出库" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "血浆冷沉淀出库" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "血浆冷沉淀出库",
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "血浆出库-量" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血浆出库-量" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "血浆出库-量" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "血浆出库-量" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "血浆出库-量" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "血浆出库-量" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "血浆出库-量",
         -- 血浆入库-量环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "血浆入库-量" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血浆入库-量" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "血浆入库-量" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "血浆入库-量" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "血浆入库-量" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "血浆入库-量" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "血浆入库-量",
         -- 血小板出库-量环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "血小板出库-量" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血小板出库-量" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "血小板出库-量" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "血小板出库-量" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "血小板出库-量" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "血小板出库-量" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "血小板出库-量",
         -- 冷沉淀出库环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "冷沉淀出库" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "冷沉淀出库" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "冷沉淀出库" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "冷沉淀出库" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "冷沉淀出库" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "冷沉淀出库" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "冷沉淀出库",
         -- 血浆出库环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "血浆出库" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血浆出库" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "血浆出库" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "血浆出库" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "血浆出库" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "血浆出库" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "血浆出库",
         -- 全院调剂血小板次数环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "全院调剂血小板次数" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "全院调剂血小板次数" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "全院调剂血小板次数" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "全院调剂血小板次数" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "全院调剂血小板次数" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "全院调剂血小板次数" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "全院调剂血小板次数",
         -- 盘库环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "盘库" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "盘库" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "盘库" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "盘库" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "盘库" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "盘库" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "盘库",
         -- 周末加班手术台次环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "周末加班手术台次" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "周末加班手术台次" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "周末加班手术台次" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "周末加班手术台次" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "周末加班手术台次" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "周末加班手术台次" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "周末加班手术台次",
         -- 配血检收入环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "配血检收入" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "配血检收入" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "配血检收入" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "配血检收入" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "配血检收入" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "配血检收入" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "配血检收入",
         -- 总收入环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "总收入" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "总收入" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "总收入" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "总收入" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "总收入" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "总收入" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "总收入",
         -- 血费收入环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "血费收入" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血费收入" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "血费收入" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "血费收入" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "血费收入" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "血费收入" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "血费收入"
     FROM base_result

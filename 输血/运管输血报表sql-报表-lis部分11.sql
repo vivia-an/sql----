@@ -1314,135 +1314,135 @@ date_format(date_add('month', -1, current_date), '%Y-%m') as "统计月",
         '输血科' as "运管科室",
         -- 样本数环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "样本数" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "样本数" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "样本数" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "样本数" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "样本数" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "样本数" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "样本数",
         -- 项目数环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "项目数" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "项目数" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "项目数" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "项目数" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "项目数" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "项目数" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "项目数",
         -- 工作量环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "工作量" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "工作量" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "工作量" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "工作量" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "工作量" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "工作量" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "工作量",
         -- 卡查血型环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "卡查血型" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "卡查血型" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "卡查血型" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "卡查血型" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "卡查血型" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "卡查血型" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "卡查血型",
         -- 抗A、抗B血清查血型环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "抗A、抗B血清查血型" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "抗A、抗B血清查血型" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "抗A、抗B血清查血型" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "抗A、抗B血清查血型" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "抗A、抗B血清查血型" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "抗A、抗B血清查血型" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "抗A、抗B血清查血型",
         -- 红细胞血型复查环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "红细胞血型复查" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "红细胞血型复查" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "红细胞血型复查" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "红细胞血型复查" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "红细胞血型复查" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "红细胞血型复查" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "红细胞血型复查",
         -- 抗体筛查环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "抗体筛查" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "抗体筛查" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "抗体筛查" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "抗体筛查" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "抗体筛查" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "抗体筛查" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "抗体筛查",
         -- 凝聚胺配血环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "凝聚胺配血" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "凝聚胺配血" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "凝聚胺配血" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "凝聚胺配血" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "凝聚胺配血" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "凝聚胺配血" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "凝聚胺配血",
         -- 卡式配血环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "卡式配血" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "卡式配血" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "卡式配血" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "卡式配血" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "卡式配血" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "卡式配血" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "卡式配血",
         -- 直接抗人球蛋白环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "直接抗人球蛋白" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "直接抗人球蛋白" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "直接抗人球蛋白" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "直接抗人球蛋白" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "直接抗人球蛋白" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "直接抗人球蛋白" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "直接抗人球蛋白",
         -- 抗体鉴定环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "抗体鉴定" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "抗体鉴定" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "抗体鉴定" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "抗体鉴定" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "抗体鉴定" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "抗体鉴定" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "抗体鉴定",
         -- 血小板交叉环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "血小板交叉" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血小板交叉" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "血小板交叉" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "血小板交叉" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "血小板交叉" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "血小板交叉" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "血小板交叉",
         -- 血小板抗体环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "血小板抗体" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血小板抗体" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "血小板抗体" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "血小板抗体" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "血小板抗体" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "血小板抗体" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "血小板抗体",
         -- 抗体效价环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "抗体效价" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "抗体效价" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "抗体效价" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "抗体效价" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "抗体效价" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "抗体效价" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "抗体效价",
         -- Rh分型环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "Rh分型" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "Rh分型" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "Rh分型" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "Rh分型" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "Rh分型" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "Rh分型" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "Rh分型",
         -- 血小板血型复查环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "血小板血型复查" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血小板血型复查" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "血小板血型复查" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "血小板血型复查" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "血小板血型复查" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "血小板血型复查" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "血小板血型复查",
         -- 吸收放散试验环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "吸收放散试验" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "吸收放散试验" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "吸收放散试验" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "吸收放散试验" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "吸收放散试验" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "吸收放散试验" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "吸收放散试验",
         -- 治疗性单采例数环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "治疗性单采例数" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "治疗性单采例数" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "治疗性单采例数" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "治疗性单采例数" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "治疗性单采例数" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "治疗性单采例数" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "治疗性单采例数",
         -- 特殊血型抗原鉴定环比
         CASE WHEN MAX(CASE WHEN "排序" = 2 THEN "特殊血型抗原鉴定" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "特殊血型抗原鉴定" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "特殊血型抗原鉴定" END) - 
                         MAX(CASE WHEN "排序" = 2 THEN "特殊血型抗原鉴定" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 2 THEN "特殊血型抗原鉴定" END), 2)
+                        MAX(CASE WHEN "排序" = 2 THEN "特殊血型抗原鉴定" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "特殊血型抗原鉴定"
     FROM base_result
@@ -1468,135 +1468,135 @@ date_format(date_add('month', -1, current_date), '%Y-%m') as "统计月",
         '输血科' as "运管科室",
         -- 样本数环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "样本数" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "样本数" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "样本数" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "样本数" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "样本数" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "样本数" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "样本数",
         -- 项目数环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "项目数" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "项目数" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "项目数" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "项目数" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "项目数" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "项目数" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "项目数",
         -- 工作量环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "工作量" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "工作量" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "工作量" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "工作量" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "工作量" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "工作量" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "工作量",
         -- 卡查血型环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "卡查血型" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "卡查血型" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "卡查血型" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "卡查血型" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "卡查血型" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "卡查血型" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "卡查血型",
         -- 抗A、抗B血清查血型环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "抗A、抗B血清查血型" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "抗A、抗B血清查血型" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "抗A、抗B血清查血型" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "抗A、抗B血清查血型" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "抗A、抗B血清查血型" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "抗A、抗B血清查血型" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "抗A、抗B血清查血型",
         -- 红细胞血型复查环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "红细胞血型复查" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "红细胞血型复查" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "红细胞血型复查" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "红细胞血型复查" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "红细胞血型复查" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "红细胞血型复查" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "红细胞血型复查",
         -- 抗体筛查环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "抗体筛查" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "抗体筛查" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "抗体筛查" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "抗体筛查" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "抗体筛查" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "抗体筛查" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "抗体筛查",
         -- 凝聚胺配血环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "凝聚胺配血" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "凝聚胺配血" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "凝聚胺配血" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "凝聚胺配血" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "凝聚胺配血" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "凝聚胺配血" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "凝聚胺配血",
         -- 卡式配血环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "卡式配血" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "卡式配血" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "卡式配血" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "卡式配血" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "卡式配血" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "卡式配血" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "卡式配血",
         -- 直接抗人球蛋白环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "直接抗人球蛋白" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "直接抗人球蛋白" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "直接抗人球蛋白" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "直接抗人球蛋白" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "直接抗人球蛋白" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "直接抗人球蛋白" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "直接抗人球蛋白",
         -- 抗体鉴定环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "抗体鉴定" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "抗体鉴定" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "抗体鉴定" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "抗体鉴定" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "抗体鉴定" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "抗体鉴定" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "抗体鉴定",
         -- 血小板交叉环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "血小板交叉" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血小板交叉" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "血小板交叉" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "血小板交叉" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "血小板交叉" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "血小板交叉" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "血小板交叉",
         -- 血小板抗体环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "血小板抗体" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血小板抗体" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "血小板抗体" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "血小板抗体" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "血小板抗体" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "血小板抗体" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "血小板抗体",
         -- 抗体效价环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "抗体效价" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "抗体效价" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "抗体效价" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "抗体效价" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "抗体效价" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "抗体效价" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "抗体效价",
         -- Rh分型环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "Rh分型" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "Rh分型" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "Rh分型" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "Rh分型" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "Rh分型" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "Rh分型" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "Rh分型",
         -- 血小板血型复查环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "血小板血型复查" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "血小板血型复查" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "血小板血型复查" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "血小板血型复查" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "血小板血型复查" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "血小板血型复查" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "血小板血型复查",
         -- 吸收放散试验环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "吸收放散试验" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "吸收放散试验" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "吸收放散试验" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "吸收放散试验" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "吸收放散试验" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "吸收放散试验" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "吸收放散试验",
         -- 治疗性单采例数环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "治疗性单采例数" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "治疗性单采例数" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "治疗性单采例数" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "治疗性单采例数" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "治疗性单采例数" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "治疗性单采例数" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "治疗性单采例数",
         -- 特殊血型抗原鉴定环比
         CASE WHEN MAX(CASE WHEN "排序" = 3 THEN "特殊血型抗原鉴定" END) > 0 
-             THEN ROUND((MAX(CASE WHEN "排序" = 1 THEN "特殊血型抗原鉴定" END) - 
+             THEN CAST(ROUND((MAX(CASE WHEN "排序" = 1 THEN "特殊血型抗原鉴定" END) - 
                         MAX(CASE WHEN "排序" = 3 THEN "特殊血型抗原鉴定" END)) * 100.0 / 
-                        MAX(CASE WHEN "排序" = 3 THEN "特殊血型抗原鉴定" END), 3)
+                        MAX(CASE WHEN "排序" = 3 THEN "特殊血型抗原鉴定" END), 2) AS DECIMAL(10,2))
              ELSE NULL 
         END as "特殊血型抗原鉴定"
     FROM base_result

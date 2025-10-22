@@ -240,11 +240,11 @@ final_results AS (
     COALESCE((SELECT count_value FROM last_year_count), 0) AS "去年同期",
     CASE 
       WHEN COALESCE((SELECT count_value FROM last_month_count), 0) = 0 THEN NULL
-      ELSE ROUND(((COALESCE((SELECT count_value FROM current_month_count), 0) - COALESCE((SELECT count_value FROM last_month_count), 0)) / COALESCE((SELECT count_value FROM last_month_count), 0)) * 100, 2)
+      ELSE CAST(ROUND(((COALESCE((SELECT count_value FROM current_month_count), 0) - COALESCE((SELECT count_value FROM last_month_count), 0)) / COALESCE((SELECT count_value FROM last_month_count), 0)) * 100, 2) AS DECIMAL(10,2))
     END AS "与上月差异%",
     CASE 
       WHEN COALESCE((SELECT count_value FROM last_year_count), 0) = 0 THEN NULL
-      ELSE ROUND(((COALESCE((SELECT count_value FROM current_month_count), 0) - COALESCE((SELECT count_value FROM last_year_count), 0)) / COALESCE((SELECT count_value FROM last_year_count), 0)) * 100, 2)
+      ELSE CAST(ROUND(((COALESCE((SELECT count_value FROM current_month_count), 0) - COALESCE((SELECT count_value FROM last_year_count), 0)) / COALESCE((SELECT count_value FROM last_year_count), 0)) * 100, 2) AS DECIMAL(10,2))
     END AS "与同期差异%"
   
   UNION ALL
@@ -259,11 +259,11 @@ final_results AS (
     COALESCE((SELECT income_value FROM last_year_income), 0) AS "去年同期",
     CASE 
       WHEN COALESCE((SELECT income_value FROM last_month_income), 0) = 0 THEN NULL
-      ELSE ROUND(((COALESCE((SELECT income_value FROM current_month_income), 0) - COALESCE((SELECT income_value FROM last_month_income), 0)) / COALESCE((SELECT income_value FROM last_month_income), 0)) * 100, 2)
+      ELSE CAST(ROUND(((COALESCE((SELECT income_value FROM current_month_income), 0) - COALESCE((SELECT income_value FROM last_month_income), 0)) / COALESCE((SELECT income_value FROM last_month_income), 0)) * 100, 2) AS DECIMAL(10,2))
     END AS "与上月差异%",
     CASE 
       WHEN COALESCE((SELECT income_value FROM last_year_income), 0) = 0 THEN NULL
-      ELSE ROUND(((COALESCE((SELECT income_value FROM current_month_income), 0) - COALESCE((SELECT income_value FROM last_year_income), 0)) / COALESCE((SELECT income_value FROM last_year_income), 0)) * 100, 2)
+      ELSE CAST(ROUND(((COALESCE((SELECT income_value FROM current_month_income), 0) - COALESCE((SELECT income_value FROM last_year_income), 0)) / COALESCE((SELECT income_value FROM last_year_income), 0)) * 100, 2) AS DECIMAL(10,2))
     END AS "与同期差异%"
   
   UNION ALL
@@ -278,11 +278,11 @@ final_results AS (
     COALESCE((SELECT income_value FROM last_year_puncture), 0) AS "去年同期",
     CASE 
       WHEN COALESCE((SELECT income_value FROM last_month_puncture), 0) = 0 THEN NULL
-      ELSE ROUND(((COALESCE((SELECT income_value FROM current_month_puncture), 0) - COALESCE((SELECT income_value FROM last_month_puncture), 0)) / COALESCE((SELECT income_value FROM last_month_puncture), 0)) * 100, 2)
+      ELSE CAST(ROUND(((COALESCE((SELECT income_value FROM current_month_puncture), 0) - COALESCE((SELECT income_value FROM last_month_puncture), 0)) / COALESCE((SELECT income_value FROM last_month_puncture), 0)) * 100, 2) AS DECIMAL(10,2))
     END AS "与上月差异%",
     CASE 
       WHEN COALESCE((SELECT income_value FROM last_year_puncture), 0) = 0 THEN NULL
-      ELSE ROUND(((COALESCE((SELECT income_value FROM current_month_puncture), 0) - COALESCE((SELECT income_value FROM last_year_puncture), 0)) / COALESCE((SELECT income_value FROM last_year_puncture), 0)) * 100, 2)
+      ELSE CAST(ROUND(((COALESCE((SELECT income_value FROM current_month_puncture), 0) - COALESCE((SELECT income_value FROM last_year_puncture), 0)) / COALESCE((SELECT income_value FROM last_year_puncture), 0)) * 100, 2) AS DECIMAL(10,2))
     END AS "与同期差异%"
   
   UNION ALL
@@ -297,11 +297,11 @@ final_results AS (
     COALESCE((SELECT income_value FROM last_year_physical), 0) AS "去年同期",
     CASE 
       WHEN COALESCE((SELECT income_value FROM last_month_physical), 0) = 0 THEN NULL
-      ELSE ROUND(((COALESCE((SELECT income_value FROM current_month_physical), 0) - COALESCE((SELECT income_value FROM last_month_physical), 0)) / COALESCE((SELECT income_value FROM last_month_physical), 0)) * 100, 2)
+      ELSE CAST(ROUND(((COALESCE((SELECT income_value FROM current_month_physical), 0) - COALESCE((SELECT income_value FROM last_month_physical), 0)) / COALESCE((SELECT income_value FROM last_month_physical), 0)) * 100, 2) AS DECIMAL(10,2))
     END AS "与上月差异%",
     CASE 
       WHEN COALESCE((SELECT income_value FROM last_year_physical), 0) = 0 THEN NULL
-      ELSE ROUND(((COALESCE((SELECT income_value FROM current_month_physical), 0) - COALESCE((SELECT income_value FROM last_year_physical), 0)) / COALESCE((SELECT income_value FROM last_year_physical), 0)) * 100, 2)
+      ELSE CAST(ROUND(((COALESCE((SELECT income_value FROM current_month_physical), 0) - COALESCE((SELECT income_value FROM last_year_physical), 0)) / COALESCE((SELECT income_value FROM last_year_physical), 0)) * 100, 2) AS DECIMAL(10,2))
     END AS "与同期差异%"
   
   UNION ALL
@@ -337,7 +337,7 @@ final_results AS (
       WHEN (COALESCE((SELECT income_value FROM last_month_income), 0) + 
             COALESCE((SELECT income_value FROM last_month_puncture), 0) + 
             COALESCE((SELECT income_value FROM last_month_physical), 0)) = 0 THEN NULL
-      ELSE ROUND(((
+      ELSE CAST(ROUND(((
         (COALESCE((SELECT income_value FROM current_month_income), 0) + 
          COALESCE((SELECT income_value FROM current_month_puncture), 0) + 
          COALESCE((SELECT income_value FROM current_month_physical), 0)) - 
@@ -346,13 +346,13 @@ final_results AS (
          COALESCE((SELECT income_value FROM last_month_physical), 0))
       ) / (COALESCE((SELECT income_value FROM last_month_income), 0) + 
            COALESCE((SELECT income_value FROM last_month_puncture), 0) + 
-           COALESCE((SELECT income_value FROM last_month_physical), 0))) * 100, 2)
+           COALESCE((SELECT income_value FROM last_month_physical), 0))) * 100, 2) AS DECIMAL(10,2))
     END AS "与上月差异%",
     CASE 
       WHEN (COALESCE((SELECT income_value FROM last_year_income), 0) + 
             COALESCE((SELECT income_value FROM last_year_puncture), 0) + 
             COALESCE((SELECT income_value FROM last_year_physical), 0)) = 0 THEN NULL
-      ELSE ROUND(((
+      ELSE CAST(ROUND(((
         (COALESCE((SELECT income_value FROM current_month_income), 0) + 
          COALESCE((SELECT income_value FROM current_month_puncture), 0) + 
          COALESCE((SELECT income_value FROM current_month_physical), 0)) - 
@@ -361,7 +361,7 @@ final_results AS (
          COALESCE((SELECT income_value FROM last_year_physical), 0))
       ) / (COALESCE((SELECT income_value FROM last_year_income), 0) + 
            COALESCE((SELECT income_value FROM last_year_puncture), 0) + 
-           COALESCE((SELECT income_value FROM last_year_physical), 0))) * 100, 2)
+           COALESCE((SELECT income_value FROM last_year_physical), 0))) * 100, 2) AS DECIMAL(10,2))
     END AS "与同期差异%"
   
   UNION ALL
@@ -376,11 +376,11 @@ final_results AS (
     COALESCE((SELECT cost_value FROM last_year_material), 0) AS "去年同期",
     CASE 
       WHEN COALESCE((SELECT cost_value FROM last_month_material), 0) = 0 THEN NULL
-      ELSE ROUND(((COALESCE((SELECT cost_value FROM current_month_material), 0) - COALESCE((SELECT cost_value FROM last_month_material), 0)) / COALESCE((SELECT cost_value FROM last_month_material), 0)) * 100, 2)
+      ELSE CAST(ROUND(((COALESCE((SELECT cost_value FROM current_month_material), 0) - COALESCE((SELECT cost_value FROM last_month_material), 0)) / COALESCE((SELECT cost_value FROM last_month_material), 0)) * 100, 2) AS DECIMAL(10,2))
     END AS "与上月差异%",
     CASE 
       WHEN COALESCE((SELECT cost_value FROM last_year_material), 0) = 0 THEN NULL
-      ELSE ROUND(((COALESCE((SELECT cost_value FROM current_month_material), 0) - COALESCE((SELECT cost_value FROM last_year_material), 0)) / COALESCE((SELECT cost_value FROM last_year_material), 0)) * 100, 2)
+      ELSE CAST(ROUND(((COALESCE((SELECT cost_value FROM current_month_material), 0) - COALESCE((SELECT cost_value FROM last_year_material), 0)) / COALESCE((SELECT cost_value FROM last_year_material), 0)) * 100, 2) AS DECIMAL(10,2))
     END AS "与同期差异%"
   
   UNION ALL
@@ -606,11 +606,11 @@ final_results AS (
     COALESCE((SELECT count_value FROM last_year_count), 0) AS "去年同期",
     CASE 
       WHEN COALESCE((SELECT count_value FROM last_month_count), 0) = 0 THEN NULL
-      ELSE ROUND(((COALESCE((SELECT count_value FROM current_month_count), 0) - COALESCE((SELECT count_value FROM last_month_count), 0)) / COALESCE((SELECT count_value FROM last_month_count), 0)) * 100, 2)
+      ELSE CAST(ROUND(((COALESCE((SELECT count_value FROM current_month_count), 0) - COALESCE((SELECT count_value FROM last_month_count), 0)) / COALESCE((SELECT count_value FROM last_month_count), 0)) * 100, 2) AS DECIMAL(10,2))
     END AS "与上月差异%",
     CASE 
       WHEN COALESCE((SELECT count_value FROM last_year_count), 0) = 0 THEN NULL
-      ELSE ROUND(((COALESCE((SELECT count_value FROM current_month_count), 0) - COALESCE((SELECT count_value FROM last_year_count), 0)) / COALESCE((SELECT count_value FROM last_year_count), 0)) * 100, 2)
+      ELSE CAST(ROUND(((COALESCE((SELECT count_value FROM current_month_count), 0) - COALESCE((SELECT count_value FROM last_year_count), 0)) / COALESCE((SELECT count_value FROM last_year_count), 0)) * 100, 2) AS DECIMAL(10,2))
     END AS "与同期差异%"
   
   UNION ALL
@@ -625,11 +625,11 @@ final_results AS (
     COALESCE((SELECT income_value FROM last_year_income), 0) AS "去年同期",
     CASE 
       WHEN COALESCE((SELECT income_value FROM last_month_income), 0) = 0 THEN NULL
-      ELSE ROUND(((COALESCE((SELECT income_value FROM current_month_income), 0) - COALESCE((SELECT income_value FROM last_month_income), 0)) / COALESCE((SELECT income_value FROM last_month_income), 0)) * 100, 2)
+      ELSE CAST(ROUND(((COALESCE((SELECT income_value FROM current_month_income), 0) - COALESCE((SELECT income_value FROM last_month_income), 0)) / COALESCE((SELECT income_value FROM last_month_income), 0)) * 100, 2) AS DECIMAL(10,2))
     END AS "与上月差异%",
     CASE 
       WHEN COALESCE((SELECT income_value FROM last_year_income), 0) = 0 THEN NULL
-      ELSE ROUND(((COALESCE((SELECT income_value FROM current_month_income), 0) - COALESCE((SELECT income_value FROM last_year_income), 0)) / COALESCE((SELECT income_value FROM last_year_income), 0)) * 100, 2)
+      ELSE CAST(ROUND(((COALESCE((SELECT income_value FROM current_month_income), 0) - COALESCE((SELECT income_value FROM last_year_income), 0)) / COALESCE((SELECT income_value FROM last_year_income), 0)) * 100, 2) AS DECIMAL(10,2))
     END AS "与同期差异%"
   
   UNION ALL
@@ -644,11 +644,11 @@ final_results AS (
     COALESCE((SELECT income_value FROM last_year_physical), 0) AS "去年同期",
     CASE 
       WHEN COALESCE((SELECT income_value FROM last_month_physical), 0) = 0 THEN NULL
-      ELSE ROUND(((COALESCE((SELECT income_value FROM current_month_physical), 0) - COALESCE((SELECT income_value FROM last_month_physical), 0)) / COALESCE((SELECT income_value FROM last_month_physical), 0)) * 100, 2)
+      ELSE CAST(ROUND(((COALESCE((SELECT income_value FROM current_month_physical), 0) - COALESCE((SELECT income_value FROM last_month_physical), 0)) / COALESCE((SELECT income_value FROM last_month_physical), 0)) * 100, 2) AS DECIMAL(10,2))
     END AS "与上月差异%",
     CASE 
       WHEN COALESCE((SELECT income_value FROM last_year_physical), 0) = 0 THEN NULL
-      ELSE ROUND(((COALESCE((SELECT income_value FROM current_month_physical), 0) - COALESCE((SELECT income_value FROM last_year_physical), 0)) / COALESCE((SELECT income_value FROM last_year_physical), 0)) * 100, 2)
+      ELSE CAST(ROUND(((COALESCE((SELECT income_value FROM current_month_physical), 0) - COALESCE((SELECT income_value FROM last_year_physical), 0)) / COALESCE((SELECT income_value FROM last_year_physical), 0)) * 100, 2) AS DECIMAL(10,2))
     END AS "与同期差异%"
   
   UNION ALL
@@ -667,24 +667,24 @@ final_results AS (
     CASE 
       WHEN (COALESCE((SELECT income_value FROM last_month_income), 0) + 
             COALESCE((SELECT income_value FROM last_month_physical), 0)) = 0 THEN NULL
-      ELSE ROUND(((
+      ELSE CAST(ROUND(((
         (COALESCE((SELECT income_value FROM current_month_income), 0) + 
          COALESCE((SELECT income_value FROM current_month_physical), 0)) - 
         (COALESCE((SELECT income_value FROM last_month_income), 0) + 
          COALESCE((SELECT income_value FROM last_month_physical), 0))
       ) / (COALESCE((SELECT income_value FROM last_month_income), 0) + 
-           COALESCE((SELECT income_value FROM last_month_physical), 0))) * 100, 2)
+           COALESCE((SELECT income_value FROM last_month_physical), 0))) * 100, 2) AS DECIMAL(10,2))
     END AS "与上月差异%",
     CASE 
       WHEN (COALESCE((SELECT income_value FROM last_year_income), 0) + 
             COALESCE((SELECT income_value FROM last_year_physical), 0)) = 0 THEN NULL
-      ELSE ROUND(((
+      ELSE CAST(ROUND(((
         (COALESCE((SELECT income_value FROM current_month_income), 0) + 
          COALESCE((SELECT income_value FROM current_month_physical), 0)) - 
         (COALESCE((SELECT income_value FROM last_year_income), 0) + 
          COALESCE((SELECT income_value FROM last_year_physical), 0))
       ) / (COALESCE((SELECT income_value FROM last_year_income), 0) + 
-           COALESCE((SELECT income_value FROM last_year_physical), 0))) * 100, 2)
+           COALESCE((SELECT income_value FROM last_year_physical), 0))) * 100, 2) AS DECIMAL(10,2))
     END AS "与同期差异%"
 )
 
@@ -983,11 +983,11 @@ final_results AS (
     COALESCE((SELECT count_value FROM last_year_count), 0) AS "去年同期",
     CASE 
       WHEN COALESCE((SELECT count_value FROM last_month_count), 0) = 0 THEN NULL
-      ELSE ROUND(((COALESCE((SELECT count_value FROM current_month_count), 0) - COALESCE((SELECT count_value FROM last_month_count), 0)) / COALESCE((SELECT count_value FROM last_month_count), 0)) * 100, 2)
+      ELSE CAST(ROUND(((COALESCE((SELECT count_value FROM current_month_count), 0) - COALESCE((SELECT count_value FROM last_month_count), 0)) / COALESCE((SELECT count_value FROM last_month_count), 0)) * 100, 2) AS DECIMAL(10,2))
     END AS "与上月差异%",
     CASE 
       WHEN COALESCE((SELECT count_value FROM last_year_count), 0) = 0 THEN NULL
-      ELSE ROUND(((COALESCE((SELECT count_value FROM current_month_count), 0) - COALESCE((SELECT count_value FROM last_year_count), 0)) / COALESCE((SELECT count_value FROM last_year_count), 0)) * 100, 2)
+      ELSE CAST(ROUND(((COALESCE((SELECT count_value FROM current_month_count), 0) - COALESCE((SELECT count_value FROM last_year_count), 0)) / COALESCE((SELECT count_value FROM last_year_count), 0)) * 100, 2) AS DECIMAL(10,2))
     END AS "与同期差异%"
   
   UNION ALL
@@ -1002,11 +1002,11 @@ final_results AS (
     COALESCE((SELECT income_value FROM last_year_income), 0) AS "去年同期",
     CASE 
       WHEN COALESCE((SELECT income_value FROM last_month_income), 0) = 0 THEN NULL
-      ELSE ROUND(((COALESCE((SELECT income_value FROM current_month_income), 0) - COALESCE((SELECT income_value FROM last_month_income), 0)) / COALESCE((SELECT income_value FROM last_month_income), 0)) * 100, 2)
+      ELSE CAST(ROUND(((COALESCE((SELECT income_value FROM current_month_income), 0) - COALESCE((SELECT income_value FROM last_month_income), 0)) / COALESCE((SELECT income_value FROM last_month_income), 0)) * 100, 2) AS DECIMAL(10,2))
     END AS "与上月差异%",
     CASE 
       WHEN COALESCE((SELECT income_value FROM last_year_income), 0) = 0 THEN NULL
-      ELSE ROUND(((COALESCE((SELECT income_value FROM current_month_income), 0) - COALESCE((SELECT income_value FROM last_year_income), 0)) / COALESCE((SELECT income_value FROM last_year_income), 0)) * 100, 2)
+      ELSE CAST(ROUND(((COALESCE((SELECT income_value FROM current_month_income), 0) - COALESCE((SELECT income_value FROM last_year_income), 0)) / COALESCE((SELECT income_value FROM last_year_income), 0)) * 100, 2) AS DECIMAL(10,2))
     END AS "与同期差异%"
   
   UNION ALL
@@ -1021,11 +1021,11 @@ final_results AS (
     COALESCE((SELECT income_value FROM last_year_physical), 0) AS "去年同期",
     CASE 
       WHEN COALESCE((SELECT income_value FROM last_month_physical), 0) = 0 THEN NULL
-      ELSE ROUND(((COALESCE((SELECT income_value FROM current_month_physical), 0) - COALESCE((SELECT income_value FROM last_month_physical), 0)) / COALESCE((SELECT income_value FROM last_month_physical), 0)) * 100, 2)
+      ELSE CAST(ROUND(((COALESCE((SELECT income_value FROM current_month_physical), 0) - COALESCE((SELECT income_value FROM last_month_physical), 0)) / COALESCE((SELECT income_value FROM last_month_physical), 0)) * 100, 2) AS DECIMAL(10,2))
     END AS "与上月差异%",
     CASE 
       WHEN COALESCE((SELECT income_value FROM last_year_physical), 0) = 0 THEN NULL
-      ELSE ROUND(((COALESCE((SELECT income_value FROM current_month_physical), 0) - COALESCE((SELECT income_value FROM last_year_physical), 0)) / COALESCE((SELECT income_value FROM last_year_physical), 0)) * 100, 2)
+      ELSE CAST(ROUND(((COALESCE((SELECT income_value FROM current_month_physical), 0) - COALESCE((SELECT income_value FROM last_year_physical), 0)) / COALESCE((SELECT income_value FROM last_year_physical), 0)) * 100, 2) AS DECIMAL(10,2))
     END AS "与同期差异%"
   
   UNION ALL
@@ -1044,24 +1044,24 @@ final_results AS (
     CASE 
       WHEN (COALESCE((SELECT income_value FROM last_month_income), 0) + 
             COALESCE((SELECT income_value FROM last_month_physical), 0)) = 0 THEN NULL
-      ELSE ROUND(((
+      ELSE CAST(ROUND(((
         (COALESCE((SELECT income_value FROM current_month_income), 0) + 
          COALESCE((SELECT income_value FROM current_month_physical), 0)) - 
         (COALESCE((SELECT income_value FROM last_month_income), 0) + 
          COALESCE((SELECT income_value FROM last_month_physical), 0))
       ) / (COALESCE((SELECT income_value FROM last_month_income), 0) + 
-           COALESCE((SELECT income_value FROM last_month_physical), 0))) * 100, 2)
+           COALESCE((SELECT income_value FROM last_month_physical), 0))) * 100, 2) AS DECIMAL(10,2))
     END AS "与上月差异%",
     CASE 
       WHEN (COALESCE((SELECT income_value FROM last_year_income), 0) + 
             COALESCE((SELECT income_value FROM last_year_physical), 0)) = 0 THEN NULL
-      ELSE ROUND(((
+      ELSE CAST(ROUND(((
         (COALESCE((SELECT income_value FROM current_month_income), 0) + 
          COALESCE((SELECT income_value FROM current_month_physical), 0)) - 
         (COALESCE((SELECT income_value FROM last_year_income), 0) + 
          COALESCE((SELECT income_value FROM last_year_physical), 0))
       ) / (COALESCE((SELECT income_value FROM last_year_income), 0) + 
-           COALESCE((SELECT income_value FROM last_year_physical), 0))) * 100, 2)
+           COALESCE((SELECT income_value FROM last_year_physical), 0))) * 100, 2) AS DECIMAL(10,2))
     END AS "与同期差异%"
 )
 
@@ -1109,15 +1109,15 @@ total_count AS (
     SUM(CASE WHEN "项目" = '检查治疗人次/项次' THEN "去年同期" ELSE 0 END) AS "去年同期",
     CASE 
       WHEN SUM(CASE WHEN "项目" = '检查治疗人次/项次' THEN "上月" ELSE 0 END) = 0 THEN NULL
-      ELSE ROUND(((SUM(CASE WHEN "项目" = '检查治疗人次/项次' THEN "本月" ELSE 0 END) - 
+      ELSE CAST(ROUND(((SUM(CASE WHEN "项目" = '检查治疗人次/项次' THEN "本月" ELSE 0 END) - 
                    SUM(CASE WHEN "项目" = '检查治疗人次/项次' THEN "上月" ELSE 0 END)) / 
-                  SUM(CASE WHEN "项目" = '检查治疗人次/项次' THEN "上月" ELSE 0 END)) * 100, 2)
+                  SUM(CASE WHEN "项目" = '检查治疗人次/项次' THEN "上月" ELSE 0 END)) * 100, 2) AS DECIMAL(10,2))
     END AS "与上月差异%",
     CASE 
       WHEN SUM(CASE WHEN "项目" = '检查治疗人次/项次' THEN "去年同期" ELSE 0 END) = 0 THEN NULL
-      ELSE ROUND(((SUM(CASE WHEN "项目" = '检查治疗人次/项次' THEN "本月" ELSE 0 END) - 
+      ELSE CAST(ROUND(((SUM(CASE WHEN "项目" = '检查治疗人次/项次' THEN "本月" ELSE 0 END) - 
                    SUM(CASE WHEN "项目" = '检查治疗人次/项次' THEN "去年同期" ELSE 0 END)) / 
-                  SUM(CASE WHEN "项目" = '检查治疗人次/项次' THEN "去年同期" ELSE 0 END)) * 100, 2)
+                  SUM(CASE WHEN "项目" = '检查治疗人次/项次' THEN "去年同期" ELSE 0 END)) * 100, 2) AS DECIMAL(10,2))
     END AS "与同期差异%"
   FROM base_report
 ),
@@ -1145,15 +1145,15 @@ total_income AS (
         END) AS "去年同期",
     CASE 
       WHEN SUM(CASE WHEN "项目" IN ('本部收入合计', '上锦收入合计', '天府收入合计') THEN "上月" ELSE 0 END) = 0 THEN NULL
-      ELSE ROUND(((SUM(CASE WHEN "项目" IN ('本部收入合计', '上锦收入合计', '天府收入合计') THEN "本月" ELSE 0 END) - 
+      ELSE CAST(ROUND(((SUM(CASE WHEN "项目" IN ('本部收入合计', '上锦收入合计', '天府收入合计') THEN "本月" ELSE 0 END) - 
                    SUM(CASE WHEN "项目" IN ('本部收入合计', '上锦收入合计', '天府收入合计') THEN "上月" ELSE 0 END)) / 
-                  SUM(CASE WHEN "项目" IN ('本部收入合计', '上锦收入合计', '天府收入合计') THEN "上月" ELSE 0 END)) * 100, 2)
+                  SUM(CASE WHEN "项目" IN ('本部收入合计', '上锦收入合计', '天府收入合计') THEN "上月" ELSE 0 END)) * 100, 2) AS DECIMAL(10,2))
     END AS "与上月差异%",
     CASE 
       WHEN SUM(CASE WHEN "项目" IN ('本部收入合计', '上锦收入合计', '天府收入合计') THEN "去年同期" ELSE 0 END) = 0 THEN NULL
-      ELSE ROUND(((SUM(CASE WHEN "项目" IN ('本部收入合计', '上锦收入合计', '天府收入合计') THEN "本月" ELSE 0 END) - 
+      ELSE CAST(ROUND(((SUM(CASE WHEN "项目" IN ('本部收入合计', '上锦收入合计', '天府收入合计') THEN "本月" ELSE 0 END) - 
                    SUM(CASE WHEN "项目" IN ('本部收入合计', '上锦收入合计', '天府收入合计') THEN "去年同期" ELSE 0 END)) / 
-                  SUM(CASE WHEN "项目" IN ('本部收入合计', '上锦收入合计', '天府收入合计') THEN "去年同期" ELSE 0 END)) * 100, 2)
+                  SUM(CASE WHEN "项目" IN ('本部收入合计', '上锦收入合计', '天府收入合计') THEN "去年同期" ELSE 0 END)) * 100, 2) AS DECIMAL(10,2))
     END AS "与同期差异%"
   FROM base_report
 )
