@@ -132,7 +132,9 @@ current_month_physical AS (
         ELSE CAST(CAST("qty" AS DECIMAL(10, 2)) AS INTEGER) * CAST("FactPrice" AS DECIMAL(10, 2))
       END AS "计算金额"
     FROM m1.mdr_peisincome
-    WHERE ((f_feecharged = 'AQ==') OR f_feecharged = 'true')
+    WHERE 
+     f_feecharged in ('AQ==','true','1')  and (f_regreturned   = 'false' or f_regreturned   = 'AA==' 
+  or f_regreturned  is null ) and f_registered in ('AQ==','true','ARRIVED') 
       AND examfeeitem_name IN (
         '宫颈刮片病理细胞学检查','宫颈刮片病理细胞学检查【HPV】','液基薄层细胞学检查',
         '液基薄层细胞学检查【加HPV】','尿液基细胞学检测','液基薄层细胞制片术',
@@ -156,7 +158,9 @@ last_month_physical AS (
         ELSE CAST(CAST("qty" AS DECIMAL(10, 2)) AS INTEGER) * CAST("FactPrice" AS DECIMAL(10, 2))
       END AS "计算金额"
     FROM m1.mdr_peisincome
-    WHERE ((f_feecharged = 'AQ==') OR f_feecharged = 'true')
+    WHERE
+     f_feecharged in ('AQ==','true','1')  and (f_regreturned   = 'false' or f_regreturned   = 'AA==' 
+  or f_regreturned  is null ) and f_registered in ('AQ==','true','ARRIVED') 
       AND examfeeitem_name IN (
         '宫颈刮片病理细胞学检查','宫颈刮片病理细胞学检查【HPV】','液基薄层细胞学检查',
         '液基薄层细胞学检查【加HPV】','尿液基细胞学检测','液基薄层细胞制片术',
@@ -180,7 +184,9 @@ last_year_physical AS (
         ELSE CAST(CAST("qty" AS DECIMAL(10, 2)) AS INTEGER) * CAST("FactPrice" AS DECIMAL(10, 2))
       END AS "计算金额"
     FROM m1.mdr_peisincome
-    WHERE ((f_feecharged = 'AQ==') OR f_feecharged = 'true')
+    WHERE 
+     f_feecharged in ('AQ==','true','1')  and (f_regreturned   = 'false' or f_regreturned   = 'AA==' 
+  or f_regreturned  is null ) and f_registered in ('AQ==','true','ARRIVED') 
       AND examfeeitem_name IN (
         '宫颈刮片病理细胞学检查','宫颈刮片病理细胞学检查【HPV】','液基薄层细胞学检查',
         '液基薄层细胞学检查【加HPV】','尿液基细胞学检测','液基薄层细胞制片术',
