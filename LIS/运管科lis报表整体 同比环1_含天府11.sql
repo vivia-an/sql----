@@ -203,13 +203,13 @@ tianfu_data AS (
 
         COUNT(DISTINCT T."inspection_id") as "标本数",
 
-        SUM(COALESCE(CAST(B."workload" AS DOUBLE), 0)) as "工作量",
+        count(b.inspection_id) as "工作量",
 
-        SUM(COALESCE(CAST(B."charge" AS DOUBLE), 0)) as "收费金额"
+        SUM(COALESCE(CAST(B."item_charge" AS DOUBLE), 0)) as "收费金额"
 
     FROM hid0117_orcl_lis_dbo.lis_inspection_sample T
 
-    INNER JOIN hid0117_orcl_lis_dbo.lis_inspection_sample_charge B
+    INNER JOIN hid0117_orcl_lis_xhdata.lis6_inspect_charge B
 
         ON T."inspection_id" = B."inspection_id"
 
@@ -238,6 +238,7 @@ tianfu_data AS (
                 AND Q."isdeleted" = '0'
 
         )
+        and T.GROUP_ID IN ('G003','G004','G006','G009','G010','G011','G014','G017','G022','G068' ,'G999')
 
 ),
 
@@ -249,13 +250,13 @@ tianfu_data_last_month AS (
 
         COUNT(DISTINCT T."inspection_id") as "上月标本数",
 
-        SUM(COALESCE(CAST(B."workload" AS DOUBLE), 0)) as "上月工作量",
+        count(b.inspection_id) as "上月工作量",
 
-        SUM(COALESCE(CAST(B."charge" AS DOUBLE), 0)) as "上月收费金额"
+        SUM(COALESCE(CAST(B."item_charge" AS DOUBLE), 0)) as "上月收费金额"
 
     FROM hid0117_orcl_lis_dbo.lis_inspection_sample T
 
-    INNER JOIN hid0117_orcl_lis_dbo.lis_inspection_sample_charge B
+    INNER JOIN hid0117_orcl_lis_xhdata.lis6_inspect_charge B
 
         ON T."inspection_id" = B."inspection_id"
 
@@ -284,6 +285,7 @@ tianfu_data_last_month AS (
                 AND Q."isdeleted" = '0'
 
         )
+        and T.GROUP_ID IN ('G003','G004','G006','G009','G010','G011','G014','G017','G022','G068' ,'G999')
 
 ),
 
@@ -295,13 +297,13 @@ tianfu_data_last_year AS (
 
         COUNT(DISTINCT T."inspection_id") as "去年同期标本数",
 
-        SUM(COALESCE(CAST(B."workload" AS DOUBLE), 0)) as "去年同期工作量",
+        count(b.inspection_id) as "去年同期工作量",
 
-        SUM(COALESCE(CAST(B."charge" AS DOUBLE), 0)) as "去年同期收费金额"
+        SUM(COALESCE(CAST(B."item_charge" AS DOUBLE), 0)) as "去年同期收费金额"
 
     FROM hid0117_orcl_lis_dbo.lis_inspection_sample T
 
-    INNER JOIN hid0117_orcl_lis_dbo.lis_inspection_sample_charge B
+    INNER JOIN hid0117_orcl_lis_xhdata.lis6_inspect_charge B
 
         ON T."inspection_id" = B."inspection_id"
 
@@ -330,6 +332,7 @@ tianfu_data_last_year AS (
                 AND Q."isdeleted" = '0'
 
         )
+        and T.GROUP_ID IN ('G003','G004','G006','G009','G010','G011','G014','G017','G022','G068' ,'G999')
 
 ),
 
