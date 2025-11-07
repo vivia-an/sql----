@@ -294,6 +294,263 @@ WITH date_conversion AS (
   FROM hid0101_orcl_operaanesthisa_emrhis.sam_anar_enent
   WHERE "isdeleted" = '0'
   
+  UNION ALL
+  
+  -- ========== 天府院区（hid0117）表检查 ==========
+  
+  -- 天府院区 - 字典表检查
+  SELECT 
+    'hid0117_orcl_lis_xhsystem1.lis_charge_item' as "表名",
+    '字典表' as "表类型",
+    "lastupdatedttm",
+    CASE 
+      WHEN "lastupdatedttm" IS NULL THEN current_date
+      WHEN length(trim("lastupdatedttm")) < 10 THEN current_date
+      ELSE date_parse(substr("lastupdatedttm", 1, 10), '%Y-%m-%d')
+    END as "parsed_date"
+  FROM hid0117_orcl_lis_xhsystem1.lis_charge_item
+  WHERE "isdeleted" = '0'
+  
+  UNION ALL
+  
+  SELECT 
+    'hid0117_orcl_lis_xhbis.bis6_match_blood_type' as "表名",
+    '字典表' as "表类型",
+    "lastupdatedttm",
+    CASE 
+      WHEN "lastupdatedttm" IS NULL THEN current_date
+      WHEN length(trim("lastupdatedttm")) < 10 THEN current_date
+      ELSE date_parse(substr("lastupdatedttm", 1, 10), '%Y-%m-%d')
+    END as "parsed_date"
+  FROM hid0117_orcl_lis_xhbis.bis6_match_blood_type
+  WHERE "isdeleted" = '0'
+  
+  UNION ALL
+  
+  SELECT 
+    'hid0117_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT' as "表名",
+    '字典表' as "表类型",
+    "lastupdatedttm",
+    CASE 
+      WHEN "lastupdatedttm" IS NULL THEN current_date
+      WHEN length(trim("lastupdatedttm")) < 10 THEN current_date
+      ELSE date_parse(substr("lastupdatedttm", 1, 10), '%Y-%m-%d')
+    END as "parsed_date"
+  FROM hid0117_orcl_lis_xhbis.BIS6_BLOOD_COMPONENT
+  WHERE "isdeleted" = '0'
+  
+  UNION ALL
+  
+  SELECT 
+    'hid0117_orcl_lis_xhbis.bis6_match_method' as "表名",
+    '字典表' as "表类型",
+    "lastupdatedttm",
+    CASE 
+      WHEN "lastupdatedttm" IS NULL THEN current_date
+      WHEN length(trim("lastupdatedttm")) < 10 THEN current_date
+      ELSE date_parse(substr("lastupdatedttm", 1, 10), '%Y-%m-%d')
+    END as "parsed_date"
+  FROM hid0117_orcl_lis_xhbis.bis6_match_method
+  WHERE "isdeleted" = '0'
+  
+  UNION ALL
+  
+  -- 天府院区 - 业务数据表检查
+  SELECT 
+    'hid0117_orcl_lis_dbo.lis_inspection_sample' as "表名",
+    '业务表' as "表类型",
+    "lastupdatedttm",
+    CASE 
+      WHEN "lastupdatedttm" IS NULL THEN current_date
+      WHEN length(trim("lastupdatedttm")) < 10 THEN current_date
+      ELSE date_parse(substr("lastupdatedttm", 1, 10), '%Y-%m-%d')
+    END as "parsed_date"
+  FROM hid0117_orcl_lis_dbo.lis_inspection_sample
+  WHERE "isdeleted" = '0'
+  
+  UNION ALL
+  
+  SELECT 
+    'hid0117_orcl_lis_dbo.lis_inspection_sample_charge' as "表名",
+    '业务表' as "表类型",
+    "lastupdatedttm",
+    CASE 
+      WHEN "lastupdatedttm" IS NULL THEN current_date
+      WHEN length(trim("lastupdatedttm")) < 10 THEN current_date
+      ELSE date_parse(substr("lastupdatedttm", 1, 10), '%Y-%m-%d')
+    END as "parsed_date"
+  FROM hid0117_orcl_lis_dbo.lis_inspection_sample_charge
+  WHERE "isdeleted" = '0'
+  
+  UNION ALL
+  
+  SELECT 
+    'hid0117_orcl_lis_dbo.LIS_INSPECTION_RESULT' as "表名",
+    '业务表' as "表类型",
+    "lastupdatedttm",
+    CASE 
+      WHEN "lastupdatedttm" IS NULL THEN current_date
+      WHEN length(trim("lastupdatedttm")) < 10 THEN current_date
+      ELSE date_parse(substr("lastupdatedttm", 1, 10), '%Y-%m-%d')
+    END as "parsed_date"
+  FROM hid0117_orcl_lis_dbo.LIS_INSPECTION_RESULT
+  WHERE "isdeleted" = '0'
+  
+  UNION ALL
+  
+  SELECT 
+    'hid0117_orcl_lis_xhdata.lis6_inspect_sample' as "表名",
+    '业务表' as "表类型",
+    "lastupdatedttm",
+    CASE 
+      WHEN "lastupdatedttm" IS NULL THEN current_date
+      WHEN length(trim("lastupdatedttm")) < 10 THEN current_date
+      ELSE date_parse(substr("lastupdatedttm", 1, 10), '%Y-%m-%d')
+    END as "parsed_date"
+  FROM hid0117_orcl_lis_xhdata.lis6_inspect_sample
+  WHERE "isdeleted" = '0'
+  
+  UNION ALL
+  
+  SELECT 
+    'hid0117_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE' as "表名",
+    '业务表' as "表类型",
+    "lastupdatedttm",
+    CASE 
+      WHEN "lastupdatedttm" IS NULL THEN current_date
+      WHEN length(trim("lastupdatedttm")) < 10 THEN current_date
+      ELSE date_parse(substr("lastupdatedttm", 1, 10), '%Y-%m-%d')
+    END as "parsed_date"
+  FROM hid0117_orcl_lis_xhdata.LIS6_INSPECT_SAMPLE
+  WHERE "isdeleted" = '0'
+  
+  UNION ALL
+  
+  SELECT 
+    'hid0117_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT' as "表名",
+    '业务表' as "表类型",
+    "lastupdatedttm",
+    CASE 
+      WHEN "lastupdatedttm" IS NULL THEN current_date
+      WHEN length(trim("lastupdatedttm")) < 10 THEN current_date
+      ELSE date_parse(substr("lastupdatedttm", 1, 10), '%Y-%m-%d')
+    END as "parsed_date"
+  FROM hid0117_orcl_lis_xhbis.BIS6_BLOODBAG_INPUT
+  WHERE "isdeleted" = '0'
+  
+  UNION ALL
+  
+  SELECT 
+    'hid0117_orcl_lis_xhbis.bis6_req_info' as "表名",
+    '业务表' as "表类型",
+    "lastupdatedttm",
+    CASE 
+      WHEN "lastupdatedttm" IS NULL THEN current_date
+      WHEN length(trim("lastupdatedttm")) < 10 THEN current_date
+      ELSE date_parse(substr("lastupdatedttm", 1, 10), '%Y-%m-%d')
+    END as "parsed_date"
+  FROM hid0117_orcl_lis_xhbis.bis6_req_info
+  WHERE "isdeleted" = '0'
+  
+  UNION ALL
+  
+  SELECT 
+    'hid0117_orcl_lis_xhbis.bis6_req_blood' as "表名",
+    '业务表' as "表类型",
+    "lastupdatedttm",
+    CASE 
+      WHEN "lastupdatedttm" IS NULL THEN current_date
+      WHEN length(trim("lastupdatedttm")) < 10 THEN current_date
+      ELSE date_parse(substr("lastupdatedttm", 1, 10), '%Y-%m-%d')
+    END as "parsed_date"
+  FROM hid0117_orcl_lis_xhbis.bis6_req_blood
+  WHERE "isdeleted" = '0'
+  
+  UNION ALL
+  
+  SELECT 
+    'hid0117_orcl_lis_xhbis.bis6_charged_info' as "表名",
+    '业务表' as "表类型",
+    "lastupdatedttm",
+    CASE 
+      WHEN "lastupdatedttm" IS NULL THEN current_date
+      WHEN length(trim("lastupdatedttm")) < 10 THEN current_date
+      ELSE date_parse(substr("lastupdatedttm", 1, 10), '%Y-%m-%d')
+    END as "parsed_date"
+  FROM hid0117_orcl_lis_xhbis.bis6_charged_info
+  WHERE "isdeleted" = '0'
+  
+  UNION ALL
+  
+  SELECT 
+    'hid0117_orcl_lis_xhbis.bis6_bloodbag_match' as "表名",
+    '业务表' as "表类型",
+    "lastupdatedttm",
+    CASE 
+      WHEN "lastupdatedttm" IS NULL THEN current_date
+      WHEN length(trim("lastupdatedttm")) < 10 THEN current_date
+      ELSE date_parse(substr("lastupdatedttm", 1, 10), '%Y-%m-%d')
+    END as "parsed_date"
+  FROM hid0117_orcl_lis_xhbis.bis6_bloodbag_match
+  WHERE "isdeleted" = '0'
+  
+  UNION ALL
+  
+  SELECT 
+    'hid0117_orcl_lis_xhbis.BIS6_PAT_SPECIAL_LIST' as "表名",
+    '业务表' as "表类型",
+    "lastupdatedttm",
+    CASE 
+      WHEN "lastupdatedttm" IS NULL THEN current_date
+      WHEN length(trim("lastupdatedttm")) < 10 THEN current_date
+      ELSE date_parse(substr("lastupdatedttm", 1, 10), '%Y-%m-%d')
+    END as "parsed_date"
+  FROM hid0117_orcl_lis_xhbis.BIS6_PAT_SPECIAL_LIST
+  WHERE "isdeleted" = '0'
+  
+  UNION ALL
+  
+  SELECT 
+    'hid0117_orcl_lis_xhbis.bis6_blood_inventory' as "表名",
+    '业务表' as "表类型",
+    "lastupdatedttm",
+    CASE 
+      WHEN "lastupdatedttm" IS NULL THEN current_date
+      WHEN length(trim("lastupdatedttm")) < 10 THEN current_date
+      ELSE date_parse(substr("lastupdatedttm", 1, 10), '%Y-%m-%d')
+    END as "parsed_date"
+  FROM hid0117_orcl_lis_xhbis.bis6_blood_inventory
+  WHERE "isdeleted" = '0'
+  
+  UNION ALL
+  
+  SELECT 
+    'hid0117_orcl_lis_bis.his_requisition' as "表名",
+    '业务表' as "表类型",
+    "lastupdatedttm",
+    CASE 
+      WHEN "lastupdatedttm" IS NULL THEN current_date
+      WHEN length(trim("lastupdatedttm")) < 10 THEN current_date
+      ELSE date_parse(substr("lastupdatedttm", 1, 10), '%Y-%m-%d')
+    END as "parsed_date"
+  FROM hid0117_orcl_lis_bis.his_requisition
+  WHERE "isdeleted" = '0'
+  
+  UNION ALL
+  
+  -- 天府院区 - 接口表检查
+  SELECT 
+    'hid0117_orcl_lis_xhinterface.xinghe_charged_list' as "表名",
+    '接口表' as "表类型",
+    "lastupdatedttm",
+    CASE 
+      WHEN "lastupdatedttm" IS NULL THEN current_date
+      WHEN length(trim("lastupdatedttm")) < 10 THEN current_date
+      ELSE date_parse(substr("lastupdatedttm", 1, 10), '%Y-%m-%d')
+    END as "parsed_date"
+  FROM hid0117_orcl_lis_xhinterface.xinghe_charged_list
+  WHERE "isdeleted" = '0'
+  
 ),
 
 table_quality_check AS (
@@ -326,7 +583,12 @@ SELECT
     WHEN "表名" LIKE '%operaanesthisa%' THEN '手术麻醉'
     WHEN "表名" LIKE '%datacenter%' THEN '数据中心'
     ELSE '其他'
-  END as "业务域"
+  END as "业务域",
+  CASE 
+    WHEN "表名" LIKE 'hid0117_%' THEN '天府院区'
+    WHEN "表名" LIKE 'hid0101_%' THEN '本部院区'
+    ELSE '未知院区'
+  END as "院区"
 FROM table_quality_check
 ORDER BY 
   CASE 
@@ -335,6 +597,11 @@ ORDER BY
     WHEN "质量状态" = '⚠️ 注意' THEN 3
     ELSE 4
   END,
-  "距今天数" DESC, 
+  "距今天数" DESC,
+  CASE 
+    WHEN "表名" LIKE 'hid0101_%' THEN 1  -- 本部院区优先
+    WHEN "表名" LIKE 'hid0117_%' THEN 2  -- 天府院区其次
+    ELSE 3
+  END,
   "业务域", 
   "表名"

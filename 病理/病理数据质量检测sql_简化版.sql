@@ -71,6 +71,22 @@ WITH date_conversion AS (
   WHERE "hosp_code" = 'HID0101'
     AND "dept_name" LIKE '%病理科%'
     AND "isdeleted" = '0'
+
+  UNION ALL
+
+  -- 天府病理系统表检查
+  SELECT
+    'hid0117_mysql_bl_pis.pathology' as "表名",
+    '天府病理业务表' as "表类型",
+    MAX(receive_at) as "最新更新时间",
+    CASE
+      WHEN MAX(receive_at) IS NULL THEN 999
+      WHEN LENGTH(TRIM(MAX(receive_at))) < 10 THEN 999
+      ELSE date_diff('day', date_parse(substr(MAX(receive_at), 1, 10), '%Y-%m-%d'), current_date)
+    END as "距今天数"
+  FROM hid0117_mysql_bl_pis."pathology"
+  WHERE "deleted_at" IS NULL
+    AND "library_id" NOT IN ('39', '40', '41', '60', '67', '68', '69', '77', '18')
 )
 
 -- 主查询：仅基于天数的病理数据质量报告
@@ -89,6 +105,7 @@ SELECT
   END as "质量状态",
   CASE
     WHEN "表名" LIKE '%t_jcxx%' THEN '病理检查'
+    WHEN "表名" LIKE '%pathology%' THEN '病理检查'
     WHEN "表名" LIKE '%mdr_income%' THEN '病理收入'
     WHEN "表名" LIKE '%mdr_peisincome%' THEN '体检病理'
     WHEN "表名" LIKE '%inventory%' THEN '物资管理'
@@ -119,16 +136,17 @@ ORDER BY
 -- ❓ 数据异常：无法解析更新时间
 --
 -- 监控表：
--- 1. hid0101_mssql_bl_rep.t_jcxx - 病理检查信息表
--- 2. m1.mdr_income - 病理收入数据表
--- 3. m1.mdr_peisincome - 体检病理收入表
--- 4. datacenter_db.inventory_del_dets - 病理科物资领用表
+-- 1. hid0101_mssql_bl_rep.t_jcxx - 病理检查信息表（主院区/上锦/锦江）
+-- 2. m1.mdr_income - 病理收入数据表（所有院区）
+-- 3. m1.mdr_peisincome - 体检病理收入表（所有院区）
+-- 4. datacenter_db.inventory_del_dets - 病理科物资领用表（主院区）
+-- 5. hid0117_mysql_bl_pis.pathology - 天府病理系统表（天府院区）
 --
 -- 业务域分类：
--- - 病理检查：核心病理业务数据
--- - 病理收入：病理相关收入数据
--- - 体检病理：体检相关病理数据
--- - 物资管理：病理科物资领用数据
+-- - 病理检查：核心病理业务数据（包含主院区、上锦、锦江、天府）
+-- - 病理收入：病理相关收入数据（所有院区）
+-- - 体检病理：体检相关病理数据（所有院区）
+-- - 物资管理：病理科物资领用数据（主院区）
 --
 -- 使用说明：
 -- 1. 定期执行监控各表数据更新时效

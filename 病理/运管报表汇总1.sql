@@ -6,19 +6,25 @@ select * from (
 WITH last_month_range AS (
   SELECT
     FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM-dd') || ' 00:00:00' AS start_date,
-    FORMAT_DATETIME(LAST_DAY_OF_MONTH(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH)), 'yyyy-MM-dd') || ' 23:59:59' AS end_date
+    FORMAT_DATETIME(LAST_DAY_OF_MONTH(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH)), 'yyyy-MM-dd') || ' 23:59:59' AS end_date,
+    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS month_label,
+    DATE_FORMAT(DATE_ADD('month', -1, CURRENT_DATE), '%Y-%m') AS month_label_presto
 ),
 
 last_last_month_range AS (
   SELECT
     FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '2' MONTH), 'yyyy-MM-dd') || ' 00:00:00' AS start_date,
-    FORMAT_DATETIME(LAST_DAY_OF_MONTH(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '2' MONTH)), 'yyyy-MM-dd') || ' 23:59:59' AS end_date
+    FORMAT_DATETIME(LAST_DAY_OF_MONTH(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '2' MONTH)), 'yyyy-MM-dd') || ' 23:59:59' AS end_date,
+    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '2' MONTH), 'yyyy-MM') AS month_label,
+    DATE_FORMAT(DATE_ADD('month', -2, CURRENT_DATE), '%Y-%m') AS month_label_presto
 ),
 
 last_year_same_month_range AS (
   SELECT
     FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '13' MONTH), 'yyyy-MM-dd') || ' 00:00:00' AS start_date,
-    FORMAT_DATETIME(LAST_DAY_OF_MONTH(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '13' MONTH)), 'yyyy-MM-dd') || ' 23:59:59' AS end_date
+    FORMAT_DATETIME(LAST_DAY_OF_MONTH(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '13' MONTH)), 'yyyy-MM-dd') || ' 23:59:59' AS end_date,
+    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '13' MONTH), 'yyyy-MM') AS month_label,
+    DATE_FORMAT(DATE_ADD('month', -13, CURRENT_DATE), '%Y-%m') AS month_label_presto
 ),
 
 -- 本月检查治疗人次/项次
@@ -56,34 +62,35 @@ last_year_count AS (
 
 -- 本月检查治疗收入
 current_month_income AS (
-  SELECT SUM(TotalFee) AS income_value FROM m1.mdr_income
+  SELECT SUM(TotalFee) AS income_value 
+  FROM m1.mdr_income, last_month_range
   WHERE IsDeleted = '0' 
     AND RecDeptName IN ('病理科','锦江病理科','温江病理科','天府病理科')
-    AND SUBSTRING(chargedttm, 1, 7) = 
-        FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM')
+    AND SUBSTRING(chargedttm, 1, 7) = month_label
 ),
 
 -- 上月检查治疗收入
 last_month_income AS (
-  SELECT SUM(TotalFee) AS income_value FROM m1.mdr_income
+  SELECT SUM(TotalFee) AS income_value 
+  FROM m1.mdr_income, last_last_month_range
   WHERE IsDeleted = '0' 
     AND RecDeptName IN ('病理科','锦江病理科','温江病理科','天府病理科')
-    AND SUBSTRING(chargedttm, 1, 7) = 
-        FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '2' MONTH), 'yyyy-MM')
+    AND SUBSTRING(chargedttm, 1, 7) = month_label
 ),
 
 -- 去年同期检查治疗收入
 last_year_income AS (
-  SELECT SUM(TotalFee) AS income_value FROM m1.mdr_income
+  SELECT SUM(TotalFee) AS income_value 
+  FROM m1.mdr_income, last_year_same_month_range
   WHERE IsDeleted = '0' 
     AND RecDeptName IN ('病理科','锦江病理科','温江病理科','天府病理科')
-    AND SUBSTRING(chargedttm, 1, 7) = 
-        FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '13' MONTH), 'yyyy-MM')
+    AND SUBSTRING(chargedttm, 1, 7) = month_label
 ),
 
 -- 本月穿刺中心收入
 current_month_puncture AS (
-  SELECT SUM(TotalFee) AS income_value FROM m1.mdr_income
+  SELECT SUM(TotalFee) AS income_value 
+  FROM m1.mdr_income, last_month_range
   WHERE IsDeleted = '0' 
     AND RecDeptName IN ('穿刺诊疗中心', '锦江穿刺诊疗中心')
     AND OrderName IN (
@@ -91,13 +98,13 @@ current_month_puncture AS (
         '脱落细胞学检查与诊断(涂片)','细针穿刺细胞学检查与诊断(细胞块)',
         '细针穿刺细胞学检查与诊断(涂片)'
     )
-    AND SUBSTRING(chargedttm, 1, 7) = 
-        FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM')
+    AND SUBSTRING(chargedttm, 1, 7) = month_label
 ),
 
 -- 上月穿刺中心收入
 last_month_puncture AS (
-  SELECT SUM(TotalFee) AS income_value FROM m1.mdr_income
+  SELECT SUM(TotalFee) AS income_value 
+  FROM m1.mdr_income, last_last_month_range
   WHERE IsDeleted = '0' 
     AND RecDeptName IN ('穿刺诊疗中心', '锦江穿刺诊疗中心')
     AND OrderName IN (
@@ -105,13 +112,13 @@ last_month_puncture AS (
         '脱落细胞学检查与诊断(涂片)','细针穿刺细胞学检查与诊断(细胞块)',
         '细针穿刺细胞学检查与诊断(涂片)'
     )
-    AND SUBSTRING(chargedttm, 1, 7) = 
-        FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '2' MONTH), 'yyyy-MM')
+    AND SUBSTRING(chargedttm, 1, 7) = month_label
 ),
 
 -- 去年同期穿刺中心收入
 last_year_puncture AS (
-  SELECT SUM(TotalFee) AS income_value FROM m1.mdr_income
+  SELECT SUM(TotalFee) AS income_value 
+  FROM m1.mdr_income, last_year_same_month_range
   WHERE IsDeleted = '0' 
     AND RecDeptName IN ('穿刺诊疗中心', '锦江穿刺诊疗中心')
     AND OrderName IN (
@@ -119,8 +126,7 @@ last_year_puncture AS (
         '脱落细胞学检查与诊断(涂片)','细针穿刺细胞学检查与诊断(细胞块)',
         '细针穿刺细胞学检查与诊断(涂片)'
     )
-    AND SUBSTRING(chargedttm, 1, 7) = 
-        FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '13' MONTH), 'yyyy-MM')
+    AND SUBSTRING(chargedttm, 1, 7) = month_label
 ),
 
 -- 本月体检收入
@@ -144,7 +150,7 @@ current_month_physical AS (
         '两癌筛查组织病理学检查【需取组织检查才用条码】','液基薄层细胞学检查【加白带常规】',
         '体检液基薄层细胞制片术','液基薄层细胞制片术','液基薄层细胞学检查（HPV）（体检）'
       )
-      AND SUBSTRING(dateregister, 1, 7) = DATE_FORMAT(DATE_ADD('month', -1, CURRENT_DATE), '%Y-%m')
+      AND SUBSTRING(dateregister, 1, 7) = (SELECT month_label_presto FROM last_month_range)
       AND medorgcode IN ('HID0101','HID0118','F0017','F0002')
   ) t1
 ),
@@ -170,7 +176,7 @@ last_month_physical AS (
         '两癌筛查组织病理学检查【需取组织检查才用条码】','液基薄层细胞学检查【加白带常规】',
         '体检液基薄层细胞制片术','液基薄层细胞制片术','液基薄层细胞学检查（HPV）（体检）'
       )
-      AND SUBSTRING(dateregister, 1, 7) = DATE_FORMAT(DATE_ADD('month', -2, CURRENT_DATE), '%Y-%m')
+      AND SUBSTRING(dateregister, 1, 7) = (SELECT month_label_presto FROM last_last_month_range)
       AND medorgcode IN ('HID0101','HID0118','F0017','F0002')
   ) t2
 ),
@@ -196,7 +202,7 @@ last_year_physical AS (
         '两癌筛查组织病理学检查【需取组织检查才用条码】','液基薄层细胞学检查【加白带常规】',
         '体检液基薄层细胞制片术','液基薄层细胞制片术','液基薄层细胞学检查（HPV）（体检）'
       )
-      AND SUBSTRING(dateregister, 1, 7) = DATE_FORMAT(DATE_ADD('month', -13, CURRENT_DATE), '%Y-%m')
+      AND SUBSTRING(dateregister, 1, 7) = (SELECT month_label_presto FROM last_year_same_month_range)
       AND medorgcode IN ('HID0101','HID0118','F0017','F0002')
   ) t3
 ),
@@ -204,33 +210,30 @@ last_year_physical AS (
 -- 本月领用材料试剂费
 current_month_material AS (
   SELECT SUM(CAST("amountmoney" AS DOUBLE)) AS cost_value 
-  FROM datacenter_db.inventory_del_dets
+  FROM datacenter_db.inventory_del_dets, last_month_range
   WHERE "hosp_code" = 'HID0101' 
     AND "dept_name" LIKE '%病理科%'
-    AND SUBSTRING("del_date", 1, 7) = 
-        FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM')
+    AND SUBSTRING("del_date", 1, 7) = month_label
     AND isdeleted = '0'
 ),
 
 -- 上月领用材料试剂费
 last_month_material AS (
   SELECT SUM(CAST("amountmoney" AS DOUBLE)) AS cost_value 
-  FROM datacenter_db.inventory_del_dets
+  FROM datacenter_db.inventory_del_dets, last_last_month_range
   WHERE "hosp_code" = 'HID0101' 
     AND "dept_name" LIKE '%病理科%'
-    AND SUBSTRING("del_date", 1, 7) = 
-        FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '2' MONTH), 'yyyy-MM')
+    AND SUBSTRING("del_date", 1, 7) = month_label
     AND isdeleted = '0'
 ),
 
 -- 去年同期领用材料试剂费
 last_year_material AS (
   SELECT SUM(CAST("amountmoney" AS DOUBLE)) AS cost_value 
-  FROM datacenter_db.inventory_del_dets
+  FROM datacenter_db.inventory_del_dets, last_year_same_month_range
   WHERE "hosp_code" = 'HID0101' 
     AND "dept_name" LIKE '%病理科%'
-    AND SUBSTRING("del_date", 1, 7) = 
-        FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '13' MONTH), 'yyyy-MM')
+    AND SUBSTRING("del_date", 1, 7) = month_label
     AND isdeleted = '0'
 ),
 
@@ -238,7 +241,7 @@ last_year_material AS (
 final_results AS (
   -- 1. 检查治疗人次/项次
   SELECT 
-    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
+    (SELECT month_label FROM last_month_range) AS "统计月",
     '主院区' AS "单位",
     '检查治疗人次/项次' AS "项目",
     COALESCE((SELECT count_value FROM current_month_count), 0) AS "本月",
@@ -257,7 +260,7 @@ final_results AS (
   
   -- 2. 检查治疗收入(元)
   SELECT 
-    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
+    (SELECT month_label FROM last_month_range) AS "统计月",
     '主院区' AS "单位",
     '检查治疗收入(元)' AS "项目",
     COALESCE((SELECT income_value FROM current_month_income), 0) AS "本月",
@@ -276,7 +279,7 @@ final_results AS (
   
   -- 3. 穿刺中心细胞病理收入(元)
   SELECT 
-    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
+    (SELECT month_label FROM last_month_range) AS "统计月",
     '主院区' AS "单位",
     '穿刺中心细胞病理收入(元)' AS "项目",
     COALESCE((SELECT income_value FROM current_month_puncture), 0) AS "本月",
@@ -295,7 +298,7 @@ final_results AS (
   
   -- 4. 本部温江第三方体检病理收入(元)
   SELECT 
-    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
+    (SELECT month_label FROM last_month_range) AS "统计月",
     '主院区' AS "单位",
     '本部温江第三方体检病理收入(元)' AS "项目",
     COALESCE((SELECT income_value FROM current_month_physical), 0) AS "本月",
@@ -314,7 +317,7 @@ final_results AS (
   
   -- 5. 其他收入(元)
   SELECT 
-    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
+    (SELECT month_label FROM last_month_range) AS "统计月",
     '主院区' AS "单位",
     '其他收入(元)' AS "项目",
     0 AS "本月",
@@ -327,7 +330,7 @@ final_results AS (
   
   -- 6. 本部收入合计
   SELECT 
-    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
+    (SELECT month_label FROM last_month_range) AS "统计月",
     '主院区' AS "单位",
     '本部收入合计' AS "项目",
     COALESCE((SELECT income_value FROM current_month_income), 0) + 
@@ -374,7 +377,7 @@ final_results AS (
   
   -- 7. 领用材料试剂费(元)
   SELECT 
-    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
+    (SELECT month_label FROM last_month_range) AS "统计月",
     '主院区' AS "单位",
     '领用材料试剂费(元)' AS "项目",
     COALESCE((SELECT cost_value FROM current_month_material), 0) AS "本月",
@@ -393,7 +396,7 @@ final_results AS (
   
   -- 8. 领用材料试剂费占收入比例(%)
   SELECT 
-    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
+    (SELECT month_label FROM last_month_range) AS "统计月",
     '主院区' AS "单位",
     '领用材料试剂费占收入比例(%)' AS "项目",
     CASE 
@@ -456,19 +459,25 @@ select * from (
 WITH last_month_range AS (
   SELECT
     FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM-dd') || ' 00:00:00' AS start_date,
-    FORMAT_DATETIME(LAST_DAY_OF_MONTH(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH)), 'yyyy-MM-dd') || ' 23:59:59' AS end_date
+    FORMAT_DATETIME(LAST_DAY_OF_MONTH(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH)), 'yyyy-MM-dd') || ' 23:59:59' AS end_date,
+    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS month_label,
+    DATE_FORMAT(DATE_ADD('month', -1, CURRENT_DATE), '%Y-%m') AS month_label_presto
 ),
 
 last_last_month_range AS (
   SELECT
     FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '2' MONTH), 'yyyy-MM-dd') || ' 00:00:00' AS start_date,
-    FORMAT_DATETIME(LAST_DAY_OF_MONTH(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '2' MONTH)), 'yyyy-MM-dd') || ' 23:59:59' AS end_date
+    FORMAT_DATETIME(LAST_DAY_OF_MONTH(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '2' MONTH)), 'yyyy-MM-dd') || ' 23:59:59' AS end_date,
+    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '2' MONTH), 'yyyy-MM') AS month_label,
+    DATE_FORMAT(DATE_ADD('month', -2, CURRENT_DATE), '%Y-%m') AS month_label_presto
 ),
 
 last_year_same_month_range AS (
   SELECT
     FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '13' MONTH), 'yyyy-MM-dd') || ' 00:00:00' AS start_date,
-    FORMAT_DATETIME(LAST_DAY_OF_MONTH(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '13' MONTH)), 'yyyy-MM-dd') || ' 23:59:59' AS end_date
+    FORMAT_DATETIME(LAST_DAY_OF_MONTH(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '13' MONTH)), 'yyyy-MM-dd') || ' 23:59:59' AS end_date,
+    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '13' MONTH), 'yyyy-MM') AS month_label,
+    DATE_FORMAT(DATE_ADD('month', -13, CURRENT_DATE), '%Y-%m') AS month_label_presto
 ),
 
 -- 本月检查治疗人次/项次（上锦）
@@ -503,29 +512,29 @@ last_year_count AS (
 
 -- 本月检查治疗收入（上锦）
 current_month_income AS (
-  SELECT SUM(TotalFee) AS income_value FROM m1.mdr_income
+  SELECT SUM(TotalFee) AS income_value 
+  FROM m1.mdr_income, last_month_range
   WHERE IsDeleted = '0' 
     AND RecDeptName = '病理科(上锦)'
-    AND SUBSTRING(chargedttm, 1, 7) = 
-        FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM')
+    AND SUBSTRING(chargedttm, 1, 7) = month_label
 ),
 
 -- 上月检查治疗收入（上锦）
 last_month_income AS (
-  SELECT SUM(TotalFee) AS income_value FROM m1.mdr_income
+  SELECT SUM(TotalFee) AS income_value 
+  FROM m1.mdr_income, last_last_month_range
   WHERE IsDeleted = '0' 
     AND RecDeptName = '病理科(上锦)'
-    AND SUBSTRING(chargedttm, 1, 7) = 
-        FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '2' MONTH), 'yyyy-MM')
+    AND SUBSTRING(chargedttm, 1, 7) = month_label
 ),
 
 -- 去年同期检查治疗收入（上锦）
 last_year_income AS (
-  SELECT SUM(TotalFee) AS income_value FROM m1.mdr_income
+  SELECT SUM(TotalFee) AS income_value 
+  FROM m1.mdr_income, last_year_same_month_range
   WHERE IsDeleted = '0' 
     AND RecDeptName = '病理科(上锦)'
-    AND SUBSTRING(chargedttm, 1, 7) = 
-        FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '13' MONTH), 'yyyy-MM')
+    AND SUBSTRING(chargedttm, 1, 7) = month_label
 ),
 
 -- 本月体检收入（上锦）
@@ -547,7 +556,7 @@ current_month_physical AS (
         '两癌筛查组织病理学检查【需取组织检查才用条码】','液基薄层细胞学检查【加白带常规】',
         '体检液基薄层细胞制片术','液基薄层细胞制片术','液基薄层细胞学检查（HPV）（体检）'
       )
-      AND SUBSTRING(dateregister, 1, 7) = DATE_FORMAT(DATE_ADD('month', -1, CURRENT_DATE), '%Y-%m')
+      AND SUBSTRING(dateregister, 1, 7) = (SELECT month_label_presto FROM last_month_range)
       AND medorgcode IN ('HID0103')
   ) t1
 ),
@@ -571,7 +580,7 @@ last_month_physical AS (
         '两癌筛查组织病理学检查【需取组织检查才用条码】','液基薄层细胞学检查【加白带常规】',
         '体检液基薄层细胞制片术','液基薄层细胞制片术','液基薄层细胞学检查（HPV）（体检）'
       )
-      AND SUBSTRING(dateregister, 1, 7) = DATE_FORMAT(DATE_ADD('month', -2, CURRENT_DATE), '%Y-%m')
+      AND SUBSTRING(dateregister, 1, 7) = (SELECT month_label_presto FROM last_last_month_range)
       AND medorgcode IN ('HID0103')
   ) t2
 ),
@@ -595,7 +604,7 @@ last_year_physical AS (
         '两癌筛查组织病理学检查【需取组织检查才用条码】','液基薄层细胞学检查【加白带常规】',
         '体检液基薄层细胞制片术','液基薄层细胞制片术','液基薄层细胞学检查（HPV）（体检）'
       )
-      AND SUBSTRING(dateregister, 1, 7) = DATE_FORMAT(DATE_ADD('month', -13, CURRENT_DATE), '%Y-%m')
+      AND SUBSTRING(dateregister, 1, 7) = (SELECT month_label_presto FROM last_year_same_month_range)
       AND medorgcode IN ('HID0103')
   ) t3
 ),
@@ -604,7 +613,7 @@ last_year_physical AS (
 final_results AS (
   -- 1. 检查治疗人次/项次（上锦）
   SELECT 
-    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
+    (SELECT month_label FROM last_month_range) AS "统计月",
     '上锦院区' AS "单位",
     '检查治疗人次/项次' AS "项目",
     COALESCE((SELECT count_value FROM current_month_count), 0) AS "本月",
@@ -623,7 +632,7 @@ final_results AS (
   
   -- 2. 上锦检查治疗收入(元)
   SELECT 
-    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
+    (SELECT month_label FROM last_month_range) AS "统计月",
     '上锦院区' AS "单位",
     '上锦检查治疗收入(元)' AS "项目",
     COALESCE((SELECT income_value FROM current_month_income), 0) AS "本月",
@@ -642,7 +651,7 @@ final_results AS (
   
   -- 3. 上锦体检病理收入(元)
   SELECT 
-    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
+    (SELECT month_label FROM last_month_range) AS "统计月",
     '上锦院区' AS "单位",
     '上锦体检病理收入(元)' AS "项目",
     COALESCE((SELECT income_value FROM current_month_physical), 0) AS "本月",
@@ -661,7 +670,7 @@ final_results AS (
   
   -- 4. 上锦收入合计
   SELECT 
-    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
+    (SELECT month_label FROM last_month_range) AS "统计月",
     '上锦院区' AS "单位",
     '上锦收入合计' AS "项目",
     COALESCE((SELECT income_value FROM current_month_income), 0) + 
@@ -719,19 +728,25 @@ select * from (
 WITH last_month_range AS (
   SELECT
     FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM-dd') || ' 00:00:00' AS start_date,
-    FORMAT_DATETIME(LAST_DAY_OF_MONTH(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH)), 'yyyy-MM-dd') || ' 23:59:59' AS end_date
+    FORMAT_DATETIME(LAST_DAY_OF_MONTH(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH)), 'yyyy-MM-dd') || ' 23:59:59' AS end_date,
+    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS month_label,
+    DATE_FORMAT(DATE_ADD('month', -1, CURRENT_DATE), '%Y-%m') AS month_label_presto
 ),
 
 last_last_month_range AS (
   SELECT
     FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '2' MONTH), 'yyyy-MM-dd') || ' 00:00:00' AS start_date,
-    FORMAT_DATETIME(LAST_DAY_OF_MONTH(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '2' MONTH)), 'yyyy-MM-dd') || ' 23:59:59' AS end_date
+    FORMAT_DATETIME(LAST_DAY_OF_MONTH(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '2' MONTH)), 'yyyy-MM-dd') || ' 23:59:59' AS end_date,
+    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '2' MONTH), 'yyyy-MM') AS month_label,
+    DATE_FORMAT(DATE_ADD('month', -2, CURRENT_DATE), '%Y-%m') AS month_label_presto
 ),
 
 last_year_same_month_range AS (
   SELECT
     FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '13' MONTH), 'yyyy-MM-dd') || ' 00:00:00' AS start_date,
-    FORMAT_DATETIME(LAST_DAY_OF_MONTH(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '13' MONTH)), 'yyyy-MM-dd') || ' 23:59:59' AS end_date
+    FORMAT_DATETIME(LAST_DAY_OF_MONTH(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '13' MONTH)), 'yyyy-MM-dd') || ' 23:59:59' AS end_date,
+    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '13' MONTH), 'yyyy-MM') AS month_label,
+    DATE_FORMAT(DATE_ADD('month', -13, CURRENT_DATE), '%Y-%m') AS month_label_presto
 ),
 
 -- 本月检查治疗人次/项次（天府）
@@ -880,29 +895,29 @@ last_year_count AS (
 
 -- 本月检查治疗收入（天府）
 current_month_income AS (
-  SELECT SUM(TotalFee) AS income_value FROM m1.mdr_income
+  SELECT SUM(TotalFee) AS income_value 
+  FROM m1.mdr_income, last_month_range
   WHERE IsDeleted = '0' 
     AND RecDeptName = '病理科(天府)'
-    AND SUBSTRING(chargedttm, 1, 7) = 
-        FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM')
+    AND SUBSTRING(chargedttm, 1, 7) = month_label
 ),
 
 -- 上月检查治疗收入（天府）
 last_month_income AS (
-  SELECT SUM(TotalFee) AS income_value FROM m1.mdr_income
+  SELECT SUM(TotalFee) AS income_value 
+  FROM m1.mdr_income, last_last_month_range
   WHERE IsDeleted = '0' 
     AND RecDeptName = '病理科(天府)'
-    AND SUBSTRING(chargedttm, 1, 7) = 
-        FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '2' MONTH), 'yyyy-MM')
+    AND SUBSTRING(chargedttm, 1, 7) = month_label
 ),
 
 -- 去年同期检查治疗收入（天府）
 last_year_income AS (
-  SELECT SUM(TotalFee) AS income_value FROM m1.mdr_income
+  SELECT SUM(TotalFee) AS income_value 
+  FROM m1.mdr_income, last_year_same_month_range
   WHERE IsDeleted = '0' 
     AND RecDeptName = '病理科(天府)'
-    AND SUBSTRING(chargedttm, 1, 7) = 
-        FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '13' MONTH), 'yyyy-MM')
+    AND SUBSTRING(chargedttm, 1, 7) = month_label
 ),
 
 -- 本月体检收入（天府）
@@ -924,7 +939,7 @@ current_month_physical AS (
         '两癌筛查组织病理学检查【需取组织检查才用条码】','液基薄层细胞学检查【加白带常规】',
         '体检液基薄层细胞制片术','液基薄层细胞制片术','液基薄层细胞学检查（HPV）（体检）'
       )
-      AND SUBSTRING(dateregister, 1, 7) = DATE_FORMAT(DATE_ADD('month', -1, CURRENT_DATE), '%Y-%m')
+      AND SUBSTRING(dateregister, 1, 7) = (SELECT month_label_presto FROM last_month_range)
       AND medorgcode IN ('HID0117')
   ) t1
 ),
@@ -948,7 +963,7 @@ last_month_physical AS (
         '两癌筛查组织病理学检查【需取组织检查才用条码】','液基薄层细胞学检查【加白带常规】',
         '体检液基薄层细胞制片术','液基薄层细胞制片术','液基薄层细胞学检查（HPV）（体检）'
       )
-      AND SUBSTRING(dateregister, 1, 7) = DATE_FORMAT(DATE_ADD('month', -2, CURRENT_DATE), '%Y-%m')
+      AND SUBSTRING(dateregister, 1, 7) = (SELECT month_label_presto FROM last_last_month_range)
       AND medorgcode IN ('HID0117')
   ) t2
 ),
@@ -972,7 +987,7 @@ last_year_physical AS (
         '两癌筛查组织病理学检查【需取组织检查才用条码】','液基薄层细胞学检查【加白带常规】',
         '体检液基薄层细胞制片术','液基薄层细胞制片术','液基薄层细胞学检查（HPV）（体检）'
       )
-      AND SUBSTRING(dateregister, 1, 7) = DATE_FORMAT(DATE_ADD('month', -13, CURRENT_DATE), '%Y-%m')
+      AND SUBSTRING(dateregister, 1, 7) = (SELECT month_label_presto FROM last_year_same_month_range)
       AND medorgcode IN ('HID0117')
   ) t3
 ),
@@ -981,7 +996,7 @@ last_year_physical AS (
 final_results AS (
   -- 1. 检查治疗人次/项次（天府）
   SELECT 
-    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
+    (SELECT month_label FROM last_month_range) AS "统计月",
     '天府院区' AS "单位",
     '检查治疗人次/项次' AS "项目",
     COALESCE((SELECT count_value FROM current_month_count), 0) AS "本月",
@@ -1000,7 +1015,7 @@ final_results AS (
   
   -- 2. 天府检查治疗收入(元)
   SELECT 
-    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
+    (SELECT month_label FROM last_month_range) AS "统计月",
     '天府院区' AS "单位",
     '天府检查治疗收入(元)' AS "项目",
     COALESCE((SELECT income_value FROM current_month_income), 0) AS "本月",
@@ -1019,7 +1034,7 @@ final_results AS (
   
   -- 3. 天府体检病理收入(元)
   SELECT 
-    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
+    (SELECT month_label FROM last_month_range) AS "统计月",
     '天府院区' AS "单位",
     '天府体检病理收入(元)' AS "项目",
     COALESCE((SELECT income_value FROM current_month_physical), 0) AS "本月",
@@ -1038,7 +1053,7 @@ final_results AS (
   
   -- 4. 天府收入合计
   SELECT 
-    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
+    (SELECT month_label FROM last_month_range) AS "统计月",
     '天府院区' AS "单位",
     '天府收入合计' AS "项目",
     COALESCE((SELECT income_value FROM current_month_income), 0) + 
@@ -1089,11 +1104,15 @@ ORDER BY
 ,
 -- ====================total query 
 
+last_month_range AS (
+  SELECT
+    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS month_label
+),
 
 base_report AS (
   -- 原始视图数据，添加统计月字段以匹配其他查询
   SELECT 
-    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
+    (SELECT month_label FROM last_month_range) AS "统计月",
     "单位",
     "项目", 
     "本月",
@@ -1107,7 +1126,7 @@ base_report AS (
 -- 计算检查治疗人次/项次总合计
 total_count AS (
   SELECT 
-    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
+    (SELECT month_label FROM last_month_range) AS "统计月",
     '合计' AS "单位",
     '检查治疗人次/项次合计' AS "项目",
     SUM(CASE WHEN "项目" = '检查治疗人次/项次' THEN "本月" ELSE 0 END) AS "本月",
@@ -1131,7 +1150,7 @@ total_count AS (
 -- 计算总收入合计
 total_income AS (
   SELECT 
-    FORMAT_DATETIME(DATE_TRUNC('MONTH', CURRENT_DATE - INTERVAL '1' MONTH), 'yyyy-MM') AS "统计月",
+    (SELECT month_label FROM last_month_range) AS "统计月",
     '合计' AS "单位",
     '总收入合计(元)' AS "项目",
     SUM(CASE 

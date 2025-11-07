@@ -7,6 +7,11 @@ WITH date_ranges AS (
 
    SELECT 
 
+        -- 统计月份标签
+
+        CAST(YEAR(CURRENT_DATE - INTERVAL '1' MONTH) AS VARCHAR) || '年-' || 
+        LPAD(CAST(MONTH(CURRENT_DATE - INTERVAL '1' MONTH) AS VARCHAR), 2, '0') || '月' as stat_month_label,
+
         -- 当月日期范围
 
          -- 当月（实际是上个月）日期范围
@@ -442,9 +447,7 @@ summary_with_totals AS (
 
     SELECT 
 
-        CAST(YEAR(CURRENT_DATE - INTERVAL '1' MONTH) AS VARCHAR) || '年-' || 
-
-        LPAD(CAST(MONTH(CURRENT_DATE - INTERVAL '1' MONTH) AS VARCHAR), 2, '0') || '月' as "统计月份",
+        d.stat_month_label as "统计月份",
 
         '实验医学科(检验科)' as "运管科室",
 
@@ -524,6 +527,8 @@ summary_with_totals AS (
 
     FROM final_summary
 
+    CROSS JOIN date_ranges d
+
     
 
     UNION ALL
@@ -534,9 +539,7 @@ summary_with_totals AS (
 
     SELECT 
 
-        CAST(YEAR(CURRENT_DATE - INTERVAL '1' MONTH) AS VARCHAR) || '年-' || 
-
-        LPAD(CAST(MONTH(CURRENT_DATE - INTERVAL '1' MONTH) AS VARCHAR), 2, '0') || '月' as "统计月",
+        MAX(d.stat_month_label) as "统计月",
 
         '实验医学科(检验科)' as "运管科室",
 
@@ -588,6 +591,8 @@ summary_with_totals AS (
 
     FROM final_summary
 
+    CROSS JOIN date_ranges d
+
     
 
     UNION ALL
@@ -598,9 +603,7 @@ summary_with_totals AS (
 
     SELECT 
 
-        CAST(YEAR(CURRENT_DATE - INTERVAL '1' MONTH) AS VARCHAR) || '年-' || 
-
-        LPAD(CAST(MONTH(CURRENT_DATE - INTERVAL '1' MONTH) AS VARCHAR), 2, '0') || '月' as "统计月",
+        MAX(d.stat_month_label) as "统计月",
 
         '实验医学科(检验科)' as "运管科室",
 
@@ -670,6 +673,8 @@ summary_with_totals AS (
 
     FROM final_summary
 
+    CROSS JOIN date_ranges d
+
     WHERE "亚专业组" != '天府院区'
 
     
@@ -682,9 +687,7 @@ summary_with_totals AS (
 
     SELECT 
 
-        CAST(YEAR(CURRENT_DATE - INTERVAL '1' MONTH) AS VARCHAR) || '年-' || 
-
-        LPAD(CAST(MONTH(CURRENT_DATE - INTERVAL '1' MONTH) AS VARCHAR), 2, '0') || '月' as "统计月",
+        MAX(d.stat_month_label) as "统计月",
 
         '实验医学科(检验科)' as "运管科室",
 
@@ -694,55 +697,55 @@ summary_with_totals AS (
 
         -- 当月数据
 
-        COALESCE(tf."标本数", 0) as "标本数",
+        MAX(COALESCE(tf."标本数", 0)) as "标本数",
 
-        COALESCE(tf."工作量", 0) as "项目数",
+        MAX(COALESCE(tf."工作量", 0)) as "项目数",
 
-        COALESCE(tf."收费金额", 0) as "总收入",
+        MAX(COALESCE(tf."收费金额", 0)) as "总收入",
 
         -- 上月数据
 
-        COALESCE(tflm."上月标本数", 0) as "上月标本数",
+        MAX(COALESCE(tflm."上月标本数", 0)) as "上月标本数",
 
-        COALESCE(tflm."上月工作量", 0) as "上月项目数",
+        MAX(COALESCE(tflm."上月工作量", 0)) as "上月项目数",
 
-        COALESCE(tflm."上月收费金额", 0) as "上月总收入",
+        MAX(COALESCE(tflm."上月收费金额", 0)) as "上月总收入",
 
         -- 去年同期数据
 
-        COALESCE(tfly."去年同期标本数", 0) as "去年同期标本数",
+        MAX(COALESCE(tfly."去年同期标本数", 0)) as "去年同期标本数",
 
-        COALESCE(tfly."去年同期工作量", 0) as "去年同期项目数",
+        MAX(COALESCE(tfly."去年同期工作量", 0)) as "去年同期项目数",
 
-        COALESCE(tfly."去年同期收费金额", 0) as "去年同期总收入",
+        MAX(COALESCE(tfly."去年同期收费金额", 0)) as "去年同期总收入",
 
         -- 天府医院环比增长率
 
-        CAST(ROUND((COALESCE(tf."标本数", 0) - COALESCE(tflm."上月标本数", 0)) * 100.0 / 
+        CAST(ROUND((MAX(COALESCE(tf."标本数", 0)) - MAX(COALESCE(tflm."上月标本数", 0))) * 100.0 / 
 
-            NULLIF(COALESCE(tflm."上月标本数", 0), 0), 2) AS DECIMAL(10,2)) as "标本数环比增长率%",
+            NULLIF(MAX(COALESCE(tflm."上月标本数", 0)), 0), 2) AS DECIMAL(10,2)) as "标本数环比增长率%",
 
-        CAST(ROUND((COALESCE(tf."工作量", 0) - COALESCE(tflm."上月工作量", 0)) * 100.0 / 
+        CAST(ROUND((MAX(COALESCE(tf."工作量", 0)) - MAX(COALESCE(tflm."上月工作量", 0))) * 100.0 / 
 
-            NULLIF(COALESCE(tflm."上月工作量", 0), 0), 2) AS DECIMAL(10,2)) as "项目数环比增长率%",
+            NULLIF(MAX(COALESCE(tflm."上月工作量", 0)), 0), 2) AS DECIMAL(10,2)) as "项目数环比增长率%",
 
-        CAST(ROUND((COALESCE(tf."收费金额", 0) - COALESCE(tflm."上月收费金额", 0)) * 100.0 / 
+        CAST(ROUND((MAX(COALESCE(tf."收费金额", 0)) - MAX(COALESCE(tflm."上月收费金额", 0))) * 100.0 / 
 
-            NULLIF(COALESCE(tflm."上月收费金额", 0), 0), 2) AS DECIMAL(10,2)) as "收入环比增长率%",
+            NULLIF(MAX(COALESCE(tflm."上月收费金额", 0)), 0), 2) AS DECIMAL(10,2)) as "收入环比增长率%",
 
         -- 天府医院同比增长率
 
-        CAST(ROUND((COALESCE(tf."标本数", 0) - COALESCE(tfly."去年同期标本数", 0)) * 100.0 / 
+        CAST(ROUND((MAX(COALESCE(tf."标本数", 0)) - MAX(COALESCE(tfly."去年同期标本数", 0))) * 100.0 / 
 
-            NULLIF(COALESCE(tfly."去年同期标本数", 0), 0), 2) AS DECIMAL(10,2)) as "标本数同比增长率%",
+            NULLIF(MAX(COALESCE(tfly."去年同期标本数", 0)), 0), 2) AS DECIMAL(10,2)) as "标本数同比增长率%",
 
-        CAST(ROUND((COALESCE(tf."工作量", 0) - COALESCE(tfly."去年同期工作量", 0)) * 100.0 / 
+        CAST(ROUND((MAX(COALESCE(tf."工作量", 0)) - MAX(COALESCE(tfly."去年同期工作量", 0))) * 100.0 / 
 
-            NULLIF(COALESCE(tfly."去年同期工作量", 0), 0), 2) AS DECIMAL(10,2)) as "项目数同比增长率%",
+            NULLIF(MAX(COALESCE(tfly."去年同期工作量", 0)), 0), 2) AS DECIMAL(10,2)) as "项目数同比增长率%",
 
-        CAST(ROUND((COALESCE(tf."收费金额", 0) - COALESCE(tfly."去年同期收费金额", 0)) * 100.0 / 
+        CAST(ROUND((MAX(COALESCE(tf."收费金额", 0)) - MAX(COALESCE(tfly."去年同期收费金额", 0))) * 100.0 / 
 
-            NULLIF(COALESCE(tfly."去年同期收费金额", 0), 0), 2) AS DECIMAL(10,2)) as "收入同比增长率%",
+            NULLIF(MAX(COALESCE(tfly."去年同期收费金额", 0)), 0), 2) AS DECIMAL(10,2)) as "收入同比增长率%",
 
         -- 天府医院收入占比（注：由于数据源不同，暂时设为NULL或0）
 
@@ -757,6 +760,8 @@ summary_with_totals AS (
     CROSS JOIN tianfu_data_last_month tflm
 
     CROSS JOIN tianfu_data_last_year tfly
+
+    CROSS JOIN date_ranges d
 
 )
 
