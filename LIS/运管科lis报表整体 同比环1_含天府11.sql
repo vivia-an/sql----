@@ -46,7 +46,7 @@ correct_workload AS (
 
         COUNT(DISTINCT t."inspection_id") as "标本数",
 
-        SUM(COALESCE(CAST(b."workload" AS DOUBLE), 0)) as "工作量"
+        SUM(COALESCE(CAST(C."workload" AS DOUBLE), 0)) as "工作量"
 
     FROM hid0101_orcl_lis_dbo.lis_inspection_sample t
 
@@ -56,11 +56,19 @@ correct_workload AS (
 
         AND b."isdeleted" = '0'
 
+    LEFT JOIN HID0101_ORCL_LIS_XHSYSTEM1.lis_charge_item C
+
+        ON b."charge_item_id" = C."charge_item_id"
+
+        AND C."isdeleted" = '0'
+
     CROSS JOIN date_ranges d
 
     WHERE t."inspection_date" BETWEEN d.current_month_start AND d.current_month_end
 
         AND t."isdeleted" = '0'
+
+        AND t."CHECK_TIME" IS NOT NULL
 
     GROUP BY t."GROUP_ID"
 
@@ -76,7 +84,7 @@ correct_workload_last_month AS (
 
         COUNT(DISTINCT t."inspection_id") as "上月标本数",
 
-        SUM(COALESCE(CAST(b."workload" AS DOUBLE), 0)) as "上月工作量"
+        SUM(COALESCE(CAST(C."workload" AS DOUBLE), 0)) as "上月工作量"
 
     FROM hid0101_orcl_lis_dbo.lis_inspection_sample t
 
@@ -86,11 +94,19 @@ correct_workload_last_month AS (
 
         AND b."isdeleted" = '0'
 
+    LEFT JOIN HID0101_ORCL_LIS_XHSYSTEM1.lis_charge_item C
+
+        ON b."charge_item_id" = C."charge_item_id"
+
+        AND C."isdeleted" = '0'
+
     CROSS JOIN date_ranges d
 
     WHERE t."inspection_date" BETWEEN d.last_month_start AND d.last_month_end
 
         AND t."isdeleted" = '0'
+
+        AND t."CHECK_TIME" IS NOT NULL
 
     GROUP BY t."GROUP_ID"
 
@@ -106,7 +122,7 @@ correct_workload_last_year AS (
 
         COUNT(DISTINCT t."inspection_id") as "去年同期标本数",
 
-        SUM(COALESCE(CAST(b."workload" AS DOUBLE), 0)) as "去年同期工作量"
+        SUM(COALESCE(CAST(C."workload" AS DOUBLE), 0)) as "去年同期工作量"
 
     FROM hid0101_orcl_lis_dbo.lis_inspection_sample t
 
@@ -116,11 +132,19 @@ correct_workload_last_year AS (
 
         AND b."isdeleted" = '0'
 
+    LEFT JOIN HID0101_ORCL_LIS_XHSYSTEM1.lis_charge_item C
+
+        ON b."charge_item_id" = C."charge_item_id"
+
+        AND C."isdeleted" = '0'
+
     CROSS JOIN date_ranges d
 
     WHERE t."inspection_date" BETWEEN d.last_year_start AND d.last_year_end
 
         AND t."isdeleted" = '0'
+
+        AND t."CHECK_TIME" IS NOT NULL
 
     GROUP BY t."GROUP_ID"
 
