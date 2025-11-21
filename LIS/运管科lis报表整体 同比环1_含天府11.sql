@@ -507,29 +507,29 @@ summary_with_totals AS (
 
         "去年同期总收入",
 
-        -- 收入占比
+        -- 收入占比（分母为总收入合计，包含天府医院）
 
         CASE 
 
-            WHEN (SELECT SUM("总收入") FROM final_summary) = 0 THEN 0
+            WHEN ((SELECT SUM("总收入") FROM final_summary) + (SELECT MAX(COALESCE("收费金额", 0)) FROM tianfu_data)) = 0 THEN 0
 
-            ELSE ROUND("总收入" * 100.0 / (SELECT SUM("总收入") FROM final_summary), 2)
+            ELSE ROUND("总收入" * 100.0 / ((SELECT SUM("总收入") FROM final_summary) + (SELECT MAX(COALESCE("收费金额", 0)) FROM tianfu_data)), 2)
 
         END as "总收入占比%",
 
         CASE 
 
-            WHEN (SELECT SUM("上月总收入") FROM final_summary) = 0 THEN 0
+            WHEN ((SELECT SUM("上月总收入") FROM final_summary) + (SELECT MAX(COALESCE("上月收费金额", 0)) FROM tianfu_data_last_month)) = 0 THEN 0
 
-            ELSE ROUND("上月总收入" * 100.0 / (SELECT SUM("上月总收入") FROM final_summary), 2)
+            ELSE ROUND("上月总收入" * 100.0 / ((SELECT SUM("上月总收入") FROM final_summary) + (SELECT MAX(COALESCE("上月收费金额", 0)) FROM tianfu_data_last_month)), 2)
 
         END as "上月总收入占比%",
 
         CASE 
 
-            WHEN (SELECT SUM("去年同期总收入") FROM final_summary) = 0 THEN 0
+            WHEN ((SELECT SUM("去年同期总收入") FROM final_summary) + (SELECT MAX(COALESCE("去年同期收费金额", 0)) FROM tianfu_data_last_year)) = 0 THEN 0
 
-            ELSE ROUND("去年同期总收入" * 100.0 / (SELECT SUM("去年同期总收入") FROM final_summary), 2)
+            ELSE ROUND("去年同期总收入" * 100.0 / ((SELECT SUM("去年同期总收入") FROM final_summary) + (SELECT MAX(COALESCE("去年同期收费金额", 0)) FROM tianfu_data_last_year)), 2)
 
         END as "去年同期总收入占比%",
 
@@ -559,7 +559,7 @@ summary_with_totals AS (
 
     
 
-    -- 合计行
+    -- 合计行（包含所有明细 + 天府医院独立统计）
 
     SELECT 
 
@@ -571,39 +571,45 @@ summary_with_totals AS (
 
         '合计' as "亚专业组",
 
-        SUM("标本数") as "标本数",
+        SUM(fs."标本数") + MAX(COALESCE(tf."标本数", 0)) as "标本数",
 
-        SUM("项目数") as "项目数",
+        SUM(fs."项目数") + MAX(COALESCE(tf."工作量", 0)) as "项目数",
 
-        ROUND(SUM("总收入"), 2) as "总收入",
+        ROUND(SUM(fs."总收入") + MAX(COALESCE(tf."收费金额", 0)), 2) as "总收入",
 
-        SUM("上月标本数") as "上月标本数",
+        SUM(fs."上月标本数") + MAX(COALESCE(tflm."上月标本数", 0)) as "上月标本数",
 
-        SUM("上月项目数") as "上月项目数",
+        SUM(fs."上月项目数") + MAX(COALESCE(tflm."上月工作量", 0)) as "上月项目数",
 
-        ROUND(SUM("上月总收入"), 2) as "上月总收入",
+        ROUND(SUM(fs."上月总收入") + MAX(COALESCE(tflm."上月收费金额", 0)), 2) as "上月总收入",
 
-        SUM("去年同期标本数") as "去年同期标本数",
+        SUM(fs."去年同期标本数") + MAX(COALESCE(tfly."去年同期标本数", 0)) as "去年同期标本数",
 
-        SUM("去年同期项目数") as "去年同期项目数",
+        SUM(fs."去年同期项目数") + MAX(COALESCE(tfly."去年同期工作量", 0)) as "去年同期项目数",
 
-        ROUND(SUM("去年同期总收入"), 2) as "去年同期总收入",
+        ROUND(SUM(fs."去年同期总收入") + MAX(COALESCE(tfly."去年同期收费金额", 0)), 2) as "去年同期总收入",
 
         -- 合计行的环比增长率
 
-        CAST(ROUND((SUM("标本数") - SUM("上月标本数")) * 100.0 / NULLIF(SUM("上月标本数"), 0), 2) AS DECIMAL(10,2)),
+        CAST(ROUND(((SUM(fs."标本数") + MAX(COALESCE(tf."标本数", 0))) - (SUM(fs."上月标本数") + MAX(COALESCE(tflm."上月标本数", 0)))) * 100.0 / 
+            NULLIF((SUM(fs."上月标本数") + MAX(COALESCE(tflm."上月标本数", 0))), 0), 2) AS DECIMAL(10,2)),
 
-        CAST(ROUND((SUM("项目数") - SUM("上月项目数")) * 100.0 / NULLIF(SUM("上月项目数"), 0), 2) AS DECIMAL(10,2)),
+        CAST(ROUND(((SUM(fs."项目数") + MAX(COALESCE(tf."工作量", 0))) - (SUM(fs."上月项目数") + MAX(COALESCE(tflm."上月工作量", 0)))) * 100.0 / 
+            NULLIF((SUM(fs."上月项目数") + MAX(COALESCE(tflm."上月工作量", 0))), 0), 2) AS DECIMAL(10,2)),
 
-        CAST(ROUND((SUM("总收入") - SUM("上月总收入")) * 100.0 / NULLIF(SUM("上月总收入"), 0), 2) AS DECIMAL(10,2)),
+        CAST(ROUND(((SUM(fs."总收入") + MAX(COALESCE(tf."收费金额", 0))) - (SUM(fs."上月总收入") + MAX(COALESCE(tflm."上月收费金额", 0)))) * 100.0 / 
+            NULLIF((SUM(fs."上月总收入") + MAX(COALESCE(tflm."上月收费金额", 0))), 0), 2) AS DECIMAL(10,2)),
 
         -- 合计行的同比增长率
 
-        CAST(ROUND((SUM("标本数") - SUM("去年同期标本数")) * 100.0 / NULLIF(SUM("去年同期标本数"), 0), 2) AS DECIMAL(10,2)),
+        CAST(ROUND(((SUM(fs."标本数") + MAX(COALESCE(tf."标本数", 0))) - (SUM(fs."去年同期标本数") + MAX(COALESCE(tfly."去年同期标本数", 0)))) * 100.0 / 
+            NULLIF((SUM(fs."去年同期标本数") + MAX(COALESCE(tfly."去年同期标本数", 0))), 0), 2) AS DECIMAL(10,2)),
 
-        CAST(ROUND((SUM("项目数") - SUM("去年同期项目数")) * 100.0 / NULLIF(SUM("去年同期项目数"), 0), 2) AS DECIMAL(10,2)),
+        CAST(ROUND(((SUM(fs."项目数") + MAX(COALESCE(tf."工作量", 0))) - (SUM(fs."去年同期项目数") + MAX(COALESCE(tfly."去年同期工作量", 0)))) * 100.0 / 
+            NULLIF((SUM(fs."去年同期项目数") + MAX(COALESCE(tfly."去年同期工作量", 0))), 0), 2) AS DECIMAL(10,2)),
 
-        CAST(ROUND((SUM("总收入") - SUM("去年同期总收入")) * 100.0 / NULLIF(SUM("去年同期总收入"), 0), 2) AS DECIMAL(10,2)),
+        CAST(ROUND(((SUM(fs."总收入") + MAX(COALESCE(tf."收费金额", 0))) - (SUM(fs."去年同期总收入") + MAX(COALESCE(tfly."去年同期收费金额", 0)))) * 100.0 / 
+            NULLIF((SUM(fs."去年同期总收入") + MAX(COALESCE(tfly."去年同期收费金额", 0))), 0), 2) AS DECIMAL(10,2)),
 
         -- 合计行收入占比（都是100%）
 
@@ -613,7 +619,13 @@ summary_with_totals AS (
 
         100.00 as "去年同期总收入占比%"
 
-    FROM final_summary
+    FROM final_summary fs
+
+    CROSS JOIN tianfu_data tf
+
+    CROSS JOIN tianfu_data_last_month tflm
+
+    CROSS JOIN tianfu_data_last_year tfly
 
     CROSS JOIN date_ranges d
 
@@ -635,71 +647,71 @@ summary_with_totals AS (
 
         '本部实际量' as "亚专业组",
 
-        SUM("标本数") as "标本数",
+        SUM(fs."标本数") as "标本数",
 
-        SUM("项目数") as "项目数",
+        SUM(fs."项目数") as "项目数",
 
-        ROUND(SUM("总收入"), 2) as "总收入",
+        ROUND(SUM(fs."总收入"), 2) as "总收入",
 
-        SUM("上月标本数") as "上月标本数",
+        SUM(fs."上月标本数") as "上月标本数",
 
-        SUM("上月项目数") as "上月项目数",
+        SUM(fs."上月项目数") as "上月项目数",
 
-        ROUND(SUM("上月总收入"), 2) as "上月总收入",
+        ROUND(SUM(fs."上月总收入"), 2) as "上月总收入",
 
-        SUM("去年同期标本数") as "去年同期标本数",
+        SUM(fs."去年同期标本数") as "去年同期标本数",
 
-        SUM("去年同期项目数") as "去年同期项目数",
+        SUM(fs."去年同期项目数") as "去年同期项目数",
 
-        ROUND(SUM("去年同期总收入"), 2) as "去年同期总收入",
+        ROUND(SUM(fs."去年同期总收入"), 2) as "去年同期总收入",
 
         -- 本部实际量的环比增长率
 
-        CAST(ROUND((SUM("标本数") - SUM("上月标本数")) * 100.0 / NULLIF(SUM("上月标本数"), 0), 2) AS DECIMAL(10,2)),
+        CAST(ROUND((SUM(fs."标本数") - SUM(fs."上月标本数")) * 100.0 / NULLIF(SUM(fs."上月标本数"), 0), 2) AS DECIMAL(10,2)),
 
-        CAST(ROUND((SUM("项目数") - SUM("上月项目数")) * 100.0 / NULLIF(SUM("上月项目数"), 0), 2) AS DECIMAL(10,2)),
+        CAST(ROUND((SUM(fs."项目数") - SUM(fs."上月项目数")) * 100.0 / NULLIF(SUM(fs."上月项目数"), 0), 2) AS DECIMAL(10,2)),
 
-        CAST(ROUND((SUM("总收入") - SUM("上月总收入")) * 100.0 / NULLIF(SUM("上月总收入"), 0), 2) AS DECIMAL(10,2)),
+        CAST(ROUND((SUM(fs."总收入") - SUM(fs."上月总收入")) * 100.0 / NULLIF(SUM(fs."上月总收入"), 0), 2) AS DECIMAL(10,2)),
 
         -- 本部实际量的同比增长率
 
-        CAST(ROUND((SUM("标本数") - SUM("去年同期标本数")) * 100.0 / NULLIF(SUM("去年同期标本数"), 0), 2) AS DECIMAL(10,2)),
+        CAST(ROUND((SUM(fs."标本数") - SUM(fs."去年同期标本数")) * 100.0 / NULLIF(SUM(fs."去年同期标本数"), 0), 2) AS DECIMAL(10,2)),
 
-        CAST(ROUND((SUM("项目数") - SUM("去年同期项目数")) * 100.0 / NULLIF(SUM("去年同期项目数"), 0), 2) AS DECIMAL(10,2)),
+        CAST(ROUND((SUM(fs."项目数") - SUM(fs."去年同期项目数")) * 100.0 / NULLIF(SUM(fs."去年同期项目数"), 0), 2) AS DECIMAL(10,2)),
 
-        CAST(ROUND((SUM("总收入") - SUM("去年同期总收入")) * 100.0 / NULLIF(SUM("去年同期总收入"), 0), 2) AS DECIMAL(10,2)),
+        CAST(ROUND((SUM(fs."总收入") - SUM(fs."去年同期总收入")) * 100.0 / NULLIF(SUM(fs."去年同期总收入"), 0), 2) AS DECIMAL(10,2)),
 
-        -- 本部实际量收入占比
+        -- 本部实际量收入占比（分母为总收入合计，包含天府医院）
 
         CASE 
 
-            WHEN (SELECT SUM("总收入") FROM final_summary) = 0 THEN 0
+            WHEN ((SELECT SUM("总收入") FROM final_summary) + (SELECT MAX(COALESCE("收费金额", 0)) FROM tianfu_data)) = 0 THEN 0
 
-            ELSE ROUND(SUM("总收入") * 100.0 / (SELECT SUM("总收入") FROM final_summary), 2)
+            ELSE ROUND(SUM(fs."总收入") * 100.0 / ((SELECT SUM("总收入") FROM final_summary) + (SELECT MAX(COALESCE("收费金额", 0)) FROM tianfu_data)), 2)
 
         END as "总收入占比%",
 
         CASE 
 
-            WHEN (SELECT SUM("上月总收入") FROM final_summary) = 0 THEN 0
+            WHEN ((SELECT SUM("上月总收入") FROM final_summary) + (SELECT MAX(COALESCE("上月收费金额", 0)) FROM tianfu_data_last_month)) = 0 THEN 0
 
-            ELSE ROUND(SUM("上月总收入") * 100.0 / (SELECT SUM("上月总收入") FROM final_summary), 2)
+            ELSE ROUND(SUM(fs."上月总收入") * 100.0 / ((SELECT SUM("上月总收入") FROM final_summary) + (SELECT MAX(COALESCE("上月收费金额", 0)) FROM tianfu_data_last_month)), 2)
 
         END as "上月总收入占比%",
 
         CASE 
 
-            WHEN (SELECT SUM("去年同期总收入") FROM final_summary) = 0 THEN 0
+            WHEN ((SELECT SUM("去年同期总收入") FROM final_summary) + (SELECT MAX(COALESCE("去年同期收费金额", 0)) FROM tianfu_data_last_year)) = 0 THEN 0
 
-            ELSE ROUND(SUM("去年同期总收入") * 100.0 / (SELECT SUM("去年同期总收入") FROM final_summary), 2)
+            ELSE ROUND(SUM(fs."去年同期总收入") * 100.0 / ((SELECT SUM("去年同期总收入") FROM final_summary) + (SELECT MAX(COALESCE("去年同期收费金额", 0)) FROM tianfu_data_last_year)), 2)
 
         END as "去年同期总收入占比%"
 
-    FROM final_summary
+    FROM final_summary fs
 
     CROSS JOIN date_ranges d
 
-    WHERE "亚专业组" != '天府院区'
+    WHERE fs."亚专业组" != '天府院区'
 
     
 
@@ -771,13 +783,31 @@ summary_with_totals AS (
 
             NULLIF(MAX(COALESCE(tfly."去年同期收费金额", 0)), 0), 2) AS DECIMAL(10,2)) as "收入同比增长率%",
 
-        -- 天府医院收入占比（注：由于数据源不同，暂时设为NULL或0）
+        -- 天府医院收入占比（分母为总收入合计）
 
-        0.00 as "总收入占比%",
+        CASE 
 
-        0.00 as "上月总收入占比%",
+            WHEN ((SELECT SUM("总收入") FROM final_summary) + MAX(COALESCE(tf."收费金额", 0))) = 0 THEN 0
 
-        0.00 as "去年同期总收入占比%"
+            ELSE ROUND(MAX(COALESCE(tf."收费金额", 0)) * 100.0 / ((SELECT SUM("总收入") FROM final_summary) + MAX(COALESCE(tf."收费金额", 0))), 2)
+
+        END as "总收入占比%",
+
+        CASE 
+
+            WHEN ((SELECT SUM("上月总收入") FROM final_summary) + MAX(COALESCE(tflm."上月收费金额", 0))) = 0 THEN 0
+
+            ELSE ROUND(MAX(COALESCE(tflm."上月收费金额", 0)) * 100.0 / ((SELECT SUM("上月总收入") FROM final_summary) + MAX(COALESCE(tflm."上月收费金额", 0))), 2)
+
+        END as "上月总收入占比%",
+
+        CASE 
+
+            WHEN ((SELECT SUM("去年同期总收入") FROM final_summary) + MAX(COALESCE(tfly."去年同期收费金额", 0))) = 0 THEN 0
+
+            ELSE ROUND(MAX(COALESCE(tfly."去年同期收费金额", 0)) * 100.0 / ((SELECT SUM("去年同期总收入") FROM final_summary) + MAX(COALESCE(tfly."去年同期收费金额", 0))), 2)
+
+        END as "去年同期总收入占比%"
 
     FROM tianfu_data tf
 
