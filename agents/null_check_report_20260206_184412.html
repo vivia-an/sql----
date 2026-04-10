@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>BI报表空值检查报告</title>
+<style>
+  body { font-family: 'Microsoft YaHei', sans-serif; margin: 20px; background: #f5f6fa; }
+  .container { max-width: 1100px; margin: 0 auto; }
+  h1 { color: #2c3e50; border-bottom: 3px solid #19af5d; padding-bottom: 10px; }
+  h2 { color: #34495e; margin-top: 30px; }
+  .summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
+  .card { background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center; }
+  .card .num { font-size: 32px; font-weight: bold; color: #2c3e50; }
+  .card .label { font-size: 14px; color: #7f8c8d; margin-top: 6px; }
+  .card.critical .num { color: #e74c3c; }
+  .card.warning .num { color: #f39c12; }
+  .card.info .num { color: #3498db; }
+  .card.ok .num { color: #27ae60; }
+  table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 20px; }
+  th { background: #19af5d; color: #fff; padding: 10px 14px; text-align: left; font-size: 14px; }
+  td { padding: 8px 14px; border-bottom: 1px solid #ecf0f1; font-size: 13px; }
+  tr:hover { background: #f8f9fa; }
+  .num { text-align: right; font-weight: 600; }
+  .badge { padding: 2px 8px; border-radius: 4px; font-size: 12px; color: #fff; }
+  .badge-empty { background: #e74c3c; }
+  .badge-null_text { background: #9b59b6; }
+  .badge-dash { background: #f39c12; }
+  .badge-na { background: #e67e22; }
+  .badge-missing { background: #c0392b; }
+  .meta { color: #95a5a6; font-size: 13px; margin-bottom: 20px; }
+  code { background: #f0f0f0; padding: 1px 5px; border-radius: 3px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>BI报表空值检查报告</h1>
+  <div class="meta">
+    检查时间: 2026-02-06 18:44:08 &nbsp;|&nbsp;
+    报表URL: <code>https://hxdmc.wchscu.cn/bi/sso?proc=1&action=viewer&hback=true&db=!28!01!29!!534e!!897f!!62a5!!8868!...</code>
+  </div>
+
+  <div class="summary-cards">
+    <div class="card">
+      <div class="num">64</div>
+      <div class="label">数据行数</div>
+    </div>
+    <div class="card">
+      <div class="num">3</div>
+      <div class="label">列数</div>
+    </div>
+    <div class="card">
+      <div class="num">192</div>
+      <div class="label">总单元格</div>
+    </div>
+    <div class="card critical">
+      <div class="num">24</div>
+      <div class="label">空值数量</div>
+    </div>
+    <div class="card critical">
+      <div class="num">12.50%</div>
+      <div class="label">空值率 (严重)</div>
+    </div>
+    <div class="card">
+      <div class="num">0</div>
+      <div class="label">零值数量</div>
+    </div>
+  </div>
+
+  <h2>按列统计空值</h2>
+  <table>
+    <tr><th>列名</th><th class="num">空值数</th></tr>
+    <tr><td>内容</td><td class='num'>9</td></tr>
+<tr><td>备注</td><td class='num'>7</td></tr>
+<tr><td>日8点全院运行情况</td><td class='num'>1</td></tr>
+<tr><td>的护理单元有</td><td class='num'>1</td></tr>
+<tr><td>诊断</td><td class='num'>1</td></tr>
+<tr><td>重症肺炎</td><td class='num'>1</td></tr>
+<tr><td>等候入院科室</td><td class='num'>1</td></tr>
+<tr><td>注</td><td class='num'>1</td></tr>
+<tr><td>医技平台</td><td class='num'>1</td></tr>
+<tr><td>具体情况如下</td><td class='num'>1</td></tr>
+
+  </table>
+
+  <h2>按行统计空值 (Top 30)</h2>
+  <table>
+    <tr><th>行标识</th><th class="num">空值数</th></tr>
+    <tr><td>段落6</td><td class='num'>12</td></tr>
+<tr><td>段落2</td><td class='num'>4</td></tr>
+<tr><td>段落1</td><td class='num'>3</td></tr>
+<tr><td>段落0</td><td class='num'>2</td></tr>
+<tr><td>段落3</td><td class='num'>2</td></tr>
+<tr><td>段落4</td><td class='num'>1</td></tr>
+
+  </table>
+
+  <h2>空值明细 (前200条)</h2>
+  <table>
+    <tr><th>行号</th><th>行标识</th><th>列名</th><th>值</th><th>类型</th></tr>
+    <tr><td>1</td><td>段落0</td><td>内容</td><td><code>2026年 2月6 日8点全院运行情况:</code></td><td><span class='badge badge-empty'>空白</span></td></tr>
+<tr><td>1</td><td>段落0</td><td>日8点全院运行情况</td><td><code>(空)</code></td><td><span class='badge badge-empty'>空白</span></td></tr>
+<tr><td>2</td><td>段落1</td><td>内容</td><td><code>1.今日上午8点在院 人，床位使用率 ，其中急诊来源 人，占比 。今日手术排程 台，8点床位使用率低于100%的科室有：</code></td><td><span class='badge badge-empty'>空白</span></td></tr>
+<tr><td>4</td><td>段落1</td><td>内容</td><td><code>8点床位使用率低于100%的护理单元有：</code></td><td><span class='badge badge-empty'>空白</span></td></tr>
+<tr><td>4</td><td>段落1</td><td>的护理单元有</td><td><code>(空)</code></td><td><span class='badge badge-empty'>空白</span></td></tr>
+<tr><td>8</td><td>段落2</td><td>内容</td><td><code>今日上午8点急诊等候患者 人，急诊等候入院超72小时患者 人，其中最长等候入院患者等候时长 小时 诊断：气管插管术后;弥</code></td><td><span class='badge badge-empty'>空白</span></td></tr>
+<tr><td>8</td><td>段落2</td><td>诊断</td><td><code>(空)</code></td><td><span class='badge badge-empty'>空白</span></td></tr>
+<tr><td>8</td><td>段落2</td><td>重症肺炎</td><td><code>(空)</code></td><td><span class='badge badge-empty'>空白</span></td></tr>
+<tr><td>8</td><td>段落2</td><td>等候入院科室</td><td><code>(空)</code></td><td><span class='badge badge-empty'>空白</span></td></tr>
+<tr><td>9</td><td>段落3</td><td>内容</td><td><code>3.昨日手术排程 台： 638</code></td><td><span class='badge badge-empty'>空白</span></td></tr>
+<tr><td>18</td><td>段落3</td><td>内容</td><td><code>今日手术排程 台： 634</code></td><td><span class='badge badge-empty'>空白</span></td></tr>
+<tr><td>27</td><td>段落4</td><td>内容</td><td><code>4.昨日门诊总量 ： 40545</code></td><td><span class='badge badge-empty'>空白</span></td></tr>
+<tr><td>36</td><td>段落6</td><td>内容</td><td><code>(注： 为自动取值) 划线处</code></td><td><span class='badge badge-empty'>空白</span></td></tr>
+<tr><td>36</td><td>段落6</td><td>注</td><td><code>(空)</code></td><td><span class='badge badge-empty'>空白</span></td></tr>
+<tr><td>37</td><td>段落6</td><td>备注</td><td><code>(空)</code></td><td><span class='badge badge-empty'>空白</span></td></tr>
+<tr><td>37</td><td>段落6</td><td>医技平台</td><td><code>(空)</code></td><td><span class='badge badge-empty'>空白</span></td></tr>
+<tr><td>38</td><td>段落6</td><td>备注</td><td><code>--</code></td><td><span class='badge badge-dash'>横线占位</span></td></tr>
+<tr><td>39</td><td>段落6</td><td>备注</td><td><code>(空)</code></td><td><span class='badge badge-empty'>空白</span></td></tr>
+<tr><td>40</td><td>段落6</td><td>内容</td><td><code>锦城 ：在院 人，床位使用率 ，昨日入院 人次，出院 人次；今日手术排程 台，昨日门诊 人次；昨日急诊 人次；昨日体检人</code></td><td><span class='badge badge-empty'>空白</span></td></tr>
+<tr><td>40</td><td>段落6</td><td>备注</td><td><code>(空)</code></td><td><span class='badge badge-empty'>空白</span></td></tr>
+<tr><td>40</td><td>段落6</td><td>具体情况如下</td><td><code>(空)</code></td><td><span class='badge badge-empty'>空白</span></td></tr>
+<tr><td>41</td><td>段落6</td><td>备注</td><td><code>(空)</code></td><td><span class='badge badge-empty'>空白</span></td></tr>
+<tr><td>42</td><td>段落6</td><td>备注</td><td><code>--</code></td><td><span class='badge badge-dash'>横线占位</span></td></tr>
+<tr><td>43</td><td>段落6</td><td>备注</td><td><code>--</code></td><td><span class='badge badge-dash'>横线占位</span></td></tr>
+
+  </table>
+
+  
+</div>
+</body>
+</html>

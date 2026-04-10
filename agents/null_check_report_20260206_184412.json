@@ -1,0 +1,225 @@
+{
+  "check_time": "2026-02-06 18:44:08",
+  "url": "https://hxdmc.wchscu.cn/bi/sso?proc=1&action=viewer&hback=true&db=!28!01!29!!534e!!897f!!62a5!!8868!!95e8!!6237!!2f!!8fd0!!8425!!7ba1!!7406!!90e8!!2f!!8fd0!!7ba1!!53ef!!89c6!!5316!!5206!!6790!-!52ff!!52a8!!2f!!6bcf!!65e5!!63a8!!9001!!2f!!8fd0!!7ba1!!6307!!6807!!6bcf!!65e5!!63a8!!9001!!28!!4e0a!!5348!!29!.db",
+  "total_rows": 64,
+  "total_cols": 3,
+  "total_cells": 192,
+  "null_count": 24,
+  "null_rate": "12.50%",
+  "zero_count": 0,
+  "by_column": {
+    "内容": 9,
+    "日8点全院运行情况": 1,
+    "的护理单元有": 1,
+    "诊断": 1,
+    "重症肺炎": 1,
+    "等候入院科室": 1,
+    "注": 1,
+    "备注": 7,
+    "医技平台": 1,
+    "具体情况如下": 1
+  },
+  "by_row": {
+    "段落0": 2,
+    "段落1": 3,
+    "段落2": 4,
+    "段落3": 2,
+    "段落4": 1,
+    "段落6": 12
+  },
+  "null_details": [
+    {
+      "row_idx": 0,
+      "col_idx": 1,
+      "row_label": "段落0",
+      "col_label": "内容",
+      "cell_value": "2026年 2月6 日8点全院运行情况:",
+      "null_type": "empty"
+    },
+    {
+      "row_idx": 0,
+      "col_idx": 1,
+      "row_label": "段落0",
+      "col_label": "日8点全院运行情况",
+      "cell_value": "(空)",
+      "null_type": "empty"
+    },
+    {
+      "row_idx": 1,
+      "col_idx": 1,
+      "row_label": "段落1",
+      "col_label": "内容",
+      "cell_value": "1.今日上午8点在院 人，床位使用率 ，其中急诊来源 人，占比 。今日手术排程 台，8点床位使用率低于100%的科室有：",
+      "null_type": "empty"
+    },
+    {
+      "row_idx": 3,
+      "col_idx": 1,
+      "row_label": "段落1",
+      "col_label": "内容",
+      "cell_value": "8点床位使用率低于100%的护理单元有：",
+      "null_type": "empty"
+    },
+    {
+      "row_idx": 3,
+      "col_idx": 1,
+      "row_label": "段落1",
+      "col_label": "的护理单元有",
+      "cell_value": "(空)",
+      "null_type": "empty"
+    },
+    {
+      "row_idx": 7,
+      "col_idx": 1,
+      "row_label": "段落2",
+      "col_label": "内容",
+      "cell_value": "今日上午8点急诊等候患者 人，急诊等候入院超72小时患者 人，其中最长等候入院患者等候时长 小时 诊断：气管插管术后;弥",
+      "null_type": "empty"
+    },
+    {
+      "row_idx": 7,
+      "col_idx": 1,
+      "row_label": "段落2",
+      "col_label": "诊断",
+      "cell_value": "(空)",
+      "null_type": "empty"
+    },
+    {
+      "row_idx": 7,
+      "col_idx": 1,
+      "row_label": "段落2",
+      "col_label": "重症肺炎",
+      "cell_value": "(空)",
+      "null_type": "empty"
+    },
+    {
+      "row_idx": 7,
+      "col_idx": 1,
+      "row_label": "段落2",
+      "col_label": "等候入院科室",
+      "cell_value": "(空)",
+      "null_type": "empty"
+    },
+    {
+      "row_idx": 8,
+      "col_idx": 1,
+      "row_label": "段落3",
+      "col_label": "内容",
+      "cell_value": "3.昨日手术排程 台： 638",
+      "null_type": "empty"
+    },
+    {
+      "row_idx": 17,
+      "col_idx": 1,
+      "row_label": "段落3",
+      "col_label": "内容",
+      "cell_value": "今日手术排程 台： 634",
+      "null_type": "empty"
+    },
+    {
+      "row_idx": 26,
+      "col_idx": 1,
+      "row_label": "段落4",
+      "col_label": "内容",
+      "cell_value": "4.昨日门诊总量 ： 40545",
+      "null_type": "empty"
+    },
+    {
+      "row_idx": 35,
+      "col_idx": 1,
+      "row_label": "段落6",
+      "col_label": "内容",
+      "cell_value": "(注： 为自动取值) 划线处",
+      "null_type": "empty"
+    },
+    {
+      "row_idx": 35,
+      "col_idx": 1,
+      "row_label": "段落6",
+      "col_label": "注",
+      "cell_value": "(空)",
+      "null_type": "empty"
+    },
+    {
+      "row_idx": 36,
+      "col_idx": 1,
+      "row_label": "段落6",
+      "col_label": "备注",
+      "cell_value": "(空)",
+      "null_type": "empty"
+    },
+    {
+      "row_idx": 36,
+      "col_idx": 1,
+      "row_label": "段落6",
+      "col_label": "医技平台",
+      "cell_value": "(空)",
+      "null_type": "empty"
+    },
+    {
+      "row_idx": 37,
+      "col_idx": 1,
+      "row_label": "段落6",
+      "col_label": "备注",
+      "cell_value": "--",
+      "null_type": "dash"
+    },
+    {
+      "row_idx": 38,
+      "col_idx": 1,
+      "row_label": "段落6",
+      "col_label": "备注",
+      "cell_value": "(空)",
+      "null_type": "empty"
+    },
+    {
+      "row_idx": 39,
+      "col_idx": 1,
+      "row_label": "段落6",
+      "col_label": "内容",
+      "cell_value": "锦城 ：在院 人，床位使用率 ，昨日入院 人次，出院 人次；今日手术排程 台，昨日门诊 人次；昨日急诊 人次；昨日体检人",
+      "null_type": "empty"
+    },
+    {
+      "row_idx": 39,
+      "col_idx": 1,
+      "row_label": "段落6",
+      "col_label": "备注",
+      "cell_value": "(空)",
+      "null_type": "empty"
+    },
+    {
+      "row_idx": 39,
+      "col_idx": 1,
+      "row_label": "段落6",
+      "col_label": "具体情况如下",
+      "cell_value": "(空)",
+      "null_type": "empty"
+    },
+    {
+      "row_idx": 40,
+      "col_idx": 1,
+      "row_label": "段落6",
+      "col_label": "备注",
+      "cell_value": "(空)",
+      "null_type": "empty"
+    },
+    {
+      "row_idx": 41,
+      "col_idx": 1,
+      "row_label": "段落6",
+      "col_label": "备注",
+      "cell_value": "--",
+      "null_type": "dash"
+    },
+    {
+      "row_idx": 42,
+      "col_idx": 1,
+      "row_label": "段落6",
+      "col_label": "备注",
+      "cell_value": "--",
+      "null_type": "dash"
+    }
+  ],
+  "zero_details": []
+}

@@ -1,0 +1,199 @@
+# SQL生成项目 血缘追踪
+
+## 项目介绍
+医疗数据分析SQL生成项目，涵盖病案首页、手术麻醉、输血、LIS等多个业务领域。
+
+---
+
+## 时间线
+
+### 2026-04-09 | 输血线上改.txt DataX 锚定调度日统计上月
+- **需求**：与 `更改区域/输血线上` 一致：`ds`（`$[yyyy-MM-dd]`）+ 全表 `current_date` → `(SELECT biz_date FROM ds)`，上月区间逻辑不变
+- **修改文件**：`更改区域/输血线上改.txt`
+- **血缘**：`$[yyyy-MM-dd]` → `ds.biz_date` → 原输血报表各 LIS/BIS 子查询时间窗（上月/上上月/同比月）
+
+### 2026-04-09 | 输血线上改-收入3 DataX 锚定调度日（去年同期治疗收入）
+- **需求**：同收费/收入2 注入 `ds`；本任务为「去年同期」区间（-13/-12 月相对 `biz_date`），`current_date` → `(SELECT biz_date FROM ds)`
+- **修改文件**：`更改区域/输血线上改-收入3`
+- **血缘**：`$[yyyy-MM-dd]` → `ds` → `Order_Main` / `fee_billdet` → `blood_treatment_income_report`（排序=3 去年同期行）
+
+### 2026-04-09 | 输血线上改-收入2 DataX 锚定调度日（上上月治疗收入）
+- **需求**：同 `输血线上改-收费1` 注入 `ds`；本任务原为「上上月」区间，`current_date` → `(SELECT biz_date FROM ds)`
+- **修改文件**：`更改区域/输血线上改-收入2`
+- **血缘**：`$[yyyy-MM-dd]` → `ds` → `datacenter_db.Order_Main` / `fee_billdet` → `blood_treatment_income_report`（排序=2 上上月行）
+
+### 2026-04-09 | 输血线上改-收费1 DataX 锚定调度日统计上月治疗收入
+- **需求**：`Order_Main`+`fee_billdet` 收费查询由 `current_date` 改为 `ds` + `$[yyyy-MM-dd]`，上月区间不变
+- **修改文件**：`更改区域/输血线上改-收费1`
+- **血缘**：`$[yyyy-MM-dd]` → `ds.biz_date` → `datacenter_db.Order_Main` / `fee_billdet` → StarRocks `blood_treatment_income_report`
+
+### 2026-04-09 | 输血线上改-输血.txt DataX 锚定调度日（同输血线上改）
+- **需求**：同上；`WITH base_result AS (SELECT` 前注入 `ds`，`current_date` 全量替换为 `(SELECT biz_date FROM ds)`
+- **修改文件**：`更改区域/输血线上改-输血.txt`
+- **血缘**：同 `输血线上改.txt`（输血专项宽表/库存等）
+
+### 2026-04-09 | 实验医学纠正-微生物 DataX 业务日统计上月（微生物口径）
+- **需求**：`${month}` → `$[yyyy-MM-dd]` + `ds` + `date_ranges` 上月区间；占比列别名与 writer 对齐为 `总收入占比%` 等
+- **修改文件**：`更改区域/实验医学纠正-微生物`
+- **血缘**：`$[yyyy-MM-dd]` → `ds` → `date_ranges` → 主院区 `lis_inspection_sample` / `lis_inspection_sample_charge` / `lis_charge_item` / `lis_requisition_item`（微生物组）→ StarRocks `transport_is_experimental`
+
+### 2026-04-09 | 实验医学线上 DataX 传入业务日统计上月 LIS 报表
+- **需求**：`${month}` 改为 `$[yyyy-MM-dd]` + `ds` + `date_ranges` 上月 yyyyMMdd 区间（与病理/输血一致）；输出列 `统计月份` 与 writer 对齐为 `统计月`
+- **修改文件**：`更改区域/实验医学线上`
+- **血缘**：`$[yyyy-MM-dd]` → `ds` → `date_ranges`（stat_month_label、上月起止）→ 主院区 `lis_*` / 天府 `lis_*`+`lis6_inspect_charge` → StarRocks `transport_is_experimental`
+
+### 2026-04-09 | 病理线上 DataX 按 DolphinScheduler 业务日期统计上月
+- **需求**：由手工 `${month}` 改为 DS 日期占位；**纠错**：`$[yyyy-MM-1]` 实为「业务日减 1 天」再格式化为 yyyy-MM（月中跑会得到当月），已改为 `$[yyyy-MM-dd]` + CTE `ds` + `date_add('month',-1,biz_date)` 统计自然月上月（对齐 `更改区域/输血线上`）
+- **修改文件**：`更改区域/病理线上`
+- **血缘**：`$[yyyy-MM-dd]` → `ds.biz_date` → `month_range`（上月起止、month_label）→ `t_jcxx` / `mdr_income` / `mdr_peisincome` / `inventory_del_dets` / `pathology` → StarRocks `om_bl_report_with_total`
+
+### 2026-04-03 | 手麻报表明细 Presto 表存在性检测 SQL
+- **需求**：为《手麻报表明细_Oracle转Presto》提供全表 information_schema 检测（含 cdxt_boot.sys_user）
+- **新增文件**：`手麻/手麻报表明细_表存在性检测.sql`
+- **血缘**：expected(schema,table) ↔ `information_schema.tables`；跨 catalog 见文件尾注释
+
+### 2026-04-03 | 手麻不良事件 Presto 对齐需求2 更新
+- **需求**：按 `手麻/需求2-不良事件管理(1).sql` 更新 Presto 版（adverse_details JSON、列顺序/别名、日期、p_sched、pub_sssyzt JOIN）；表检测增加 pub_sssyzt
+- **修改文件**：`手麻/手麻不良事件报表明细_Oracle转Presto.sql`、`手麻/手麻不良事件报表明细_表存在性检测.sql`
+- **血缘**：`sam_adverse_event.adverse_details` → `json_extract_scalar` 替代 valuejson/valuejsonsz；`adr.reason_name` 仅保留「不良事件原因」列，「不良事件发生原因」改为 JSON 拼接
+
+### 2026-04-03 | 手麻不良事件 Presto 表存在性检测 SQL
+- **需求**：为《手麻不良事件报表明细_Oracle转Presto》提供 information_schema 对比清单
+- **新增文件**：`手麻/手麻不良事件报表明细_表存在性检测.sql`
+- **血缘**：expected VALUES ↔ `information_schema.tables`（当前 catalog + v_schema）
+
+### 2026-04-03 | Oracle 手麻输血明细 SQL → Presto
+- **需求**：输血开始/结束、血型、剂量等单位行 Oracle→Presto；INNER JOIN 替代 xueinfo.apid 非空过滤
+- **新增文件**：`手麻/手麻输血明细_Oracle转Presto.sql`
+- **血缘**：info(sam_apply/reg/reg_op/sam_anar) → xueinfo(sam_anar_enent s_mzsjlb_dm=31 + pub_jldw + pub_aboxx + pub_rhxx)；内层去掉未用 join 防 listagg 重复
+
+### 2026-04-03 | Oracle 手麻不良事件明细 SQL → Presto
+- **需求**：不良事件宽表 Oracle→Presto（DECODE/CASE、listagg、手麻库前缀、isdeleted、INNER JOIN 替代 ad.id 过滤）
+- **新增文件**：`手麻/手麻不良事件报表明细_Oracle转Presto.sql`
+- **血缘**：info 聚合 → `sam_adverse_event` → `sam_adverse` / `sam_adverse_factor` / `sam_adverse_reason` / `pub_smzd` / `hrm_employee`×2；`f_j_getage`→年份差近似
+
+### 2026-04-03 | Oracle 手麻明细 SQL → Presto
+- **需求**：用户提供的 Oracle 手麻宽表 SQL 转为 Presto（库前缀、isdeleted、函数与 varchar 日期）
+- **新增文件**：`手麻/手麻报表明细_Oracle转Presto.sql`
+- **血缘**：`hid0101_orcl_operaanesthisa_emrhis.sam_*` / `ipi_registration` / `opc_registration` / `hrm_employee` / `hra00_department` / `sam_anar_enent` / `pub_*` / `gb_t_2261_1_2003`；`pro_send_order`+`cdxt_boot.sys_user` 占位需按环境换 catalog；子查询日期用 CTE `p_sched`
+
+### 2026-03-31 | 病理本部 t_jcxx 时效异常检测 SQL
+- **需求**：由 lastupdatedttm 滞后查询改为输出「病理本部异常 超时超过 x 天」、异常系统=病理、原因沿用 lag_seconds/lag_days
+- **新增文件**：`病理/病理本部_t_jcxx_时效异常检测.sql`
+- **血缘**：`hid0101_mssql_bl_rep.t_jcxx` + `isdeleted='0'` → MAX(lastupdatedttm) → 与 `threshold_days` 比较
+
+### 2026-03-27 | 实验医学报表指标定义（对齐最新需求格式）
+- **需求**：实验医学科经营分析 3 项 — 标本数、项目数、收入
+- **新增文件**：`需求/实验医学报表指标定义.md`
+- **血缘**：`LIS/运管科lis报表整体_单月_dolphinscheduler.sql`（标本 distinct inspection_id、项目数=workload 累加、收入 SAMPLE_CHARGE+天府）、`LIS/LIS提示词`（标本=条码、项目数口径待对齐）
+
+### 2026-04-07 | LIS+病理SQL血缘分析与数据字典整理
+- **需求**：分析3个SQL文件血缘，梳理LIS和病理系统使用的数据字典
+- **分析文件**：
+  - `LIS/lis微生物标本数统计_单月_dolphinscheduler1.sql`
+  - `LIS/运管科lis报表整体_单月_dolphinscheduler1.sql`
+  - `病理/病理运管报表汇总1dolphineschduler单月1.sql`
+- **血缘梳理**：
+  - **LIS系统**：hid0101_orcl_lis_dbo(主院区) + hid0117_orcl_lis_dbo/xhdata(天府) → 标本/收费/项目/收费项
+  - **病理系统**：hid0101_mssql_bl_rep(主/上锦) + hid0117_mysql_bl_pis(天府) + m1(mdr收入) + datacenter_db(耗材)
+
+### 2026-03-27 | 病理报表指标定义（对齐最新需求格式）
+- **需求**：病理科主要运行指标 8 项 — 指标定义、计算公式、指标来源
+- **新增文件**：`需求/病理报表指标定义.md`
+- **血缘**：`病理/病理运管报表汇总1.sql`（人次 t_jcxx、收入 mdr_income/穿刺/体检 mdr_peisincome、本部收入合计、其他收入占位0、耗材 inventory_del_dets）、`病理/病理收入`
+
+### 2026-03-27 | 输血报表指标定义（对齐最新需求格式）
+- **需求**：按 `需求/最新需求` 列式，为输血科运行分析 9 项指标补充指标定义、计算公式、指标来源
+- **新增文件**：`需求/输血报表指标定义.md`
+- **血缘**：`LIS/LIS提示词-输血报表` → 三类收入/支出口径；`输血/输血科报表主题数据架构设计方案.md` → DC/MDR 与 Fee_BillDet；`输血/运管输血报表sql-报表-lis部分简化版.sql` → 样本数/项目数/总工作量 SQL 逻辑
+
+### 2025-02-06 | 2025年三级手术例次统计
+- **需求**：统计2025年全年病案首页填写的三级手术手术例次（不分科室）
+- **修改文件**：`HIS/2025年三级手术例次统计.sql`
+- **血缘**：`datacenter_db.MR_FPOPS` → 手术级别代码='3' + 手术时间2025年
+
+### 2026-02-06 | BI报表空值检查Agent
+- **需求**：创建浏览器自动化Agent，检测永洪BI报表页面中的空值/缺失值并生成报告
+- **新增文件**：
+  - `agents/bi_null_checker.py` — 核心空值检测逻辑(HTML提取+空值分类+报告生成)
+  - `agents/run_null_check.py` — 运行入口脚本
+- **血缘**：
+  - `bi_crawler.py`(复用Cookie认证+Selenium抓取模式) → `bi_null_checker.py`(空值检测) → HTML/JSON报告
+  - 数据提取路径: 永洪BI `data-type=elem` → 左冻结列容器(编号+项目+本期值) + 右滚动列容器(差值+环比+同比) → 按top分行 → 空值分类
+  - 支持3种输入: Selenium实时抓取 / 本地HTML文件 / JSON数据文件
+
+  #### 2026-02-06 | 文本报表空值检测增强
+  - **需求**：支持非表格型文本报表(运管指标每日推送)空值检测
+  - **修改文件**：`agents/bi_null_checker.py`
+  - **新增能力**：
+    - `_wait_for_report_ready()` — 智能等待永洪BI渲染完成(检测elem组件/文本稳定)
+    - `_extract_text_report_via_js()` — JS注入提取全量文本节点+位置信息
+    - `_check_text_report()` — 文本报表指标空值解析(冒号模式+行内数值检测)
+    - `_scroll_collect_text()` — 滚动收集完整文本
+  - **提取策略优先级**: JS网格提取 → HTML网格解析 → 文本报表模式
+  - **发现**: 天府院区缺少挂号人次+收入数据, 乐城全部指标为"--"占位
+
+### 2026-03-22 | 工具链表审核
+- **需求**：逻辑/术语/AI痕迹/表述审核修改
+- **skill**：`chinese-tech-doc-review` + `ai-anti-patterns`
+- **修改文件**：`审核/工具链`
+- **已修改（8处）**：
+  - T1 序号3 "图片"→"医学影像"（工具名+功能列）
+  - T2 序号3 "影像报告和图像报告"重复→"影像报告"
+  - L3 序号2 功能循环表述→补充实质功能描述
+  - T3 序号12 "管镜"→"内窥镜"（工具名）
+  - T4 序号4 "数据干净性"→"数据质量"
+  - T5 序号15 "证据依据"→"临床证据"；补句号
+  - F1 序号12 英文句号→中文句号
+  - F3 序号17/20/3/19 补缺句号
+  - 序号19 "ROI区域识别"等功能描述不完整→重写
+- **待用户确认（4处）**：
+  - ⚠️ 序号9 完全缺失，需补充工具名称+功能
+  - ⚠️ 序号1 "数据库订阅、"后内容截断
+  - ⚠️ 序号11 "等关键信息，"后内容截断
+
+### 2026-03-22 | 高质量数据集上报文档审核（第二轮）
+- **需求**：再次审核，带证据链修改
+- **skill**：`chinese-tech-doc-review` + `ai-anti-patterns` + `anti-slop`
+- **修改文件**：`审核/高质量数据集上报`
+- **修改点**（10处）：
+  - L1 行24 "图片"→"医学影像（含病理图像）"（全文术语一致性）
+  - L2 行67/73/75/77 四处主谓残缺修复（与行61/64同类）
+  - L3 行71 节标题缩写"质控"→"质量控制"（正文与标题一致）
+  - L4 行163 时效性指标"符合要求"→具体量化（≥95%达标率）
+  - L5 行170 "构建看板+搭建看板"重复合并
+  - T1 行110 "语音衰弱"→"言语低弱"（非标准医学术语）
+  - T2 行133 "零样本/少样本迁移学习"→"零样本推理、少样本学习和迁移学习"（三概念拆分）
+  - A1 行174 "持续进化"→"持续迭代优化"
+
+### 2026-03-22 | 高质量数据集上报文档审核（第一轮）
+- **需求**：审核逻辑、术语、AI生成痕迹和表述问题
+- **安装skill**：`~/.cursor/skills/chinese-tech-doc-review/SKILL.md`（新增）
+- **修改文件**：`审核/高质量数据集上报`、`审核/高质量数据集上报2`
+- **修改点（两份文件一致）**：
+  - T2/T3 主谓残缺句式修正（3.6.4.1、3.6.4.2节）
+  - T3b/T3c/T9/T10/T11 同类"模块+逗号"句式全部修正（3.6.4.3/4.5/4.6/4.7/4.8节）
+  - L5 "并通过"→"同时通过"（行2连词句首问题）
+  - L6 正文与节标题"规范"二字不一致（行6）
+  - T5 "图片"→"图像"（医疗语境统一用词，行24）
+  - T6 "语音衰弱"→"声音嘶哑/音量减弱"（非标准医学术语，行110）
+  - T7 "病理与病理结论"→"病理图像与病理报告"（行138）
+  - T8 "逻辑吻合度"→"时序对应一致性"（行159）
+  - L7 时效性维度目标量化：采样频率≥125Hz，时间戳完整率100%（行163）
+  - L8 看板描述重复合并（行170）
+  - L9 "持续进化能力"→"持续迭代优化"（行174）
+  - T4 "无缺帧"→"序列完整无缺失/采样连续无断点"（3.7.1节）
+  - L1 临床验证医师范围扩展（3.7.1节）
+  - L2 术语标准覆盖率100%→≥95%（3.7.2节）
+  - T1 "零容忍"口号→PHI残留率量化指标（3.7.2节）
+  - L4 "反向传播机制"→"双向反馈机制"（3.7.4节）；"增强回路"→"持续优化闭环"
+
+### 2026-03-03 | JWT生成 + 企业微信Agent
+- **需求**：解析H3C api-signature-sdk的JwtSign.sign逻辑，转为Python实现，并构建agent编排方式调用企业微信发送接口
+- **新增文件**：
+  - `开发/jwt_sign.py` — JWT生成（等效JwtSign.sign：HMAC256, iss=AccessKey）
+  - `开发/wechat_agent.py` — 企业微信发送Agent（JWT鉴权→POST请求）
+- **血缘**：
+  - `AccessKey+SecretKey` → `jwt_sign()` (HS256, iss=accessKey, exp=now+ttl) → `Authorization` Header → `POST /hxmsg/msg/send-enterprise-wechat`
+  - `开发/send_wechat.py` — 合并脚本：gen_token + send，单文件一键发送
+  - `开发/send_wechat.sh` — Shell版：openssl生成JWT + curl发送；send_from_file 读文件(换行/空格→-)发企业微信

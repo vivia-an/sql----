@@ -1,0 +1,93 @@
+-- =====================================================
+-- StarRocks 在院病人宽表 建表语句
+-- 主键模型 + 分区表
+-- =====================================================
+
+CREATE TABLE IF NOT EXISTS m1.mdr_beinhosp
+(
+    -- 主键
+    uuid                     VARCHAR(64)    NOT NULL COMMENT 'UUID主键',
+    
+    -- 基础字段
+    medorgid                 VARCHAR(64)    COMMENT '医疗机构ID',
+    medorgcode               VARCHAR(64)    COMMENT '医疗机构代码',
+    medorgname               VARCHAR(256)   COMMENT '医疗机构名称',
+    empiid                   VARCHAR(64)    COMMENT '人员唯一标识ID',
+    empino                   VARCHAR(64)    COMMENT '人员唯一标识号',
+    persid                   VARCHAR(64)    COMMENT '人员ID',
+    persno                   VARCHAR(64)    COMMENT '人员号',
+    visitid                  VARCHAR(64)    COMMENT '就诊ID',
+    visitno                  VARCHAR(64)    COMMENT '就诊号',
+    serialno                 VARCHAR(64)    COMMENT '流水号',
+    persname                 VARCHAR(128)   COMMENT '人员姓名',
+    
+    -- 特殊类型字段
+    beinhospdate             DATE           COMMENT '在院日期',
+    beinhospperscount        INT            COMMENT '在院人次',
+    
+    -- 快照字段 (分区字段)
+    repdate                  VARCHAR(10)    NOT NULL COMMENT '快照日期',
+    reptime                  VARCHAR(10)    COMMENT '快照时间',
+    repdttm                  VARCHAR(32)    COMMENT '快照日期时间',
+    rephour                  VARCHAR(2)     NOT NULL COMMENT '快照时刻',
+    newest                   VARCHAR(2)     COMMENT '是否最新',
+    
+    -- 床位信息
+    bednoid                  VARCHAR(64)    COMMENT '床号ID',
+    bedno                    VARCHAR(64)    COMMENT '床号',
+    
+    -- 入院信息
+    inhospdate               VARCHAR(32)    COMMENT '入院日期',
+    inhospwardid             VARCHAR(64)    COMMENT '入院护理单元ID',
+    inhospwardcode           VARCHAR(64)    COMMENT '入院护理单元编码',
+    inhospwardname           VARCHAR(256)   COMMENT '入院护理单元名称',
+    inhospmedelementid       VARCHAR(64)    COMMENT '入院医疗单元ID',
+    inhospmedelementcode     VARCHAR(64)    COMMENT '入院医疗单元编码',
+    inhospmedelementname     VARCHAR(256)   COMMENT '入院医疗单元名称',
+    
+    -- 当前护理单元
+    currentwardid            VARCHAR(64)    COMMENT '当前护理单元ID',
+    currentwardcode          VARCHAR(64)    COMMENT '当前护理单元编码',
+    currentwardname          VARCHAR(256)   COMMENT '当前护理单元名称',
+    
+    -- 当前医疗单元
+    currentmedelementid      VARCHAR(64)    COMMENT '当前医疗单元ID',
+    currentmedelementcode    VARCHAR(64)    COMMENT '当前医疗单元编码',
+    currentmedelementname    VARCHAR(256)   COMMENT '当前医疗单元名称',
+    
+    -- 当前医疗组长
+    currentstaffgroupid      VARCHAR(64)    COMMENT '当前医疗组长ID',
+    currentstaffgroupcode    VARCHAR(64)    COMMENT '当前医疗组长工号',
+    currentstaffgroupname    VARCHAR(128)   COMMENT '当前医疗组长名称',
+    
+    -- 其他业务字段
+    iswait                   VARCHAR(2)     COMMENT '是否等待区',
+    datasourceflag           VARCHAR(64)    COMMENT '数据来源标识',
+    dstable                  VARCHAR(64)    COMMENT '接入数据源的表',
+    indatasourcekey          VARCHAR(64)    COMMENT '接入数据源的KEY',
+    indatasourcekeyvalue     VARCHAR(256)   COMMENT '接入数据源的KEY值',
+    isdelete                 VARCHAR(2)     COMMENT '是否物理删除',
+    lastupdatedttm           VARCHAR(32)    COMMENT '最后更新时间',
+    datacreatedttm           VARCHAR(32)    COMMENT '数据创建时间',
+    
+    -- 运管院区字段
+    threecode                VARCHAR(64)    COMMENT '三级院区编码',
+    threename                VARCHAR(256)   COMMENT '三级院区名称',
+    omthreecode              VARCHAR(64)    COMMENT '运管院区编码',
+    omthreename              VARCHAR(256)   COMMENT '运管院区名称',
+    
+    -- 运管科室字段
+    omdeptid                 VARCHAR(64)    COMMENT '运管科室ID',
+    omdeptcode               VARCHAR(64)    COMMENT '运管科室编码',
+    omdeptdesc               VARCHAR(256)   COMMENT '运管科室名称'
+)
+ENGINE = OLAP
+PRIMARY KEY (uuid, repdate, rephour)
+COMMENT '在院病人宽表'
+PARTITION BY (repdate, rephour)
+DISTRIBUTED BY HASH(uuid) BUCKETS 16
+PROPERTIES (
+    "replication_num" = "3",
+    "enable_persistent_index" = "true",
+    "compression" = "LZ4"
+);

@@ -1,0 +1,142 @@
+-- 术中自体血回输率统计（修正版 - 使用sam_apply.id作为患者手术标识）
+-- 问题：person_info_id可能为空，改用 sam_apply.id（申请单ID）作为唯一标识
+
+WITH 
+-- 1. 术中进行输血的患者（分母）
+surgery_with_transfusion AS (
+    SELECT DISTINCT
+        sa.id AS apply_id,  -- ⭐使用申请单ID作为唯一标识
+        substr(sao.operator_begin_date, 1, 7) AS surgery_month
+    FROM hid0101_orcl_operaanesthisa_emrhis.sam_apply sa
+    INNER JOIN hid0101_orcl_operaanesthisa_emrhis.sam_apply_op sao 
+        ON sa.id = sao.sam_apply_id 
+        AND sao.isdeleted = '0'
+    INNER JOIN hid0101_orcl_operaanesthisa_emrhis.sam_anar_enent ae 
+        ON sa.id = ae.sam_apply_id 
+        AND ae.s_mzsjlb_dm = '31'        -- 输血事件
+        AND ae.is_rec_enent = '2'        -- ⭐手术室记录（术中）
+        AND ae.isdeleted = '0'
+    WHERE sa.health_service_org_id = 'HXSSMZK'  
+        AND sa.oper_type = 'ROOM_OPER'           
+        AND sa.is_reject = '2'                   
+        AND sa.s_sssyzt_dm = '90'               
+        AND sa.isdeleted = '0'
+        AND sa.scheduled_date >= '2024-01-01 00:00:00'
+        AND sa.scheduled_date <= '2024-12-31 23:59:59'
+),
+
+-- 2. 术中使用自体血回输的患者（分子）
+surgery_with_autologous AS (
+    SELECT DISTINCT
+        sa.id AS apply_id,  -- ⭐使用申请单ID作为唯一标识
+        substr(sao.operator_begin_date, 1, 7) AS surgery_month
+    FROM hid0101_orcl_operaanesthisa_emrhis.sam_apply sa
+    INNER JOIN hid0101_orcl_operaanesthisa_emrhis.sam_apply_op sao 
+        ON sa.id = sao.sam_apply_id 
+        AND sao.isdeleted = '0'
+    INNER JOIN hid0101_orcl_operaanesthisa_emrhis.sam_anar_enent ae 
+        ON sa.id = ae.sam_apply_id 
+        AND ae.s_mzsjlb_dm = '31'        -- 输血事件
+        AND ae.is_rec_enent = '2'        -- ⭐手术室记录（术中）
+        AND (
+            ae.event_text = '自体回收血'     -- 精确匹配
+            OR ae.event_text LIKE '%自体回收血%'
+            OR ae.event_text LIKE '%自体血%'
+        )
+        AND ae.isdeleted = '0'
+    WHERE sa.health_service_org_id = 'HXSSMZK'  
+        AND sa.oper_type = 'ROOM_OPER'           
+        AND sa.is_reject = '2'                   
+        AND sa.s_sssyzt_dm = '90'               
+        AND sa.isdeleted = '0'
+        AND sa.scheduled_date >= '2024-01-01 00:00:00'
+        AND sa.scheduled_date <= '2024-12-31 23:59:59'
+)
+
+-- 3. 按月统计
+SELECT 
+    COALESCE(swt.surgery_month, swab.surgery_month) AS "统计月份",
+    
+    -- 分母：术中进行输血的手术台次（每台手术算1次）
+    COUNT(DISTINCT swt.apply_id) AS "术中输血手术台次_分母",
+    
+    -- 分子：术中使用自体血回输的手术台次
+    COUNT(DISTINCT swab.apply_id) AS "术中自体血回输手术台次_分子",
+    
+    -- 计算占比（百分比，保留2位小数）
+    CASE 
+        WHEN COUNT(DISTINCT swt.apply_id) > 0 
+        THEN ROUND(
+            CAST(COUNT(DISTINCT swab.apply_id) AS DOUBLE) / 
+            CAST(COUNT(DISTINCT swt.apply_id) AS DOUBLE) * 100, 
+            2
+        )
+        ELSE 0.0
+    END AS "术中自体血回输率_%"
+    
+FROM surgery_with_transfusion swt
+FULL OUTER JOIN surgery_with_autologous swab 
+    ON swt.apply_id = swab.apply_id 
+    AND swt.surgery_month = swab.surgery_month
+
+GROUP BY COALESCE(swt.surgery_month, swab.surgery_month)
+ORDER BY "统计月份" DESC;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- 明细查询：验证数据（显示前100条）
+
+SELECT 
+    substr(sao.operator_begin_date, 1, 7) AS "手术月份",
+    sa.id AS "申请单ID",
+    sa.patient_name AS "患者姓名",
+    sao.operation_name AS "手术名称",
+    sao.operator_begin_date AS "手术开始时间",
+    
+    -- 输血信息
+    ae.event_text AS "血制品类型",
+    CAST(ae.single_dose AS VARCHAR) AS "输血量",
+    ae.single_dose_unit AS "输血单位",
+    
+    -- 标识
+    CASE 
+        WHEN ae.event_text = '自体回收血' THEN '是'
+        WHEN ae.event_text LIKE '%自体回收血%' THEN '是（模糊）'
+        WHEN ae.event_text LIKE '%自体血%' THEN '是（模糊）'
+        ELSE '否'
+    END AS "是否自体血",
+    
+    ae.is_rec_enent AS "记录位置代码"
+
+FROM hid0101_orcl_operaanesthisa_emrhis.sam_apply sa
+INNER JOIN hid0101_orcl_operaanesthisa_emrhis.sam_apply_op sao 
+    ON sa.id = sao.sam_apply_id 
+    AND sao.isdeleted = '0'
+INNER JOIN hid0101_orcl_operaanesthisa_emrhis.sam_anar_enent ae 
+    ON sa.id = ae.sam_apply_id 
+    AND ae.s_mzsjlb_dm = '31'        -- 输血事件
+    AND ae.is_rec_enent = '2'        -- 术中（手术室）
+    AND ae.isdeleted = '0'
+
+WHERE sa.health_service_org_id = 'HXSSMZK'  
+    AND sa.oper_type = 'ROOM_OPER'           
+    AND sa.is_reject = '2'                   
+    AND sa.s_sssyzt_dm = '90'               
+    AND sa.isdeleted = '0'
+    AND sa.scheduled_date >= '2024-01-01 00:00:00'
+    AND sa.scheduled_date <= '2024-12-31 23:59:59'
+
+ORDER BY 
+    sao.operator_begin_date DESC
+LIMIT 100;

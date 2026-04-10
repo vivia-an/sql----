@@ -1,0 +1,1544 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.30">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>arm架构测试方案-裸金属</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="arm架构测试方案-裸金属_files/libs/clipboard/clipboard.min.js"></script>
+<script src="arm架构测试方案-裸金属_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="arm架构测试方案-裸金属_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="arm架构测试方案-裸金属_files/libs/quarto-html/popper.min.js"></script>
+<script src="arm架构测试方案-裸金属_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="arm架构测试方案-裸金属_files/libs/quarto-html/anchor.min.js"></script>
+<link href="arm架构测试方案-裸金属_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="arm架构测试方案-裸金属_files/libs/quarto-html/quarto-syntax-highlighting-de070a7b0ab54f8780927367ac907214.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="arm架构测试方案-裸金属_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="arm架构测试方案-裸金属_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="arm架构测试方案-裸金属_files/libs/bootstrap/bootstrap-bb462d781dde1847d9e3ccf7736099dd.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+
+
+
+<section id="arm-架构测试方案" class="level1">
+<h1>ARM 架构测试方案</h1>
+<section id="测试目的" class="level2">
+<h2 class="anchored" data-anchor-id="测试目的">1. 测试目的</h2>
+<ul>
+<li>评估 ARM 服务器与现有 x86 服务器在部署 StarRocks 集群时的性能差异，特别是在使用不同操作系统和存储配置下的表现。</li>
+<li>比较国产操作系统（如欧拉、麒麟、统信）与国际操作系统（如 Red Hat Enterprise 8.8）对数据库性能的影响。</li>
+<li>测试环境：ARM 服务器与现有非ARM环境对比，包括硬件（服务器、磁盘、存储）与操作系统（包括国产操作系统的对比）。</li>
+</ul>
+</section>
+<section id="测试环境" class="level2">
+<h2 class="anchored" data-anchor-id="测试环境">2. 测试环境</h2>
+<section id="对照环境x86-环境" class="level3">
+<h3 class="anchored" data-anchor-id="对照环境x86-环境">2.1 对照环境（x86 环境）</h3>
+<p>现有的非 ARM 集群，配置如下：</p>
+<section id="操作系统" class="level4">
+<h4 class="anchored" data-anchor-id="操作系统">2.1.1 操作系统</h4>
+<ul>
+<li><strong>操作系统</strong>：Red Hat Enterprise Linux 8.8</li>
+<li><strong>内核版本</strong>：4.18.0-477.10.1.el8_8.x86_64</li>
+<li><strong>架构</strong>：x86_64</li>
+</ul>
+</section>
+<section id="硬件配置" class="level4">
+<h4 class="anchored" data-anchor-id="硬件配置">2.1.2 硬件配置</h4>
+<ul>
+<li><strong>处理器（CPU）</strong>：
+<ul>
+<li>型号：Intel(R) Xeon(R) Gold 6530</li>
+<li>线程数：128 线程 32 Core(s) per socket * 2 Socket * 2 Thread(s) per core = 128</li>
+<li>架构：x86_64</li>
+</ul></li>
+<li><strong>内存（Memory）</strong>：
+<ul>
+<li>总内存容量：2TB</li>
+</ul></li>
+<li><strong>存储配置</strong>：
+<ul>
+<li>总磁盘容量：70T</li>
+<li>磁盘数量：10 个磁盘</li>
+<li>每台机器挂载数据：7T</li>
+<li>总数据量：7T</li>
+<li>当前磁盘使用情况：每台服务器磁盘已使用 710GB</li>
+</ul></li>
+</ul>
+<p><strong>注</strong>：x86 环境硬件信息补充： - CPU 核心数、主频：32 Core(s) per socket * 2 Socket * 2 Thread(s) per core = 128 线程 - 内存类型、频率：DDR4-3200MT/s - 磁盘类型、RAID 配置：RAID5 配置 - 网络配置：1GB 管理网卡 + 4×25GB 双端口网卡 - 存储阵列配置：2×32GB 双端口 FC HBA 卡</p>
+</section>
+</section>
+<section id="arm-环境" class="level3">
+<h3 class="anchored" data-anchor-id="arm-环境">2.2 ARM 环境</h3>
+<section id="服务器数量" class="level4">
+<h4 class="anchored" data-anchor-id="服务器数量">2.2.1 服务器数量</h4>
+<ul>
+<li><strong>服务器数量</strong>：5 台 ARM 服务器</li>
+</ul>
+</section>
+<section id="arm-服务器硬件详细规格" class="level4">
+<h4 class="anchored" data-anchor-id="arm-服务器硬件详细规格">2.2.2 ARM 服务器硬件详细规格</h4>
+<p>每台 ARM 服务器配置如下：</p>
+<ul>
+<li><strong>处理器（CPU）</strong>：
+<ul>
+<li>配置 ≥ 4 颗鲲鹏 920 处理器</li>
+<li>单颗处理器核数 ≥ 48 核</li>
+<li>主频 ≥ 2.6GHz</li>
+<li>总核心数：≥ 192 核（4 × 48）</li>
+</ul></li>
+<li><strong>内存（Memory）</strong>：
+<ul>
+<li>配置 ≥ 32 条内存条</li>
+<li>单条容量 ≥ 64GB</li>
+<li>规格：DDR4-3200MT/s</li>
+<li>总内存容量：≥ 2TB（32 × 64GB）</li>
+</ul></li>
+<li><strong>本地存储（硬盘）</strong>：
+<ul>
+<li>配置 ≥ 2 × 960GB SSD 盘</li>
+<li>用途：系统盘和数据缓存</li>
+</ul></li>
+<li><strong>网络配置</strong>：
+<ul>
+<li>1 个四端口 1GB 以太网卡（管理网络）</li>
+<li>≥ 4 个 25GB 双端口网卡（含 25GB 模块）</li>
+<li>总网络带宽：≥ 200GB（4 × 2 × 25GB）</li>
+</ul></li>
+<li><strong>存储连接（HBA 卡）</strong>：
+<ul>
+<li>配置 ≥ 2 个双端口 32GB 光纤通道 HBA 卡（含 32GB 模块）</li>
+<li>用于连接 FC 存储阵列</li>
+</ul></li>
+<li><strong>RAID 配置</strong>：
+<ul>
+<li>出厂预装 ≥ 4GB 缓存 RAID 卡</li>
+<li>用于本地 SSD 盘的 RAID 配置</li>
+</ul></li>
+<li><strong>电源配置</strong>：
+<ul>
+<li>配置 ≤ 2 个电源</li>
+<li>1+1 冗余配置</li>
+</ul></li>
+<li><strong>外观规格</strong>：
+<ul>
+<li>机架式服务器</li>
+<li>高度：2U</li>
+</ul></li>
+</ul>
+</section>
+<section id="存储配置" class="level4">
+<h4 class="anchored" data-anchor-id="存储配置">2.2.3 存储配置</h4>
+<ul>
+<li><strong>本地存储</strong>：每台服务器配置 ≥ 2 × 960GB SSD（系统盘）</li>
+<li><strong>FC 存储</strong>：每台服务器需要申请 1T FC 存储作为数据存储
+<ul>
+<li>通过 32GB 光纤通道 HBA 卡连接</li>
+<li>用于数据的持久化和管理</li>
+<li>总存储容量：5 台服务器 × 1T = 5T FC 存储 - 需赵老师提供</li>
+</ul></li>
+</ul>
+</section>
+<section id="操作系统-1" class="level4">
+<h4 class="anchored" data-anchor-id="操作系统-1">2.2.4 操作系统</h4>
+<section id="操作系统测试策略" class="level5">
+<h5 class="anchored" data-anchor-id="操作系统测试策略">操作系统测试策略</h5>
+<ul>
+<li><strong>测试范围</strong>：不需要测试所有列出的操作系统，可选其一进行测试</li>
+<li><strong>版本选择原则</strong>：按照芯片（鲲鹏 920）适配支持的最新稳定版本选择</li>
+</ul>
+</section>
+<section id="可选操作系统列表" class="level5">
+<h5 class="anchored" data-anchor-id="可选操作系统列表">可选操作系统列表</h5>
+<ul>
+<li><strong>国产操作系统</strong>：
+<ul>
+<li>欧拉操作系统（openEuler）- 需确认芯片适配的最新稳定版本</li>
+<li>银河麒麟操作系统（Kylin）- 需确认芯片适配的最新稳定版本</li>
+<li>统信操作系统（UOS）- 需确认芯片适配的最新稳定版本</li>
+<li>FusionOS - 需确认芯片适配的最新稳定版本</li>
+</ul></li>
+<li><strong>国际操作系统</strong>（作为对照，如支持 ARM 架构）：
+<ul>
+<li>SUSE Linux Enterprise Server - 需确认芯片适配的最新稳定版本</li>
+<li>Red Hat Enterprise Linux 8.8（需确认是否支持 ARM 架构）</li>
+</ul></li>
+</ul>
+<p><strong>注</strong>： - 具体选择哪个操作系统进行测试，需根据实际需求和芯片适配情况确定 - 每个操作系统的具体版本号需在测试前确认芯片厂商提供的适配支持情况 - 建议优先选择芯片厂商官方认证和推荐的操作系统版本</p>
+</section>
+<section id="虚拟化平台" class="level5">
+<h5 class="anchored" data-anchor-id="虚拟化平台">虚拟化平台</h5>
+<ul>
+<li><strong>FusionCompute 虚拟化软件</strong>：
+<ul>
+<li>实现对配套服务器、存储和网络资源虚拟化</li>
+<li>形成虚拟机弹性资源池</li>
+<li>支持虚拟机配置 RedHat、银河麒麟、龙蜥等主流操作系统</li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="管理功能" class="level4">
+<h4 class="anchored" data-anchor-id="管理功能">2.2.5 管理功能</h4>
+<ul>
+<li><strong>统一管理控制台</strong>：
+<ul>
+<li>通过单一控制台管理全系列服务器产品</li>
+<li>支持跨数据中心设备集群管理</li>
+<li>实现院内该品牌已有的所有设备纳管</li>
+</ul></li>
+<li><strong>远程管理功能</strong>：
+<ul>
+<li>与操作系统无关的远程服务器完全控制</li>
+<li>支持远程开机、关机、重启、更新 Firmware 等操作</li>
+<li>提供服务器控制台录屏/回放功能</li>
+<li>SSD 寿命检测和阈值预警功能</li>
+</ul></li>
+<li><strong>监控对接</strong>：
+<ul>
+<li>与院内多云管理平台、监控平台对接</li>
+<li>硬件设备 CPU、内存、磁盘、电源等运行状态信息监控和告警</li>
+<li>与院内 IT 运维管理系统对接</li>
+<li>实现告警自动派单与闭环管理</li>
+</ul></li>
+</ul>
+</section>
+<section id="配件" class="level4">
+<h4 class="anchored" data-anchor-id="配件">2.2.6 配件</h4>
+<ul>
+<li>服务器配套滑动导轨和理线架</li>
+<li>实现服务器滑动拖拉功能</li>
+<li>设备符合医院现有机柜尺寸</li>
+</ul>
+</section>
+</section>
+<section id="硬件配置对比总结" class="level3">
+<h3 class="anchored" data-anchor-id="硬件配置对比总结">2.2.7 硬件配置对比总结</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 15%">
+<col style="width: 52%">
+<col style="width: 31%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>配置项</th>
+<th>x86 环境（对照）</th>
+<th>ARM 环境</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>CPU 型号</strong></td>
+<td>Intel Xeon Gold 6530</td>
+<td>鲲鹏 920</td>
+</tr>
+<tr class="even">
+<td><strong>CPU 数量</strong></td>
+<td>4 颗</td>
+<td>≥ 4 颗</td>
+</tr>
+<tr class="odd">
+<td><strong>CPU 核心数</strong></td>
+<td>128 核（4 × 32），共 128 线程</td>
+<td>≥ 192 核（4 × 48）</td>
+</tr>
+<tr class="even">
+<td><strong>CPU 主频</strong></td>
+<td>2.6GHz</td>
+<td>≥ 2.6GHz</td>
+</tr>
+<tr class="odd">
+<td><strong>内存容量</strong></td>
+<td>2TB（32 × 64GB）</td>
+<td>≥ 2TB（32 × 64GB）</td>
+</tr>
+<tr class="even">
+<td><strong>内存类型</strong></td>
+<td>DDR4-3200MT/s</td>
+<td>DDR4-3200MT/s</td>
+</tr>
+<tr class="odd">
+<td><strong>本地存储</strong></td>
+<td>2 × 960GB SSD</td>
+<td>≥ 2 × 960GB SSD</td>
+</tr>
+<tr class="even">
+<td><strong>数据存储</strong></td>
+<td>70T（10 个企业级 SAS 硬盘，每台 7T，RAID5）</td>
+<td>1T FC 存储/台（共 5T）</td>
+</tr>
+<tr class="odd">
+<td><strong>网络配置</strong></td>
+<td>1GB 管理网卡 + 4×25GB 双端口以太网卡</td>
+<td>1GB 管理网卡 + 4×25GB 双端口网卡</td>
+</tr>
+<tr class="even">
+<td><strong>存储连接</strong></td>
+<td>2 × 32GB 双端口 FC HBA 卡</td>
+<td>2×32GB 双端口 FC HBA 卡</td>
+</tr>
+<tr class="odd">
+<td><strong>RAID 配置</strong></td>
+<td>≥ 4GB 缓存 RAID 卡，支持 RAID10 配置</td>
+<td>≥ 4GB 缓存 RAID 卡</td>
+</tr>
+<tr class="even">
+<td><strong>服务器数量</strong></td>
+<td>5 台</td>
+<td>5 台</td>
+</tr>
+<tr class="odd">
+<td><strong>服务器高度</strong></td>
+<td>2U</td>
+<td>2U</td>
+</tr>
+</tbody>
+</table>
+<p><strong>注</strong>：x86 环境的详细硬件信息需进一步补充，以便进行更全面的性能对比分析。</p>
+</section>
+<section id="软件环境" class="level3">
+<h3 class="anchored" data-anchor-id="软件环境">2.3 软件环境</h3>
+<section id="starrocks-配置详情" class="level4">
+<h4 class="anchored" data-anchor-id="starrocks-配置详情">2.3.1 StarRocks 配置详情</h4>
+<section id="x86-环境对照环境配置" class="level5">
+<h5 class="anchored" data-anchor-id="x86-环境对照环境配置">x86 环境（对照环境）配置</h5>
+<ul>
+<li><strong>版本号</strong>：StarRocks 3.5.6</li>
+<li><strong>集群架构</strong>：
+<ul>
+<li>FE（Frontend）节点数：3 台</li>
+<li>BE（Backend）节点数：5 台</li>
+<li>部署方式：物理机部署</li>
+</ul></li>
+</ul>
+</section>
+<section id="arm-环境配置" class="level5">
+<h5 class="anchored" data-anchor-id="arm-环境配置">ARM 环境配置</h5>
+<ul>
+<li><strong>版本号</strong>：StarRocks 3.5.6（需与 x86 环境保持一致）</li>
+<li><strong>集群架构</strong>：
+<ul>
+<li>FE（Frontend）节点数：3 台（与 x86 环境一致）</li>
+<li>BE（Backend）节点数：5 台（与 x86 环境一致）</li>
+<li>部署方式：物理机部署</li>
+</ul></li>
+</ul>
+</section>
+<section id="关键配置参数需确保-arm-和-x86-环境完全一致" class="level5">
+<h5 class="anchored" data-anchor-id="关键配置参数需确保-arm-和-x86-环境完全一致">关键配置参数（需确保 ARM 和 x86 环境完全一致）</h5>
+<ul>
+<li><strong>配置策略</strong>：采用 StarRocks 官方默认参数配置</li>
+<li><strong>参数说明</strong>：
+<ul>
+<li>BE 内存限制配置：使用官方默认值</li>
+<li>查询并发数限制：使用官方默认值</li>
+<li>表副本数配置：使用官方默认值</li>
+<li>分区策略配置：使用官方默认值</li>
+<li>查询超时时间：使用官方默认值</li>
+<li>数据导入并发数：使用官方默认值</li>
+<li>其他性能相关参数：使用官方默认值</li>
+</ul></li>
+</ul>
+<p><strong>注</strong>：ARM 和 x86 环境均采用 StarRocks 官方默认参数，确保配置一致性，以便公平对比硬件和操作系统对性能的影响。</p>
+</section>
+<section id="配置一致性检查清单" class="level5">
+<h5 class="anchored" data-anchor-id="配置一致性检查清单">配置一致性检查清单</h5>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="">StarRocks 版本号一致（3.5.6）</label></li>
+<li><label><input type="checkbox" checked="">FE/BE 节点数量一致（x86：FE 3台，BE 5台；ARM：FE 3台，BE 5台）</label></li>
+<li><label><input type="checkbox" checked="">FE/BE 节点配置参数一致（均采用官方默认参数）</label></li>
+<li><label><input type="checkbox">表结构、分区策略、副本数一致（测试时需保持一致）</label></li>
+<li><label><input type="checkbox" checked="">查询优化器参数一致（官方默认参数）</label></li>
+<li><label><input type="checkbox" checked="">内存限制、并发控制参数一致（官方默认参数）</label></li>
+</ul>
+</section>
+<section id="starrocks-集群配置对比" class="level5">
+<h5 class="anchored" data-anchor-id="starrocks-集群配置对比">StarRocks 集群配置对比</h5>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>配置项</th>
+<th>x86 环境（对照）</th>
+<th>ARM 环境</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>StarRocks 版本</strong></td>
+<td>3.5.6</td>
+<td>3.5.6</td>
+</tr>
+<tr class="even">
+<td><strong>FE 节点数</strong></td>
+<td>3 台</td>
+<td>3 台</td>
+</tr>
+<tr class="odd">
+<td><strong>BE 节点数</strong></td>
+<td>5 台</td>
+<td>5 台</td>
+</tr>
+<tr class="even">
+<td><strong>部署方式</strong></td>
+<td>物理机部署</td>
+<td>物理机部署</td>
+</tr>
+<tr class="odd">
+<td><strong>参数配置策略</strong></td>
+<td>官方默认参数</td>
+<td>官方默认参数</td>
+</tr>
+<tr class="even">
+<td><strong>BE 内存限制</strong></td>
+<td>官方默认值</td>
+<td>官方默认值</td>
+</tr>
+<tr class="odd">
+<td><strong>查询并发数限制</strong></td>
+<td>官方默认值</td>
+<td>官方默认值</td>
+</tr>
+<tr class="even">
+<td><strong>表副本数</strong></td>
+<td>测试时保持一致</td>
+<td>测试时保持一致</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="监控工具" class="level4">
+<h4 class="anchored" data-anchor-id="监控工具">2.3.2 监控工具</h4>
+<ul>
+<li><strong>监控工具</strong>：使用 Prometheus + Grafana 监控 ARM 和 x86 环境的 CPU、内存、磁盘、网络等资源使用情况</li>
+<li><strong>StarRocks 内置监控</strong>：启用 StarRocks 自带的监控指标</li>
+<li><strong>日志收集</strong>：配置日志收集工具（如 ELK Stack）用于问题分析</li>
+</ul>
+</section>
+<section id="测试环境隔离" class="level4">
+<h4 class="anchored" data-anchor-id="测试环境隔离">2.3.3 测试环境隔离</h4>
+<ul>
+<li>ARM 测试环境与生产环境完全隔离</li>
+<li>网络隔离方案：使用独立的网络段或 VLAN</li>
+<li>数据隔离方案：使用独立的存储和数据库实例</li>
+<li>避免测试对生产环境造成影响</li>
+</ul>
+</section>
+</section>
+</section>
+<section id="测试场景设计" class="level2">
+<h2 class="anchored" data-anchor-id="测试场景设计">3. 测试场景设计</h2>
+<section id="批量写入操作" class="level3">
+<h3 class="anchored" data-anchor-id="批量写入操作">3.1 批量写入操作</h3>
+<p>在每个环境中模拟就诊表和账单明细表的大量数据插入操作，使用不同的操作系统进行测试。</p>
+</section>
+<section id="复杂查询测试" class="level3">
+<h3 class="anchored" data-anchor-id="复杂查询测试">3.2 复杂查询测试</h3>
+<p>执行多表联接和聚合查询，模拟现实中常见的医疗数据查询，比较不同操作系统下的执行性能。</p>
+</section>
+<section id="增量更新场景" class="level3">
+<h3 class="anchored" data-anchor-id="增量更新场景">3.3 增量更新场景</h3>
+<p>模拟有实时增量数据的场景，测试实时数据的插入、更新与查询性能。</p>
+</section>
+<section id="离线数据分析" class="level3">
+<h3 class="anchored" data-anchor-id="离线数据分析">3.4 离线数据分析</h3>
+<p>执行大规模的数据聚合与统计计算任务，评估不同操作系统下的计算资源消耗和执行时间。</p>
+</section>
+<section id="高并发场景测试" class="level3">
+<h3 class="anchored" data-anchor-id="高并发场景测试">3.5 高并发场景测试</h3>
+<ul>
+<li>模拟高并发查询场景（1000+ 并发）</li>
+<li>测试连接池压力</li>
+<li>测试查询队列管理</li>
+<li>测试系统在高并发下的稳定性</li>
+</ul>
+</section>
+<section id="长时间稳定性测试" class="level3">
+<h3 class="anchored" data-anchor-id="长时间稳定性测试">3.6 长时间稳定性测试</h3>
+<ul>
+<li>7×24 小时持续运行测试</li>
+<li>内存泄漏检测</li>
+<li>长时间运行后的性能衰减分析</li>
+<li>系统资源使用趋势分析</li>
+</ul>
+</section>
+<section id="故障恢复测试" class="level3">
+<h3 class="anchored" data-anchor-id="故障恢复测试">3.7 故障恢复测试</h3>
+<ul>
+<li>节点故障恢复时间测试</li>
+<li>数据一致性验证</li>
+<li>自动故障转移能力测试</li>
+<li>存储故障场景模拟</li>
+</ul>
+</section>
+<section id="混合负载测试" class="level3">
+<h3 class="anchored" data-anchor-id="混合负载测试">3.8 混合负载测试</h3>
+<ul>
+<li>同时执行写入、查询、分析任务</li>
+<li>测试不同负载下的资源竞争情况</li>
+<li>评估系统在混合负载下的性能表现</li>
+</ul>
+</section>
+<section id="数据压缩与存储效率" class="level3">
+<h3 class="anchored" data-anchor-id="数据压缩与存储效率">3.9 数据压缩与存储效率</h3>
+<ul>
+<li>不同压缩算法的性能对比</li>
+<li>存储空间占用对比</li>
+<li>压缩对查询性能的影响</li>
+</ul>
+</section>
+</section>
+<section id="性能测试指标" class="level2">
+<h2 class="anchored" data-anchor-id="性能测试指标">4. 性能测试指标</h2>
+<section id="吞吐量tps" class="level3">
+<h3 class="anchored" data-anchor-id="吞吐量tps">4.1 吞吐量（TPS）</h3>
+<p>测量不同操作系统下的吞吐量，在不同负载情况下的表现。</p>
+<ul>
+<li>测试不同并发数（100、200、500、1000）下的吞吐量，记录 TPS 值</li>
+</ul>
+</section>
+<section id="响应时间latency" class="level3">
+<h3 class="anchored" data-anchor-id="响应时间latency">4.2 响应时间（Latency）</h3>
+<p>记录查询操作的响应时间，分析不同操作系统下的查询延迟。</p>
+<ul>
+<li>测试复杂查询和批量插入的响应时间，比较不同操作系统对查询性能的影响</li>
+</ul>
+</section>
+<section id="资源利用率" class="level3">
+<h3 class="anchored" data-anchor-id="资源利用率">4.3 资源利用率</h3>
+<p>监控并记录每种操作系统下的 CPU 使用率、内存占用、磁盘 IO 和网络带宽。</p>
+</section>
+<section id="sql-执行时间" class="level3">
+<h3 class="anchored" data-anchor-id="sql-执行时间">4.4 SQL 执行时间</h3>
+<p>记录 SQL 查询执行的时间，特别是涉及多个表的复杂查询。</p>
+</section>
+<section id="系统负载" class="level3">
+<h3 class="anchored" data-anchor-id="系统负载">4.5 系统负载</h3>
+<p>监控系统负载，测试在不同并发和负载下的表现，特别是高并发下系统稳定性。</p>
+</section>
+<section id="查询性能细分指标" class="level3">
+<h3 class="anchored" data-anchor-id="查询性能细分指标">4.6 查询性能细分指标</h3>
+<ul>
+<li><strong>延迟分位数统计</strong>：
+<ul>
+<li>P50（中位数）延迟</li>
+<li>P95 延迟</li>
+<li>P99 延迟</li>
+<li>最大延迟</li>
+</ul></li>
+<li><strong>查询吞吐量（QPS）</strong>：每秒查询数</li>
+<li><strong>查询成功率</strong>：成功查询数 / 总查询数，记录失败率</li>
+<li><strong>慢查询分析</strong>：超过阈值的查询统计和分析</li>
+</ul>
+</section>
+<section id="写入性能细分指标" class="level3">
+<h3 class="anchored" data-anchor-id="写入性能细分指标">4.7 写入性能细分指标</h3>
+<ul>
+<li><strong>批量写入速度</strong>：MB/s 或 行/s</li>
+<li><strong>单条插入延迟</strong>：平均延迟、最大延迟</li>
+<li><strong>写入失败率</strong>：写入失败次数统计</li>
+<li><strong>数据一致性验证时间</strong>：写入后数据可见性延迟</li>
+</ul>
+</section>
+<section id="资源利用率细分" class="level3">
+<h3 class="anchored" data-anchor-id="资源利用率细分">4.8 资源利用率细分</h3>
+<ul>
+<li><strong>CPU 利用率</strong>：
+<ul>
+<li>用户态 CPU 使用率</li>
+<li>内核态 CPU 使用率</li>
+<li>IO 等待时间占比</li>
+<li>CPU 空闲率</li>
+</ul></li>
+<li><strong>内存使用</strong>：
+<ul>
+<li>堆内存使用情况</li>
+<li>非堆内存使用情况</li>
+<li>缓存命中率</li>
+<li>内存交换（Swap）使用情况</li>
+</ul></li>
+<li><strong>磁盘 IO</strong>：
+<ul>
+<li>IOPS（每秒 IO 操作数）</li>
+<li>吞吐量（MB/s）</li>
+<li>平均 IO 延迟</li>
+<li>IO 队列深度</li>
+<li>读写比例</li>
+</ul></li>
+<li><strong>网络 IO</strong>：
+<ul>
+<li>带宽使用率</li>
+<li>包丢失率</li>
+<li>网络延迟</li>
+<li>连接数统计</li>
+</ul></li>
+</ul>
+</section>
+<section id="数据库特定指标" class="level3">
+<h3 class="anchored" data-anchor-id="数据库特定指标">4.9 数据库特定指标</h3>
+<ul>
+<li><strong>查询计划执行时间</strong>：优化器性能分析</li>
+<li><strong>数据扫描量</strong>：实际扫描数据量 vs 返回数据量</li>
+<li><strong>缓存命中率</strong>：
+<ul>
+<li>查询缓存命中率</li>
+<li>数据缓存命中率</li>
+<li>索引缓存命中率</li>
+</ul></li>
+<li><strong>锁竞争</strong>：
+<ul>
+<li>表锁等待时间</li>
+<li>行锁等待时间</li>
+<li>死锁发生次数</li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="测试数据准备" class="level2">
+<h2 class="anchored" data-anchor-id="测试数据准备">5. 测试数据准备</h2>
+<section id="数据量模拟" class="level3">
+<h3 class="anchored" data-anchor-id="数据量模拟">5.1 数据量模拟</h3>
+<p>通过模拟工具生成与实际生产环境类似的数据量，确保测试的数据规模接近实际场景。</p>
+<ul>
+<li>测试数据包括：就诊记录、账单明细、患者信息等</li>
+</ul>
+</section>
+<section id="数据结构" class="level3">
+<h3 class="anchored" data-anchor-id="数据结构">5.2 数据结构</h3>
+<p>包括多个业务表（如病人信息表、账单表等），并为其创建适当的索引和分区策略，保证查询时的高效性。</p>
+</section>
+<section id="数据分布设计" class="level3">
+<h3 class="anchored" data-anchor-id="数据分布设计">5.3 数据分布设计</h3>
+<ul>
+<li><strong>数据倾斜场景模拟</strong>：模拟实际生产环境中的数据分布不均情况</li>
+<li><strong>热点数据分布</strong>：模拟热点数据的访问模式</li>
+<li><strong>时间序列数据分布</strong>：模拟时间序列数据的分布特征</li>
+</ul>
+</section>
+<section id="数据量级设计" class="level3">
+<h3 class="anchored" data-anchor-id="数据量级设计">5.4 数据量级设计</h3>
+<ul>
+<li><strong>小数据量测试</strong>：&lt; 100GB（功能验证）</li>
+<li><strong>中等数据量测试</strong>：100GB - 1TB（性能基准测试）</li>
+<li><strong>大数据量测试</strong>：&gt; 1TB（极限性能测试）</li>
+<li><strong>数据增长模拟</strong>：模拟生产环境数据增长趋势</li>
+</ul>
+</section>
+<section id="数据真实性" class="level3">
+<h3 class="anchored" data-anchor-id="数据真实性">5.5 数据真实性</h3>
+<ul>
+<li>使用脱敏后的生产数据样本</li>
+<li>数据分布特征与生产环境保持一致</li>
+<li>数据关联关系与生产环境一致</li>
+</ul>
+</section>
+</section>
+<section id="测试流程" class="level2">
+<h2 class="anchored" data-anchor-id="测试流程">6. 测试流程</h2>
+<section id="环境部署" class="level3">
+<h3 class="anchored" data-anchor-id="环境部署">6.1 环境部署</h3>
+<ul>
+<li>部署 5 台 ARM 服务器，并配置 1T FC 存储，确保 ARM 集群与现有的 x86 集群环境配置一致</li>
+<li>安装并配置不同的操作系统（Red Hat Enterprise 8.8、欧拉、麒麟、统信等）进行对比</li>
+</ul>
+</section>
+<section id="数据准备" class="level3">
+<h3 class="anchored" data-anchor-id="数据准备">6.2 数据准备</h3>
+<p>使用数据模拟工具生成所需数据量，并导入到各个环境的 StarRocks 集群中。</p>
+</section>
+<section id="性能测试" class="level3">
+<h3 class="anchored" data-anchor-id="性能测试">6.3 性能测试</h3>
+<section id="测试工具清单" class="level4">
+<h4 class="anchored" data-anchor-id="测试工具清单">6.3.1 测试工具清单</h4>
+<ul>
+<li><strong>压力测试工具</strong>：
+<ul>
+<li>JMeter：用于 HTTP/HTTPS 接口压力测试</li>
+<li>sysbench：用于数据库基准测试</li>
+<li>TPC-H/TPC-DS：标准数据库性能测试基准</li>
+<li>StarRocks 自带的性能测试工具</li>
+</ul></li>
+<li><strong>监控工具</strong>：
+<ul>
+<li>Prometheus：指标收集和存储</li>
+<li>Grafana：可视化监控面板</li>
+<li>StarRocks 内置监控：数据库内部指标监控</li>
+</ul></li>
+<li><strong>性能分析工具</strong>：
+<ul>
+<li>perf：Linux 性能分析工具</li>
+<li>strace：系统调用跟踪</li>
+<li>tcpdump：网络包分析</li>
+<li>iostat/vmstat：系统资源监控</li>
+</ul></li>
+<li><strong>日志分析工具</strong>：
+<ul>
+<li>ELK Stack（Elasticsearch + Logstash + Kibana）</li>
+<li>或类似的日志收集和分析工具</li>
+</ul></li>
+</ul>
+</section>
+<section id="测试脚本标准化" class="level4">
+<h4 class="anchored" data-anchor-id="测试脚本标准化">6.3.2 测试脚本标准化</h4>
+<ul>
+<li>统一的测试脚本模板</li>
+<li>可重复执行的测试用例</li>
+<li>自动化测试流程</li>
+<li>测试结果自动收集和对比</li>
+</ul>
+</section>
+<section id="测试执行" class="level4">
+<h4 class="anchored" data-anchor-id="测试执行">6.3.3 测试执行</h4>
+<p>使用上述工具进行批量数据写入、复杂查询和增量更新等操作。</p>
+<p>记录 TPS、延迟、资源消耗等性能指标，确保在不同操作系统下进行对比。</p>
+</section>
+</section>
+<section id="数据分析" class="level3">
+<h3 class="anchored" data-anchor-id="数据分析">6.4 数据分析</h3>
+<ul>
+<li>收集并分析每种操作系统的性能数据，找出潜在的瓶颈</li>
+<li>对比 ARM 和 x86 环境中不同操作系统对数据库性能的影响</li>
+</ul>
+</section>
+<section id="报告编写" class="level3">
+<h3 class="anchored" data-anchor-id="报告编写">6.5 报告编写</h3>
+<p>根据测试结果，撰写详细的性能测试报告，总结 ARM 和 x86 环境下不同操作系统的性能差异。</p>
+</section>
+</section>
+<section id="兼容性测试" class="level2">
+<h2 class="anchored" data-anchor-id="兼容性测试">9. 兼容性测试</h2>
+<section id="应用兼容性" class="level3">
+<h3 class="anchored" data-anchor-id="应用兼容性">9.1 应用兼容性</h3>
+<ul>
+<li>现有应用在 ARM 环境下的运行情况</li>
+<li>JDBC/ODBC 连接测试</li>
+<li>SQL 语法兼容性验证</li>
+<li>数据类型兼容性验证</li>
+</ul>
+</section>
+<section id="工具链兼容性" class="level3">
+<h3 class="anchored" data-anchor-id="工具链兼容性">9.2 工具链兼容性</h3>
+<ul>
+<li>ETL 工具兼容性测试</li>
+<li>BI 工具连接测试（如 Tableau、永洪BI、帆软BI、Power BI 等）</li>
+<li>数据导入导出工具测试</li>
+<li>备份恢复工具兼容性</li>
+</ul>
+</section>
+<section id="第三方组件兼容性" class="level3">
+<h3 class="anchored" data-anchor-id="第三方组件兼容性">9.3 第三方组件兼容性</h3>
+<ul>
+<li>监控工具（Prometheus、Grafana）在 ARM 下的表现</li>
+<li>备份恢复工具兼容性</li>
+<li>数据同步工具兼容性</li>
+<li>其他依赖组件的兼容性</li>
+</ul>
+</section>
+</section>
+<section id="风险评估" class="level2">
+<h2 class="anchored" data-anchor-id="风险评估">10. 风险评估</h2>
+<section id="技术风险" class="level3">
+<h3 class="anchored" data-anchor-id="技术风险">10.1 技术风险</h3>
+<ul>
+<li><strong>性能不达预期</strong>：
+<ul>
+<li>不预设性能阈值标准</li>
+<li>根据实际测试结果进行讨论分析</li>
+<li>识别性能差异的原因和优化方向</li>
+<li>准备性能优化方案</li>
+</ul></li>
+<li><strong>兼容性问题</strong>：
+<ul>
+<li>识别潜在不兼容点</li>
+<li>准备替代方案</li>
+<li>兼容性问题的解决路径</li>
+</ul></li>
+<li><strong>稳定性问题</strong>：
+<ul>
+<li>长时间运行可能出现的问题</li>
+<li>内存泄漏风险</li>
+<li>系统崩溃风险</li>
+</ul></li>
+</ul>
+</section>
+<section id="业务风险" class="level3">
+<h3 class="anchored" data-anchor-id="业务风险">10.2 业务风险</h3>
+<ul>
+<li><strong>数据迁移风险</strong>：
+<ul>
+<li>迁移过程中的数据一致性保障</li>
+<li>数据丢失风险控制</li>
+<li>迁移回滚方案</li>
+</ul></li>
+<li><strong>服务中断风险</strong>：
+<ul>
+<li>测试对生产环境的影响</li>
+<li>测试环境故障对业务的影响</li>
+<li>服务可用性保障</li>
+</ul></li>
+</ul>
+</section>
+<section id="风险应对措施" class="level3">
+<h3 class="anchored" data-anchor-id="风险应对措施">10.3 风险应对措施</h3>
+<ul>
+<li><strong>回滚方案</strong>：
+<ul>
+<li>测试失败时的回滚流程</li>
+<li>数据回滚方案</li>
+<li>配置回滚方案</li>
+</ul></li>
+<li><strong>应急预案</strong>：
+<ul>
+<li>系统故障应急预案</li>
+<li>数据丢失应急预案</li>
+<li>性能严重下降应急预案</li>
+</ul></li>
+<li><strong>数据备份策略</strong>：
+<ul>
+<li>测试前数据备份</li>
+<li>测试过程中定期备份</li>
+<li>备份数据验证机制</li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="测试验收标准" class="level2">
+<h2 class="anchored" data-anchor-id="测试验收标准">7. 测试验收标准</h2>
+<section id="验收策略" class="level3">
+<h3 class="anchored" data-anchor-id="验收策略">7.1 验收策略</h3>
+<ul>
+<li><strong>不预设性能阈值标准</strong>：本次测试不设置 ARM 环境性能必须达到 x86 环境某个百分比的标准</li>
+<li><strong>结果导向分析</strong>：根据实际测试结果进行讨论分析，评估 ARM 环境的适用性</li>
+<li><strong>全面评估</strong>：综合考虑性能、稳定性、兼容性、成本等多方面因素</li>
+</ul>
+</section>
+<section id="评估维度" class="level3">
+<h3 class="anchored" data-anchor-id="评估维度">7.2 评估维度</h3>
+<p>测试完成后，将从以下维度进行评估和讨论：</p>
+<ul>
+<li><strong>性能表现</strong>：
+<ul>
+<li>ARM 环境与 x86 环境的性能对比</li>
+<li>不同操作系统下的性能差异</li>
+<li>性能瓶颈分析</li>
+</ul></li>
+<li><strong>稳定性表现</strong>：
+<ul>
+<li>长时间运行稳定性</li>
+<li>故障恢复能力</li>
+<li>系统可靠性</li>
+</ul></li>
+<li><strong>兼容性表现</strong>：
+<ul>
+<li>应用兼容性</li>
+<li>工具链兼容性</li>
+<li>第三方组件兼容性</li>
+</ul></li>
+<li><strong>资源利用率</strong>：
+<ul>
+<li>CPU、内存、磁盘、网络资源使用情况</li>
+<li>资源利用效率对比</li>
+</ul></li>
+<li><strong>成本效益</strong>：
+<ul>
+<li>硬件成本对比</li>
+<li>能耗对比</li>
+<li>总体 TCO 分析</li>
+</ul></li>
+</ul>
+</section>
+<section id="决策依据" class="level3">
+<h3 class="anchored" data-anchor-id="决策依据">7.3 决策依据</h3>
+<p>根据测试结果，结合以下因素进行综合分析和决策：</p>
+<ul>
+<li>测试数据的完整性和准确性</li>
+<li>性能差异的可接受程度</li>
+<li>稳定性是否满足生产要求</li>
+<li>兼容性问题是否可解决</li>
+<li>成本效益是否合理</li>
+<li>国产化替代的价值和意义</li>
+</ul>
+<p><strong>注</strong>：最终是否采用 ARM 架构，将根据测试结果进行综合讨论后决定，不预设硬性标准。</p>
+</section>
+</section>
+<section id="测试报告模板" class="level2">
+<h2 class="anchored" data-anchor-id="测试报告模板">8. 测试报告模板</h2>
+<section id="测试概述" class="level3">
+<h3 class="anchored" data-anchor-id="测试概述">8.1 测试概述</h3>
+<section id="测试目标" class="level4">
+<h4 class="anchored" data-anchor-id="测试目标">测试目标</h4>
+<p>评估不同操作系统（Red Hat、欧拉、麒麟、统信）在 ARM 和 x86 环境下的 StarRocks 集群性能，特别是对吞吐量、响应时间和资源利用率的影响。</p>
+</section>
+<section id="测试环境-1" class="level4">
+<h4 class="anchored" data-anchor-id="测试环境-1">测试环境</h4>
+<ul>
+<li><strong>硬件环境</strong>：5 台 ARM 服务器与现有的 x86 集群环境对比</li>
+<li><strong>操作系统</strong>：测试不同操作系统（Red Hat Enterprise 8.8、欧拉、麒麟、统信）对性能的影响</li>
+<li><strong>StarRocks 配置</strong>：
+<ul>
+<li>x86 环境：StarRocks 3.5.6，FE 3台，BE 5台</li>
+<li>ARM 环境：StarRocks 3.5.6，FE/BE 节点数待确认（建议与 x86 一致）</li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="测试指标" class="level3">
+<h3 class="anchored" data-anchor-id="测试指标">8.2 测试指标</h3>
+<ul>
+<li><strong>吞吐量（TPS）</strong>：记录每种操作系统在不同并发下的吞吐量</li>
+<li><strong>响应时间（Latency）</strong>：记录查询操作的响应时间，特别是批量插入和复杂查询</li>
+<li><strong>资源利用率</strong>：对比不同操作系统下的 CPU 使用率、内存占用、磁盘 IO 等资源的使用情况</li>
+<li><strong>SQL 执行时间</strong>：记录复杂查询的执行时间</li>
+</ul>
+</section>
+<section id="测试结果" class="level3">
+<h3 class="anchored" data-anchor-id="测试结果">8.3 测试结果</h3>
+<section id="对比分析方法" class="level4">
+<h4 class="anchored" data-anchor-id="对比分析方法">8.3.1 对比分析方法</h4>
+<ul>
+<li><strong>基准测试</strong>：以 x86 + Red Hat Enterprise Linux 8.8 为基准（100%）</li>
+<li><strong>性能百分比</strong>：ARM + 各操作系统的相对性能（相对于基准的百分比）</li>
+<li><strong>统计显著性</strong>：多次测试的平均值和标准差</li>
+<li><strong>可视化对比</strong>：使用图表展示不同组合的性能差异</li>
+</ul>
+</section>
+<section id="吞吐量" class="level4">
+<h4 class="anchored" data-anchor-id="吞吐量">吞吐量</h4>
+<p>在不同并发下的吞吐量（TPS）测试结果。</p>
+</section>
+<section id="响应时间" class="level4">
+<h4 class="anchored" data-anchor-id="响应时间">响应时间</h4>
+<p>不同操作系统下查询的平均响应时间和最大响应时间。</p>
+</section>
+<section id="资源利用率-1" class="level4">
+<h4 class="anchored" data-anchor-id="资源利用率-1">资源利用率</h4>
+<p>不同操作系统下 CPU 和内存的使用情况。</p>
+</section>
+<section id="sql-执行时间-1" class="level4">
+<h4 class="anchored" data-anchor-id="sql-执行时间-1">SQL 执行时间</h4>
+<p>记录每个 SQL 查询的执行时间，分析瓶颈。</p>
+</section>
+</section>
+<section id="性能瓶颈分析" class="level3">
+<h3 class="anchored" data-anchor-id="性能瓶颈分析">8.4 性能瓶颈分析</h3>
+<p>分析 ARM 与 x86 环境在不同操作系统下的瓶颈，特别是 CPU 和磁盘 IO 的瓶颈。</p>
+</section>
+<section id="优化建议" class="level3">
+<h3 class="anchored" data-anchor-id="优化建议">8.5 优化建议</h3>
+<p>根据测试结果，提供操作系统优化和配置调整的建议。</p>
+</section>
+<section id="结论" class="level3">
+<h3 class="anchored" data-anchor-id="结论">8.6 结论</h3>
+<p>总结 ARM 和 x86 环境下不同操作系统的性能表现，并根据测试结果进行综合讨论分析，评估是否适合在 ARM 环境中使用国产操作系统。</p>
+</section>
+</section>
+<section id="测试执行计划" class="level2">
+<h2 class="anchored" data-anchor-id="测试执行计划">11. 测试执行计划</h2>
+<section id="时间安排" class="level3">
+<h3 class="anchored" data-anchor-id="时间安排">11.1 时间安排</h3>
+<ul>
+<li><p><strong>测试开始时间</strong>：待定</p></li>
+<li><p><strong>各阶段时间安排</strong>：待讨论确定</p>
+<ul>
+<li><strong>环境准备</strong>：待讨论（预计 X 天）
+<ul>
+<li>ARM 服务器部署和配置</li>
+<li>操作系统安装和配置</li>
+<li>StarRocks 集群部署</li>
+<li>网络和存储配置</li>
+</ul></li>
+<li><strong>数据准备</strong>：待讨论（预计 X 天）
+<ul>
+<li>测试数据生成</li>
+<li>数据导入和验证</li>
+<li>索引和分区配置</li>
+</ul></li>
+<li><strong>功能测试</strong>：待讨论（预计 X 天）
+<ul>
+<li>基本功能验证</li>
+<li>兼容性测试</li>
+<li>稳定性初步验证</li>
+</ul></li>
+<li><strong>性能测试</strong>：待讨论（预计 X 天）
+<ul>
+<li>批量写入测试</li>
+<li>复杂查询测试</li>
+<li>高并发测试</li>
+<li>混合负载测试</li>
+</ul></li>
+<li><strong>稳定性测试</strong>：待讨论（预计 X 天）
+<ul>
+<li>7×24 小时持续运行</li>
+<li>故障恢复测试</li>
+<li>长时间性能衰减分析</li>
+</ul></li>
+<li><strong>数据分析</strong>：待讨论（预计 X 天）
+<ul>
+<li>测试数据收集和整理</li>
+<li>性能对比分析</li>
+<li>瓶颈识别和分析</li>
+</ul></li>
+<li><strong>报告编写</strong>：待讨论（预计 X 天）
+<ul>
+<li>测试报告撰写</li>
+<li>优化建议整理</li>
+<li>结论总结</li>
+</ul></li>
+</ul></li>
+</ul>
+<p><strong>注</strong>：具体的时间安排需在测试启动前进行讨论确定，根据实际情况和资源投入制定详细的测试计划。</p>
+</section>
+<section id="人员分工" class="level3">
+<h3 class="anchored" data-anchor-id="人员分工">11.2 人员分工</h3>
+<ul>
+<li><strong>测试负责人</strong>：负责整体测试规划和协调</li>
+<li><strong>环境搭建人员</strong>：负责 ARM 环境部署和配置</li>
+<li><strong>测试执行人员</strong>：负责具体测试用例执行</li>
+<li><strong>数据分析人员</strong>：负责测试数据分析和报告编写</li>
+<li><strong>技术支持人员</strong>：负责技术问题解决和优化</li>
+</ul>
+</section>
+<section id="里程碑" class="level3">
+<h3 class="anchored" data-anchor-id="里程碑">11.3 里程碑</h3>
+<ul>
+<li><strong>里程碑 1</strong>：环境部署完成</li>
+<li><strong>里程碑 2</strong>：功能测试完成</li>
+<li><strong>里程碑 3</strong>：性能测试完成</li>
+<li><strong>里程碑 4</strong>：稳定性测试完成</li>
+<li><strong>里程碑 5</strong>：测试报告交付</li>
+</ul>
+</section>
+<section id="交付物清单" class="level3">
+<h3 class="anchored" data-anchor-id="交付物清单">11.4 交付物清单</h3>
+<ul>
+<li>ARM 环境部署文档</li>
+<li>测试用例文档</li>
+<li>测试执行记录</li>
+<li>性能测试数据</li>
+<li>测试分析报告</li>
+<li>优化建议文档</li>
+<li>风险评估报告</li>
+</ul>
+</section>
+</section>
+<section id="成本效益分析" class="level2">
+<h2 class="anchored" data-anchor-id="成本效益分析">12. 成本效益分析</h2>
+<section id="硬件成本对比" class="level3">
+<h3 class="anchored" data-anchor-id="硬件成本对比">12.1 硬件成本对比</h3>
+<ul>
+<li><strong>ARM 服务器成本</strong>：
+<ul>
+<li>5 台 ARM 服务器采购成本</li>
+<li>FC 存储成本（5T）</li>
+<li>网络设备成本</li>
+<li>其他配件成本</li>
+</ul></li>
+<li><strong>x86 服务器成本</strong>：
+<ul>
+<li>现有 x86 服务器成本（作为对照）</li>
+<li>存储成本</li>
+<li>网络设备成本</li>
+</ul></li>
+<li><strong>总体 TCO（总拥有成本）分析</strong>：
+<ul>
+<li>硬件采购成本</li>
+<li>软件许可成本</li>
+<li>运维成本</li>
+<li>能耗成本</li>
+</ul></li>
+</ul>
+</section>
+<section id="性能成本比" class="level3">
+<h3 class="anchored" data-anchor-id="性能成本比">12.2 性能成本比</h3>
+<ul>
+<li><strong>单位性能的成本</strong>：
+<ul>
+<li>每 TPS 的成本</li>
+<li>每 QPS 的成本</li>
+<li>每 TB 存储的成本</li>
+</ul></li>
+<li><strong>能耗对比</strong>：
+<ul>
+<li>ARM 服务器功耗 vs x86 服务器功耗</li>
+<li>长期电费成本对比</li>
+<li>数据中心 PUE 影响</li>
+</ul></li>
+</ul>
+</section>
+<section id="roi-分析" class="level3">
+<h3 class="anchored" data-anchor-id="roi-分析">12.3 ROI 分析</h3>
+<ul>
+<li><strong>投资回报周期</strong>：
+<ul>
+<li>初始投资金额</li>
+<li>年度节省成本</li>
+<li>投资回收期计算</li>
+</ul></li>
+<li><strong>长期运营成本</strong>：
+<ul>
+<li>3 年 TCO 对比</li>
+<li>5 年 TCO 对比</li>
+<li>维护成本对比</li>
+</ul></li>
+</ul>
+</section>
+<section id="其他效益" class="level3">
+<h3 class="anchored" data-anchor-id="其他效益">12.4 其他效益</h3>
+<ul>
+<li><strong>国产化替代价值</strong>：
+<ul>
+<li>技术自主可控</li>
+<li>供应链安全</li>
+<li>政策合规性</li>
+</ul></li>
+<li><strong>性能提升价值</strong>：
+<ul>
+<li>业务响应速度提升</li>
+<li>用户体验改善</li>
+<li>业务处理能力提升</li>
+</ul></li>
+</ul>
+<p>附录：测试用例：</p>
+<p>账单明细查询示例：</p>
+<p>明细集成sql:</p>
+<p>【附件】</p>
+<p>核心数据规模 - 总数据规模：40亿+条 - 账单明细：5.97亿条 - 医嘱数据：2.34亿条 - 住院信息：4,480万条 - 其他关键数据量：2.15亿</p>
+</section>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

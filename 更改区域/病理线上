@@ -1,26 +1,29 @@
----- create view m1.om_bl_report_single_month as  
--- 病理运管报表汇总 - 单月查询版本
--- 使用说明：将 ${month} 替换为需要查询的月份，格式为 'yyyy-MM'，如 '2024-11'
--- 
--- ==================== 血缘依赖说明 ====================
--- 数据来源表：
--- 1. hid0101_mssql_bl_rep.t_jcxx - 检查信息表（主院区、上锦院区检查治疗人次）
---    关键字段：f_blk(病理类型), f_bgzt(报告状态), f_sdrq(送达日期), isdeleted
--- 2. m1.mdr_income - 收入表（各院区检查治疗收入、穿刺中心收入）
---    关键字段：TotalFee(费用), RecDeptName(执行科室), chargedttm(计费时间), OrderName(项目名称)
--- 3. m1.mdr_peisincome - 体检收入表（各院区体检病理收入）
---    关键字段：qty(数量), FactPrice(实际价格), examfeeitem_name(项目名称), dateregister(登记日期), medorgcode(机构编码)
--- 4. datacenter_db.inventory_del_dets - 材料领用表（主院区材料试剂费）
---    关键字段：amountmoney(金额), hosp_code(医院编码), dept_name(科室名称), del_date(领用日期)
--- 5. hid0117_mysql_bl_pis.pathology - 天府病理系统表（天府院区检查治疗人次）
---    关键字段：receive_at(接收时间), library_detail_id(病理类型ID), library_id, deleted_at
-
-WITH month_range AS (
+{
+  "job":{
+    "moduleName":"starrocks-hid0101_mssql_hxcs_hxcsrep.biz_exam",
+    "uuid":"fffb40de-688a-4346-83d6-866574227ec5",
+    "content":[
+      {
+        "reader":{
+          "parameter":{
+            "password":"!1qwOPASkl",
+            "session":[
+              "SET SESSION hive.hoodie_incremental_table_config=''"
+            ],
+            "connection":[
+              {
+                "querySql":[
+                  "
+         -- 原因说明：$[yyyy-MM-1] 中 -1 在 DolphinScheduler 里是「减 1 天」再按 yyyy-MM 取整，非减 1 个月；月中运行会得到当月(如 4-9 跑→2026-04)。改为 $[yyyy-MM-dd]+SQL 内 date_add(month,-1) 与 输血线上 一致。
+         WITH ds AS (
+  SELECT CAST(date_parse('$[yyyy-MM-dd]', '%Y-%m-%d') AS DATE) AS biz_date
+),
+month_range AS (
   SELECT
-    '${month}' AS month_label,
-    '${month}' || '-01 00:00:00' AS start_date,
-    FORMAT_DATETIME(LAST_DAY_OF_MONTH(DATE_PARSE('${month}' || '-01', '%Y-%m-%d')), 'yyyy-MM-dd') || ' 23:59:59' AS end_date,
-    '${month}' AS month_label_presto
+    date_format(date_add('month', -1, (SELECT biz_date FROM ds)), '%Y-%m') AS month_label,
+    date_format(date_trunc('month', date_add('month', -1, (SELECT biz_date FROM ds))), '%Y-%m-%d') || ' 00:00:00' AS start_date,
+    date_format(date_add('day', -1, date_trunc('month', (SELECT biz_date FROM ds))), '%Y-%m-%d') || ' 23:59:59' AS end_date,
+    date_format(date_add('month', -1, (SELECT biz_date FROM ds)), '%Y-%m') AS month_label_presto
 ),
 
 -- ==================== 主院区部分 ====================
@@ -67,12 +70,12 @@ main_puncture AS (
 -- 来源：m1.mdr_peisincome
 -- 筛选：medorgcode IN ('HID0101','HID0118','F0017','F0002')
 main_physical AS (
-  SELECT SUM("计算金额") AS income_value FROM (
+  SELECT SUM(\"计算金额\") AS income_value FROM (
     SELECT
       CASE
-        WHEN "qty" IS NULL THEN CAST("FactPrice" AS DECIMAL(10, 2))
-        ELSE CAST(CAST("qty" AS DECIMAL(10, 2)) AS INTEGER) * CAST("FactPrice" AS DECIMAL(10, 2))
-      END AS "计算金额"
+        WHEN \"qty\" IS NULL THEN CAST(\"FactPrice\" AS DECIMAL(10, 2))
+        ELSE CAST(CAST(\"qty\" AS DECIMAL(10, 2)) AS INTEGER) * CAST(\"FactPrice\" AS DECIMAL(10, 2))
+      END AS \"计算金额\"
     FROM m1.mdr_peisincome, month_range
     WHERE f_feecharged IN ('AQ==','true','1')  
       AND (f_regreturned = 'false' OR f_regreturned = 'AA==' OR f_regreturned IS NULL) 
@@ -95,11 +98,11 @@ main_physical AS (
 -- 来源：datacenter_db.inventory_del_dets
 -- 筛选：hosp_code = 'HID0101', dept_name LIKE '%病理科%'
 main_material AS (
-  SELECT SUM(CAST("amountmoney" AS DOUBLE)) AS cost_value 
+  SELECT SUM(CAST(\"amountmoney\" AS DOUBLE)) AS cost_value 
   FROM datacenter_db.inventory_del_dets, month_range
-  WHERE "hosp_code" = 'HID0101' 
-    AND "dept_name" LIKE '%病理科%'
-    AND SUBSTRING("del_date", 1, 7) = month_label
+  WHERE \"hosp_code\" = 'HID0101' 
+    AND \"dept_name\" LIKE '%病理科%'
+    AND SUBSTRING(\"del_date\", 1, 7) = month_label
     AND isdeleted = '0'
 ),
 
@@ -132,12 +135,12 @@ sj_income AS (
 -- 来源：m1.mdr_peisincome
 -- 筛选：medorgcode IN ('HID0103')
 sj_physical AS (
-  SELECT SUM("计算金额") AS income_value FROM (
+  SELECT SUM(\"计算金额\") AS income_value FROM (
     SELECT
       CASE
-        WHEN "qty" IS NULL THEN CAST("FactPrice" AS DECIMAL(10, 2))
-        ELSE CAST(CAST("qty" AS DECIMAL(10, 2)) AS INTEGER) * CAST("FactPrice" AS DECIMAL(10, 2))
-      END AS "计算金额"
+        WHEN \"qty\" IS NULL THEN CAST(\"FactPrice\" AS DECIMAL(10, 2))
+        ELSE CAST(CAST(\"qty\" AS DECIMAL(10, 2)) AS INTEGER) * CAST(\"FactPrice\" AS DECIMAL(10, 2))
+      END AS \"计算金额\"
     FROM m1.mdr_peisincome, month_range
     WHERE ((f_feecharged = 'AQ==') OR f_feecharged = 'true')
       AND examfeeitem_name IN (
@@ -161,12 +164,12 @@ sj_physical AS (
 -- 筛选：deleted_at IS NULL, library_id NOT IN 排除类型
 tf_count AS (
   SELECT COUNT(1) AS count_value FROM (
-    SELECT "pathology"."receive_at" AS "接收时间"
-    FROM hid0117_mysql_bl_pis."pathology", month_range
-    WHERE "pathology"."deleted_at" IS NULL
-      AND "pathology"."library_id" NOT IN ('39', '40', '41', '60', '67', '68', '69', '77', '18')
-      AND "pathology"."receive_at" >= start_date
-      AND "pathology"."receive_at" <= end_date
+    SELECT \"pathology\".\"receive_at\" AS \"接收时间\"
+    FROM hid0117_mysql_bl_pis.\"pathology\", month_range
+    WHERE \"pathology\".\"deleted_at\" IS NULL
+      AND \"pathology\".\"library_id\" NOT IN ('39', '40', '41', '60', '67', '68', '69', '77', '18')
+      AND \"pathology\".\"receive_at\" >= start_date
+      AND \"pathology\".\"receive_at\" <= end_date
   ) sub
 ),
 
@@ -184,12 +187,12 @@ tf_income AS (
 -- 来源：m1.mdr_peisincome
 -- 筛选：medorgcode IN ('HID0117')
 tf_physical AS (
-  SELECT SUM("计算金额") AS income_value FROM (
+  SELECT SUM(\"计算金额\") AS income_value FROM (
     SELECT
       CASE
-        WHEN "qty" IS NULL THEN CAST("FactPrice" AS DECIMAL(10, 2))
-        ELSE CAST(CAST("qty" AS DECIMAL(10, 2)) AS INTEGER) * CAST("FactPrice" AS DECIMAL(10, 2))
-      END AS "计算金额"
+        WHEN \"qty\" IS NULL THEN CAST(\"FactPrice\" AS DECIMAL(10, 2))
+        ELSE CAST(CAST(\"qty\" AS DECIMAL(10, 2)) AS INTEGER) * CAST(\"FactPrice\" AS DECIMAL(10, 2))
+      END AS \"计算金额\"
     FROM m1.mdr_peisincome, month_range
     WHERE ((f_feecharged = 'AQ==') OR f_feecharged = 'true')
       AND examfeeitem_name IN (
@@ -210,22 +213,31 @@ tf_physical AS (
 
 -- 主院区结果
 main_results AS (
-  SELECT (SELECT month_label FROM month_range) AS "统计月", '主院区' AS "单位", '检查治疗人次/项次' AS "项目", COALESCE((SELECT count_value FROM main_count), 0) AS "数值"
+  SELECT (SELECT month_label FROM month_range) AS \"统计月\", '主院区' AS \"单位\", '检查治疗人次/项次' AS \"项目\", 
+    COALESCE((SELECT count_value FROM main_count), 0) AS \"本月\",
+    CAST(0 AS DOUBLE) AS \"上月\",
+    CAST(0 AS DOUBLE) AS \"去年同期\",
+    CAST(0 AS DECIMAL(10,2)) AS \"与上月差异%\",
+    CAST(0 AS DECIMAL(10,2)) AS \"与同期差异%\"
   UNION ALL
-  SELECT (SELECT month_label FROM month_range), '主院区', '检查治疗收入(元)', COALESCE((SELECT income_value FROM main_income), 0)
+  SELECT (SELECT month_label FROM month_range), '主院区', '检查治疗收入(元)', 
+    COALESCE((SELECT income_value FROM main_income), 0), 0, 0, 0, 0
   UNION ALL
-  SELECT (SELECT month_label FROM month_range), '主院区', '穿刺中心细胞病理收入(元)', COALESCE((SELECT income_value FROM main_puncture), 0)
+  SELECT (SELECT month_label FROM month_range), '主院区', '穿刺中心细胞病理收入(元)', 
+    COALESCE((SELECT income_value FROM main_puncture), 0), 0, 0, 0, 0
   UNION ALL
-  SELECT (SELECT month_label FROM month_range), '主院区', '本部温江第三方体检病理收入(元)', COALESCE((SELECT income_value FROM main_physical), 0)
+  SELECT (SELECT month_label FROM month_range), '主院区', '本部温江第三方体检病理收入(元)', 
+    COALESCE((SELECT income_value FROM main_physical), 0), 0, 0, 0, 0
   UNION ALL
-  SELECT (SELECT month_label FROM month_range), '主院区', '其他收入(元)', 0
+  SELECT (SELECT month_label FROM month_range), '主院区', '其他收入(元)', 0, 0, 0, 0, 0
   UNION ALL
   SELECT (SELECT month_label FROM month_range), '主院区', '本部收入合计', 
     COALESCE((SELECT income_value FROM main_income), 0) + 
     COALESCE((SELECT income_value FROM main_puncture), 0) + 
-    COALESCE((SELECT income_value FROM main_physical), 0)
+    COALESCE((SELECT income_value FROM main_physical), 0), 0, 0, 0, 0
   UNION ALL
-  SELECT (SELECT month_label FROM month_range), '主院区', '领用材料试剂费(元)', COALESCE((SELECT cost_value FROM main_material), 0)
+  SELECT (SELECT month_label FROM month_range), '主院区', '领用材料试剂费(元)', 
+    COALESCE((SELECT cost_value FROM main_material), 0), 0, 0, 0, 0
   UNION ALL
   SELECT (SELECT month_label FROM month_range), '主院区', '领用材料试剂费占收入比例(%)',
     CASE 
@@ -236,33 +248,47 @@ main_results AS (
                  (COALESCE((SELECT income_value FROM main_income), 0) + 
                   COALESCE((SELECT income_value FROM main_puncture), 0) + 
                   COALESCE((SELECT income_value FROM main_physical), 0))) * 100, 2)
-    END
+    END, 0, 0, 0, 0
 ),
 
 -- 上锦院区结果
 sj_results AS (
-  SELECT (SELECT month_label FROM month_range) AS "统计月", '上锦院区' AS "单位", '检查治疗人次/项次' AS "项目", COALESCE((SELECT count_value FROM sj_count), 0) AS "数值"
+  SELECT (SELECT month_label FROM month_range) AS \"统计月\", '上锦院区' AS \"单位\", '检查治疗人次/项次' AS \"项目\", 
+    COALESCE((SELECT count_value FROM sj_count), 0) AS \"本月\",
+    CAST(0 AS DOUBLE) AS \"上月\",
+    CAST(0 AS DOUBLE) AS \"去年同期\",
+    CAST(0 AS DECIMAL(10,2)) AS \"与上月差异%\",
+    CAST(0 AS DECIMAL(10,2)) AS \"与同期差异%\"
   UNION ALL
-  SELECT (SELECT month_label FROM month_range), '上锦院区', '上锦检查治疗收入(元)', COALESCE((SELECT income_value FROM sj_income), 0)
+  SELECT (SELECT month_label FROM month_range), '上锦院区', '上锦检查治疗收入(元)', 
+    COALESCE((SELECT income_value FROM sj_income), 0), 0, 0, 0, 0
   UNION ALL
-  SELECT (SELECT month_label FROM month_range), '上锦院区', '上锦体检病理收入(元)', COALESCE((SELECT income_value FROM sj_physical), 0)
+  SELECT (SELECT month_label FROM month_range), '上锦院区', '上锦体检病理收入(元)', 
+    COALESCE((SELECT income_value FROM sj_physical), 0), 0, 0, 0, 0
   UNION ALL
   SELECT (SELECT month_label FROM month_range), '上锦院区', '上锦收入合计', 
     COALESCE((SELECT income_value FROM sj_income), 0) + 
-    COALESCE((SELECT income_value FROM sj_physical), 0)
+    COALESCE((SELECT income_value FROM sj_physical), 0), 0, 0, 0, 0
 ),
 
 -- 天府院区结果
 tf_results AS (
-  SELECT (SELECT month_label FROM month_range) AS "统计月", '天府院区' AS "单位", '检查治疗人次/项次' AS "项目", COALESCE((SELECT count_value FROM tf_count), 0) AS "数值"
+  SELECT (SELECT month_label FROM month_range) AS \"统计月\", '天府院区' AS \"单位\", '检查治疗人次/项次' AS \"项目\", 
+    COALESCE((SELECT count_value FROM tf_count), 0) AS \"本月\",
+    CAST(0 AS DOUBLE) AS \"上月\",
+    CAST(0 AS DOUBLE) AS \"去年同期\",
+    CAST(0 AS DECIMAL(10,2)) AS \"与上月差异%\",
+    CAST(0 AS DECIMAL(10,2)) AS \"与同期差异%\"
   UNION ALL
-  SELECT (SELECT month_label FROM month_range), '天府院区', '天府检查治疗收入(元)', COALESCE((SELECT income_value FROM tf_income), 0)
+  SELECT (SELECT month_label FROM month_range), '天府院区', '天府检查治疗收入(元)', 
+    COALESCE((SELECT income_value FROM tf_income), 0), 0, 0, 0, 0
   UNION ALL
-  SELECT (SELECT month_label FROM month_range), '天府院区', '天府体检病理收入(元)', COALESCE((SELECT income_value FROM tf_physical), 0)
+  SELECT (SELECT month_label FROM month_range), '天府院区', '天府体检病理收入(元)', 
+    COALESCE((SELECT income_value FROM tf_physical), 0), 0, 0, 0, 0
   UNION ALL
   SELECT (SELECT month_label FROM month_range), '天府院区', '天府收入合计', 
     COALESCE((SELECT income_value FROM tf_income), 0) + 
-    COALESCE((SELECT income_value FROM tf_physical), 0)
+    COALESCE((SELECT income_value FROM tf_physical), 0), 0, 0, 0, 0
 ),
 
 -- 合并所有院区数据
@@ -279,42 +305,54 @@ all_results AS (
 -- 检查治疗人次/项次总合计
 total_count AS (
   SELECT 
-    (SELECT month_label FROM month_range) AS "统计月",
-    '合计' AS "单位",
-    '检查治疗人次/项次合计' AS "项目",
-    SUM(CASE WHEN "项目" = '检查治疗人次/项次' THEN "数值" ELSE 0 END) AS "数值"
+    (SELECT month_label FROM month_range) AS \"统计月\",
+    '合计' AS \"单位\",
+    '检查治疗人次/项次合计' AS \"项目\",
+    SUM(CASE WHEN \"项目\" = '检查治疗人次/项次' THEN \"本月\" ELSE 0 END) AS \"本月\",
+    CAST(0 AS DOUBLE) AS \"上月\",
+    CAST(0 AS DOUBLE) AS \"去年同期\",
+    CAST(0 AS DECIMAL(10,2)) AS \"与上月差异%\",
+    CAST(0 AS DECIMAL(10,2)) AS \"与同期差异%\"
   FROM all_results
 ),
 
 -- 总收入合计
 total_income AS (
   SELECT 
-    (SELECT month_label FROM month_range) AS "统计月",
-    '合计' AS "单位",
-    '总收入合计(元)' AS "项目",
+    (SELECT month_label FROM month_range) AS \"统计月\",
+    '合计' AS \"单位\",
+    '总收入合计(元)' AS \"项目\",
     SUM(CASE 
-          WHEN "项目" IN ('本部收入合计', '上锦收入合计', '天府收入合计') 
-          THEN "数值" 
+          WHEN \"项目\" IN ('本部收入合计', '上锦收入合计', '天府收入合计') 
+          THEN \"本月\" 
           ELSE 0 
-        END) AS "数值"
+        END) AS \"本月\",
+    CAST(0 AS DOUBLE) AS \"上月\",
+    CAST(0 AS DOUBLE) AS \"去年同期\",
+    CAST(0 AS DECIMAL(10,2)) AS \"与上月差异%\",
+    CAST(0 AS DECIMAL(10,2)) AS \"与同期差异%\"
   FROM all_results
 )
 
 -- ==================== 最终输出 ====================
 SELECT * FROM (
   SELECT 
-    "统计月",
-    "单位",
-    "项目", 
-    "数值",
-    CASE "单位"
+    \"统计月\",
+    \"单位\",
+    \"项目\", 
+    \"本月\",
+    \"上月\",
+    \"去年同期\",
+    \"与上月差异%\",
+    \"与同期差异%\",
+    CASE \"单位\"
       WHEN '主院区' THEN 1
       WHEN '上锦院区' THEN 2
       WHEN '天府院区' THEN 3
       WHEN '合计' THEN 4
       ELSE 5
     END AS unit_order,
-    CASE "项目"
+    CASE \"项目\"
       WHEN '检查治疗人次/项次' THEN 1
       WHEN '检查治疗收入(元)' THEN 2
       WHEN '穿刺中心细胞病理收入(元)' THEN 3
@@ -342,3 +380,56 @@ SELECT * FROM (
   ) t
 ) result
 ORDER BY unit_order, item_order
+
+
+"
+                ],
+                "jdbcUrl":[
+                  "jdbc:presto://coordinator.example.com:18080/hive/default?SSL=true&SSLKeyStorePath=/opt/kerberos/check.jks&SSLKeyStorePassword=tK98ns@83dYU"
+                ]
+              }
+            ],
+            "username":"xxzx"
+          },
+          "name":"prestoreader"
+        },
+        "writer":{
+          "parameter":{
+            "postSql":[],
+            "password":"7993@5b8D",
+            "database":"m1",
+            "loadProps":{
+              "format":"json",
+              "strip_outer_array":true
+            },
+            "column":[
+              "统计月",
+              "单位",
+              "项目",
+              "本月",
+              "上月",
+              "去年同期",
+              "与上月差异%",
+              "与同期差异%",
+              "unit_order",
+              "item_order"
+            ],
+            "jdbcUrl":"jdbc:mysql://10.239.91.107:9030/",
+            "loadUrl":[
+              "10.239.91.107:8030"
+            ],
+            "table":"om_bl_report_with_total",
+            "username":"root",
+            "preSql":[]
+          },
+          "name":"starrockswriter"
+        }
+      }
+    ],
+    "setting":{
+      "speed":{
+        "channel":1
+      }
+    }
+  }
+}

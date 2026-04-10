@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>BI报表空值检查报告</title>
+<style>
+  body { font-family: 'Microsoft YaHei', sans-serif; margin: 20px; background: #f5f6fa; }
+  .container { max-width: 1100px; margin: 0 auto; }
+  h1 { color: #2c3e50; border-bottom: 3px solid #19af5d; padding-bottom: 10px; }
+  h2 { color: #34495e; margin-top: 30px; }
+  .summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
+  .card { background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center; }
+  .card .num { font-size: 32px; font-weight: bold; color: #2c3e50; }
+  .card .label { font-size: 14px; color: #7f8c8d; margin-top: 6px; }
+  .card.critical .num { color: #e74c3c; }
+  .card.warning .num { color: #f39c12; }
+  .card.info .num { color: #3498db; }
+  .card.ok .num { color: #27ae60; }
+  table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 20px; }
+  th { background: #19af5d; color: #fff; padding: 10px 14px; text-align: left; font-size: 14px; }
+  td { padding: 8px 14px; border-bottom: 1px solid #ecf0f1; font-size: 13px; }
+  tr:hover { background: #f8f9fa; }
+  .num { text-align: right; font-weight: 600; }
+  .badge { padding: 2px 8px; border-radius: 4px; font-size: 12px; color: #fff; }
+  .badge-empty { background: #e74c3c; }
+  .badge-null_text { background: #9b59b6; }
+  .badge-dash { background: #f39c12; }
+  .badge-na { background: #e67e22; }
+  .badge-missing { background: #c0392b; }
+  .meta { color: #95a5a6; font-size: 13px; margin-bottom: 20px; }
+  code { background: #f0f0f0; padding: 1px 5px; border-radius: 3px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>BI报表空值检查报告</h1>
+  <div class="meta">
+    检查时间: 2026-02-06 18:37:06 &nbsp;|&nbsp;
+    报表URL: <code>https://hxdmc.wchscu.cn/bi/sso?proc=1&action=viewer&hback=true&db=!28!01!29!!534e!!897f!!62a5!!8868!...</code>
+  </div>
+
+  <div class="summary-cards">
+    <div class="card">
+      <div class="num">0</div>
+      <div class="label">数据行数</div>
+    </div>
+    <div class="card">
+      <div class="num">0</div>
+      <div class="label">列数</div>
+    </div>
+    <div class="card">
+      <div class="num">0</div>
+      <div class="label">总单元格</div>
+    </div>
+    <div class="card ok">
+      <div class="num">0</div>
+      <div class="label">空值数量</div>
+    </div>
+    <div class="card ok">
+      <div class="num">0.00%</div>
+      <div class="label">空值率 (正常)</div>
+    </div>
+    <div class="card">
+      <div class="num">0</div>
+      <div class="label">零值数量</div>
+    </div>
+  </div>
+
+  <h2>按列统计空值</h2>
+  <table>
+    <tr><th>列名</th><th class="num">空值数</th></tr>
+    <tr><td colspan='2'>无空值</td></tr>
+  </table>
+
+  <h2>按行统计空值 (Top 30)</h2>
+  <table>
+    <tr><th>行标识</th><th class="num">空值数</th></tr>
+    <tr><td colspan='2'>无空值</td></tr>
+  </table>
+
+  <h2>空值明细 (前200条)</h2>
+  <table>
+    <tr><th>行号</th><th>行标识</th><th>列名</th><th>值</th><th>类型</th></tr>
+    <tr><td colspan='5'>无空值</td></tr>
+  </table>
+
+  
+</div>
+</body>
+</html>

@@ -334,10 +334,12 @@ def crawl_with_selenium(url: str, cookies: dict = None, wait_time: int = 10, use
         html = driver.page_source
         print(f"   页面HTML长度: {len(html)} 字符")
         
-        # 保存HTML
-        with open("bi_selenium_result.html", 'w', encoding='utf-8') as f:
-            f.write(html)
-        print("   HTML已保存: bi_selenium_result.html")
+        # 直接输出HTML内容（不保存文件）
+        print("\n" + "="*80)
+        print("HTML内容:")
+        print("="*80)
+        print(html)
+        print("="*80)
         
         # 尝试提取表格数据
         try:
@@ -547,25 +549,40 @@ def crawl_with_scroll(url: str, cookies: dict = None, wait_time: int = 10, max_s
             os.environ[var] = value
 
 
-def build_bi_url(db_path: str) -> str:
+# 默认JWT令牌（可选，主要用于初始访问）
+DEFAULT_JWT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJsb2dpbm5hbWUiOiIyMDIzODA2MSIsImlzcyI6IjdERjMyMkNCQTRFQjQ2NkI1Q0FFQjhGQ0FBRUNDRDE2IiwiZXhwIjoxNzg2NTI0MjkxLCJzdWIiOiIyMDIzODA2MSJ9.WjGbXcs43fUIRhfO59nPGV5T3ZNWEhJ0TqlTdcrm_Wc"
+
+
+def build_bi_url(db_path: str, jwt_token: str = None) -> str:
     """根据db路径构建完整的BI报表URL
     
     Args:
         db_path: 报表db路径，例如 "!28!01!29!!534e!!897f!...!.db" 或完整URL
+        jwt_token: 可选的JWT令牌，如果不提供则使用默认值
     
     Returns:
         完整的BI报表URL
     """
-    # 如果已经是完整URL，直接返回
+    # 如果已经是完整URL，处理JWT参数
     if db_path.startswith("http"):
-        # 移除可能存在的JWT参数
+        # 移除可能存在的旧JWT参数
         if "&yhjwt=" in db_path:
             db_path = db_path.split("&yhjwt=")[0]
+        # 如果提供了新JWT，添加它
+        if jwt_token:
+            db_path += f"&yhjwt={jwt_token}"
         return db_path
     
     # 构建URL
     base_url = "https://hxdmc.wchscu.cn/bi/sso"
     params = f"?proc=1&action=viewer&hback=true&db={db_path}&platform=PC&browerType=chrome"
+    
+    # 添加JWT（如果提供或使用默认值）
+    if jwt_token:
+        params += f"&yhjwt={jwt_token}"
+    elif DEFAULT_JWT:
+        params += f"&yhjwt={DEFAULT_JWT}"
+    
     return base_url + params
 
 
@@ -618,9 +635,6 @@ def crawl_bi_report(db_path: str, output_prefix: str = "bi_report", full_data: b
         result = crawl_with_selenium(url, cookies=cookies_dict, wait_time=15)
         
         if result:
-            with open(f"{output_prefix}.html", 'w', encoding='utf-8') as f:
-                f.write(result)
-            print(f"[OK] HTML已保存: {output_prefix}.html")
             print(f"[OK] 截图已保存: bi_screenshot.png")
             return {"success": True, "html": result, "url": url}
         else:

@@ -64,8 +64,7 @@ last_year_count AS (
 current_month_income AS (
   SELECT SUM(TotalFee) AS income_value 
   FROM m1.mdr_income, last_month_range
-  WHERE IsDeleted = '0' 
-    AND RecDeptName IN ('病理科','锦江病理科','温江病理科','天府病理科')
+  WHERE  RecDeptName IN ('病理科','锦江病理科','温江病理科','天府病理科')
     AND SUBSTRING(chargedttm, 1, 7) = month_label
 ),
 
@@ -73,8 +72,7 @@ current_month_income AS (
 last_month_income AS (
   SELECT SUM(TotalFee) AS income_value 
   FROM m1.mdr_income, last_last_month_range
-  WHERE IsDeleted = '0' 
-    AND RecDeptName IN ('病理科','锦江病理科','温江病理科','天府病理科')
+  WHERE  RecDeptName IN ('病理科','锦江病理科','温江病理科','天府病理科')
     AND SUBSTRING(chargedttm, 1, 7) = month_label
 ),
 
@@ -82,8 +80,7 @@ last_month_income AS (
 last_year_income AS (
   SELECT SUM(TotalFee) AS income_value 
   FROM m1.mdr_income, last_year_same_month_range
-  WHERE IsDeleted = '0' 
-    AND RecDeptName IN ('病理科','锦江病理科','温江病理科','天府病理科')
+  WHERE  RecDeptName IN ('病理科','锦江病理科','温江病理科','天府病理科')
     AND SUBSTRING(chargedttm, 1, 7) = month_label
 ),
 
@@ -91,8 +88,7 @@ last_year_income AS (
 current_month_puncture AS (
   SELECT SUM(TotalFee) AS income_value 
   FROM m1.mdr_income, last_month_range
-  WHERE IsDeleted = '0' 
-    AND RecDeptName IN ('穿刺诊疗中心', '锦江穿刺诊疗中心')
+  WHERE  RecDeptName IN ('穿刺诊疗中心', '锦江穿刺诊疗中心')
     AND OrderName IN (
         '淋巴结细针穿刺检查','皮下包块细针穿刺检查','乳腺肿物穿刺活检术(细针)',
         '脱落细胞学检查与诊断(涂片)','细针穿刺细胞学检查与诊断(细胞块)',
@@ -105,8 +101,7 @@ current_month_puncture AS (
 last_month_puncture AS (
   SELECT SUM(TotalFee) AS income_value 
   FROM m1.mdr_income, last_last_month_range
-  WHERE IsDeleted = '0' 
-    AND RecDeptName IN ('穿刺诊疗中心', '锦江穿刺诊疗中心')
+  WHERE  RecDeptName IN ('穿刺诊疗中心', '锦江穿刺诊疗中心')
     AND OrderName IN (
         '淋巴结细针穿刺检查','皮下包块细针穿刺检查','乳腺肿物穿刺活检术(细针)',
         '脱落细胞学检查与诊断(涂片)','细针穿刺细胞学检查与诊断(细胞块)',
@@ -119,8 +114,7 @@ last_month_puncture AS (
 last_year_puncture AS (
   SELECT SUM(TotalFee) AS income_value 
   FROM m1.mdr_income, last_year_same_month_range
-  WHERE IsDeleted = '0' 
-    AND RecDeptName IN ('穿刺诊疗中心', '锦江穿刺诊疗中心')
+  WHERE RecDeptName IN ('穿刺诊疗中心', '锦江穿刺诊疗中心')
     AND OrderName IN (
         '淋巴结细针穿刺检查','皮下包块细针穿刺检查','乳腺肿物穿刺活检术(细针)',
         '脱落细胞学检查与诊断(涂片)','细针穿刺细胞学检查与诊断(细胞块)',
@@ -514,8 +508,7 @@ last_year_count AS (
 current_month_income AS (
   SELECT SUM(TotalFee) AS income_value 
   FROM m1.mdr_income, last_month_range
-  WHERE IsDeleted = '0' 
-    AND RecDeptName = '病理科(上锦)'
+  WHERE RecDeptName = '病理科(上锦)'
     AND SUBSTRING(chargedttm, 1, 7) = month_label
 ),
 
@@ -523,8 +516,7 @@ current_month_income AS (
 last_month_income AS (
   SELECT SUM(TotalFee) AS income_value 
   FROM m1.mdr_income, last_last_month_range
-  WHERE IsDeleted = '0' 
-    AND RecDeptName = '病理科(上锦)'
+  WHERE RecDeptName = '病理科(上锦)'
     AND SUBSTRING(chargedttm, 1, 7) = month_label
 ),
 
@@ -532,8 +524,7 @@ last_month_income AS (
 last_year_income AS (
   SELECT SUM(TotalFee) AS income_value 
   FROM m1.mdr_income, last_year_same_month_range
-  WHERE IsDeleted = '0' 
-    AND RecDeptName = '病理科(上锦)'
+  WHERE  RecDeptName = '病理科(上锦)'
     AND SUBSTRING(chargedttm, 1, 7) = month_label
 ),
 
@@ -897,8 +888,7 @@ last_year_count AS (
 current_month_income AS (
   SELECT SUM(TotalFee) AS income_value 
   FROM m1.mdr_income, last_month_range
-  WHERE IsDeleted = '0' 
-    AND RecDeptName = '病理科(天府)'
+  WHERE  RecDeptName = '病理科(天府)'
     AND SUBSTRING(chargedttm, 1, 7) = month_label
 ),
 
@@ -906,8 +896,7 @@ current_month_income AS (
 last_month_income AS (
   SELECT SUM(TotalFee) AS income_value 
   FROM m1.mdr_income, last_last_month_range
-  WHERE IsDeleted = '0' 
-    AND RecDeptName = '病理科(天府)'
+  WHERE  RecDeptName = '病理科(天府)'
     AND SUBSTRING(chargedttm, 1, 7) = month_label
 ),
 
@@ -915,8 +904,7 @@ last_month_income AS (
 last_year_income AS (
   SELECT SUM(TotalFee) AS income_value 
   FROM m1.mdr_income, last_year_same_month_range
-  WHERE IsDeleted = '0' 
-    AND RecDeptName = '病理科(天府)'
+  WHERE  RecDeptName = '病理科(天府)'
     AND SUBSTRING(chargedttm, 1, 7) = month_label
 ),
 

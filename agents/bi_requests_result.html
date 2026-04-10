@@ -1,0 +1,157 @@
+<html class="fill"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title></title><link rel="shortcut icon" href="/bi/sso?proc=2&action=loadFavicon&name=HXLOGO.png" type="image/x-icon"><link rel="stylesheet" href="/bi/sso?proc=2&resource=/g5/h5/dist/style/images/default.css"><link rel="stylesheet" href="/bi/sso?proc=2&resource=/g5/h5/dist/style/images/admin/font-family.css"><script>var hideBtn = '';
+      var backUrl = '';
+
+      // ready function replace jquery.ready().
+      function ready(fn){
+         if(document.addEventListener) {
+            document.addEventListener('DOMContentLoaded', function() {
+               document.removeEventListener('DOMContentLoaded',arguments.callee, false);
+               fn();
+            }, false);
+         }else if(document.attachEvent) {
+            //IE
+            document.attachEvent('onreadystatechange', function() {
+               if(document.readyState == 'complete') {
+                  document.detachEvent('onreadystatechange', arguments.callee);
+                  fn();
+               }
+            });
+         }
+      };
+
+      ready(function () {
+         if(!isPC()) {
+            hideBackBtn();
+            var content = document.getElementById("content");
+            content && (content.className = 'content fill');
+            var firstTrTd = document.getElementById("firstTrTd");
+
+            if(firstTrTd) {
+               firstTrTd.className = "firstTrTd";
+            }
+
+            var lastTrTdA = document.getElementById("lastTrTdA");
+
+            if(lastTrTdA) {
+               lastTrTdA.className = "lastTrTd";
+            }
+
+            var lastTrTdB = document.getElementById("lastTrTdB");
+
+            if(lastTrTdB) {
+               lastTrTdB.className = "lastTrTd";
+            }
+         }
+         else {
+            if((window.history.length < 2 || hideBtn === 'true' ||
+               window.location.search.indexOf('&portalId=') !== -1) &&
+               "jwtè¿æ" !== "Audit Serverä¸æ¯æè¯¥åè½")
+            {
+               hideBackBtn();
+            }
+         }
+      });
+
+      document.documentElement.style.fontSize = innerWidth / 10 + "px";
+      window.onresize = function () {
+         document.documentElement.style.fontSize = innerWidth / 10 + "px";
+      }
+
+      function cAlert() {
+         var dialogContainer = document.getElementById("_dialogContainer_");
+
+         if (dialogContainer) {
+            var dialogHtml = "<div class=\"dialog-flex\" style=\"align-items: center;\">"
+               + "<div tabindex=\"0\" class=\"dialog\">"
+               + "<div class=\"dialog-header\"><span>jwtå¼å¸¸æç¤º</span><img class=\"icon-close\" src=\"/bi/sso?proc=2&resource=/g5/h5/dist/style/images/admin/close.svg\" onclick=\"closeDialog()\"></div>"
+               + "<div class=\"dialog-body\" style=\"box-shadow: 0px 0px 0px;\">"
+               + "<img class=\"icon-error\" src=\"/bi/sso?proc=2&resource=/g5/h5/dist/style/images/admin/error.svg\">"
+               + "<div class=\"alertDlg\">"
+               + "<div class=\"alertDlg-body\">"
+               + "<div class=\"alertDlg-body-container\" style=\"max-height: 5.625rem; padding: 0px;line-height:28px\">"
+               + "<div style=\"max-height: 5.625rem; margin-right: 0px;\">"
+               + "<div style=\"padding: 0px;\">"
+               + "<div class=\"alertDlg-message\" style=\"color:#838587;font-size:12px;\">jwtè¿æ</div>"
+               + "</div>"
+               + "</div>"
+               + "</div>"
+               + "</div>"
+               + "</div>"
+               + "</div>"
+               + "<div class=\"dialog-footer\">"
+               + "<div class=\"yh-button yh-button-primary yh-button-default\" style=\"margin-left: 20px;\" onclick=\"closeDialog()\">ç¡®å®</div>"
+               + "</div>"
+               + "</div>"
+               + "</div>";
+            dialogContainer.innerHTML = dialogHtml;
+         }
+      }
+
+      window.closeDialog = function () {
+         var dialogContainer = document.getElementById("_dialogContainer_");
+
+         if (dialogContainer) {
+            while (dialogContainer.childNodes && dialogContainer.childNodes.length > 0) {
+               dialogContainer.removeChild(dialogContainer.childNodes[0]);
+            }
+         }
+
+         if (window.top) {
+            window.top.close();
+         } else {
+            window.close();
+         }
+      }
+
+      function isPC() {
+         var userAgentInfo = navigator.userAgent;
+         var agents = ["Android", "iPhone", "Windows Phone", "iPad"];
+
+         if(userAgentInfo) {
+            for (var v = 0; v < agents.length; v++) {
+               if (userAgentInfo.indexOf(agents[v]) > 0) {
+                  return false
+               }
+            }
+         }
+
+         if(location.search.slice(1) && location.search.slice(1).indexOf('isAir=true') !== -1) {
+            return false
+         }
+
+         return true
+      }
+
+      window.onload = function () {
+         var reg = new RegExp("(^|&)from=([^&]*)(&|$)");
+         var from = window.location.search.match(reg);
+
+         if (from != null) {
+            var fromStr = from[2];
+            if (fromStr && (fromStr === "msg" || fromStr === "email")) {
+               cAlert();
+            }
+         }
+      };
+
+      function historyBack() {
+         try {
+            if("jwtè¿æ" === "Audit Serverä¸æ¯æè¯¥åè½" && window.parent !== window) {
+               window.parent.location.assign(document.referrer);
+            }
+            else if(backUrl) {
+               window.open(backUrl, '_self');
+            }
+            else {
+               window.history.back();
+            }
+         }
+         catch(err) {
+            // ignore
+         }
+      }
+
+      function hideBackBtn() {
+         var but = document.getElementById("button");
+         but && (but.style.display = 'none');
+      }</script><style>.firstTrTd{font-size:.6rem;padding-left:.5rem;padding-top:2rem}.lastTrTd{font-size:.4rem;padding:.2rem;padding-left:1.6rem}.dialog-flex{position:absolute;top:0;bottom:0;left:0;right:0;background:rgba(0,0,0,.2)}.dialog{height:154px;width:450px;margin:auto;position:absolute;top:0;bottom:0;left:0;right:0;border-radius:2px;background-color:#fff;box-shadow:0 0 5px #ccc;cursor:default;font-weight:400;font-size:12px;color:#515151}.dialog-header{background-color:#fbfbfb;border-top-right-radius:2px;border-top-left-radius:2px;border-bottom:1px solid #efefef;color:#515151;font-size:14px;height:35px}.dialog-header>span{padding-left:30px;font-size:14px;display:inline-block;float:left;height:35px;line-height:35px}.dialog-footer{background-color:#fbfbfb;border-top:1px solid #efefef;width:100%;height:50px;box-sizing:border-box}.yh-button{height:26px;border-radius:2px;padding:0;cursor:pointer;text-align:center;font-size:12px;color:#fff;line-height:26px}.yh-button-default{width:70px}.yh-button-primary{background-color:#29b758;border:0;margin-top:10px;position:absolute;right:20px}.yh-button-primary:hover{opacity:.75}.icon-close{height:14px;width:14px;margin-right:10px;margin-top:10px;opacity:.5;border-radius:50%;float:right;cursor:pointer}.icon-close:hover{background-color:rgba(158,158,158,.3)}.icon-error{height:28px;width:28px;margin-right:18px;display:inline-block;float:left}.dialog-body{box-shadow:0 0 0;background-color:#fff;padding:20px 30px}.subTitle{color:#eb8f00;font-weight:700;font-size:18px;margin-bottom:2px;height:26px}.error-page-tip{color:#999;max-width:450px;font-size:14px;line-height:26px}.fill{width:100%;height:100%}.flex-col{display:flex;justify-content:center;align-items:center}.content{flex-direction:column}.content .yh-button{position:static}</style></head><body><div class="flex-col fill"><div id="content" class="content"><div id="firstTrTd" class="subTitle">jwtå¼å¸¸æç¤º</div><div id="SecondTrTd" class="error-page-tip"></div><div id="lastTrTdB" class="error-page-tip">jwtè¿æ</div><div id="button" onclick="historyBack()" class="yh-button yh-button-primary yh-button-default">è¿å</div></div></div><div id="_dialogContainer_" class="dialog-container"></div></body></html>

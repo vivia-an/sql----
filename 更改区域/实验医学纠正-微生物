@@ -1,0 +1,194 @@
+{
+  "job":{
+    "moduleName":"starrocks-hid0101_mssql_hxcs_hxcsrep.biz_exam",
+    "uuid":"fffb40de-688a-4346-83d6-866574227ec5",
+    "content":[
+      {
+        "reader":{
+          "parameter":{
+            "password":"!1qwOPASkl",
+            "session":[
+              "SET SESSION query_max_stage_count = 5000"
+            ],
+            "connection":[
+              {
+                "querySql":[
+                  "
+        -- 传 $[yyyy-MM-dd]（调度/业务日），统计其自然月上一个月；勿用 $[yyyy-MM-1]（减 1 天取月，月中会错）
+        WITH ds AS (
+    SELECT CAST(date_parse('$[yyyy-MM-dd]', '%Y-%m-%d') AS DATE) AS biz_date
+),
+date_ranges AS (
+    SELECT
+        date_format(date_add('month', -1, (SELECT biz_date FROM ds)), '%Y') || '年-' || date_format(date_add('month', -1, (SELECT biz_date FROM ds)), '%m') || '月' AS stat_month_label,
+        date_format(date_trunc('month', date_add('month', -1, (SELECT biz_date FROM ds))), '%Y%m%d') AS current_month_start,
+        date_format(date_add('day', -1, date_trunc('month', (SELECT biz_date FROM ds))), '%Y%m%d') AS current_month_end
+),
+
+-- ==================== 统计月（上月）数据查询 ====================
+
+-- 工作量和标本数
+-- 来源：lis_inspection_sample + lis_inspection_sample_charge + lis_charge_item
+-- 筛选：GROUP_ID IN ('G999', 'G998', 'G014', 'G022')，inspection_date 在 date_ranges（上月）
+workload_stat AS (
+    SELECT 
+        COUNT(DISTINCT t.\"inspection_id\") as \"标本数\", 
+        SUM(COALESCE(CAST(C.\"workload\" AS DOUBLE), 0)) as \"项目数\"
+    FROM hid0101_orcl_lis_dbo.lis_inspection_sample t
+    INNER JOIN hid0101_orcl_lis_dbo.lis_inspection_sample_charge b 
+        ON t.\"inspection_id\" = b.\"inspection_id\" AND b.\"isdeleted\" = '0'
+    LEFT JOIN HID0101_ORCL_LIS_XHSYSTEM1.lis_charge_item C 
+        ON b.\"charge_item_id\" = C.\"charge_item_id\" AND C.\"isdeleted\" = '0'
+    CROSS JOIN date_ranges d
+    WHERE t.\"inspection_date\" BETWEEN d.current_month_start AND d.current_month_end 
+        AND t.\"isdeleted\" = '0' 
+        AND t.\"CHECK_TIME\" IS NOT NULL
+        AND t.\"GROUP_ID\" IN ('G999', 'G998', 'G014', 'G022')
+),
+
+-- 收入统计
+-- 来源：lis_inspection_sample
+income_stat AS (
+    SELECT SUM(COALESCE(CAST(A.\"SAMPLE_CHARGE\" AS DOUBLE), 0)) as \"总收入\"
+    FROM hid0101_orcl_lis_dbo.lis_inspection_sample A
+    CROSS JOIN date_ranges d
+    WHERE A.\"inspection_date\" BETWEEN d.current_month_start AND d.current_month_end 
+        AND A.\"isdeleted\" = '0' 
+        AND A.\"CHECK_TIME\" IS NOT NULL
+        AND A.\"GROUP_ID\" IN ('G999', 'G998', 'G014', 'G022')
+),
+
+-- 外包收费样本数（his_id包含'||'的记录）
+-- 来源：lis_inspection_sample + lis_inspection_sample_charge
+-- 筛选：GROUP_ID IN ('G999','G998'), patient_type IN ('1','2','3','4','5','8','12')
+wb_bufe AS (
+    SELECT COUNT(A.\"inspection_id\") as \"样本数\"
+    FROM hid0101_orcl_lis_dbo.lis_inspection_sample A
+    INNER JOIN hid0101_orcl_lis_dbo.lis_inspection_sample_charge B 
+        ON A.\"inspection_id\" = B.\"inspection_id\" AND B.\"isdeleted\" = '0'
+    CROSS JOIN date_ranges d
+    WHERE STRPOS(B.\"his_id\", '||') > 0 
+        AND A.\"patient_type\" IN ('1','2','3','4','5','8','12') 
+        AND A.\"GROUP_ID\" IN ('G999','G998')
+        AND A.\"inspection_date\" BETWEEN d.current_month_start AND d.current_month_end 
+        AND A.\"isdeleted\" = '0'
+),
+
+-- 科室样本数（按申请单去重）
+-- 来源：lis_inspection_sample + lis_requisition_item
+-- 筛选：GROUP_ID IN ('G999','G998','G014','G022'), patient_type IN ('1','2','3','4','5','8','12')
+keshi_stat AS (
+    SELECT COUNT(DISTINCT A.\"requisition_id\") as \"样本数\"
+    FROM hid0101_orcl_lis_dbo.lis_inspection_sample A
+    INNER JOIN hid0101_orcl_lis_dbo.lis_requisition_item B 
+        ON A.\"requisition_id\" = B.\"requisition_id\" AND B.\"isdeleted\" = '0'
+    CROSS JOIN date_ranges d
+    WHERE A.\"patient_type\" IN ('1','2','3','4','5','8','12') 
+        AND A.\"GROUP_ID\" IN ('G999','G998','G014','G022')
+        AND A.\"inspection_date\" BETWEEN d.current_month_start AND d.current_month_end 
+        AND A.\"isdeleted\" = '0'
+)
+
+-- ==================== 最终输出（保持原有字段结构） ====================
+SELECT 
+    d.stat_month_label as \"统计月\",
+    '实验医学科(检验科)' as \"运管科室\",
+    '主院区' as \"运管院区\",
+    '临床微生物实验室' as \"亚专业组\",
+    
+    -- 统计月（上月）数据
+    COALESCE((SELECT \"样本数\" FROM wb_bufe), 0) + COALESCE((SELECT \"样本数\" FROM keshi_stat), 0) as \"标本数\",
+    COALESCE((SELECT \"项目数\" FROM workload_stat), 0) as \"项目数\",
+    ROUND(COALESCE((SELECT \"总收入\" FROM income_stat), 0), 2) as \"总收入\",
+    
+    -- 上月数据（默认值0）
+    CAST(0 AS BIGINT) as \"上月标本数\",
+    CAST(0 AS BIGINT) as \"上月项目数\",
+    CAST(0 AS DECIMAL(18,2)) as \"上月总收入\",
+    
+    -- 去年同期数据（默认值0）
+    CAST(0 AS BIGINT) as \"去年同期标本数\",
+    CAST(0 AS BIGINT) as \"去年同期项目数\",
+    CAST(0 AS DECIMAL(18,2)) as \"去年同期总收入\",
+    
+    -- 收入占比（默认值0）
+    CAST(0 AS DECIMAL(10,2)) as \"总收入占比%\",
+    CAST(0 AS DECIMAL(10,2)) as \"上月总收入占比%\",
+    CAST(0 AS DECIMAL(10,2)) as \"去年同期总收入占比%\",
+    
+    -- 环比增长率（默认值0）
+    CAST(0 AS DECIMAL(10,2)) as \"标本数环比增长率%\",
+    CAST(0 AS DECIMAL(10,2)) as \"项目数环比增长率%\",
+    CAST(0 AS DECIMAL(10,2)) as \"收入环比增长率%\",
+    
+    -- 同比增长率（默认值0）
+    CAST(0 AS DECIMAL(10,2)) as \"标本数同比增长率%\",
+    CAST(0 AS DECIMAL(10,2)) as \"项目数同比增长率%\",
+    CAST(0 AS DECIMAL(10,2)) as \"收入同比增长率%\"
+FROM date_ranges d
+
+
+
+"
+                ],
+                "jdbcUrl":[
+                  "jdbc:presto://coordinator.example.com:18080/hive/default?SSL=true&SSLKeyStorePath=/opt/kerberos/check.jks&SSLKeyStorePassword=tK98ns@83dYU"
+                ]
+              }
+            ],
+            "username":"xxzx"
+          },
+          "name":"prestoreader"
+        },
+        "writer":{
+          "parameter":{
+            "postSql":[],
+            "password":"7993@5b8D",
+            "database":"m1",
+            "loadProps":{
+              "format":"json",
+              "strip_outer_array":true
+            },
+            "column":[
+              "统计月",
+                "运管科室",
+                "运管院区",
+                "亚专业组",
+                "标本数",
+                "项目数",
+                "总收入",
+                "上月标本数",
+                "上月项目数",
+                "上月总收入",
+                "去年同期标本数",
+                "去年同期项目数",
+                "去年同期总收入",
+                "总收入占比%",
+                "上月总收入占比%",
+                "去年同期总收入占比%",
+                "标本数环比增长率%",
+                "项目数环比增长率%",
+                "收入环比增长率%",
+                "标本数同比增长率%",
+                "项目数同比增长率%",
+                "收入同比增长率%"
+            ],
+            "jdbcUrl":"jdbc:mysql://10.239.91.107:9030/",
+            "loadUrl":[
+              "10.239.91.107:8030"
+            ],
+            "table":"transport_is_experimental",
+            "username":"root",
+            "preSql":[]
+          },
+          "name":"starrockswriter"
+        }
+      }
+    ],
+    "setting":{
+      "speed":{
+        "channel":1
+      }
+    }
+  }
+}

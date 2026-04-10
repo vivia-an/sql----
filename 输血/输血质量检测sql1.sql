@@ -299,19 +299,19 @@ WITH date_conversion AS (
   -- ========== 天府院区（hid0117）表检查 ==========
   
   -- 天府院区 - 字典表检查
-  SELECT 
-    'hid0117_orcl_lis_xhsystem1.lis_charge_item' as "表名",
-    '字典表' as "表类型",
-    "lastupdatedttm",
-    CASE 
-      WHEN "lastupdatedttm" IS NULL THEN current_date
-      WHEN length(trim("lastupdatedttm")) < 10 THEN current_date
-      ELSE date_parse(substr("lastupdatedttm", 1, 10), '%Y-%m-%d')
-    END as "parsed_date"
-  FROM hid0117_orcl_lis_xhsystem1.lis_charge_item
-  WHERE "isdeleted" = '0'
+  -- SELECT 
+  --   'hid0117_orcl_lis_xhsystem1.lis_charge_item' as "表名",
+  --   '字典表' as "表类型",
+  --   "lastupdatedttm",
+  --   CASE 
+  --     WHEN "lastupdatedttm" IS NULL THEN current_date
+  --     WHEN length(trim("lastupdatedttm")) < 10 THEN current_date
+  --     ELSE date_parse(substr("lastupdatedttm", 1, 10), '%Y-%m-%d')
+  --   END as "parsed_date"
+  -- FROM hid0117_orcl_lis_xhsystem1.lis_charge_item
+  -- WHERE "isdeleted" = '0'
   
-  UNION ALL
+  -- UNION ALL
   
   SELECT 
     'hid0117_orcl_lis_xhbis.bis6_match_blood_type' as "表名",
@@ -536,20 +536,20 @@ WITH date_conversion AS (
   FROM hid0117_orcl_lis_bis.his_requisition
   WHERE "isdeleted" = '0'
   
-  UNION ALL
+  -- UNION ALL
   
-  -- 天府院区 - 接口表检查
-  SELECT 
-    'hid0117_orcl_lis_xhinterface.xinghe_charged_list' as "表名",
-    '接口表' as "表类型",
-    "lastupdatedttm",
-    CASE 
-      WHEN "lastupdatedttm" IS NULL THEN current_date
-      WHEN length(trim("lastupdatedttm")) < 10 THEN current_date
-      ELSE date_parse(substr("lastupdatedttm", 1, 10), '%Y-%m-%d')
-    END as "parsed_date"
-  FROM hid0117_orcl_lis_xhinterface.xinghe_charged_list
-  WHERE "isdeleted" = '0'
+  -- -- 天府院区 - 接口表检查
+  -- SELECT 
+  --   'hid0117_orcl_lis_xhinterface.xinghe_charged_list' as "表名",
+  --   '接口表' as "表类型",
+  --   "lastupdatedttm",
+  --   CASE 
+  --     WHEN "lastupdatedttm" IS NULL THEN current_date
+  --     WHEN length(trim("lastupdatedttm")) < 10 THEN current_date
+  --     ELSE date_parse(substr("lastupdatedttm", 1, 10), '%Y-%m-%d')
+  --   END as "parsed_date"
+  -- FROM hid0117_orcl_lis_xhinterface.xinghe_charged_list
+  -- WHERE "isdeleted" = '0'
   
 ),
 

@@ -1,0 +1,312 @@
+-- 运管科LIS报表整体（含天府医院独立数据）- DolphinScheduler单月版本
+-- 使用说明：DolphinScheduler参数 $[yyyy-MM-1] 表示上个月
+-- 
+-- ==================== 血缘依赖说明 ====================
+-- 数据来源表：
+-- 1. hid0101_orcl_lis_dbo.lis_inspection_sample - 主院区LIS检验样本表
+--    关键字段：inspection_id, GROUP_ID, inspection_date, CHECK_TIME, SAMPLE_CHARGE, isdeleted
+-- 2. hid0101_orcl_lis_dbo.lis_inspection_sample_charge - 主院区检验收费关联表
+--    关键字段：inspection_id, charge_item_id, isdeleted
+-- 3. HID0101_ORCL_LIS_XHSYSTEM1.lis_charge_item - 收费项目表（工作量）
+--    关键字段：charge_item_id, workload, isdeleted
+-- 4. hid0117_orcl_lis_dbo.lis_inspection_sample - 天府医院LIS检验样本表
+--    关键字段：inspection_id, GROUP_ID, inspection_date, requisition_id, isdeleted
+-- 5. hid0117_orcl_lis_xhdata.lis6_inspect_charge - 天府医院收费表
+--    关键字段：inspection_id, item_charge, isdeleted
+-- 6. hid0117_orcl_lis_dbo.lis_requisition_item - 天府医院申请单项目表
+--    关键字段：requisition_id, charge_item_id, isdeleted
+
+WITH date_ranges AS (
+    -- 动态日期范围（基于DolphinScheduler参数）
+    SELECT 
+        -- 统计月份标签
+        SUBSTR('$[yyyy-MM-1]', 1, 4) || '年-' || SUBSTR('$[yyyy-MM-1]', 6, 2) || '月' as stat_month_label,
+        
+        -- 当月日期范围（格式：yyyyMMdd）
+        REPLACE('$[yyyy-MM-1]', '-', '') || '01' as current_month_start,
+        REPLACE(CAST(LAST_DAY_OF_MONTH(DATE_PARSE('$[yyyy-MM-1]' || '-01', '%Y-%m-%d')) AS VARCHAR), '-', '') as current_month_end
+),
+
+WITH date_ranges AS (
+    -- 动态日期范围（基于DolphinScheduler参数）
+    SELECT 
+        -- 统计月份标签
+        '2025年-12月' as stat_month_label,
+        
+        -- 当月日期范围（格式：yyyyMMdd）
+        '20251201' as current_month_start,
+        '20251231' as current_month_end
+),
+-- ==================== 主院区数据查询 ====================
+
+-- 当月工作量和标本数
+-- 来源：lis_inspection_sample + lis_inspection_sample_charge + lis_charge_item
+-- 筛选：inspection_date在当月范围内，CHECK_TIME不为空
+correct_workload AS (
+    SELECT 
+        t."GROUP_ID" as "亚专业组代码",
+        COUNT(DISTINCT t."inspection_id") as "标本数",
+        SUM(COALESCE(CAST(C."workload" AS DOUBLE), 0)) as "工作量"
+    FROM hid0101_orcl_lis_dbo.lis_inspection_sample t
+    INNER JOIN hid0101_orcl_lis_dbo.lis_inspection_sample_charge b
+        ON t."inspection_id" = b."inspection_id"
+        AND b."isdeleted" = '0'
+    LEFT JOIN HID0101_ORCL_LIS_XHSYSTEM1.lis_charge_item C
+        ON b."charge_item_id" = C."charge_item_id"
+        AND C."isdeleted" = '0'
+    CROSS JOIN date_ranges d
+    WHERE t."inspection_date" BETWEEN d.current_month_start AND d.current_month_end
+        AND t."isdeleted" = '0'
+        AND t."CHECK_TIME" IS NOT NULL
+    GROUP BY t."GROUP_ID"
+),
+
+-- 当月收入
+-- 来源：lis_inspection_sample
+-- 筛选：inspection_date在当月范围内，CHECK_TIME不为空
+income_data AS (
+    SELECT 
+        A."GROUP_ID" as "亚专业组代码",
+        SUM(COALESCE(CAST(A."SAMPLE_CHARGE" AS DOUBLE), 0)) as "总收入"
+    FROM hid0101_orcl_lis_dbo.lis_inspection_sample A
+    CROSS JOIN date_ranges d
+    WHERE A."inspection_date" BETWEEN d.current_month_start AND d.current_month_end
+        AND A."isdeleted" = '0'
+        AND A."CHECK_TIME" IS NOT NULL
+    GROUP BY A."GROUP_ID"
+),
+
+-- ==================== 天府医院独立数据查询 (hid0117) ====================
+
+-- 天府医院当月数据
+-- 来源：hid0117_orcl_lis_dbo.lis_inspection_sample + hid0117_orcl_lis_xhdata.lis6_inspect_charge
+-- 筛选：GROUP_ID不为G050，且不在排除的charge_item_id列表中
+tianfu_data AS (
+    SELECT 
+        COUNT(DISTINCT T."inspection_id") as "标本数",
+        count(b.inspection_id) as "工作量",
+        SUM(COALESCE(CAST(COALESCE(B.charge, B.item_charge) AS DOUBLE), 0)) as "收费金额"
+    FROM hid0117_orcl_lis_dbo.lis_inspection_sample T
+    INNER JOIN hid0117_orcl_lis_xhdata.lis6_inspect_charge B
+        ON T."inspection_id" = B."inspection_id"
+        AND B."isdeleted" = '0'
+    CROSS JOIN date_ranges d
+    WHERE T."inspection_date" BETWEEN d.current_month_start AND d.current_month_end
+        AND T."GROUP_ID" <> 'G050'
+        AND T."isdeleted" = '0'
+        AND NOT EXISTS (
+            SELECT 1
+            FROM hid0117_orcl_lis_dbo.lis_requisition_item Q
+            WHERE Q."requisition_id" = T."requisition_id"
+                AND Q."charge_item_id" IN ('LIS0301', 'LIS027534', 'LIS024805',
+                    'LIS01566', 'LIS01414', 'LIS027420')
+                AND Q."isdeleted" = '0'
+        )
+        AND T.GROUP_ID IN ('G003','G004','G006','G009','G010','G011','G014','G017','G022','G068','G999')
+),
+
+-- ==================== 数据汇总 ====================
+
+-- 亚专业组级别数据
+group_level AS (
+    SELECT 
+        cw."亚专业组代码",
+        CASE 
+            WHEN cw."亚专业组代码" IN ('G003', 'G001') THEN '临床免疫实验室'
+            WHEN cw."亚专业组代码" IN ('G021', 'G017', 'G007') THEN '临床生化实验室'
+            WHEN cw."亚专业组代码" IN ('G999', 'G998', 'G014', 'G022') THEN '临床微生物实验室'
+            WHEN cw."亚专业组代码" IN ('G044', 'G009', 'G062','G068','G119','G120','G121','G122') THEN '临床分子诊断实验室'
+            WHEN cw."亚专业组代码" IN ('G002', 'G025', 'G006', 'G004', 'G076') THEN '临检与血液实验室'
+            WHEN cw."亚专业组代码" IN ('G049', 'G051', 'G050', 'G054', 'G065') THEN '温江院区'
+            WHEN cw."亚专业组代码" IN ('G011', 'G010', 'G072') THEN '急诊应急组'
+            WHEN cw."亚专业组代码" IN ('G112', 'G113') THEN '天府院区'
+            WHEN cw."亚专业组代码" IN ('G115', 'G116', 'G077', 'G104', 'G101', 'G103', 'G102') THEN '锦江院区'
+            ELSE '其他'
+        END as "亚专业组",
+        -- 当月数据
+        cw."标本数",
+        cw."工作量" as "项目数",
+        COALESCE(i."总收入", 0) as "总收入"
+    FROM correct_workload cw
+    LEFT JOIN income_data i ON cw."亚专业组代码" = i."亚专业组代码"
+),
+
+-- 最终汇总（按亚专业组）
+final_summary AS (
+    SELECT 
+        "亚专业组",
+        SUM("标本数") as "标本数",
+        SUM("项目数") as "项目数",
+        ROUND(SUM("总收入"), 2) as "总收入"
+    FROM group_level
+    WHERE "亚专业组" != '其他'
+    GROUP BY "亚专业组"
+),
+
+-- ==================== 最终输出（保持原有字段结构） ====================
+
+summary_with_totals AS (
+    -- 原始科室数据（各亚专业组明细）
+    SELECT 
+        d.stat_month_label as "统计月份",
+        '实验医学科(检验科)' as "运管科室",
+        CASE 
+            WHEN "亚专业组" IN ('温江院区') THEN '温江院区'
+            WHEN "亚专业组" IN ('天府院区') THEN '天府院区'
+            WHEN "亚专业组" IN ('锦江院区') THEN '锦江院区'
+            ELSE '主院区'
+        END as "运管院区",
+        "亚专业组",
+        "标本数",
+        "项目数",
+        "总收入",
+        -- 上月数据（默认值0）
+        CAST(0 AS BIGINT) as "上月标本数",
+        CAST(0 AS BIGINT) as "上月项目数",
+        CAST(0 AS DECIMAL(18,2)) as "上月总收入",
+        -- 去年同期数据（默认值0）
+        CAST(0 AS BIGINT) as "去年同期标本数",
+        CAST(0 AS BIGINT) as "去年同期项目数",
+        CAST(0 AS DECIMAL(18,2)) as "去年同期总收入",
+        -- 收入占比
+        CASE 
+            WHEN ((SELECT SUM("总收入") FROM final_summary) + (SELECT MAX(COALESCE("收费金额", 0)) FROM tianfu_data)) = 0 THEN 0
+            ELSE ROUND("总收入" * 100.0 / ((SELECT SUM("总收入") FROM final_summary) + (SELECT MAX(COALESCE("收费金额", 0)) FROM tianfu_data)), 2)
+        END as "总收入占比%",
+        CAST(0 AS DECIMAL(10,2)) as "上月总收入占比%",
+        CAST(0 AS DECIMAL(10,2)) as "去年同期总收入占比%",
+        -- 环比增长率（默认值0）
+        CAST(0 AS DECIMAL(10,2)) as "标本数环比增长率%",
+        CAST(0 AS DECIMAL(10,2)) as "项目数环比增长率%",
+        CAST(0 AS DECIMAL(10,2)) as "收入环比增长率%",
+        -- 同比增长率（默认值0）
+        CAST(0 AS DECIMAL(10,2)) as "标本数同比增长率%",
+        CAST(0 AS DECIMAL(10,2)) as "项目数同比增长率%",
+        CAST(0 AS DECIMAL(10,2)) as "收入同比增长率%"
+    FROM final_summary
+    CROSS JOIN date_ranges d
+    
+    UNION ALL
+    
+    -- 合计行（包含所有明细 + 天府医院独立统计）
+    SELECT 
+        MAX(d.stat_month_label) as "统计月份",
+        '实验医学科(检验科)' as "运管科室",
+        '合计' as "运管院区",
+        '合计' as "亚专业组",
+        SUM(fs."标本数") + MAX(COALESCE(tf."标本数", 0)) as "标本数",
+        SUM(fs."项目数") + MAX(COALESCE(tf."工作量", 0)) as "项目数",
+        ROUND(SUM(fs."总收入") + MAX(COALESCE(tf."收费金额", 0)), 2) as "总收入",
+        -- 上月数据（默认值0）
+        CAST(0 AS BIGINT) as "上月标本数",
+        CAST(0 AS BIGINT) as "上月项目数",
+        CAST(0 AS DECIMAL(18,2)) as "上月总收入",
+        -- 去年同期数据（默认值0）
+        CAST(0 AS BIGINT) as "去年同期标本数",
+        CAST(0 AS BIGINT) as "去年同期项目数",
+        CAST(0 AS DECIMAL(18,2)) as "去年同期总收入",
+        -- 合计行收入占比（100%）
+        100.00 as "总收入占比%",
+        CAST(0 AS DECIMAL(10,2)) as "上月总收入占比%",
+        CAST(0 AS DECIMAL(10,2)) as "去年同期总收入占比%",
+        -- 环比增长率（默认值0）
+        CAST(0 AS DECIMAL(10,2)) as "标本数环比增长率%",
+        CAST(0 AS DECIMAL(10,2)) as "项目数环比增长率%",
+        CAST(0 AS DECIMAL(10,2)) as "收入环比增长率%",
+        -- 同比增长率（默认值0）
+        CAST(0 AS DECIMAL(10,2)) as "标本数同比增长率%",
+        CAST(0 AS DECIMAL(10,2)) as "项目数同比增长率%",
+        CAST(0 AS DECIMAL(10,2)) as "收入同比增长率%"
+    FROM final_summary fs
+    CROSS JOIN tianfu_data tf
+    CROSS JOIN date_ranges d
+    
+    UNION ALL
+    
+    -- 本部实际量（排除天府院区）
+    SELECT 
+        MAX(d.stat_month_label) as "统计月份",
+        '实验医学科(检验科)' as "运管科室",
+        '本部实际量' as "运管院区",
+        '本部实际量' as "亚专业组",
+        SUM(fs."标本数") as "标本数",
+        SUM(fs."项目数") as "项目数",
+        ROUND(SUM(fs."总收入"), 2) as "总收入",
+        -- 上月数据（默认值0）
+        CAST(0 AS BIGINT) as "上月标本数",
+        CAST(0 AS BIGINT) as "上月项目数",
+        CAST(0 AS DECIMAL(18,2)) as "上月总收入",
+        -- 去年同期数据（默认值0）
+        CAST(0 AS BIGINT) as "去年同期标本数",
+        CAST(0 AS BIGINT) as "去年同期项目数",
+        CAST(0 AS DECIMAL(18,2)) as "去年同期总收入",
+        -- 本部实际量收入占比
+        CASE 
+            WHEN ((SELECT SUM("总收入") FROM final_summary) + (SELECT MAX(COALESCE("收费金额", 0)) FROM tianfu_data)) = 0 THEN 0
+            ELSE ROUND(SUM(fs."总收入") * 100.0 / ((SELECT SUM("总收入") FROM final_summary) + (SELECT MAX(COALESCE("收费金额", 0)) FROM tianfu_data)), 2)
+        END as "总收入占比%",
+        CAST(0 AS DECIMAL(10,2)) as "上月总收入占比%",
+        CAST(0 AS DECIMAL(10,2)) as "去年同期总收入占比%",
+        -- 环比增长率（默认值0）
+        CAST(0 AS DECIMAL(10,2)) as "标本数环比增长率%",
+        CAST(0 AS DECIMAL(10,2)) as "项目数环比增长率%",
+        CAST(0 AS DECIMAL(10,2)) as "收入环比增长率%",
+        -- 同比增长率（默认值0）
+        CAST(0 AS DECIMAL(10,2)) as "标本数同比增长率%",
+        CAST(0 AS DECIMAL(10,2)) as "项目数同比增长率%",
+        CAST(0 AS DECIMAL(10,2)) as "收入同比增长率%"
+    FROM final_summary fs
+    CROSS JOIN date_ranges d
+    WHERE fs."亚专业组" != '天府院区'
+    
+    UNION ALL
+    
+    -- 天府医院独立统计行 (hid0117数据源)
+    SELECT 
+        MAX(d.stat_month_label) as "统计月份",
+        '实验医学科(检验科)' as "运管科室",
+        '天府医院' as "运管院区",
+        '天府医院' as "亚专业组",
+        -- 当月数据
+        MAX(COALESCE(tf."标本数", 0)) as "标本数",
+        MAX(COALESCE(tf."工作量", 0)) as "项目数",
+        MAX(COALESCE(tf."收费金额", 0)) as "总收入",
+        -- 上月数据（默认值0）
+        CAST(0 AS BIGINT) as "上月标本数",
+        CAST(0 AS BIGINT) as "上月项目数",
+        CAST(0 AS DECIMAL(18,2)) as "上月总收入",
+        -- 去年同期数据（默认值0）
+        CAST(0 AS BIGINT) as "去年同期标本数",
+        CAST(0 AS BIGINT) as "去年同期项目数",
+        CAST(0 AS DECIMAL(18,2)) as "去年同期总收入",
+        -- 天府医院收入占比
+        CASE 
+            WHEN ((SELECT SUM("总收入") FROM final_summary) + MAX(COALESCE(tf."收费金额", 0))) = 0 THEN 0
+            ELSE ROUND(MAX(COALESCE(tf."收费金额", 0)) * 100.0 / ((SELECT SUM("总收入") FROM final_summary) + MAX(COALESCE(tf."收费金额", 0))), 2)
+        END as "总收入占比%",
+        CAST(0 AS DECIMAL(10,2)) as "上月总收入占比%",
+        CAST(0 AS DECIMAL(10,2)) as "去年同期总收入占比%",
+        -- 环比增长率（默认值0）
+        CAST(0 AS DECIMAL(10,2)) as "标本数环比增长率%",
+        CAST(0 AS DECIMAL(10,2)) as "项目数环比增长率%",
+        CAST(0 AS DECIMAL(10,2)) as "收入环比增长率%",
+        -- 同比增长率（默认值0）
+        CAST(0 AS DECIMAL(10,2)) as "标本数同比增长率%",
+        CAST(0 AS DECIMAL(10,2)) as "项目数同比增长率%",
+        CAST(0 AS DECIMAL(10,2)) as "收入同比增长率%"
+    FROM tianfu_data tf
+    CROSS JOIN date_ranges d
+)
+
+-- 最终结果
+SELECT *
+FROM summary_with_totals
+ORDER BY 
+    CASE 
+        WHEN "亚专业组" = '合计' THEN 1
+        WHEN "亚专业组" = '本部实际量' THEN 2
+        WHEN "亚专业组" = '天府医院' THEN 3
+        ELSE 4
+    END,
+    "标本数" DESC
+

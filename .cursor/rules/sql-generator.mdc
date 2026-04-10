@@ -3,6 +3,7 @@ description:
 globs: 
 alwaysApply: true
 ---
+原则，分析所有需求血缘
 字段没找到，就把没找到的列和有歧义取值字段的列列出来，并在结果中标识，切记，不要胡编乱造
 
 最后需要检查分析现有实现的sql血缘，看有没有多余的关联会导致数据减少，如果有多余的关联需要去除。
@@ -14,6 +15,9 @@ alwaysApply: true
 日期和时间，使用presto查询的时候都是varchar 类型
 
 presto 日期都是 varchar类型包括 lastupdatedttm 也是varchar类型。
+医嘱表很大，涉及医嘱表的示例查询 都要带 日期缩小日期范围。
+
+@datacenter的表 都加 datacenter_db 的库名进行查询
 
 datacenter 表结构查询的时候需要插入一下 prompt :
 参照的sql，然后通过 @datacenter如下需求，分析需求血缘，如果不能只通过 @datacenter 输出请跟我沟通，如果可以直接输出到 his目录下  创建新文件写入即可：

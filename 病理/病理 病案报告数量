@@ -1,0 +1,98 @@
+-- 病理报告数统计（主报告 + 补充报告）- 按门诊/住院分组统计
+-- 来源表：hid0101_mssql_bl_rep.t_jcxx（检查信息表）
+--        hid0101_mssql_bl_rep.t_bcbg（补充报告表）
+
+SELECT 
+    "病人类别",
+    SUM("主报告数") + SUM("补充报告数") AS "公卫骨髓报告总数"
+FROM (
+    -- 主报告统计
+    SELECT 
+        CASE 
+            WHEN a.f_brlb = '门诊' THEN '门诊'
+            WHEN a.f_brlb = '住院' THEN '住院'
+            ELSE '其他'
+        END AS "病人类别",
+        COUNT(*) AS "主报告数",
+        0 AS "补充报告数"
+    FROM hid0101_mssql_bl_rep.t_jcxx AS a 
+    WHERE a.f_blk = '公卫骨髓' 
+      AND a.f_bgrq >= '2025-12-23 00:00:00'
+      AND a.f_bgrq <= '2025-12-23 23:59:59'
+      AND a.f_bgzt = '已审核'
+      AND a.isdeleted = '0'
+    GROUP BY 
+        CASE 
+            WHEN a.f_brlb = '门诊' THEN '门诊'
+            WHEN a.f_brlb = '住院' THEN '住院'
+            ELSE '其他'
+        END
+    
+    UNION ALL
+    
+    -- 补充报告统计
+    SELECT 
+        CASE 
+            WHEN c.f_brlb = '门诊' THEN '门诊'
+            WHEN c.f_brlb = '住院' THEN '住院'
+            ELSE '其他'
+        END AS "病人类别",
+        0 AS "主报告数",
+        COUNT(*) AS "补充报告数"
+    FROM hid0101_mssql_bl_rep.t_bcbg AS b  
+    INNER JOIN hid0101_mssql_bl_rep.t_jcxx AS c ON b.f_blh = c.f_blh AND c.isdeleted = '0'
+    WHERE c.f_blk = '公卫骨髓' 
+      AND b.f_bc_bgrq >= '2025-12-23 00:00:00'
+      AND b.f_bc_bgrq <= '2025-12-23 23:59:59'
+      AND b.f_bc_bgzt = '已审核'
+      AND b.isdeleted = '0'
+    GROUP BY 
+        CASE 
+            WHEN c.f_brlb = '门诊' THEN '门诊'
+            WHEN c.f_brlb = '住院' THEN '住院'
+            ELSE '其他'
+        END
+) t
+GROUP BY "病人类别"
+ORDER BY "病人类别"
+
+
+
+
+
+
+SELECT 
+    ISNULL(m.医生姓名, s.医生姓名) AS 医生姓名,
+    ISNULL(m.病例库, s.病例库) AS 病例库,
+    ISNULL(m.主报告数量, 0) AS 初步报告数量,
+    ISNULL(s.补充报告数量, 0) AS 补充报告数量
+FROM (
+    -- 主报告统计
+    SELECT 
+        F_SHYS AS 医生姓名,
+        F_BLK AS 病例库,
+        COUNT(*) AS 主报告数量
+    FROM T_JCXX with(nolock)
+    WHERE 
+        F_BGZT = '已审核'
+        AND F_BGRQ >= 'tj_报告日期-开始 00:00:00' 
+        AND F_BGRQ <= 'tj_报告日期-结束 23:59:59'
+
+    GROUP BY F_SHYS, F_BLK
+) m
+FULL OUTER JOIN (
+    -- 补充报告统计（需要关联主表获取病例库）
+    SELECT 
+        bc.F_BC_SHYS AS 医生姓名,
+        jc.F_BLK AS 病例库,
+        COUNT(*) AS 补充报告数量
+    FROM T_BCBG bc with(nolock)
+    INNER JOIN T_JCXX jc ON bc.F_BLH = jc.F_BLH  -- 通过病理号关联
+    WHERE 
+        bc.F_BC_BGRQ >= 'tj_报告日期-开始 00:00:00' 
+        AND bc.F_BC_BGRQ <= 'tj_报告日期-结束 23:59:59'
+        AND f_bc_bgzt = '已审核'
+    GROUP BY bc.F_BC_SHYS, jc.F_BLK
+) s ON m.医生姓名 = s.医生姓名 AND m.病例库 = s.病例库
+ORDER BY 
+    医生姓名, 病例库;

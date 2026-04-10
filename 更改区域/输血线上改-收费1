@@ -1,0 +1,81 @@
+{
+	"job":{
+		"moduleName":"starrocks-hid0101_mssql_hxcs_hxcsrep.biz_exam",
+		"uuid":"fffb40de-688a-4346-83d6-866574227ec5",
+		"content":[
+			{
+				"reader":{
+					"parameter":{
+						"password":"!1qwOPASkl",
+						"session":[
+							"SET SESSION hive.hoodie_incremental_table_config=''"
+						],
+						"connection":[
+							{
+								"querySql":[
+									"WITH ds AS (
+    SELECT CAST(date_parse('$[yyyy-MM-dd]', '%Y-%m-%d') AS DATE) AS biz_date
+)
+SELECT 
+    date_format(date_add('month', -1, (SELECT biz_date FROM ds)), '%Y-%m') as \"周期\",
+    '上月' as \"周期名称\",
+    1 as \"排序\",
+    date_format(date_add('month', -1, (SELECT biz_date FROM ds)), '%Y-%m') as \"统计月\",
+    SUM(CAST(fee.fee_billdet_totalfee AS DOUBLE)) as \"治疗收入\"
+FROM datacenter_db.Order_Main order_main
+LEFT JOIN datacenter_db.fee_billdet fee
+    ON order_main.order_main_dstablevalue = fee.fee_billdet_orderdetid 
+    AND order_main.medorgcode = fee.medorgcode 
+WHERE order_main.\"Order_Main_RecDeptName\" IN ('输血科','锦江输血科')
+    AND order_main.\"Order_Main_OrderItemCode\" IN ('666600613','666000570','666000571','666600598','666000510')
+    AND order_main.\"Order_Main_OrderBeginDtTm\" BETWEEN
+        CONCAT(date_format(date_trunc('month', date_add('month', -1, (SELECT biz_date FROM ds))), '%Y-%m-%d'), ' 00:00:00')
+        AND CONCAT(date_format(date_add('day', -1, date_trunc('month', (SELECT biz_date FROM ds))), '%Y-%m-%d'), ' 23:59:59')
+
+"
+								],
+								"jdbcUrl":[
+									"jdbc:presto://coordinator.example.com:18080/hive/default?SSL=true&SSLKeyStorePath=/opt/kerberos/check.jks&SSLKeyStorePassword=tK98ns@83dYU"
+								]
+							}
+						],
+						"username":"xxzx"
+					},
+					"name":"prestoreader"
+				},
+				"writer":{
+					"parameter":{
+						"postSql":[],
+						"password":"7993@5b8D",
+						"database":"m1",
+						"loadProps":{
+							"format":"json",
+							"strip_outer_array":true
+						},
+						"column":[
+								"周期",
+							"周期名称",
+    					
+   							"排序",
+  							"统计月",
+   							"治疗收入"
+						],
+						"jdbcUrl":"jdbc:mysql://10.239.91.107:9030/",
+						"loadUrl":[
+							"10.239.91.107:8030"
+						],
+						"table":"blood_treatment_income_report",
+						"username":"root",
+						"preSql":[]
+					},
+					"name":"starrockswriter"
+				}
+			}
+		],
+		"setting":{
+			"speed":{
+				"channel":1
+			}
+		}
+	}
+}

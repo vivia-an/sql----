@@ -1,0 +1,93 @@
+SELECT 
+    COALESCE(m."医生姓名", s."医生姓名") AS "医生姓名",
+    COALESCE(m."病例库", s."病例库") AS "病例库",
+    COALESCE(m."病人类别", s."病人类别") AS "病人类别",
+    COALESCE(m."主报告数量", 0) AS "初步报告数量",
+    COALESCE(s."补充报告数量", 0) AS "补充报告数量"
+FROM (
+    -- 主报告统计
+    -- 来源：hid0101_mssql_bl_rep.t_jcxx 检查信息表
+    -- 字段：f_brlb 病人类别（门诊/住院/体检/急诊/转院）
+    SELECT 
+        f_shys AS "医生姓名",
+        f_blk AS "病例库",
+        f_brlb AS "病人类别",
+        COUNT(*) AS "主报告数量"
+    FROM hid0101_mssql_bl_rep.t_jcxx
+    WHERE 
+        f_bgzt = '已审核'
+        AND f_bgrq >= 'tj_报告日期-开始 00:00:00' 
+        AND f_bgrq <= 'tj_报告日期-结束 23:59:59'
+        AND isdeleted = '0'
+    GROUP BY f_shys, f_blk, f_brlb
+) m
+FULL OUTER JOIN (
+    -- 补充报告统计（需要关联主表获取病例库和病人类别）
+    -- 来源：hid0101_mssql_bl_rep.t_bcbg 补充报告表
+    --       hid0101_mssql_bl_rep.t_jcxx 检查信息表
+    SELECT 
+        bc.f_bc_shys AS "医生姓名",
+        jc.f_blk AS "病例库",
+        jc.f_brlb AS "病人类别",
+        COUNT(*) AS "补充报告数量"
+    FROM hid0101_mssql_bl_rep.t_bcbg bc
+    INNER JOIN hid0101_mssql_bl_rep.t_jcxx jc ON bc.f_blh = jc.f_blh
+    WHERE 
+        bc.f_bc_bgrq >= 'tj_报告日期-开始 00:00:00' 
+        AND bc.f_bc_bgrq <= 'tj_报告日期-结束 23:59:59'
+        AND bc.f_bc_bgzt = '已审核'
+        AND bc.isdeleted = '0'
+        AND jc.isdeleted = '0'
+    GROUP BY bc.f_bc_shys, jc.f_blk, jc.f_brlb
+) s ON m."医生姓名" = s."医生姓名" 
+   AND m."病例库" = s."病例库"
+   AND m."病人类别" = s."病人类别"
+ORDER BY 
+    "医生姓名", "病例库", "病人类别"
+
+
+
+
+
+SELECT 
+    COALESCE(m."医生姓名", s."医生姓名") AS "医生姓名",
+    COALESCE(m."病例库", s."病例库") AS "病例库",
+    COALESCE(m."病人类别", s."病人类别") AS "病人类别",
+    COALESCE(m."主报告数量", 0) AS "初步报告数量",
+    COALESCE(s."补充报告数量", 0) AS "补充报告数量"
+FROM (
+    SELECT 
+        f_shys AS "医生姓名",
+        f_blk AS "病例库",
+        f_brlb AS "病人类别",
+        COUNT(*) AS "主报告数量"
+    FROM hid0101_mssql_bl_rep.t_jcxx
+    WHERE 
+        f_bgzt = '已审核'
+        AND f_bgrq >= '2025-11-01 00:00:00' 
+        AND f_bgrq <= '2025-11-07 23:59:59'
+        AND isdeleted = '0'
+    GROUP BY f_shys, f_blk, f_brlb
+) m
+FULL OUTER JOIN (
+    SELECT 
+        bc.f_bc_shys AS "医生姓名",
+        jc.f_blk AS "病例库",
+        jc.f_brlb AS "病人类别",
+        COUNT(*) AS "补充报告数量"
+    FROM hid0101_mssql_bl_rep.t_bcbg bc
+    INNER JOIN hid0101_mssql_bl_rep.t_jcxx jc ON bc.f_blh = jc.f_blh
+    WHERE 
+        bc.f_bc_bgrq >= '2025-11-01 00:00:00' 
+        AND bc.f_bc_bgrq <= '2025-11-07 23:59:59'
+        AND bc.f_bc_bgzt = '已审核'
+        AND bc.isdeleted = '0'
+        AND jc.isdeleted = '0'
+    GROUP BY bc.f_bc_shys, jc.f_blk, jc.f_brlb
+) s ON m."医生姓名" = s."医生姓名" 
+   AND m."病例库" = s."病例库"
+   AND m."病人类别" = s."病人类别"
+ORDER BY 
+    "医生姓名", "病例库", "病人类别"
+
+

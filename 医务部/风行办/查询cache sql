@@ -1,0 +1,58 @@
+
+
+SELECT 
+    YEAR(ES_OperateDate) || '-' || 
+    CASE WHEN MONTH(ES_OperateDate) < 10 
+         THEN '0' || CAST(MONTH(ES_OperateDate) AS VARCHAR) 
+         ELSE CAST(MONTH(ES_OperateDate) AS VARCHAR) 
+    END AS 月份,
+    B.OEORI_RecDep_DR->CTLOC_Desc AS 科室,
+    COUNT(DISTINCT A.ID) AS 实验医学科报告发行量
+FROM Ens_StatusLog AS A
+LEFT JOIN OE_OrdItem AS B
+    ON A.ES_OrdItemID = B.OEORI_ROWID
+WHERE A.ES_SystemCode = 'LIS'
+    AND A.ES_StatusCode = 'CRP'
+    AND ES_OperateDate >= '2025-05-01' 
+    AND ES_OperateDate < '2025-12-01'
+    AND B.OEORI_RecDep_DR->CTLOC_CODE IN ('3035','3030','3032','7012','3031','3029','3033','7926','3036')
+GROUP BY 
+    YEAR(ES_OperateDate),
+    MONTH(ES_OperateDate),
+    B.OEORI_RecDep_DR->CTLOC_Desc
+ORDER BY 
+    YEAR(ES_OperateDate),
+    MONTH(ES_OperateDate),
+    科室
+
+
+
+转 presto lis 系统报告发行量
+
+SELECT
+    loc.ctloc_desc AS "科室描述",
+    SUBSTRING(A.es_operatedate, 1, 7) AS "月份",
+    COUNT(DISTINCT A.id) AS "报告发行量"
+FROM 
+    hid0101_cache_his_dhcapp_sqluser.ens_statuslog A
+LEFT JOIN 
+    hid0101_cache_his_dhcapp_sqluser.oe_orditem B 
+    ON A.es_orditemid = B.oeori_rowid
+LEFT JOIN 
+    hid0101_cache_his_dhcapp_sqluser.ct_loc loc 
+    ON B.oeori_recdep_dr = loc.ctloc_rowid
+WHERE 
+    A.es_systemcode = 'LIS'
+    AND A.es_operatedate >= '2025-05-01'
+    AND A.es_operatedate < '2025-12-01'
+    AND loc.ctloc_code IN ('3035','3030','3032','7012','3031','3029','3033','7926','3036')
+    AND A.isdeleted = '0'
+    AND B.isdeleted = '0'
+    AND loc.isdeleted = '0'
+    AND A.es_statuscode = 'RP'
+GROUP BY 
+    loc.ctloc_desc,
+    SUBSTRING(A.es_operatedate, 1, 7)
+ORDER BY 
+    loc.ctloc_desc,
+    "月份"
