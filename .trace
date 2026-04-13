@@ -7,6 +7,32 @@
 
 ## 时间线
 
+### 2026-04-13 | MDR 在院查询 Presto 参数占位符修复
+- **问题**：`?[_LAST_YEAR_MONTH_]` → `Incorrect number of parameters: expected 1 but found 0`
+- **新增文件**：`mdr/mdr在院_护理单元日快照_上月_Presto.sql`
+- **血缘**：`params.target_month`（`date_trunc`+`date_add`）↔ `m1.mdr_beinhosp.repdate`
+
+### 2026-04-10 | 择期入手术间至出PACU 默认版 Presto SQL
+- **需求**：2022-01-01～2025-12-20；申请科室=麻醉手术中心；择期；入室～出PACU；输出病案号/登记号/性别/年龄/入出院/科室/离院方式/诊断与手术名称编码/手术日期
+- **新增文件**：`手麻/择期入手术间至出PACU_默认版_Presto.sql`
+- **血缘**：`p_sched` → `sam_apply`+`sam_anar`(时间窗+完成态) → `rop_agg`/`aop_agg`(手术名码) → `ipi_registration`+`hra00_department`(req/入院/出院) → `gb_t_2261_1_2003`
+
+#### 2026-04-10 | 择期入手术间至出PACU 默认版 v2（查无数据放宽）
+- **问题**：全空结果
+- **修改**：`手麻/择期入手术间至出PACU_默认版_Presto.sql` — 择期改为「非急诊」(`NOT = '1'`)，拒收允许 NULL，`oper_type` 用 upper(trim)，日期用 `substr(…,10)` 区间，申请科室 `LIKE '%麻醉手术中心%'`，文件末附诊断 SQL
+
+#### 2026-04-10 | 择期入手术间至出PACU 默认版 v3（择期与手麻报表明细三值逻辑对齐）
+- **问题**：报表 `CASE WHEN is_emergency='1' THEN 急诊 ELSE 择期` 下大量「择期」行 is_emergency 为 NULL；`NOT col='1'` 在 WHERE 中对 NULL 为 UNKNOWN 误杀
+- **修改**：`手麻/择期入手术间至出PACU_默认版_Presto.sql` — `coalesce(reg,a).is_emergency IS DISTINCT FROM '1'`；SELECT 增加 `"手术类别"` 与报表明细一致
+
+#### 2026-04-10 | 择期入手术间至出PACU 默认版 v4（去掉单位/科室与业务码筛选，宽口径带出）
+- **需求**：去掉单位筛选、尽量全带出；仍查无数据
+- **修改**：`手麻/择期入手术间至出PACU_默认版_Presto.sql` — 去掉对申请科室 LIKE、oper_type、s_sssyzt、is_reject；输出申请科室/医疗机构ID/类型码/状态码/拒收/进手术间/出PACU；文末附宽口径 B 与日期格式抽样诊断
+
+#### 2026-04-10 | 择期入手术间至出PACU 默认版 v5（SELECT 与需求 12 字段对齐）
+- **需求**：输出仅 病案号、登记号、性别、年龄、入院/出院日期、入/出院科室、离院方式、诊断名称及编码、手术名称及编码、手术日期
+- **修改**：`手麻/择期入手术间至出PACU_默认版_Presto.sql` — 去掉探查列与 req JOIN；注释区说明字段映射与 ICD 占位
+
 ### 2026-04-09 | 输血线上改.txt DataX 锚定调度日统计上月
 - **需求**：与 `更改区域/输血线上` 一致：`ds`（`$[yyyy-MM-dd]`）+ 全表 `current_date` → `(SELECT biz_date FROM ds)`，上月区间逻辑不变
 - **修改文件**：`更改区域/输血线上改.txt`
