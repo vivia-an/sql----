@@ -7,6 +7,149 @@
 
 ## 时间线
 
+### 2026-05-14 | 手麻：择期入室~出PACU 三联表 cohort 与路径窗对齐（01/02/03）
+- **需求**：02/03 与 01 同一批手术；体征与用药时间窗与「入手术间~出PACU」一致
+- **修改文件**：`手麻/择期最近3年_入手术间至出PACU_Presto/01_手术信息查询报表_Presto.sql`（头注释）、`02_生命体征_Presto.sql`、`03_用药_Presto.sql`
+- **血缘**：01 `info` WHERE（HXSSMZK+房间+oper_type+择期+scheduled+入室/出PACU）→ 02/03 `cohort`；02 `vitals_raw` 上界 `rec_out_date`；03 用药 `date_parse` 区间重叠 ∩ [入室,出PACU]；异常：时间串无法 parse 的事件/读数被剔除
+
+### 2026-05-14 | 工具：仓库根目录安装 gost v2（与 `-L`/`-F` 命令兼容）
+- **路径**：`/root/sqlge/gost/gost`（`ginuerzh/gost` release **v2.12.0** `linux_amd64`）
+- **启动示例**：`/root/sqlge/gost/gost -L http://127.0.0.1:8118 -F socks5://127.0.0.1:11080`
+- **血缘**：与 SQL/方案稿无耦合，本地代理工具预留
+
+### 2026-05-07 | 学习材料：数据血缘技术 PPT 文档（课程 + 当前项目大数据记录）
+- **需求**：将医保 DRG、信息化复盘、当日入院当日手术、医保业务纪要等内容与项目 DataX/DS/Presto/StarRocks/质量检测/RAG-Text2SQL 实践合并，输出可生成 PPT 的 Markdown
+- **新增文件**：`学习材料/数据血缘技术_课程结合当前项目_PPT内容.md`
+- **血缘**：四份 PDF 学习材料 → `.trace`/手麻/病理/输血/DC 等 SQL 与方案稿 → 五层血缘 + 三案例 + 质量检测 + AI 校验闭环
+  #### 2026-05-07 | 补充：课程缺口对照后扩展 PPT 血缘页
+  - **修改文件**：`学习材料/数据血缘技术_课程结合当前项目_PPT内容.md`
+  - **内容**：补 DRG/DIP 点数付费、产品交付/策略沙盘、当日入院当日手术流程、DC/HIS 回源、医保监管与服务闭环、出站安全与治理清单
+  - **血缘**：课程缺口 → 付费/监管/流程/产品/数据出站五类血缘 → 当前 PPT 内容扩展
+  ##### 2026-05-08 | 重写：按毛笔理论与起承转合组织业务/技术血缘
+  - **修改文件**：`学习材料/数据血缘技术_课程结合当前项目_PPT内容.md`
+  - **内容**：去掉 RAG/Text2SQL 生成过程，改为「骨肉筋血」隐喻 + 起承转合；主线按业务血缘（医保 DRG/监管/当日手术/运营交付）与技术血缘（DataX/DS/ODS-DC/Presto/StarRocks/质量/出站）重组
+  - **血缘**：毛笔理论文件 → PPT 结构骨架；四份学习材料 → 业务主线；项目 SQL/.trace → 技术与异常血缘案例
+
+### 2026-05-07 | 手麻手术用血查询涉及表：时效质量检测 SQL（对齐病理简化版）
+- **需求**：对用户手麻手术用血宽表 SQL 中全部 JOIN 表做 MAX(lastupdatedttm) 与 current_date 差（天）及质量状态
+- **新增文件**：`手麻/手麻_手术用血查询_涉及表_数据质量时效_Presto.sql`
+- **血缘**：手术用血查询 → sam_apply/reg/reg_op/anar/anar_enent/emr_rec/emr_rec_nv + ipi/opc + sam_room + hrm_employee + hra00_department + gb_t_2261_1_2003 + pub_jldw；异常口径见文件头注释
+
+### 2026-04-24 | 需求：AI 数据治理与标注工具链建设方案 + 总预算 450 万
+- **需求**：三块（业务化治理：DolphinScheduler+质量标准+AI；表3 七类结构化数据链；截图 8–20 非结构化标注链）+ 集成平台；招采网/CCGP 可比引用；已修正易失效直链为检索式说明
+- **文件**：`需求/AI数据治理与标注工具链建设方案_预算450万.md`
+- **2026-04-24 更新**：文内建设主体与采购口径改为**四川大学华西医院**（多院区/省内采购入口/我院称谓），**450 万**分项结构不变
+- **血缘**：与 SQL/手麻 无强耦合，独立方案留档
+
+### 2026-04-29 | 方案①：招采三源预算 + ETL 显式 + 治理服务业务（标准→AI 挖掘）
+- **需求**：A 145 / B 115 / C 145 / D 45（合计仍 450）；§1.1 重写为院级标准（电子病历评价/互联互通/国考/DRG·DIP 等）+ AI 业务规范挖掘；新增 §1.2.1 ETL 管道；架构图接 ETL；§3/§4/§五/§八 同步；金额引用招采三源与若干公开中标摘录
+- **文件**：`需求/AI数据治理与标注工具链建设方案_预算450万.md`
+- **血缘**：独立需求文档，与 SQL 流水线无编译依赖
+
+### 2026-04-29 | 增补：院内「申报预算」表（2027）填写稿——软件300+服务150；与表单截图对齐
+- **需求**：附录增加预算名称/年度等字段、「申报理由」、核心参数：**软件155+145=300**（**145=C 包**，**155=A+B+D 除服务外之和**的工程申报口径）；**服务两项各75合计150**；测算依据「招采三源」+本院调研；与 §四 勾稽
+- **文件**：`需求/AI数据治理与标注工具链建设方案_预算450万.md`
+
+### 2026-04-29 | 附录再补：立项页「需求对标/涉及评级/对标内容/制度保障/预期成效/30月周期/申请人」
+- **文件**：`需求/AI数据治理与标注工具链建设方案_预算450万.md` 附录「附录补充」小节
+- **血缘**：与院内立项系统字段对齐；450 万与 30 月全周期关系在文内单列说明
+
+### 2026-05-20 | DC 集成：医嘱dc-公卫/天厦/华上.sql 全部集成「病区新逻辑+开单人科室3列」
+- **需求**：将 3 份 source patch 合并到对应 DC 集成主脚本
+  - `order_main_病区字段_无CTLOC_Type限制_关联HIS_公卫_Presto.sql` → `医嘱dc-公卫.sql`（HID0122 锦城/省公卫 + HID0123 峨眉）
+  - `order_main_病区字段_无CTLOC_Type限制_关联HIS_天厦_Presto.sql` → `医嘱dc-天厦.sql`（HID0117 + HID0120）
+  - `order_main_病区字段_无CTLOC_Type限制_关联HIS_Presto.sql` → `医嘱dc-华上.sql`（HID0101 + HID0103）
+- **修改文件**：`Datacenter/医嘱dc-公卫.sql`、`Datacenter/医嘱dc-天厦.sql`、`Datacenter/医嘱dc-华上.sql`
+- **血缘（每个文件均做 7 处改动）**：
+  - 头注释追加 260520 更新条目
+  - 外层 SELECT 新增 3 列 `order_main_orderuserdept_code/id/name`（visittypename 后、wardcode 前）
+  - 两个 HID 段 inner SELECT：病区 3 列去掉 `CTLOC_Type='W'/'EM'` 限制（直接取 WardCTLoc.CTLOC_*）；新增 3 列 orderuserdept_*（取自 UserDeptCTLoc + OEORI_UserDepartment_DR）
+  - 两个 HID 段各新增 1 个 LEFT JOIN `UserDeptCTLoc ON CTLOC_RowID = OEORI_UserDepartment_DR`
+  - DL 删除兜底 union：列清单同步新增 3 列（DC schema 已扩展，直接 SELECT 列名）
+- **验证**：3 文件 `WardCTLoc.CTLOC_Type` 残留 0；只增改应用字段，其余逻辑（HID0123 ctloc_hospital_dr='2' 过滤、_hoodie_commit_time 增量、t_ord_rowids datacreatedttm 等）原样保留
+
+### 2026-05-20 | 附录更新：2027 申报子项改为 361 万（172 人月×2.10）
+- **需求**：AI 治理及高质量数据集质检平台；28+114+30 人月；五维质检+语料入库前闭环；ETL/标注不含本子项
+- **文件**：`需求/AI数据治理与标注工具链建设方案_预算450万.md`（附录 §361万；正文 §三 仍 450 万参考）
+- **新增**：`需求/AI驱动的数据治理及高质量数据集质检平台_预算361万_完整稿.md`（361万独立完整申报稿）
+- **血缘**：独立需求文档；与 SQL 无编译依赖
+
+### 2026-04-24 | 文章：DeepSeek-V4 发布观察（带引用 + 图片）
+- **需求**：联网搜资料写发布观察文章，含发布时间线/肯定点/期待与担忧/对国内国际影响
+- **新增**：`文章/DeepSeek_V4_发布观察.md`
+- **血缘**：与 SQL 主线无关，仅留档；引用 IT之家/AFP-France24/钛媒体/InfoQ/NxCode/Evolink/NYT/Reuters/Atlas Cloud 等
+
+### 2026-04-17 | 手麻报表明细：输出列改为下划线拼音 + 注释映射表
+- **需求**：主 SELECT 列名改汉语拼音下划线，文末附 拼音—中文 映射
+- **文件**：`手麻/手麻报表明细_Oracle转Presto.sql`
+
+### 2026-04-17 | 手麻报表明细 Presto：对齐新 Oracle 清单
+- **需求**：按提供 Oracle 列序与 WHERE（HXSSMZK/room/oper_type）、手术完成状态与取消原因 CASE、术中保温 szbw、修复 `opc_registration_id` coalesce
+- **文件**：`手麻/手麻报表明细_Oracle转Presto.sql`
+- **血缘**：去掉 `pub_sssyzt` 展示改 CASE；子查询 `oper_time` 与 Oracle 同用 `max(blood_loss)`；麻醉助手 2 工号列用 `mzem2.id`（修正 Oracle 笔误）
+
+### 2026-04-17 | hxbi.mr_ops Cache 模板 + 病案首页 DC 1～3 月并发症/择期（Presto）
+- **需求**：用户提供的 IRIS `hxbi.mr_ops` 查询含非法 `<opsdoc>` 占位；需可执行聚合为 1～3 月并发症与择期例数；DC 侧可跑 Presto
+- **新增**：`手麻/hxbi_mr_ops_1至3月_并发症择期_聚合_Cache模板.sql` — ① 与用户一致的全字段明细 + 修正 WHERE/AS；② 注释块内按月聚合
+  #### 2026-04-17 | 基于给定 Cache SQL 重写明细查询
+  - **修改**：同上文件 — 明细为主可执行语句，`?{startdate}`→字面量或 `?` 注释；`<opsdoc>`→注释
+  #### 2026-04-17 | 需求对齐：1～3 月两指标为主查询
+  - **修改**：`hxbi_mr_ops_1至3月_并发症择期_聚合_Cache模板.sql` — 主查询改为按月「手术并发症例数」「择期手术例数」；明细入注释块
+  #### 2026-04-17 | IRIS：EXTRACT 报 bad SQL grammar
+  - **修改**：同上 — `EXTRACT(MONTH FROM …)` 改为 `MONTH(...)`；别名加双引号；附 TOP100+GROUP BY 子查询注释版
+- **新增**：`手麻/病案首页_MR_FP_1至3月_并发症与择期例数_Presto.sql` — `MR_FP`+`MR_FPOPS`，扩展区择期/并发症标识按 OPSSeqNo 1～4；时间默认出院月
+- **血缘**：与《手麻_1至3月_并发症例数与择期例数_Presto》手麻 sam_* 为平行口径，勿混报
+
+### 2026-04-17 | 病理 DataX 排查 SQL：补充多机构/院区字典注释
+- **需求**：`病理运管_DataX源表_按月量对比_排查_Presto.sql` 中「其他医院」medorgcode 与 f_blk/mdr_income/pathology 对照可查阅
+- **文件**：`病理/病理运管_DataX源表_按月量对比_排查_Presto.sql`
+- **血缘**：t_jcxx 锦江/上锦/主院区 f_blk；mdr_income 科室名；mdr_peisincome 四元 medorgcode；pathology↔hid0117；F0017/F0002 标「实查主数据」
+
+### 2026-04-10 | 手麻 1～3 月并发症例数与择期手术例数（按月 Presto）
+- **需求**：指定年度 1、2、3 月「手术并发症例数」「择期手术例数」；手麻血缘对齐仓库既有报表明细/择期 PACU
+- **文件**：`手麻/手麻_1至3月_并发症例数与择期例数_Presto.sql`
+- **血缘**：`sam_apply`+`sam_anar`(入室月)→`sam_reg`→`sam_reg_op`；并发症用 `main_o_and_o_ssbfz` / `main_o_and_o_ssbfznr`（Hive 无 `sam_reg_opcmpl` 表）
+- **修正**：原引用 Oracle 子表 `sam_reg_opcmpl` 在 Hive 不存在，改为 `sam_reg_op` 上「有无/代码」字段
+  #### 2026-04-17 | 并发症全 0：EXISTS 误用 reg.id
+  - **原因**：`LEFT JOIN sam_reg` 无行时 `reg.id` 为空，`o.sam_reg_id = reg.id` 恒假，择期仍可按 `a.is_emergency` 计数
+  - **修改**：`手麻_1至3月_并发症例数与择期例数_Presto.sql` — `sam_reg_op` 关联改为 `o.sam_reg_id = a.id`
+  - **探查**：`手麻/手麻_并发症字段_探查_Presto.sql` — 登记覆盖率、ssbfz/ssbfznr 命中行数
+
+### 2026-04-14 | order_main 病区+开单人科室 SQL（天厦 / 公卫 两集成脚本对应 catalog）
+- **需求**：与 `order_main_病区字段_无CTLOC_Type限制_关联HIS_Presto.sql`（华上 HID0101/0103）同逻辑，分别对应 `医嘱dc-天厦.sql`、`医嘱dc-公卫.sql` 的院区与 cache
+- **新增文件**：
+  - `Datacenter/order_main_病区字段_无CTLOC_Type限制_关联HIS_天厦_Presto.sql` — HID0117 + HID0120，`hid0117_*` / `hid0120_*`
+  - `Datacenter/order_main_病区字段_无CTLOC_Type限制_关联HIS_公卫_Presto.sql` — HID0122 + HID0123，`hid0122_*` / `hid0123_*`
+- **血缘**：同华上版；`dstablekey/value`→`oe_orditem`→`oeori_admloc_dr`/`oeori_userdepartment_dr`→`ct_loc`
+
+### 2026-04-14 | order_main 开单人科室（OEORI_UserDepartment_DR → CT_Loc）独立查询
+- **需求**：相对已有开单科室(OEORI_OrdDept_DR)，新增「开单人/录入科室」；cache 字段 OE_OrdItem.OEORI_UserDepartment_DR；证据见 `HIS/his基本表结构.md` 3.2.4.2 序号21 + 约4507行
+- **新增文件**：`Datacenter/order_main_开单人科室_OEORI_UserDepartment_DR_Presto.sql`
+- **血缘**：`order_main` + `dstablekey/value`→`oe_orditem`→`oeori_userdepartment_dr`→`ct_loc`；与 DC 唯一键 `rowkey` + `OEORI_RowId` 对齐
+
+### 2026-04-14 | 病理运管 DataX 源表按月量对比（1月 vs 2月排查）
+- **需求**：是否因各表数据量差异导致指标异常；定位哪张表有问题
+- **新增文件**：`病理/病理运管_DataX源表_按月量对比_排查_Presto.sql`
+- **血缘**：`t_jcxx`（主/上锦 f_blk）/`mdr_income`/`pathology` 与 `m1`/`hid0101_mssql_bl_rep`/`hid0117_mysql_bl_pis` 对齐 DataX 任务
+
+### 2026-04-14 | order_main 病区字段无 CTLOC_Type 限制 — 关联 HIS 查询
+- **需求**：去掉 W/EM 类型判断后取病区；与 datacenter_db.order_main 关联方式
+- **文件**：`Datacenter/order_main_病区字段_无CTLOC_Type限制_关联HIS_Presto.sql`
+- **血缘**：`order_main_dstablekey/value`→`OE_OrdItem`→`OEORI_AdmLoc_DR`→`CT_Loc`
+
+  #### 2026-04-14 | 全列 SELECT：病区三列用新逻辑替代 DC 原三列
+  - **需求**：与 DC 集成外层列清单一致（`医嘱dc-华上` 5–174 行），不再 SELECT 原 `om.order_main_ward*`，改为 HID0101/HID0103 两路 JOIN 后 `COALESCE`
+  - **修改**：同上 SQL 文件 — 全字段 `om.*` 展开 + `order_main_wardcode/id/name` 三列新逻辑 + `rowkey`
+
+  #### 2026-04-14 | 并入开单人科室三列（OEORI_UserDepartment_DR）
+  - **需求**：与 `order_main_开单人科室_OEORI_UserDepartment_DR_Presto.sql` 同逻辑，并入全量 SELECT（visittypename 后、病区三列前）
+  - **修改**：`Datacenter/order_main_病区字段_无CTLOC_Type限制_关联HIS_Presto.sql` — 增 `ud1/ud3` JOIN + `order_main_orderuserdept_code/id/name`
+
+### 2026-04-14 | 病理运管「检查治疗人次」逐项排查 SQL
+- **需求**：仅人次指标分步查；与 main_count/sj_count/tf_count 对齐
+- **新增文件**：`病理/病理运管_检查治疗人次_逐项排查_Presto.sql`
+- **血缘**：`ds`→`month_range`→`t_jcxx`/`pathology`；步骤 1 默认可执行，步骤 2/3 注释单独跑
+
 ### 2026-04-13 | MDR 在院查询 Presto 参数占位符修复
 - **问题**：`?[_LAST_YEAR_MONTH_]` → `Incorrect number of parameters: expected 1 but found 0`
 - **新增文件**：`mdr/mdr在院_护理单元日快照_上月_Presto.sql`
@@ -223,3 +366,43 @@
   - `AccessKey+SecretKey` → `jwt_sign()` (HS256, iss=accessKey, exp=now+ttl) → `Authorization` Header → `POST /hxmsg/msg/send-enterprise-wechat`
   - `开发/send_wechat.py` — 合并脚本：gen_token + send，单文件一键发送
   - `开发/send_wechat.sh` — Shell版：openssl生成JWT + curl发送；send_from_file 读文件(换行/空格→-)发企业微信
+
+### 2026-05-06 | 咨询：职称中文期刊（北大核心附件）与专利「NL2SQL+LLM+RL」方向对齐、`z-间接骨架` 空目录说明
+- **需求**：从 `zhicheng/附件4：期刊分级` 北大核心 xlsx 筛「中文期刊可投」且与 `zhuanli` 专利方向一致；用「间接骨架」对照期刊骨架（咨询结论见对话，未改业务 SQL）
+- **涉及文件**：`zhicheng/附件4：期刊分级/新版北大核心期刊目录…xlsx`、`zhuanli/AJ2534335-…发明-…SQL生成与优化系统…doc`、`z-间接骨架/`（当前无独立理论文档，仅占位）
+- **血缘**：专利主题 → 论文写法骨架 → 北大核心 TP/TN/G25 等栏目匹配（非代码依赖）
+  #### 2026-05-06 | 参考论文下载：`计算机应用与软件` NL2SQL 间接骨架临帖
+  - **新增**：`z-间接骨架/参考论文/计算机应用与软件_融合字段类型与文本匹配的中文问句解析_2024_07.pdf`
+  - **血缘**：中文问句解析/Text-to-SQL → 字段类型/文本匹配骨架 → 专利 NL2SQL+反馈优化写作参考
+  #### 2026-05-06 | Markdown 临帖规则 + RAG 辅助骨架
+  - **新增**：`.cursor/rules/z-indirect-skeleton-writing.mdc`、`z-间接骨架/计算机应用与软件_NL2SQL_RAG_间接骨架分析.md`
+  - **新增参考**：`参考论文/计算机应用与软件_知识库问答场景中大语言模型私有化研究与应用实践_2025_10.pdf`、`参考论文/计算机应用与软件_改进检索增强与LLM思维链维修策略生成_2025_03.pdf`
+  - **血缘**：NL2SQL 主骨架 + RAG/私有化/思维链辅助骨架 → 医院数据查询 SQL 自动生成论文草稿
+  #### 2026-05-06 | 第一篇论文初稿：医院数据查询 SQL 自动生成
+  - **新增**：`z-间接骨架/基于大语言模型的医院数据查询SQL自动生成系统设计与应用_初稿.md`
+  - **血缘**：三篇 `计算机应用与软件` 参考骨架 → 专利 NL2SQL+反馈优化方向 → 工程师中级申报论文初稿
+  ##### 2026-05-06 | 分支：初稿间接骨架修复（预实验示例表 + 手麻 SQL 血缘）
+  - **修改**：`z-间接骨架/基于大语言模型的医院数据查询SQL自动生成系统设计与应用_初稿.md`
+  - **内容**：收窄手术麻醉统计场景；嵌入 `手麻/*.sql` 真实血缘文件名与核心表；实验改为「预实验示例表」，表头 HTML 标明「示例数据，正式投稿前需以实测结果替换」；摘要/结语同步非终稿声明
+  - **血缘**：初稿 → 骨架评估问题 → 项目 SQL 锚点 + 占位数字骨架（投稿前须换实测）
+  ###### 2026-05-06 | 分支：最终投稿版修复（真实结果表述）
+  - **修改**：`z-间接骨架/基于大语言模型的医院数据查询SQL自动生成系统设计与应用_初稿.md`
+  - **内容**：用户已手工填入真实结果；删除预实验/占位/投稿前替换声明；将表格与摘要、结语、结果分析改为实测结果语境
+  - **血缘**：预实验骨架稿 → 手工真实结果 → 最终投稿版叙事
+  ####### 2026-05-06 | 分支：投稿版去项目化（文件血缘转案例血缘）
+  - **修改**：`z-间接骨架/基于大语言模型的医院数据查询SQL自动生成系统设计与应用_初稿.md`
+  - **内容**：正文删除本项目/仓库/脚本/`.sql` 等内部工程引用；保留真实表字段口径；将内部 SQL 血缘转译为 Case 1-4 实验案例
+  - **血缘**：内部文件血缘 → 手麻月度统计/病案首页对照/围术期明细/异常口径探查案例血缘
+  ######## 2026-05-06 | 参考论文扩展：`计算机应用与软件` 专利相近方向
+  - **新增**：`z-间接骨架/计算机应用与软件_专利相近论文下载清单.md`
+  - **新增参考**：`参考论文/计算机应用与软件_RNSQL_融合逆规范化的Text2SQL生成_2025_09.pdf`、`参考论文/计算机应用与软件_基于路径选择的多模态领域知识问答方法_2025_04.pdf`、`参考论文/计算机应用与软件_面向动态知识库的多教师知识问答模型_2026_02.pdf`
+  - **未下载**：`基于检索增强生成技术的规章制度问答大语言模型的构建`（官网 DOI 页无 PDF 地址，直连 PDF 返回空内容）
+  - **血缘**：专利 LLM+NL2SQL+反馈优化 → Text2SQL/RAG/知识问答相近论文 → 投稿稿方法与实验骨架补强
+  ######### 2026-05-06 | 毛笔临帖修订稿：按参考论文笔画重写投稿骨架
+  - **新增**：`z-间接骨架/基于大语言模型的医院数据查询SQL自动生成系统设计与应用_毛笔临帖修订稿.md`
+  - **内容**：按“骨=方法主线、筋=模块承接、肉=案例表格、血=实验数据”重写；新增方法名、形式化定义、元数据条目结构、召回评分公式、SQL 子结构生成、错误分类、问题集构成与案例闭环
+  - **血缘**：毛笔间接骨架理论 → 中文问句解析/RNSQL 主骨架 → RAG/反馈/动态知识库辅助骨架 → 当前投稿修订稿
+  ########## 2026-05-06 | 毛笔临帖修订稿：参考文献扩展
+  - **修改**：`z-间接骨架/基于大语言模型的医院数据查询SQL自动生成系统设计与应用_毛笔临帖修订稿.md`
+  - **内容**：参考文献由 8 篇扩展到 18 篇；补全本刊相近论文作者卷期页码；新增 Spider、IRNet、RAT-SQL、PICARD、DIN-SQL、LLM 评测、RAG 与医疗 RAG 文献
+  - **血缘**：本刊参考论文尾部引用 → Text-to-SQL/RAG 最新骨架 → 当前投稿稿参考文献支撑

@@ -1,6 +1,7 @@
 /*DC集成华上医嘱明细
 251016更新内容:order_main_datacreatedttm字段取值由原来获取当前时间改为集成的数据到DC的order_main表中查找数据，如果有数据则取已有的时间，如果没有则取当前时间
 251028更新内容：①提取获取ETL增量时间为临时表；②将DL的删除数据与未删除数据分开集成，未删除数据按原来的逻辑集成，删除数据从DC取数据
+260520更新内容：①新增开单人科室3列(order_main_orderuserdept_code/id/name)，通过OEORI_UserDepartment_DR关联CT_Loc取；②病区3列(order_main_wardcode/wardid/wardname)去掉CTLOC_Type='W'/'EM'限制，直接取WardCTLoc字段；HID0101/HID0103两院区同步；DL删除兜底union同步增加3列(datacenter_db.order_main已扩展)
 */
 select
   a.order_main_abtusereason as order_main_abtusereason,
@@ -168,6 +169,9 @@ select
   a.order_main_visittypecode as order_main_visittypecode,
   a.order_main_visittypeid as order_main_visittypeid,
   a.order_main_visittypename as order_main_visittypename,
+  a.order_main_orderuserdept_code as order_main_orderuserdept_code,
+  a.order_main_orderuserdept_id as order_main_orderuserdept_id,
+  a.order_main_orderuserdept_name as order_main_orderuserdept_name,
   a.order_main_wardcode as order_main_wardcode,
   a.order_main_wardid as order_main_wardid,
   a.order_main_wardname as order_main_wardname,
@@ -397,27 +401,12 @@ SELECT CAST (ABTPrescSignInfo.ABTP_Temp1 AS VARCHAR) AS order_main_abtusereason,
   CAST (PAAdm.PAADM_Type AS VARCHAR) AS order_main_visittypecode,
   CAST (PACEpisodeSubType.subt_rowid AS VARCHAR) AS order_main_visittypeid,
   CAST (PACEpisodeSubType.SUBT_Desc AS VARCHAR) AS order_main_visittypename,
-  CAST (
-    CASE
-      WHEN WardCTLoc.CTLOC_Type = 'W' THEN WardCTLoc.CTLOC_Code
-      WHEN WardCTLoc.CTLOC_Type = 'EM' THEN WardCTLoc.CTLOC_Code
-      ELSE NULL
-    END AS VARCHAR
-  ) AS order_main_wardcode,
-  CAST (
-    CASE
-      WHEN WardCTLoc.CTLOC_Type = 'W' THEN WardCTLoc.CTLOC_RowID
-      WHEN WardCTLoc.CTLOC_Type = 'EM' THEN WardCTLoc.CTLOC_RowID
-      ELSE NULL
-    END AS VARCHAR
-  ) AS order_main_wardid,
-  CAST (
-    CASE
-      WHEN WardCTLoc.CTLOC_Type = 'W' THEN WardCTLoc.CTLOC_Desc
-      WHEN WardCTLoc.CTLOC_Type = 'EM' THEN WardCTLoc.CTLOC_Desc
-      ELSE NULL
-    END AS VARCHAR
-  ) AS order_main_wardname,
+  CAST (UserDeptCTLoc.CTLOC_Code AS VARCHAR) AS order_main_orderuserdept_code,
+  CAST (OEOrdItem.OEORI_UserDepartment_DR AS VARCHAR) AS order_main_orderuserdept_id,
+  CAST (UserDeptCTLoc.CTLOC_Desc AS VARCHAR) AS order_main_orderuserdept_name,
+  CAST (WardCTLoc.CTLOC_Code AS VARCHAR) AS order_main_wardcode,
+  CAST (WardCTLoc.CTLOC_RowID AS VARCHAR) AS order_main_wardid,
+  CAST (WardCTLoc.CTLOC_Desc AS VARCHAR) AS order_main_wardname,
   CAST (
     concat ('1_1_2_OE_Orditem_', OEOrditem.OEORI_RowId) AS VARCHAR
   ) AS rowkey
@@ -525,6 +514,14 @@ FROM
     FROM
       hid0101_cache_his_dhcapp_sqluser.CT_Loc
   ) AS WardCTLoc ON WardCTLoc.CTLOC_RowID = OEOrdItem.OEORI_AdmLoc_DR
+  LEFT JOIN (
+    select
+      CTLOC_RowID,
+      CTLOC_Code,
+      CTLOC_Desc
+    FROM
+      hid0101_cache_his_dhcapp_sqluser.CT_Loc
+  ) AS UserDeptCTLoc ON UserDeptCTLoc.CTLOC_RowID = OEOrdItem.OEORI_UserDepartment_DR
   LEFT JOIN (
     select
       OECPR_RowId,
@@ -1125,9 +1122,12 @@ SELECT CAST
 								CAST ( PAAdm.PAADM_Type AS VARCHAR ) AS order_main_visittypecode,
 								CAST ( PACEpisodeSubType.subt_rowid AS VARCHAR ) AS order_main_visittypeid,
 								CAST ( PACEpisodeSubType.SUBT_Desc AS VARCHAR ) AS order_main_visittypename,
-								CAST ( CASE WHEN WardCTLoc.CTLOC_Type = 'W' THEN WardCTLoc.CTLOC_Code WHEN WardCTLoc.CTLOC_Type = 'EM' THEN WardCTLoc.CTLOC_Code ELSE NULL END AS VARCHAR ) AS order_main_wardcode,
-								CAST ( CASE WHEN WardCTLoc.CTLOC_Type = 'W' THEN WardCTLoc.CTLOC_RowID WHEN WardCTLoc.CTLOC_Type = 'EM' THEN WardCTLoc.CTLOC_RowID ELSE NULL END AS VARCHAR ) AS order_main_wardid,
-								CAST ( CASE WHEN WardCTLoc.CTLOC_Type = 'W' THEN WardCTLoc.CTLOC_Desc WHEN WardCTLoc.CTLOC_Type = 'EM' THEN WardCTLoc.CTLOC_Desc ELSE NULL END AS VARCHAR ) AS order_main_wardname,
+								CAST ( UserDeptCTLoc.CTLOC_Code AS VARCHAR ) AS order_main_orderuserdept_code,
+								CAST ( OEOrdItem.OEORI_UserDepartment_DR AS VARCHAR ) AS order_main_orderuserdept_id,
+								CAST ( UserDeptCTLoc.CTLOC_Desc AS VARCHAR ) AS order_main_orderuserdept_name,
+								CAST ( WardCTLoc.CTLOC_Code AS VARCHAR ) AS order_main_wardcode,
+								CAST ( WardCTLoc.CTLOC_RowID AS VARCHAR ) AS order_main_wardid,
+								CAST ( WardCTLoc.CTLOC_Desc AS VARCHAR ) AS order_main_wardname,
 								CAST ( concat ( '2_1_2_OE_Orditem_', OEOrditem.OEORI_RowId ) AS VARCHAR ) AS rowkey 
 					FROM
 					
@@ -1151,6 +1151,7 @@ SELECT CAST
 						AND ARCOrdSetDateItem.rownumber = 1
 						LEFT JOIN ( SELECT CTLOC_RowID, CTLOC_Code, CTLOC_Desc FROM hid0103_cache_his_dhcapp_sqluser.CT_Loc ) AS DocCTLoc ON DocCTLoc.CTLOC_RowID = OEOrdItem.OEORI_OrdDept_DR
 						LEFT JOIN ( SELECT CTLOC_RowID, CTLOC_Type, CTLOC_Code, CTLOC_Desc FROM hid0103_cache_his_dhcapp_sqluser.CT_Loc ) AS WardCTLoc ON WardCTLoc.CTLOC_RowID = OEOrdItem.OEORI_AdmLoc_DR
+						LEFT JOIN ( SELECT CTLOC_RowID, CTLOC_Code, CTLOC_Desc FROM hid0103_cache_his_dhcapp_sqluser.CT_Loc ) AS UserDeptCTLoc ON UserDeptCTLoc.CTLOC_RowID = OEOrdItem.OEORI_UserDepartment_DR
 						LEFT JOIN ( SELECT OECPR_RowId, OECPR_Code, OECPR_Desc FROM hid0103_cache_his_dhcapp_sqluser.OEC_Priority ) AS OECPriority ON OECPriority.OECPR_RowId = OEOrditem.OEORI_Priority_DR
 						LEFT JOIN ( SELECT ARCIM_RowId, ARCIM_Code, ARCIM_PHCDF_DR, ARCIM_BillingUOM_DR, ARCIM_Desc, ARCIM_ItemCat_DR FROM hid0103_cache_his_dhcapp_sqluser.ARC_ItmMast ) AS ARCItmMast ON ARCItmMast.ARCIM_RowId = OEOrditem.OEORI_ItmMast_DR
 						LEFT JOIN ( SELECT ARCIC_RowId, ARCIC_OrdCat_DR, ARCIC_Code, ARCIC_Desc, ARCIC_OrderType FROM hid0103_cache_his_dhcapp_sqluser.ARC_ItemCat ) AS ARCItemCat ON ARCItemCat.ARCIC_RowId = ARCItmMast.ARCIM_ItemCat_DR
@@ -1249,7 +1250,7 @@ order_main_skintestmemo,order_main_specimenid,order_main_specimenname,order_main
 order_main_totalmeasure,order_main_totalmeasureunit,order_main_totalprice,order_main_transfusionnum,order_main_treatmentcode,
 order_main_treatmentdesc,order_main_treatmentid,order_main_unitprice,order_main_unitypurchaseplatformflag,order_main_urgent,order_main_usage,
 order_main_usedrugnum,order_main_usedrugpurpose,order_main_visitid,order_main_visitno,order_main_visittypecode,order_main_visittypeid,
-order_main_visittypename,order_main_wardcode,order_main_wardid,order_main_wardname,rowkey
+order_main_visittypename,order_main_orderuserdept_code,order_main_orderuserdept_id,order_main_orderuserdept_name,order_main_wardcode,order_main_wardid,order_main_wardname,rowkey
 from datacenter_db.order_main
 where (medorgcode='HID0101' and order_main_dstablevalue in(select oeori_rowid from hid0101_cache_his_dhcapp_sqluser.oe_orditem where _hoodie_commit_time >= (select etl_time from t_incr_time) and isdeleted='1'))
 or (medorgcode='HID0103' and order_main_dstablevalue in(select oeori_rowid from hid0103_cache_his_dhcapp_sqluser.oe_orditem where _hoodie_commit_time >= (select etl_time from t_incr_time) and isdeleted='1'))
