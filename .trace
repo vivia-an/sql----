@@ -7,6 +7,11 @@
 
 ## 时间线
 
+### 2026-05-21 | StarRocks 物化视图 v2 + 公卫 HID0122
+- **需求**：MV 名 `_v2`；库 `indicators`；刷新 180s；5 院区 + HID0122
+- **文件**：`starrocks/starrocks物化视图.sql`
+- **血缘**：`Datacenter/医嘱dc-公卫.sql`（HID0122）
+
 ### 2026-05-14 | 手麻：择期入室~出PACU 三联表 cohort 与路径窗对齐（01/02/03）
 - **需求**：02/03 与 01 同一批手术；体征与用药时间窗与「入手术间~出PACU」一致
 - **修改文件**：`手麻/择期最近3年_入手术间至出PACU_Presto/01_手术信息查询报表_Presto.sql`（头注释）、`02_生命体征_Presto.sql`、`03_用药_Presto.sql`
@@ -67,6 +72,11 @@
   - 两个 HID 段各新增 1 个 LEFT JOIN `UserDeptCTLoc ON CTLOC_RowID = OEORI_UserDepartment_DR`
   - DL 删除兜底 union：列清单同步新增 3 列（DC schema 已扩展，直接 SELECT 列名）
 - **验证**：3 文件 `WardCTLoc.CTLOC_Type` 残留 0；只增改应用字段，其余逻辑（HID0123 ctloc_hospital_dr='2' 过滤、_hoodie_commit_time 增量、t_ord_rowids datacreatedttm 等）原样保留
+
+### 2026-05-21 | StarRocks 物化视图 v2 + 公卫 HID0122
+- **需求**：MV 名改 _v2；5 院区 UNION（+hid0122_cache_his_dhcapp_sqluser）；fsjcl 仅本部 RIS
+- **文件**：`starrocks/starrocks物化视图.sql`
+- **血缘**：pa_adm/ct_loc/pac_ward/收入/挂号/医技工作量；公卫见 `Datacenter/医嘱dc-公卫.sql`
 
 ### 2026-05-20 | 附录更新：2027 申报子项改为 361 万（172 人月×2.10）
 - **需求**：AI 治理及高质量数据集质检平台；28+114+30 人月；五维质检+语料入库前闭环；ETL/标注不含本子项
