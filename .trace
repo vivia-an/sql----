@@ -73,11 +73,6 @@
   - DL 删除兜底 union：列清单同步新增 3 列（DC schema 已扩展，直接 SELECT 列名）
 - **验证**：3 文件 `WardCTLoc.CTLOC_Type` 残留 0；只增改应用字段，其余逻辑（HID0123 ctloc_hospital_dr='2' 过滤、_hoodie_commit_time 增量、t_ord_rowids datacreatedttm 等）原样保留
 
-### 2026-05-21 | StarRocks 物化视图 v2 + 公卫 HID0122
-- **需求**：MV 名改 _v2；5 院区 UNION（+hid0122_cache_his_dhcapp_sqluser）；fsjcl 仅本部 RIS
-- **文件**：`starrocks/starrocks物化视图.sql`
-- **血缘**：pa_adm/ct_loc/pac_ward/收入/挂号/医技工作量；公卫见 `Datacenter/医嘱dc-公卫.sql`
-
 ### 2026-05-20 | 附录更新：2027 申报子项改为 361 万（172 人月×2.10）
 - **需求**：AI 治理及高质量数据集质检平台；28+114+30 人月；五维质检+语料入库前闭环；ETL/标注不含本子项
 - **文件**：`需求/AI数据治理与标注工具链建设方案_预算450万.md`（附录 §361万；正文 §三 仍 450 万参考）
