@@ -189,3 +189,72 @@ GROUP BY `hid0120_cache_his_dhcapp_sqluser`.`b`.`ctloc_desc`, `hid0120_cache_his
 FROM `hid0122_cache_his_dhcapp_sqluser`.`dhcqueue` AS `a` LEFT OUTER JOIN `hid0122_cache_his_dhcapp_sqluser`.`ct_loc` AS `b` ON `hid0122_cache_his_dhcapp_sqluser`.`a`.`quedepdr` = `hid0122_cache_his_dhcapp_sqluser`.`b`.`ctloc_rowid` LEFT OUTER JOIN `hid0122_cache_his_dhcapp_sqluser`.`pa_adm` AS `adm` ON `hid0122_cache_his_dhcapp_sqluser`.`adm`.`paadm_rowid` = `hid0122_cache_his_dhcapp_sqluser`.`a`.`quepaadmdr`
 WHERE (((((CAST(`hid0122_cache_his_dhcapp_sqluser`.`a`.`quedate` AS VARCHAR)) = (substring(CAST((current_timestamp()) AS VARCHAR), 1, 10))) AND (`hid0122_cache_his_dhcapp_sqluser`.`a`.`questatedr` IN ('1', '2', '3', '4', '6', '7'))) AND (`hid0122_cache_his_dhcapp_sqluser`.`a`.`queno` != '')) AND (NOT (`hid0122_cache_his_dhcapp_sqluser`.`a`.`queno` LIKE '%慢%'))) AND ((CAST(`hid0122_cache_his_dhcapp_sqluser`.`adm`.`paadm_admdate` AS VARCHAR)) = (substring(CAST((current_timestamp()) AS VARCHAR), 1, 10)))
 GROUP BY `hid0122_cache_his_dhcapp_sqluser`.`b`.`ctloc_desc`, `hid0122_cache_his_dhcapp_sqluser`.`b`.`ctloc_code`, `hid0122_cache_his_dhcapp_sqluser`.`a`.`questatedr`, `hid0122_cache_his_dhcapp_sqluser`.`adm`.`paadm_type`;
+
+-- =============================================================================
+-- indicators 库：物化视图清单与查询（运维/巡检）
+-- 本批 v2 共 8 个：currentcyxz_v2, currentryxz_v2, currentzyxz_v2, currtime_income_v2,
+--   fsjcl_v2, jfyjgzl_v2, kdyjgzl_v2, mzssxz_indicators_v2
+-- =============================================================================
+
+USE indicators;
+
+-- 1）列出 indicators 库下全部异步物化视图（名称、刷新状态、行数等）
+SHOW MATERIALIZED VIEWS FROM indicators;
+
+-- 2）仅查本批 _v2 物化视图
+SHOW MATERIALIZED VIEWS FROM indicators
+WHERE NAME LIKE '%_v2';
+
+-- 3）information_schema 明细（含最近刷新时间、状态、错误信息）
+SELECT
+    TABLE_SCHEMA,
+    TABLE_NAME,
+    REFRESH_TYPE,
+    IS_ACTIVE,
+    LAST_REFRESH_STATE,
+    LAST_REFRESH_START_TIME,
+    LAST_REFRESH_FINISHED_TIME,
+    LAST_REFRESH_ERROR_MESSAGE,
+    ROWS
+FROM information_schema.materialized_views
+WHERE TABLE_SCHEMA = 'indicators'
+ORDER BY TABLE_NAME;
+
+-- 4）按院区抽样（含 HID0122 公卫）
+SELECT 'currentcyxz_v2' AS mv, hosp_code, count(*) AS cnt FROM indicators.currentcyxz_v2 GROUP BY hosp_code
+UNION ALL
+SELECT 'currentryxz_v2', hosp_code, count(*) FROM indicators.currentryxz_v2 GROUP BY hosp_code
+UNION ALL
+SELECT 'currentzyxz_v2', hosp_code, count(*) FROM indicators.currentzyxz_v2 GROUP BY hosp_code
+UNION ALL
+SELECT 'currtime_income_v2', hosp_code, count(*) FROM indicators.currtime_income_v2 GROUP BY hosp_code
+UNION ALL
+SELECT 'mzssxz_indicators_v2', hosp_code, count(*) FROM indicators.mzssxz_indicators_v2 GROUP BY hosp_code;
+
+-- 5）单表预览（按需执行）
+-- SELECT * FROM indicators.currentcyxz_v2 LIMIT 20;
+-- SELECT * FROM indicators.currentryxz_v2 LIMIT 20;
+-- SELECT * FROM indicators.currentzyxz_v2 LIMIT 20;
+-- SELECT * FROM indicators.currtime_income_v2 LIMIT 20;
+-- SELECT * FROM indicators.fsjcl_v2 LIMIT 20;
+-- SELECT * FROM indicators.jfyjgzl_v2 LIMIT 20;
+-- SELECT * FROM indicators.kdyjgzl_v2 LIMIT 20;
+-- SELECT * FROM indicators.mzssxz_indicators_v2 LIMIT 20;
+
+-- 6）手动触发刷新（异常排查时用，按需取消注释）
+-- REFRESH MATERIALIZED VIEW indicators.currentcyxz_v2;
+-- REFRESH MATERIALIZED VIEW indicators.currentryxz_v2;
+-- REFRESH MATERIALIZED VIEW indicators.currentzyxz_v2;
+-- REFRESH MATERIALIZED VIEW indicators.currtime_income_v2;
+-- REFRESH MATERIALIZED VIEW indicators.fsjcl_v2;
+-- REFRESH MATERIALIZED VIEW indicators.jfyjgzl_v2;
+-- REFRESH MATERIALIZED VIEW indicators.kdyjgzl_v2;
+-- REFRESH MATERIALIZED VIEW indicators.mzssxz_indicators_v2;
+
+
+
+currentcyxz_v2
+currentryxz_v2
+currentzyxz_v2
+currtime_income_v2
+mzssxz_indicators_v2

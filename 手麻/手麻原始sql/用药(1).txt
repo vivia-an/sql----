@@ -1,0 +1,51 @@
+select t.id,
+       t.event_text, --药品名称
+       t.single_dose, --用药单位
+       t.density, --浓度
+       nvl2(t.density, t.density * 10, 1) density_value,
+       nvl(pj3.s_jldw_cmc, pj2.s_jldw_cmc) single_dose_unit_txt,
+       to_char(t.ordered_date, 'yyyy-mm-dd') date_ymd,
+       to_char(t.ordered_date, 'yyyy-mm-dd hh24:mi:ss') ordered_date, --开始时间
+       to_char(t.end_date, 'yyyy-mm-dd hh24:mi:ss') end_date, --结束时间
+       round((t.end_date - t.ordered_date) * 24 * 60, 2) between_date, --持续时间
+       t.duration, --是否持续用药   
+       (case t.duration
+         when 1 then
+          '持续用药'
+         else
+          '单次用药'
+       end) duration_drug,
+       dnd.is_weight_relate, --是否和体重有关（1是）
+       dnd.is_speed_relate, --是否和速度有关（1是）
+       dnd.udu_du_scale, --最后转换比
+       pj1.s_jldw_cmc zlunit, --最后单位
+       dd.drug_chemistry_name, --化学名称
+	   a.height,
+       f_j_getage(a.in_oproom_date,ipi.birthday) age,
+	   (select x.s_xb_cmc from gb_t_2261_1_2003 x where x.s_xb_dm=p.s_xb_dm) gender,
+       a.weight, --体重
+       ipi.ipi_registration_no,
+       ipi.patient_name
+  from sam_anar_enent t
+  left join drm_nuu_ds dnd
+    on t.single_dose_unit = dnd.id
+  left join drm_dictionary dd
+    on dd.id = t.drug_id
+  left join pub_jldw pj1
+    on pj1.s_jldw_dm = dd.single_dose_unit
+  left join pub_jldw pj2
+    on pj2.s_jldw_dm = t.single_dose_unit
+  left join pub_jldw pj3
+    on pj3.s_jldw_dm = dnd.udu
+  left join sam_anar a
+    on a.id = t.sam_anar_id
+  left join sam_apply app
+	on app.id = a.sam_apply_id
+  left join sam_reg p
+    on a.sam_apply_id = p.sam_apply_id
+  left join ipi_registration ipi
+    on ipi.id = p.ipi_registration_id
+ where t.is_rec_enent = '2'
+   and t.s_mzsjlb_dm = '22'
+   and to_char(app.scheduled_date, 'yyyy-MM-dd') between '${start}' and '${end}'
+   and ipi.ipi_registration_no = '${ipi}'

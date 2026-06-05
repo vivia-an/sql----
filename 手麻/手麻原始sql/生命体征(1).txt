@@ -1,0 +1,216 @@
+--传入参数
+select max(allTime.min_time) min_time, max(allTime.max_time) max_time--,LISTAGG('''' || allTime.sbid || '''', ',') WITHIN GROUP(ORDER BY allTime.min_time) id
+  from sam_apply sly
+  left join sam_anar sar
+    on sar.sam_apply_id = sly.id
+  left join sam_reg srg
+    on srg.id = sly.id
+  left join sam_device sd
+    on sd.sam_room_id = srg.sam_room_id
+   and sd.is_valid = '1'
+  left join (select sly.id,
+                    srg.ipi_registration_id,
+                    srg.patient_dept_id,
+                    to_char(sar.in_oproom_date,'yyyy-mm-dd hh24:mi:ss') min_time,
+                    to_char(sar.out_oproom_date,'yyyy-mm-dd hh24:mi:ss') max_time,
+                    savs.sam_anar_vs_dev_id sbid
+               from sam_apply sly
+               left join sam_reg srg
+                 on sly.id = srg.id
+               left join sam_anar sar
+                 on sar.sam_apply_id = sly.id
+                 left join sam_anar_vs savs on savs.sam_anar_id=sar.id
+               left join sam_anar_enent sae
+                 on sae.sam_anar_id = sar.id
+                and sae.op_use_state = '90'
+               left join sam_emr_rec ser
+                 on ser.sam_apply_id = sly.id
+                and ser.rss_emr_type_id in ('sam_ist_pipe', 'sam_hz')
+               left join sam_emr_rec_nv nv
+                 on nv.sam_emr_rec_id = ser.id
+                and nv.node_name = 'ORDERED_DATE'
+              where sly.id = '${id}'
+               group by sly.id,
+                    srg.ipi_registration_id,
+                    srg.patient_dept_id,
+                    sar.in_oproom_date,
+                    sar.out_oproom_date,
+                    savs.sam_anar_vs_dev_id) allTime
+    on allTime.id = sly.id
+ where allTime.id is not null and allTime.sbid is not null
+ group by sly.id
+-----获取ID
+select sly.id,
+       '病人 "'||sly.patient_name ||' "入室时间 "' || to_char(sar.in_oproom_date, 'yyyy-mm-dd') || '"  手术名称"' ||
+       nvl(listagg(sro.operation_name, '+') within group(ORDER BY sly.id),
+           sao.operation_name) || '"' detail
+  from sam_apply sly
+  left join sam_reg srg
+    on srg.id = sly.id
+  left join sam_anar sar
+    on sar.sam_apply_id = sly.id
+  left join sam_reg_op sro
+    on sro.sam_reg_id = sly.id
+  left join sam_apply_op sao
+    on sao.sam_apply_id = sly.id
+  left join ipi_registration ir
+    on ir.id = nvl(srg.ipi_registration_id,sly.ipi_registration_id)
+ where ir.ipi_registration_no = '${ipi}'
+   and (sly.is_reject in ('2', '4') or sly.reject_reason is null)
+   and sar.out_oproom_date is not null
+   and sly.s_sssyzt_dm = '90'
+ group by sly.id, sar.in_oproom_date, sao.operation_name,sly.patient_name
+--获取表名
+select nvl(ut1.TABLE_NAME, 'SAM_ANAR_VS_DEV') table1,
+        case
+         when to_char(sly.scheduled_date, 'yyyy') = '2023' then
+          'SAM_ANAR_VS_DEV_ALL'
+         else
+          (case
+            when ut2.TABLE_NAME is null then
+             (case
+               when ut1.TABLE_NAME is null then
+                'SAM_ANAR_VS_DEV'
+               else
+                ut1.TABLE_NAME
+             end)
+            else
+             ut2.TABLE_NAME
+          end)
+       end table2
+  from sam_apply sly
+  left join (select sly.id,
+                    to_char(sar.in_oproom_date, 'yyyy-mm-dd') min_time,
+                    to_char(sar.out_oproom_date, 'yyyy-mm-dd') max_time,
+                    'SAM_ANAR_VS_DEV_' ||
+                    to_char(sar.in_oproom_date + 1, 'yyyymmdd') tName1,
+                    'SAM_ANAR_VS_DEV_' ||
+                    to_char(sar.OUT_oproom_date + 1, 'yyyymmdd') tName2
+               from sam_apply sly
+               left join sam_anar sar
+                 on sar.sam_apply_id = sly.id
+              where sly.id = '${id}') t1
+    on t1.id = sly.id
+  left join user_tables ut1
+    on ut1.TABLE_NAME = t1.tName1
+  left join user_tables ut2
+    on ut2.TABLE_NAME = t1.tName2
+ where sly.id = '${id}'
+------基本信息
+select ir.ipi_registration_no,t.name_, hd.department_chinese_name dept, t.bed
+  from (select nvl(srg.ipi_registration_id, sly.ipi_registration_id) ipi,
+               nvl(srg.patient_name, sly.patient_name) name_,
+               nvl(srg.patient_dept_id, sly.patient_dept_id) deptid,
+               nvl(srg.bed_no, sly.bed_no) bed
+          from sam_apply sly
+          left join sam_reg srg
+            on srg.id = sly.id
+         where sly.id = '${id}') t
+  left join hra00_department hd
+    on hd.department_code = t.deptid
+  left join ipi_registration ir
+    on ir.id = t.ipi
+------监护仪数据
+select t.* from (
+select t.id , to_char(t.time_point,'yyyy-mm-dd hh24:mi:ss') time1,t.vspd_name,t.vspd_value
+  from (select dev1.id,dev1.time_point,dev1.sam_anar_vspd_id,dev1.vspd_name,dev1.vspd_value
+          from  ${t1} dev1
+            where dev1.sam_device_id in (select allTime.sbid id
+  from sam_apply sly
+  left join sam_anar sar
+    on sar.sam_apply_id = sly.id
+  left join sam_reg srg
+    on srg.id = sly.id
+  left join sam_device sd
+    on sd.sam_room_id = srg.sam_room_id
+   and sd.is_valid = '1'
+  left join (select sly.id,
+                    srg.ipi_registration_id,
+                    srg.patient_dept_id,
+                    to_char(sar.in_oproom_date,'yyyy-mm-dd hh24:mi:ss') min_time,
+                    to_char(sar.out_oproom_date,'yyyy-mm-dd hh24:mi:ss') max_time,
+                    savs.sam_anar_vs_dev_id sbid
+               from sam_apply sly
+               left join sam_reg srg
+                 on sly.id = srg.id
+               left join sam_anar sar
+                 on sar.sam_apply_id = sly.id
+                 left join sam_anar_vs savs on savs.sam_anar_id=sar.id
+               left join sam_anar_enent sae
+                 on sae.sam_anar_id = sar.id
+                and sae.op_use_state = '90'
+               left join sam_emr_rec ser
+                 on ser.sam_apply_id = sly.id
+                and ser.rss_emr_type_id in ('sam_ist_pipe', 'sam_hz')
+               left join sam_emr_rec_nv nv
+                 on nv.sam_emr_rec_id = ser.id
+                and nv.node_name = 'ORDERED_DATE'
+              where sly.id = '${id}'
+               group by sly.id,
+                    srg.ipi_registration_id,
+                    srg.patient_dept_id,
+                    sar.in_oproom_date,
+                    sar.out_oproom_date,
+                    savs.sam_anar_vs_dev_id) allTime
+    on allTime.id = sly.id
+ where allTime.id is not null and allTime.sbid is not null
+ group by allTime.sbid
+            ) and dev1.time_point between  to_date('${crmin}','yyyy-mm-dd hh24:mi:ss') and to_date('${crmax}','yyyy-mm-dd hh24:mi:ss')
+
+         union all 
+         select dev2.id,dev2.time_point,dev2.sam_anar_vspd_id,dev2.vspd_name,dev2.vspd_value
+          from  ${t2} dev2
+            where dev2.sam_device_id in (
+            select allTime.sbid  id
+  from sam_apply sly
+  left join sam_anar sar
+    on sar.sam_apply_id = sly.id
+  left join sam_reg srg
+    on srg.id = sly.id
+  left join sam_device sd
+    on sd.sam_room_id = srg.sam_room_id
+   and sd.is_valid = '1'
+  left join (select sly.id,
+                    srg.ipi_registration_id,
+                    srg.patient_dept_id,
+                    to_char(sar.in_oproom_date,'yyyy-mm-dd hh24:mi:ss') min_time,
+                    to_char(sar.out_oproom_date,'yyyy-mm-dd hh24:mi:ss') max_time,
+                    savs.sam_anar_vs_dev_id sbid
+               from sam_apply sly
+               left join sam_reg srg
+                 on sly.id = srg.id
+               left join sam_anar sar
+                 on sar.sam_apply_id = sly.id
+                 left join sam_anar_vs savs on savs.sam_anar_id=sar.id
+               left join sam_anar_enent sae
+                 on sae.sam_anar_id = sar.id
+                and sae.op_use_state = '90'
+               left join sam_emr_rec ser
+                 on ser.sam_apply_id = sly.id
+                and ser.rss_emr_type_id in ('sam_ist_pipe', 'sam_hz')
+               left join sam_emr_rec_nv nv
+                 on nv.sam_emr_rec_id = ser.id
+                and nv.node_name = 'ORDERED_DATE'
+              where sly.id = '${id}'
+               group by sly.id,
+                    srg.ipi_registration_id,
+                    srg.patient_dept_id,
+                    sar.in_oproom_date,
+                    sar.out_oproom_date,
+                    savs.sam_anar_vs_dev_id) allTime
+    on allTime.id = sly.id
+ where allTime.id is not null and allTime.sbid is not null
+ group by allTime.sbid
+            ) and dev2.time_point between to_date('${crmin}','yyyy-mm-dd hh24:mi:ss') and to_date('${crmax}','yyyy-mm-dd hh24:mi:ss')
+
+         
+         
+         )t
+         where t.vspd_name is not null
+          ${if(isnull(type),"","and t.sam_anar_vspd_id ='"+type+"'")}
+            --数据范围
+          ${if(isnull(max),""," and t.vspd_value <='"+max+"'")}
+          ${if(isnull(min),""," and t.vspd_value >='"+min+"'")}
+order by t.time_point ,t.sam_anar_vspd_id
+)t
+order by t.time1

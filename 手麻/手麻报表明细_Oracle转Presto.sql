@@ -1,12 +1,11 @@
--- Oracle 手麻明细 SQL → Presto 适配版
+-- Oracle 手麻明细 SQL → Presto 适配版（与提供的 Oracle 清单对齐）
 -- 血缘：SAM_APPLY / SAM_REG / SAM_REG_OP / SAM_APPLY_OP / SAM_ANAR / HRM_EMPLOYEE / HRA00_DEPARTMENT / SAM_ROOM
---       SAM_EMR_REC+SAM_EMR_REC_NV(麻醉方式) / SAM_ANAR_ENENT(术后运转、出血量) / PUB_JLDW / GB_T_2261_1_2003 / PUB_SSSYZT
+--       SAM_EMR_REC+SAM_EMR_REC_NV(麻醉方式) / SAM_ANAR_ENENT(术后运转、出血量、术中保温) / PUB_JLDW / GB_T_2261_1_2003
 --       IPI_REGISTRATION / OPC_REGISTRATION
---       PRO_SEND_ORDER + SYS_USER（非手麻库，catalog/schema 需按环境替换）
--- 说明：平台字段多为 varchar；日期比较与 date_parse 按实际格式可微调；原 Oracle 结束日为 2024-12-30 00:00:00 易漏数，此处改为 12 月整月可改回变量区
--- 原 Oracle 子查询中 oper_time 与 blood_loss 均取 blood_loss，本版「手术预计时长」改为 max(a.op_time)（若需与 Oracle 完全一致可改回 blood_loss）
--- 可按需追加：a.health_service_org_id / a.oper_type='ROOM_OPER' / a.is_reject / a.s_sssyzt_dm 等业务过滤（见 AI大模型SQL生成指南 / 手麻SQL字段血缘）
--- 派运/用户库：请将 CATALOG_TRANSPORT、CATALOG_CDXT 替换为实际 Presto catalog（若与手麻同库可改为 hid0101_orcl_operaanesthisa_emrhis）
+--       PRO_SEND_ORDER + SYS_USER（非手麻库，catalog 见下）
+-- 说明：子查询中 Oracle 为 max(blood_loss) AS oper_time，本版按源 SQL 亦映射「手术预计时长」至该别名；若需业务含义上的「预计时长」可改为 max(a.op_time)
+-- 派运/用户库：hid0101_orcl_operaanesthisa_cdxtboot.SYS_USER（与 Oracle 侧 cdxtboot.sys_user 对应，可按环境改为 cdxt_boot）
+-- 输出列名：下划线汉语拼音，见文尾「列名 拼音—中文 映射表」
 
 WITH p_sched AS (
     SELECT
@@ -14,53 +13,55 @@ WITH p_sched AS (
         '2024-12-31 23:59:59' AS dt_end
 )
 SELECT
-    ieg.ipno AS "病案号",
-    coalesce(ieg.ipi_registration_no, opc.opc_registration_no) AS "登记号",
-    info.patient_name AS "姓名",
-    xb.s_xb_cmc AS "性别",
-    info.birthday AS "出生日期",
-    ar.height AS "身高",
-    ar.weight AS "体重",
-    (CASE WHEN info.is_emergency = '1' THEN '急诊' ELSE '择期' END) AS "手术类别",
-    mzfs.mzfs_cmc AS "麻醉方式",
-    info.asadm AS "ASA分级",
-    CAST('' AS VARCHAR) AS "急诊手术分级",
+    ieg.ipno AS bing_an_hao,
+    coalesce(ieg.ipi_registration_no, opc.opc_registration_no) AS deng_ji_hao,
+    info.patient_name AS xing_ming,
+    xb.s_xb_cmc AS xing_bie,
+    info.birthday AS chu_sheng_ri_qi,
+    ar.height AS shen_gao,
+    ar.weight AS ti_zhong,
+    (CASE WHEN info.is_emergency = '1' THEN '急诊' ELSE '择期' END) AS shou_shu_lei_bie,
+    (CASE WHEN info.is_daytime = '1' THEN '是' ELSE '否' END) AS shi_fou_ri_jian_shou_shu,
+    mzfs.mzfs_cmc AS ma_zui_fang_shi,
+    info.asadm AS asa_fen_ji,
+    cast('' AS varchar) AS ji_zhen_shou_shu_fen_ji,
     rank() OVER (
         PARTITION BY info.room_id, info.scheduled_date
         ORDER BY info.in_oproom_date, info.oper_beging_date
-    ) AS "台次",
-    CAST('' AS VARCHAR) AS "首台",
-    CAST('' AS VARCHAR) AS "末台",
-    CAST('' AS VARCHAR) AS "周末",
-    dpt.department_chinese_name AS "患者所在科室",
-    info.in_oproom_date AS "手术日期",
-    rm.oper_room AS "手术间",
-    concat(rm.building, rm.floor) AS "手术间位置",
-    info.main_diag AS "术前诊断",
-    info.oper_name AS "手术名称",
-    hzqx.tw_place AS "术后运转地点",
-    info.qkdj AS "切口等级",
-    mzem.employee_name AS "麻醉医生",
-    mzem.id AS "麻醉医生工号",
-    mzem1.employee_name AS "麻醉助手1",
-    mzem1.id AS "麻醉助手1工号",
-    mzem2.employee_name AS "麻醉助手2",
-    mzem2.id AS "麻醉助手2工号",
-    xhdoc1.employee_name AS "巡回护士1",
-    xhdoc1.id AS "巡回护士1工号",
-    xhdoc2.employee_name AS "巡回护士2",
-    xhdoc2.id AS "巡回护士2工号",
-    xsdoc1.employee_name AS "洗手护士1",
-    xsdoc1.id AS "洗手护士1工号",
-    xsdoc2.employee_name AS "洗手护士2",
-    xsdoc2.id AS "洗手护士2工号",
-    ssem.employee_name AS "手术医生",
-    ssem.id AS "手术医生工号",
-    ssem1.employee_name AS "手术助手1",
-    ssem1.id AS "手术助手1工号",
-    ssem2.employee_name AS "手术助手2",
-    ssem2.id AS "手术助手2工号",
-    docdept.department_chinese_name AS "医生科室",
+    ) AS tai_ci,
+    cast('' AS varchar) AS shou_tai,
+    cast('' AS varchar) AS mo_tai,
+    cast('' AS varchar) AS zhou_mo,
+    dpt.department_chinese_name AS huan_zhe_suo_zai_ke_shi,
+    docdept.department_chinese_name AS shou_shu_yi_sheng_ke_shi,
+    info.schedate AS shou_shu_an_pai_ri_qi,
+    rm.oper_room AS shou_shu_jian,
+    concat(rm.building, rm.floor) AS shou_shu_jian_wei_zhi,
+    info.main_diag AS shu_qian_zhen_duan,
+    info.oper_name AS shou_shu_ming_cheng,
+    hzqx.tw_place AS shu_hou_yun_zhuan_di_dian,
+    info.qkdj AS qie_kou_deng_ji,
+    mzem.employee_name AS ma_zui_yi_sheng,
+    mzem.id AS ma_zui_yi_sheng_gong_hao,
+    mzem1.employee_name AS ma_zui_zhu_shou_1,
+    mzem1.id AS ma_zui_zhu_shou_1_gong_hao,
+    mzem2.employee_name AS ma_zui_zhu_shou_2,
+    mzem2.id AS ma_zui_zhu_shou_2_gong_hao,
+    xhdoc1.employee_name AS xun_hui_hu_shi_1,
+    xhdoc1.id AS xun_hui_hu_shi_1_gong_hao,
+    xhdoc2.employee_name AS xun_hui_hu_shi_2,
+    xhdoc2.id AS xun_hui_hu_shi_2_gong_hao,
+    xsdoc1.employee_name AS xi_shou_hu_shi_1,
+    xsdoc1.id AS xi_shou_hu_shi_1_gong_hao,
+    xsdoc2.employee_name AS xi_shou_hu_shi_2,
+    xsdoc2.id AS xi_shou_hu_shi_2_gong_hao,
+    ssem.employee_name AS shou_shu_yi_sheng,
+    ssem.id AS shou_shu_yi_sheng_gong_hao,
+    ssem1.employee_name AS shou_shu_zhu_shou_1,
+    ssem1.id AS shou_shu_zhu_shou_1_gong_hao,
+    ssem2.employee_name AS shou_shu_zhu_shou_2,
+    ssem2.id AS shou_shu_zhu_shou_2_gong_hao,
+    docdept.department_chinese_name AS yi_sheng_ke_shi,
     CASE
         WHEN try(date_parse(nullif(trim(info.oper_beging_date), ''), '%Y-%m-%d %H:%i:%s')) IS NOT NULL
         THEN round(
@@ -72,64 +73,73 @@ SELECT
                         try(date_parse(nullif(trim(info.oper_end_date), ''), '%Y-%m-%d %H:%i:%s')),
                         current_timestamp
                     )
-                ) AS DOUBLE
+                ) AS double
             ) / 3600.0,
             2
         )
-    END AS "手术时长",
-    cbu_jie.realname AS "接单人（接）",
-    pso_jie.send_order_time AS "派单时间（接）",
-    pso_jie.order_receiving_time AS "接单时间（接）",
-    pso_jie.start_place_arrive_time AS "到达出发地时间（接）",
-    pso_jie.send_order_arrive_time AS "接到患者时间（接）",
-    CAST('' AS VARCHAR) AS "到达手术室时间（接）",
-    pso_jie.burglary_time AS "到达手术间时间（接）",
-    pso_jie.send_order_finish_time AS "完成订单时间（接）",
-    info.oper_beging_date AS "手术开始",
-    info.oper_end_date AS "手术结束",
-    info.ana_beging_date AS "麻醉开始",
-    info.ana_end_date AS "麻醉结束",
-    info.in_oproom_date AS "进手术间",
-    info.out_oproom_date AS "出手术间",
-    CAST('' AS VARCHAR) AS "建立人工气道",
-    CAST('' AS VARCHAR) AS "拆除人工气道",
-    info.oper_time AS "手术预计时长",
-    info.blood_loss AS "预估出血量",
-    xueinfo.clsingledose AS "实际出血量",
-    info.rec_in_date AS "到达PACU时间",
-    info.rec_out_date AS "出PACU时间",
-    cbu_song.realname AS "接单人（送）",
-    pso_song.send_order_time AS "派单时间（送）",
-    pso_song.order_receiving_time AS "接单时间（送）",
-    pso_song.start_place_arrive_time AS "到达出发地时间（送）",
-    pso_song.send_order_arrive_time AS "接到患者时间（送）",
-    pso_song.burglary_time AS "到达目的地时间（送）",
-    pso_song.send_order_finish_time AS "完成订单时间（送）",
-    CAST('' AS VARCHAR) AS "小恢复室事件时间",
-    CAST('' AS VARCHAR) AS "入小恢复室时间",
-    reqrm.oper_room AS "预计手术间",
-    CAST('' AS VARCHAR) AS "变更手术间",
-    ps.s_sssyzt_cmc AS "手术完成状态",
-    info.reject_reason AS "手术取消原因",
-    CAST('' AS VARCHAR) AS "术中保温",
-    CAST('' AS VARCHAR) AS "术前抗菌药物使用时间",
-    CAST('' AS VARCHAR) AS "术中抗菌药物追加时间",
-    CAST('' AS VARCHAR) AS "术前抗菌药物医嘱名称",
-    CAST('' AS VARCHAR) AS "术中抗菌药物医嘱名称"
+    END AS shou_shu_shi_chang,
+    cbu_jie.realname AS jie_dan_ren_jie,
+    pso_jie.send_order_time AS pai_dan_shi_jian_jie,
+    pso_jie.order_receiving_time AS jie_dan_shi_jian_jie,
+    pso_jie.start_place_arrive_time AS dao_da_chu_fa_di_shi_jian_jie,
+    pso_jie.send_order_arrive_time AS jie_dao_huan_zhe_shi_jian_jie,
+    cast('' AS varchar) AS dao_da_shou_shu_shi_shi_jian_jie,
+    pso_jie.burglary_time AS dao_da_shou_shu_jian_shi_jian_jie,
+    pso_jie.send_order_finish_time AS wan_cheng_ding_dan_shi_jian_jie,
+    info.oper_beging_date AS shou_shu_kai_shi,
+    info.oper_end_date AS shou_shu_jie_shu,
+    info.ana_beging_date AS ma_zui_kai_shi,
+    info.ana_end_date AS ma_zui_jie_shu,
+    info.in_oproom_date AS jin_shou_shu_jian,
+    info.out_oproom_date AS chu_shou_shu_jian,
+    cast('' AS varchar) AS jian_li_ren_gong_qi_dao,
+    cast('' AS varchar) AS chai_chu_ren_gong_qi_dao,
+    info.oper_time AS shou_shu_yu_ji_shi_chang,
+    info.blood_loss AS yu_gu_chu_xue_liang,
+    xueinfo.clsingledose AS shi_ji_chu_xue_liang,
+    info.rec_in_date AS dao_da_pacu_shi_jian,
+    info.rec_out_date AS chu_pacu_shi_jian,
+    cbu_song.realname AS jie_dan_ren_song,
+    pso_song.send_order_time AS pai_dan_shi_jian_song,
+    pso_song.order_receiving_time AS jie_dan_shi_jian_song,
+    pso_song.start_place_arrive_time AS dao_da_chu_fa_di_shi_jian_song,
+    pso_song.send_order_arrive_time AS jie_dao_huan_zhe_shi_jian_song,
+    pso_song.burglary_time AS dao_da_mu_di_di_shi_jian_song,
+    pso_song.send_order_finish_time AS wan_cheng_ding_dan_shi_jian_song,
+    cast('' AS varchar) AS xiao_hui_fu_shi_shi_jian_shi_jian,
+    cast('' AS varchar) AS ru_xiao_hui_fu_shi_shi_jian,
+    reqrm.oper_room AS yu_ji_shou_shu_jian,
+    cast('' AS varchar) AS bian_geng_shou_shu_jian,
+    (CASE
+        WHEN info.s_sssyzt_dm = '30' AND info.in_oproom_date IS NULL THEN '排程未做'
+        WHEN info.s_sssyzt_dm = '90' AND info.oper_beging_date IS NOT NULL AND info.oper_end_date IS NOT NULL THEN '已完成手术'
+        WHEN info.ana_beging_date IS NULL AND info.oper_beging_date IS NULL THEN '麻醉前取消'
+        WHEN info.ana_beging_date IS NOT NULL AND info.oper_beging_date IS NULL THEN '手术开始前取消'
+        ELSE ''
+    END) AS shou_shu_wan_cheng_zhuang_tai,
+    (CASE
+        WHEN info.s_sssyzt_dm = '90' AND info.oper_beging_date IS NOT NULL AND info.oper_end_date IS NOT NULL THEN ''
+        ELSE info.reject_reason
+    END) AS shou_shu_qu_xiao_yuan_yin,
+    (CASE WHEN szbw.event_text IS NOT NULL THEN '是' ELSE '否' END) AS shu_zhong_bao_wen,
+    cast('' AS varchar) AS shu_qian_kang_jun_yao_wu_shi_yong_shi_jian,
+    cast('' AS varchar) AS shu_zhong_kang_jun_yao_wu_zhui_jia_shi_jian,
+    cast('' AS varchar) AS shu_qian_kang_jun_yao_wu_yi_zhu_ming_cheng,
+    cast('' AS varchar) AS shu_zhong_kang_jun_yao_wu_yi_zhu_ming_cheng
 FROM (
     SELECT
         a.id AS apply_id,
         max(ar.id) AS anar_id,
         coalesce(max(reg.sam_room_id), max(a.sam_room_id)) AS room_id,
         coalesce(max(reg.ipi_registration_id), max(a.ipi_registration_id)) AS ipi_registration_id,
-        coalesce(max(reg.opc_registration_id), max(a.ipi_registration_id)) AS opc_registration_id,
+        coalesce(max(reg.opc_registration_id), max(a.opc_registration_id)) AS opc_registration_id,
         coalesce(max(reg.patient_name), max(a.patient_name)) AS patient_name,
         array_join(array_agg(o.operation_name ORDER BY o.operation_name), '；') AS oper_name,
         coalesce(max(reg.is_emergency), max(a.is_emergency)) AS is_emergency,
         coalesce(max(reg.is_daytime), max(a.is_daytime)) AS is_daytime,
         coalesce(max(reg.patient_source), max(a.patient_source)) AS patient_source,
         max(a.blood_loss) AS blood_loss,
-        max(a.op_time) AS oper_time,
+        max(a.blood_loss) AS oper_time,
         max(a.oper_type) AS oper_type,
         max(a.is_reject) AS is_reject,
         max(a.reject_reason) AS reject_reason,
@@ -180,6 +190,12 @@ FROM (
     WHERE a.isdeleted = '0'
       AND a.scheduled_date >= (SELECT dt_start FROM p_sched)
       AND a.scheduled_date <= (SELECT dt_end FROM p_sched)
+      AND a.health_service_org_id = 'HXSSMZK'
+      AND a.sam_room_id NOT IN ('73')
+      AND (
+          a.oper_type = 'ROOM_OPER'
+          OR (a.oper_type IN ('NJ_OPER', 'QZJ_OPER') AND a.patient_source = '03')
+      )
     GROUP BY a.id
 ) info
 LEFT JOIN hid0101_orcl_operaanesthisa_emrhis.ipi_registration ieg
@@ -188,17 +204,14 @@ LEFT JOIN hid0101_orcl_operaanesthisa_emrhis.opc_registration opc
     ON opc.id = info.opc_registration_id AND opc.isdeleted = '0'
 LEFT JOIN hid0101_orcl_operaanesthisa_emrhis.hra00_department dpt
     ON dpt.id = info.dept_id AND dpt.isdeleted = '0'
--- 以下两张表不在手麻库时请替换 catalog（示例用占位，需与平台一致）
 LEFT JOIN hid0101_orcl_operaanesthisa_emrhis.pro_send_order pso_jie
     ON pso_jie.apply_id = info.apply_id AND pso_jie.direction = '0'
-LEFT JOIN  hid0101_orcl_operaanesthisa_cdxtboot.SYS_USER cbu_jie
-    ON cast(cbu_jie.id AS VARCHAR) = cast(pso_jie.carer_id AS VARCHAR)
+LEFT JOIN hid0101_orcl_operaanesthisa_cdxtboot.SYS_USER cbu_jie
+    ON cast(cbu_jie.id AS varchar) = cast(pso_jie.carer_id AS varchar)
 LEFT JOIN hid0101_orcl_operaanesthisa_emrhis.pro_send_order pso_song
     ON pso_song.apply_id = info.apply_id AND pso_song.direction = '1'
-LEFT JOIN  hid0101_orcl_operaanesthisa_cdxtboot.SYS_USER cbu_song
-    ON cast(cbu_song.id AS VARCHAR) = cast(pso_song.carer_id AS VARCHAR)
-LEFT JOIN hid0101_orcl_operaanesthisa_emrhis.pub_sssyzt ps
-    ON ps.s_sssyzt_dm = info.s_sssyzt_dm AND ps.isdeleted = '0'
+LEFT JOIN hid0101_orcl_operaanesthisa_cdxtboot.SYS_USER cbu_song
+    ON cast(cbu_song.id AS varchar) = cast(pso_song.carer_id AS varchar)
 LEFT JOIN hid0101_orcl_operaanesthisa_emrhis.sam_room rm
     ON rm.id = info.room_id AND rm.isdeleted = '0'
 LEFT JOIN hid0101_orcl_operaanesthisa_emrhis.sam_room reqrm
@@ -265,8 +278,8 @@ LEFT JOIN (
         ev.sam_apply_id AS apid,
         sum(
             CASE
-                WHEN lower(pj.s_jldw_cmc) IN ('u', '治疗量') THEN try_cast(ev.single_dose AS DOUBLE) * 200
-                ELSE try_cast(ev.single_dose AS DOUBLE)
+                WHEN lower(trim(pj.s_jldw_cmc)) IN ('u', '治疗量') THEN try_cast(ev.single_dose AS double) * 200
+                ELSE try_cast(ev.single_dose AS double)
             END
         ) AS clsingledose
     FROM hid0101_orcl_operaanesthisa_emrhis.sam_apply ap
@@ -281,4 +294,114 @@ LEFT JOIN (
     GROUP BY ev.sam_apply_id
 ) xueinfo
     ON xueinfo.apid = info.apply_id
+LEFT JOIN (
+    SELECT
+        en.sam_apply_id,
+        max(en.event_text) AS event_text
+    FROM hid0101_orcl_operaanesthisa_emrhis.sam_apply ap
+    LEFT JOIN hid0101_orcl_operaanesthisa_emrhis.sam_anar_enent en
+        ON en.sam_apply_id = ap.id AND en.isdeleted = '0'
+    WHERE ap.isdeleted = '0'
+      AND ap.scheduled_date >= (SELECT dt_start FROM p_sched)
+      AND ap.scheduled_date <= (SELECT dt_end FROM p_sched)
+      AND (
+          en.s_mzsj_dm IN ('10_29', '10_30')
+          OR (en.s_mzsj_dm = '10_41' AND strpos(coalesce(en.event_text, ''), '保温毯加温') > 0)
+      )
+    GROUP BY en.sam_apply_id
+) szbw
+    ON szbw.sam_apply_id = info.apply_id
 ORDER BY info.scheduled_date DESC;
+
+-- =============================================================================
+-- 列名 拼音（下划线）与中文含义 映射表（与上方 SELECT 输出列一一对应）
+-- =============================================================================
+-- | pinyin_jian_ti（输出列名）     | 中文含义 |
+-- |------------------------------|----------|
+-- | bing_an_hao                  | 病案号 |
+-- | deng_ji_hao                  | 登记号 |
+-- | xing_ming                    | 姓名 |
+-- | xing_bie                     | 性别 |
+-- | chu_sheng_ri_qi              | 出生日期 |
+-- | shen_gao                     | 身高 |
+-- | ti_zhong                     | 体重 |
+-- | shou_shu_lei_bie             | 手术类别 |
+-- | shi_fou_ri_jian_shou_shu     | 是否日间手术 |
+-- | ma_zui_fang_shi              | 麻醉方式 |
+-- | asa_fen_ji                   | ASA分级 |
+-- | ji_zhen_shou_shu_fen_ji      | 急诊手术分级 |
+-- | tai_ci                       | 台次 |
+-- | shou_tai                     | 首台 |
+-- | mo_tai                       | 末台 |
+-- | zhou_mo                      | 周末 |
+-- | huan_zhe_suo_zai_ke_shi      | 患者所在科室 |
+-- | shou_shu_yi_sheng_ke_shi     | 手术医生科室 |
+-- | shou_shu_an_pai_ri_qi        | 手术安排日期 |
+-- | shou_shu_jian                | 手术间 |
+-- | shou_shu_jian_wei_zhi        | 手术间位置 |
+-- | shu_qian_zhen_duan           | 术前诊断 |
+-- | shou_shu_ming_cheng          | 手术名称 |
+-- | shu_hou_yun_zhuan_di_dian    | 术后运转地点 |
+-- | qie_kou_deng_ji              | 切口等级 |
+-- | ma_zui_yi_sheng              | 麻醉医生 |
+-- | ma_zui_yi_sheng_gong_hao     | 麻醉医生工号 |
+-- | ma_zui_zhu_shou_1            | 麻醉助手1 |
+-- | ma_zui_zhu_shou_1_gong_hao   | 麻醉助手1工号 |
+-- | ma_zui_zhu_shou_2            | 麻醉助手2 |
+-- | ma_zui_zhu_shou_2_gong_hao   | 麻醉助手2工号 |
+-- | xun_hui_hu_shi_1             | 巡回护士1 |
+-- | xun_hui_hu_shi_1_gong_hao    | 巡回护士1工号 |
+-- | xun_hui_hu_shi_2             | 巡回护士2 |
+-- | xun_hui_hu_shi_2_gong_hao    | 巡回护士2工号 |
+-- | xi_shou_hu_shi_1             | 洗手护士1 |
+-- | xi_shou_hu_shi_1_gong_hao    | 洗手护士1工号 |
+-- | xi_shou_hu_shi_2             | 洗手护士2 |
+-- | xi_shou_hu_shi_2_gong_hao    | 洗手护士2工号 |
+-- | shou_shu_yi_sheng            | 手术医生（主刀） |
+-- | shou_shu_yi_sheng_gong_hao   | 手术医生工号 |
+-- | shou_shu_zhu_shou_1          | 手术助手1 |
+-- | shou_shu_zhu_shou_1_gong_hao | 手术助手1工号 |
+-- | shou_shu_zhu_shou_2          | 手术助手2 |
+-- | shou_shu_zhu_shou_2_gong_hao | 手术助手2工号 |
+-- | yi_sheng_ke_shi              | 医生科室 |
+-- | shou_shu_shi_chang           | 手术时长 |
+-- | jie_dan_ren_jie              | 接单人（接） |
+-- | pai_dan_shi_jian_jie         | 派单时间（接） |
+-- | jie_dan_shi_jian_jie         | 接单时间（接） |
+-- | dao_da_chu_fa_di_shi_jian_jie| 到达出发地时间（接） |
+-- | jie_dao_huan_zhe_shi_jian_jie| 接到患者时间（接） |
+-- | dao_da_shou_shu_shi_shi_jian_jie | 到达手术室时间（接） |
+-- | dao_da_shou_shu_jian_shi_jian_jie | 到达手术间时间（接） |
+-- | wan_cheng_ding_dan_shi_jian_jie | 完成订单时间（接） |
+-- | shou_shu_kai_shi             | 手术开始 |
+-- | shou_shu_jie_shu              | 手术结束 |
+-- | ma_zui_kai_shi               | 麻醉开始 |
+-- | ma_zui_jie_shu                | 麻醉结束 |
+-- | jin_shou_shu_jian             | 进手术间 |
+-- | chu_shou_shu_jian             | 出手术间 |
+-- | jian_li_ren_gong_qi_dao       | 建立人工气道 |
+-- | chai_chu_ren_gong_qi_dao      | 拆除人工气道 |
+-- | shou_shu_yu_ji_shi_chang      | 手术预计时长 |
+-- | yu_gu_chu_xue_liang          | 预估出血量 |
+-- | shi_ji_chu_xue_liang         | 实际出血量 |
+-- | dao_da_pacu_shi_jian         | 到达PACU时间 |
+-- | chu_pacu_shi_jian            | 出PACU时间 |
+-- | jie_dan_ren_song             | 接单人（送） |
+-- | pai_dan_shi_jian_song        | 派单时间（送） |
+-- | jie_dan_shi_jian_song        | 接单时间（送） |
+-- | dao_da_chu_fa_di_shi_jian_song | 到达出发地时间（送） |
+-- | jie_dao_huan_zhe_shi_jian_song | 接到患者时间（送） |
+-- | dao_da_mu_di_di_shi_jian_song | 到达目的地时间（送） |
+-- | wan_cheng_ding_dan_shi_jian_song | 完成订单时间（送） |
+-- | xiao_hui_fu_shi_shi_jian_shi_jian | 小恢复室事件时间 |
+-- | ru_xiao_hui_fu_shi_shi_jian  | 入小恢复室时间 |
+-- | yu_ji_shou_shu_jian          | 预计手术间 |
+-- | bian_geng_shou_shu_jian      | 变更手术间 |
+-- | shou_shu_wan_cheng_zhuang_tai| 手术完成状态 |
+-- | shou_shu_qu_xiao_yuan_yin    | 手术取消原因 |
+-- | shu_zhong_bao_wen            | 术中保温 |
+-- | shu_qian_kang_jun_yao_wu_shi_yong_shi_jian | 术前抗菌药物使用时间 |
+-- | shu_zhong_kang_jun_yao_wu_zhui_jia_shi_jian | 术中抗菌药物追加时间 |
+-- | shu_qian_kang_jun_yao_wu_yi_zhu_ming_cheng | 术前抗菌药物医嘱名称 |
+-- | shu_zhong_kang_jun_yao_wu_yi_zhu_ming_cheng | 术中抗菌药物医嘱名称 |
+-- =============================================================================
