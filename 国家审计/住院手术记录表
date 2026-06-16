@@ -1,0 +1,136 @@
+with ops_base as (
+  select
+    mr_ops.mrops_paadmdr as JZBS,
+    mr_ops.mrops_padmno as ZYH,
+    mr_ops.mrops_papmino as HZID,
+    pa_patmas.papmi_name as HZXM,
+    coalesce(
+      nullif(trim(pa_patmas.papmi_dvanumber), ''),
+      nullif(trim(pa_person.paper_id), ''),
+      nullif(trim(card_ref.cf_idcardno), ''),
+      ''
+    ) as HZSFZHM,
+    mr_ops.mrops_opclass as SSDJ,
+    mr_ops.mrops_incision as QKDJ,
+    mr_ops.mrops_opsdate as SSKSRQ,
+    mr_ops.mrops_opsdate as SSJSRQ,
+    mr_ops.mrops_opfirstname as SSMC,
+    mr_ops.mrops_narcosisname as SSMZFS,
+    '' as SSBW,
+    mr_ops.mrops_opfirstcode as SSDM,
+    mr_ops.mrops_opdocdesc as SSYS,
+    '12510000450756139Y' as YLJGBM,
+    '四川大学华西医院(四川省国际医院)' as YLJGMC,
+    row_number() over (
+      partition by
+        mr_ops.mrops_paadmdr,
+        mr_ops.mrops_papmino,
+        mr_ops.mrops_opsdate,
+        mr_ops.mrops_opfirstcode
+      order by
+        mr_ops.mrops_foutdate desc,
+        mr_ops.mrops_opfirstname desc
+    ) as ops_rn
+  from cache53.mr_ops mr_ops
+  left join hid0101_cache_his_dhcapp_sqluser.pa_patmas pa_patmas
+    on mr_ops.mrops_papmidr = pa_patmas.papmi_rowid1
+  left join hid0101_cache_his_dhcapp_sqluser.pa_person pa_person
+    on pa_patmas.papmi_rowid1 = pa_person.paper_papmi_dr
+  left join (
+    select
+      cf_papmi_dr,
+      cf_idcardno,
+      row_number() over (
+        partition by cf_papmi_dr
+        order by cf_date desc, cf_rowid desc
+      ) as card_rn
+    from hid0101_cache_his_dhcapp_sqluser.dhc_cardref
+    where coalesce(cf_activeflag, 'N') = 'N'
+  ) card_ref
+    on pa_patmas.papmi_rowid1 = card_ref.cf_papmi_dr
+   and card_ref.card_rn = 1
+  where
+    mr_ops.mrops_foutdate >  '2022-01-01 00:00:00'
+    and mr_ops.mrops_foutdate < '2026-05-31 23:59:59'
+    and mr_ops.mrops_surgtype = '手术'
+    and (mr_ops.mrops_opthrdr = '1' or mr_ops.mrops_opthrdr = '7')
+    and mr_ops.isdeleted = '0'
+    and mr_ops.mrops_mainopsflag = '1'
+),
+ops_dedup as (
+  select *
+  from ops_base
+  where ops_rn = 1
+    and JZBS is not null
+    and HZID is not null
+    and SSKSRQ is not null
+    and SSJSRQ is not null
+),
+ord_pick as (
+  select
+    paadmdr,
+    OEORIDR,
+    row_number() over (
+      partition by paadmdr
+      order by
+        concat(cast(orddate as varchar), ' ', cast(ordtime as varchar)) desc,
+        cast(OEORIDR as varchar) desc
+    ) as ord_rn
+  from cache53.vwworkloadhxmig
+  where nullif(trim(cast(OEORIDR as varchar)), '') is not null
+),
+joined as (
+  select
+    o.JZBS,
+    o.ZYH,
+    o.HZID,
+    o.HZXM,
+    o.HZSFZHM,
+    coalesce(cast(ord.OEORIDR as varchar), '') as CFID,
+    o.SSDJ,
+    o.QKDJ,
+    o.SSKSRQ,
+    o.SSJSRQ,
+    o.SSMC,
+    o.SSMZFS,
+    o.SSBW,
+    o.SSDM,
+    o.SSYS,
+    o.YLJGBM,
+    o.YLJGMC,
+    row_number() over (
+      partition by
+        o.JZBS,
+        o.HZID,
+        coalesce(cast(ord.OEORIDR as varchar), ''),
+        o.SSKSRQ,
+        o.SSDM
+      order by
+        o.SSJSRQ desc,
+        o.SSMC desc
+    ) as final_rn
+  from ops_dedup o
+  left join ord_pick ord
+    on ord.paadmdr = o.JZBS
+   and ord.ord_rn = 1
+)
+select
+  JZBS as JZBS,
+  ZYH as ZYH,
+  HZID as HZID,
+  HZXM as HZXM,
+  HZSFZHM as HZSFZHM,
+  CFID as CFID,
+  SSDJ as SSDJ,
+  QKDJ as QKDJ,
+  SSKSRQ as SSKSRQ,
+  SSJSRQ as SSJSRQ,
+  SSMC as SSMC,
+  SSMZFS as SSMZFS,
+  SSBW as SSBW,
+  SSDM as SSDM,
+  SSYS as SSYS,
+  YLJGBM as YLJGBM,
+  YLJGMC as YLJGMC
+from joined
+where final_rn = 1

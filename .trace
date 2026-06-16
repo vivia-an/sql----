@@ -7,6 +7,88 @@
 
 ## 时间线
 
+### 2026-06-14 | SQLServer：住院手术记录表字段中文化
+- **需求**：`NationalAudit2026.dbo.ZYSSJLB` 英文缩写字段改为中文字段名
+- **血缘**：`JZBS/ZYH/HZID/.../YLJGMC` → 审计上报中文字段；仅表字段命名变更，不改字段数据来源
+- **修改**：提供 SQL Server `sp_rename` 脚本；影响依赖该表英文列名的查询、视图、存储过程
+  #### 2026-06-14 | 分支：HZJBXXB3 字段中文化
+  - **需求**：`NationalAudit2026.dbo.HZJBXXB3` 英文缩写字段改为中文字段名
+  - **血缘**：`HZID/HZXM/JZZJLX/.../YLJGMC` → 患者基本信息中文字段；仅表字段命名变更
+  #### 2026-06-14 | 分支：患者基本信息表 HZJBXXB_ALL 字段中文化
+  - **需求**：`NationalAudit2026.dbo.HZJBXXB_ALL` 英文缩写字段改为中文字段名
+  - **修改**：DBeaver 可执行 `sp_rename` 脚本；不使用 `GO`
+  #### 2026-06-14 | 分支：病历表字段中文化
+  - **需求**：`NationalAudit2026.dbo.BLB` 英文缩写字段改为中文字段名
+  - **血缘**：`JZBS/BLID/HZID/.../YLJGMC` → 病历中文字段；仅表字段命名变更
+  #### 2026-06-14 | 分支：检查检验记录表字段中文化
+  - **需求**：`NationalAudit2026.dbo.JCJYJLB_ALL` 英文缩写字段改为中文字段名
+  - **血缘**：`JZBS/CFYS/CFKS/.../YLJGMC` → 检查检验中文字段；仅表字段命名变更
+  #### 2026-06-16 | 分支：四表校验结果SQL沉淀
+  - **需求**：将 `国家审计/校验结果` 对应汇总 SQL 写入同目录 `校验结果sql`
+  - **文件**：`国家审计/校验结果sql`
+  - **血缘**：`BLB/HZJBXXB_ALL/JCJYJLB_ALL/ZYSSJLB` → 自身重复、必填、日期格式校验 → 校验结果五列
+  #### 2026-06-14 | 分支：ZYSSJLB 去重落表
+  - **需求**：新建与 `ZYSSJLB` 同结构表，五键开窗去重后写入
+  - **血缘**：`ZYSSJLB` → `row_number partition by 就诊标识+患者ID+处方ID+手术开始/结束日期+手术代码` → `ZYSSJLB_DEDUP`
+  ##### 2026-06-16 | 扩展：去重表补住院医嘱处方ID
+  - **需求**：住院手术去重后补 `CFID`，用于通过处方ID+机构编码关联住院医嘱校验
+  - **血缘**：`mr_ops.mrops_paadmdr` → `vwworkloadhxmig.paadmdr` → 同就诊非空 `OEORIDR` 开窗取1条 → `CFID`
+  ##### 2026-06-16 | 分支：ZYSSJLB3 字段中文化
+  - **需求**：`NationalAudit2026.dbo.ZYSSJLB3` 英文缩写字段改为中文字段名
+  - **血缘**：`JZBS/ZYH/HZID/.../YLJGMC` → 住院手术中文字段；仅表字段命名变更
+
+### 2026-06-12 | 检验明细：CFYS/CFKS 回源 HIS 医嘱
+- **需求**：`CFYS`/`CFKS` 按开单医生、开单科室取值，解决报告冗余字段大量为空
+- **文件**：`LIS/检验明细_开单医生科室_HIS修正版_Presto.sql`
+- **血缘**：`mt_reportdet` → `mt_report(orderdetid)` → `oe_orditem` → `CT_CareProv`/`CT_Loc`；报告申请字段仅兜底
+- **异常**：`orderdetid` 缺失、医嘱或字典未命中时仍可能为空
+  #### 2026-06-12 | 分支：检查明细 CFYS/CFKS 同口径回源 HIS
+  - **需求**：检查 SQL 中 `CFYS`/`CFKS` 从空串改为开单医生、开单科室
+  - **文件**：`LIS/检查明细_开单医生科室_HIS修正版_Presto.sql`
+  - **血缘**：`mt_report(orderdetid)` → `oe_orditem` → `CT_CareProv`/`CT_Loc`；报告申请字段兜底
+  #### 2026-06-12 | 分支：外检机构取 order_main 医嘱子类
+  - **需求**：`WJJGDM/WJJGMC` 外检时取医嘱子类代码/名称（华创启德、康圣达）
+  - **血缘**：`mt_report_orderdetid` = `oe_orditem.oeori_rowid`；`oe_orditem → arc_itmmast → arc_itemcat → oec_ordercategory`；`orcat_desc=外检` → `WJJGDM=arcic_code`，`WJJGMC=arcic_desc`
+  - **修改**：不扫 `datacenter_db.order_main` 宽表；按 `Datacenter/医嘱dc-华上.sql` HID0101 实现抽取轻量医嘱分类子查询
+  ##### 2026-06-16 | 变更：检查检验外检机构置空
+  - **需求**：去掉第三方外检机构相关逻辑，`WJJGDM/WJJGMC` 固定取空
+  - **血缘**：`JCJYJLB.WJJGDM/WJJGMC` 不再回溯 `order_main` 或医嘱分类，仅保留空字段
+
+### 2026-06-11 | 患者基本信息 HZJBXXB：就诊证件身份证位数识别
+- **需求**：有身份证时 JZZJLX=身份证、JZZJHM=身份证号；15/18位位数+格式判定（如542301197508062010）；其余字段逻辑不变
+- **血缘**：`papmi_dvanumber` → `dhc_cardref.cf_idcardno` → `cf_cardno` 身份证判定；非身份证 JZZJLX 空、JZZJHM=卡号
+- **修改**：对话 SQL（01_HZJBXXB）；移除 cache 不存在的 `dhc_credtype`/`dhc_accmanager` 关联
+  #### 2026-06-13 | 分支：XB/ZYe 改中文描述
+  - **需求**：患者基本信息 `XB`、`ZYe` 不取编码，改为性别/职业中文描述
+  - **血缘**：`pa_person.paper_sex_dr → ct_sex.ctsex_desc`；`pa_person.paper_occupation_dr → ct_occupation.ctocc_desc`
+  - **修改**：对话 SQL（01_HZJBXXB）；仅替换 `XB`、`ZYe` 两个 SELECT 表达式
+  ##### 2026-06-13 | 分支：按 CJRQ 拆分跑数
+  - **需求**：患者数据量过大，按日期拆为 2018年前、2018年后两段执行
+  - **血缘**：外层 `CJRQ=pa_person.paper_updatedate` → `substr(cast(t.CJRQ as varchar),1,10)` 分段；不改变字段取值和去重逻辑
+  #### 2026-06-11 | 修复：dhc_credtype 表不存在
+  - **异常**：`hive.hid0101_cache_his_dhcapp_sqluser.dhc_credtype does not exist`
+  - **处理**：去掉 credtype/accmanager join；就诊证件类型仅身份证位数识别 + 非身份证留空
+  #### 2026-06-11 | SFZJLX：SFZJHM 18位时赋身份证
+  - **需求**：`papmi_dvanumber` 为18位身份证号时 `SFZJLX='身份证'`，其余逻辑不变
+  - **修改**：对话 SQL（01_HZJBXXB）；仅改 `SFZJLX` 为 CASE + `regexp_like`
+
+### 2026-06-10 | 蓝图：云原生底座下钻改为价值导向版
+- **需求**：`一个底座 · 云原生底座` 下钻按医院基础价值重写，去掉越界到治理/资产/安全/AI/业务场景的内容；历史版本折叠
+- **修改文件**：`蓝图/新一代大数据平台_1234蓝图.html`
+- **血缘**：首页底座卡片 → `details.d1` 价值导向 6 卡 + Hadoop 对比 → `archives` 版本2/版本1折叠；`KEY` 升级避免旧缓存覆盖
+  #### 2026-06-10 | 分支：接入整体架构 SVG 总览图
+  - **需求**：`architecture-v4.svg` 作为整体架构蓝图接入首页入口，保持交互版编辑/下载链路
+  - **修改文件**：`蓝图/新一代大数据平台_1234蓝图.html`
+  - **血缘**：首页标题区总览入口 + 工具栏总览图 → `arch` 内部页面 → 内嵌 `architecture-v4.svg` 模板 → `archSvgLabels` 图中文字编辑保存；`KEY` 升级避免旧缓存
+  ##### 2026-06-10 | 分支：同步编辑版文字到主蓝图
+  - **需求**：将 `新一代大数据平台_1234蓝图_已编辑_zr-1.html` 中已编辑文字/进度同步回主文件
+  - **修改文件**：`蓝图/新一代大数据平台_1234蓝图.html`
+  - **血缘**：编辑版 `seed` → 主文件 `seed` 共有字段覆盖；保留主文件 `arch` 总览图配置与 SVG 编辑链路
+  ###### 2026-06-10 | 修复：云原生底座历史版本折叠恢复
+  - **需求**：同步编辑版后 `一个底座 · 云原生底座` 的版本1/版本2折叠丢失，重新补回
+  - **修改文件**：`蓝图/新一代大数据平台_1234蓝图.html`
+  - **血缘**：`details.d1.sections` 当前版 → `details.d1.archives` 版本2医院价值对比版 + 版本1技术底座说明；`KEY` 升级避免旧缓存覆盖；保留 `arch` 总览图链路
+
 ### 2026-06-05 | 手排：原始排程结果明细（2019-08-01~2026-04-30）
 - **需求**：HIS 手术管理-手术排程结果；按日×手术间取原始排班字段（手术间/台次/序号/时间/住院号/申请科室/姓名/年龄/主刀/麻醉/一助~三助/其他助手/洗手/巡回/麻醉助手）
 - **文件**：`手排/原始排程结果_Plan_OPSSchedule_20190801-20260430_Presto.sql`（主）、`手排/原始排程结果_20190801-20260430_Presto.sql`（HIS OPMS 备选）

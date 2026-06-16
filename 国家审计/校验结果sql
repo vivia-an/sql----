@@ -1,0 +1,55 @@
+USE NationalAudit2026;
+
+WITH
+bl AS (SELECT COUNT(1) total_cnt FROM dbo.BLB),
+hz AS (SELECT COUNT(1) total_cnt FROM dbo.HZJBXXB_ALL),
+jc AS (SELECT COUNT(1) total_cnt FROM dbo.JCJYJLB_ALL),
+ss AS (SELECT COUNT(1) total_cnt FROM dbo.ZYSSJLB),
+r AS (
+SELECT 1 sort_no,N'病历表' 表名,N'病历ID为空' 校验项,total_cnt 总记录数,(SELECT COUNT(1) FROM dbo.BLB WHERE [病历ID] IS NULL) 异常记录数 FROM bl
+UNION ALL SELECT 2,N'病历表',N'病历表头为空',total_cnt,(SELECT COUNT(1) FROM dbo.BLB WHERE [病历表头] IS NULL) FROM bl
+UNION ALL SELECT 3,N'病历表',N'病历创建时间格式不符合 yyyyMMdd HH:mm:ss',total_cnt,(SELECT COUNT(1) FROM dbo.BLB WHERE [病历创建时间] IS NOT NULL AND (LEN(CONVERT(varchar(30),[病历创建时间]))<>17 OR CONVERT(varchar(30),[病历创建时间]) NOT LIKE '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9]')) FROM bl
+UNION ALL SELECT 4,N'病历表',N'病历创建时间为空',total_cnt,(SELECT COUNT(1) FROM dbo.BLB WHERE [病历创建时间] IS NULL) FROM bl
+UNION ALL SELECT 5,N'病历表',N'病历类型为空',total_cnt,(SELECT COUNT(1) FROM dbo.BLB WHERE [病历类型] IS NULL) FROM bl
+UNION ALL SELECT 6,N'病历表',N'病历内容为空',total_cnt,(SELECT COUNT(1) FROM dbo.BLB WHERE [病历内容] IS NULL) FROM bl
+UNION ALL SELECT 7,N'病历表',N'病历细项撰写时间格式不符合 yyyyMMdd HH:mm:ss',total_cnt,(SELECT COUNT(1) FROM dbo.BLB WHERE [病历细项撰写时间] IS NOT NULL AND (LEN(CONVERT(varchar(30),[病历细项撰写时间]))<>17 OR CONVERT(varchar(30),[病历细项撰写时间]) NOT LIKE '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9]')) FROM bl
+UNION ALL SELECT 8,N'病历表',N'病历细项撰写时间为空',total_cnt,(SELECT COUNT(1) FROM dbo.BLB WHERE [病历细项撰写时间] IS NULL) FROM bl
+UNION ALL SELECT 9,N'病历表',N'患者ID为空',total_cnt,(SELECT COUNT(1) FROM dbo.BLB WHERE [患者ID] IS NULL) FROM bl
+UNION ALL SELECT 10,N'病历表',N'就诊标识为空',total_cnt,(SELECT COUNT(1) FROM dbo.BLB WHERE [就诊标识] IS NULL) FROM bl
+UNION ALL SELECT 11,N'病历表',N'联合主键重复：病历ID+病历细项名称+病历细项顺序号',bl.total_cnt,COALESCE(SUM(x.cnt),0) FROM bl OUTER APPLY (SELECT COUNT(1) cnt FROM dbo.BLB GROUP BY [病历ID],[病历细项名称],[病历细项顺序号] HAVING COUNT(1)>1) x GROUP BY bl.total_cnt
+UNION ALL SELECT 12,N'病历表',N'医疗机构编码为空',total_cnt,(SELECT COUNT(1) FROM dbo.BLB WHERE [医疗机构编码] IS NULL) FROM bl
+UNION ALL SELECT 13,N'病历表',N'医疗机构名称为空',total_cnt,(SELECT COUNT(1) FROM dbo.BLB WHERE [医疗机构名称] IS NULL) FROM bl
+UNION ALL SELECT 14,N'患者基本信息表',N'创建日期为空',total_cnt,(SELECT COUNT(1) FROM dbo.HZJBXXB_ALL WHERE [创建日期] IS NULL) FROM hz
+UNION ALL SELECT 15,N'患者基本信息表',N'患者ID为空',total_cnt,(SELECT COUNT(1) FROM dbo.HZJBXXB_ALL WHERE [患者ID] IS NULL) FROM hz
+UNION ALL SELECT 16,N'患者基本信息表',N'患者ID重复',hz.total_cnt,COALESCE(SUM(x.cnt),0) FROM hz OUTER APPLY (SELECT COUNT(1) cnt FROM dbo.HZJBXXB_ALL GROUP BY [患者ID] HAVING COUNT(1)>1) x GROUP BY hz.total_cnt
+UNION ALL SELECT 17,N'患者基本信息表',N'新生儿标识=否但母亲编号不为空',total_cnt,(SELECT COUNT(1) FROM dbo.HZJBXXB_ALL WHERE [新生儿标识]=N'否' AND [母亲编号] IS NOT NULL) FROM hz
+UNION ALL SELECT 18,N'患者基本信息表',N'新生儿标识=是但母亲编号为空',total_cnt,(SELECT COUNT(1) FROM dbo.HZJBXXB_ALL WHERE [新生儿标识]=N'是' AND [母亲编号] IS NULL) FROM hz
+UNION ALL SELECT 19,N'患者基本信息表',N'新生儿标识非是/否',total_cnt,(SELECT COUNT(1) FROM dbo.HZJBXXB_ALL WHERE [新生儿标识] IS NULL OR [新生儿标识] NOT IN (N'是',N'否')) FROM hz
+UNION ALL SELECT 20,N'患者基本信息表',N'医疗机构编码为空',total_cnt,(SELECT COUNT(1) FROM dbo.HZJBXXB_ALL WHERE [医疗机构编码] IS NULL) FROM hz
+UNION ALL SELECT 21,N'患者基本信息表',N'医疗机构名称为空',total_cnt,(SELECT COUNT(1) FROM dbo.HZJBXXB_ALL WHERE [医疗机构名称] IS NULL) FROM hz
+UNION ALL SELECT 22,N'检查检验记录表',N'处方ID为空',total_cnt,(SELECT COUNT(1) FROM dbo.JCJYJLB_ALL WHERE [处方ID] IS NULL) FROM jc
+UNION ALL SELECT 23,N'检查检验记录表',N'检查检验报告ID为空',total_cnt,(SELECT COUNT(1) FROM dbo.JCJYJLB_ALL WHERE [检查检验报告ID] IS NULL) FROM jc
+UNION ALL SELECT 24,N'检查检验记录表',N'检查检验时间格式不符合 yyyyMMdd HH:mm:ss',total_cnt,(SELECT COUNT(1) FROM dbo.JCJYJLB_ALL WHERE [检查检验时间] IS NOT NULL AND (LEN(CONVERT(varchar(30),[检查检验时间]))<>17 OR CONVERT(varchar(30),[检查检验时间]) NOT LIKE '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9]')) FROM jc
+UNION ALL SELECT 25,N'检查检验记录表',N'检查检验时间为空',total_cnt,(SELECT COUNT(1) FROM dbo.JCJYJLB_ALL WHERE [检查检验时间] IS NULL) FROM jc
+UNION ALL SELECT 26,N'检查检验记录表',N'检查检验项目名称为空',total_cnt,(SELECT COUNT(1) FROM dbo.JCJYJLB_ALL WHERE [检查检验项目名称] IS NULL) FROM jc
+UNION ALL SELECT 27,N'检查检验记录表',N'就诊标识为空',total_cnt,(SELECT COUNT(1) FROM dbo.JCJYJLB_ALL WHERE [就诊标识] IS NULL) FROM jc
+UNION ALL SELECT 28,N'检查检验记录表',N'联合主键重复：检查检验报告ID+检查检验项目名称',jc.total_cnt,COALESCE(SUM(x.cnt),0) FROM jc OUTER APPLY (SELECT COUNT(1) cnt FROM dbo.JCJYJLB_ALL GROUP BY [检查检验报告ID],[检查检验项目名称] HAVING COUNT(1)>1) x GROUP BY jc.total_cnt
+UNION ALL SELECT 29,N'检查检验记录表',N'医疗机构编码为空',total_cnt,(SELECT COUNT(1) FROM dbo.JCJYJLB_ALL WHERE [医疗机构编码] IS NULL) FROM jc
+UNION ALL SELECT 30,N'检查检验记录表',N'医疗机构名称为空',total_cnt,(SELECT COUNT(1) FROM dbo.JCJYJLB_ALL WHERE [医疗机构名称] IS NULL) FROM jc
+UNION ALL SELECT 31,N'检查检验记录表',N'诊疗服务项目ID为空',total_cnt,(SELECT COUNT(1) FROM dbo.JCJYJLB_ALL WHERE [诊疗服务项目ID] IS NULL) FROM jc
+UNION ALL SELECT 32,N'住院手术记录表',N'处方ID为空',total_cnt,(SELECT COUNT(1) FROM dbo.ZYSSJLB WHERE [处方ID] IS NULL) FROM ss
+UNION ALL SELECT 33,N'住院手术记录表',N'患者ID为空',total_cnt,(SELECT COUNT(1) FROM dbo.ZYSSJLB WHERE [患者ID] IS NULL) FROM ss
+UNION ALL SELECT 34,N'住院手术记录表',N'就诊标识为空',total_cnt,(SELECT COUNT(1) FROM dbo.ZYSSJLB WHERE [就诊标识] IS NULL) FROM ss
+UNION ALL SELECT 35,N'住院手术记录表',N'联合主键重复：就诊标识+患者ID+处方ID+手术开始日期+手术代码',ss.total_cnt,COALESCE(SUM(x.cnt),0) FROM ss OUTER APPLY (SELECT COUNT(1) cnt FROM dbo.ZYSSJLB GROUP BY [就诊标识],[患者ID],[处方ID],[手术开始日期],[手术代码] HAVING COUNT(1)>1) x GROUP BY ss.total_cnt
+UNION ALL SELECT 36,N'住院手术记录表',N'手术代码为空',total_cnt,(SELECT COUNT(1) FROM dbo.ZYSSJLB WHERE [手术代码] IS NULL) FROM ss
+UNION ALL SELECT 37,N'住院手术记录表',N'手术结束日期格式不符合 yyyyMMdd HH:mm:ss',total_cnt,(SELECT COUNT(1) FROM dbo.ZYSSJLB WHERE [手术结束日期] IS NOT NULL AND (LEN(CONVERT(varchar(30),[手术结束日期]))<>17 OR CONVERT(varchar(30),[手术结束日期]) NOT LIKE '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9]')) FROM ss
+UNION ALL SELECT 38,N'住院手术记录表',N'手术结束日期为空',total_cnt,(SELECT COUNT(1) FROM dbo.ZYSSJLB WHERE [手术结束日期] IS NULL) FROM ss
+UNION ALL SELECT 39,N'住院手术记录表',N'手术开始日期格式不符合 yyyyMMdd HH:mm:ss',total_cnt,(SELECT COUNT(1) FROM dbo.ZYSSJLB WHERE [手术开始日期] IS NOT NULL AND (LEN(CONVERT(varchar(30),[手术开始日期]))<>17 OR CONVERT(varchar(30),[手术开始日期]) NOT LIKE '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9]')) FROM ss
+UNION ALL SELECT 40,N'住院手术记录表',N'手术开始日期为空',total_cnt,(SELECT COUNT(1) FROM dbo.ZYSSJLB WHERE [手术开始日期] IS NULL) FROM ss
+UNION ALL SELECT 41,N'住院手术记录表',N'医疗机构编码为空',total_cnt,(SELECT COUNT(1) FROM dbo.ZYSSJLB WHERE [医疗机构编码] IS NULL) FROM ss
+UNION ALL SELECT 42,N'住院手术记录表',N'医疗机构名称为空',total_cnt,(SELECT COUNT(1) FROM dbo.ZYSSJLB WHERE [医疗机构名称] IS NULL) FROM ss
+)
+SELECT 表名,校验项,总记录数,异常记录数,
+       CAST(CASE WHEN 总记录数=0 THEN 0 ELSE 异常记录数*100.0/总记录数 END AS decimal(18,4)) AS [异常占比%]
+FROM r
+ORDER BY sort_no;

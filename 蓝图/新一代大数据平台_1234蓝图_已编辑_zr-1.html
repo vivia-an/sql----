@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>新一代大数据平台 · 1234 架构蓝图（整合·可编辑）</title>
+<style>
+  :root{
+    --ink:#222a31; --ink2:#566069; --muted:#8a929b;
+    --line:#e4e8ec;
+    --blue-bg:#e9f2fc; --blue-bd:#1f63a8; --blue-tx:#0c447c;
+    --app-bg:#f5f5f2; --app-bd:#dedcd5; --app-tx:#5f5e5a;
+    --mod-bg:#ffffff; --mod-bd:#aecae9;
+    --base-bg:#f1efe8; --base-bd:#dedcd5;
+    --page:#f9fafb; --accent:#1f63a8; --accent-soft:#e9f2fc;
+    --r:12px; --shadow:0 1px 2px rgba(20,40,60,.05),0 6px 20px rgba(20,40,60,.07);
+    --shadow-h:0 2px 6px rgba(20,40,60,.08),0 16px 40px rgba(31,99,168,.16);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"PingFang SC","Microsoft YaHei","Noto Sans CJK SC","Hiragino Sans GB",sans-serif;
+    color:var(--ink);background:var(--page);-webkit-font-smoothing:antialiased;line-height:1.6}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px 64px}
+  .toolbar{position:sticky;top:0;z-index:10;background:rgba(249,250,251,.94);backdrop-filter:blur(6px);
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 0 10px;margin-bottom:8px;border-bottom:1px solid var(--line)}
+  .tb-btn{font:inherit;font-size:13px;border:1px solid var(--line);background:#fff;color:var(--ink2);padding:6px 12px;border-radius:8px;cursor:pointer;transition:.15s}
+  .tb-btn:hover{border-color:var(--accent);color:var(--accent)}
+  .tb-btn.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .tb-sep{width:1px;height:20px;background:var(--line);margin:0 2px}
+  .tb-note{flex-basis:100%;font-size:12px;color:var(--muted)}
+  .crumbs{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-bottom:16px;flex-wrap:wrap}
+  .crumb{cursor:pointer;padding:4px 9px;border-radius:8px;transition:.18s;white-space:nowrap}
+  .crumb:hover{background:#fff;color:var(--accent);box-shadow:var(--shadow)}
+  .crumb.cur{color:var(--ink);font-weight:600;cursor:default}
+  .crumb.cur:hover{background:none;box-shadow:none}
+  .sep{color:var(--line)}
+  .view{animation:fade .35s ease both}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .h-title{text-align:center;font-size:24px;font-weight:700}
+  .h-mnemo{text-align:center;color:var(--ink2);font-size:14px;margin-top:6px}
+  .h-tag{text-align:center;font-size:13.5px;font-weight:600;color:var(--accent);letter-spacing:1px;margin-top:8px;margin-bottom:6px}
+  .h-hint{text-align:center;font-size:12.5px;color:var(--accent);background:var(--accent-soft);border:1px solid #cfe0f3;display:inline-block;padding:5px 13px;border-radius:999px;margin:14px auto 0}
+  .hint-row{text-align:center;margin-bottom:20px}
+  .frame{border:1px solid #d6dee6;border-radius:18px;padding:16px;background:#fff;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px}
+  .tier{position:relative;border-radius:var(--r);transition:.2s;cursor:pointer}
+  .tier:hover{transform:translateY(-2px);box-shadow:var(--shadow-h)}
+  .tier::after{content:"展开 →";position:absolute;top:8px;right:12px;font-size:11px;font-weight:700;color:var(--accent);opacity:0;transition:.2s}
+  .tier:hover::after{opacity:1}
+  .badge{position:absolute;top:-10px;left:-10px;width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(31,99,168,.35);z-index:3}
+  .toprow{display:flex;gap:10px;padding:4px}
+  .dbox{flex:1;border:1px solid var(--app-bd);background:var(--app-bg);border-radius:10px;padding:11px 8px;text-align:center}
+  .dt{font-size:14px;font-weight:600;color:var(--app-tx)}
+  .dsum{font-size:11.5px;font-weight:500;color:var(--app-tx);opacity:.7;margin-top:2px}
+  .dsub{display:inline-block;margin-top:7px;font-size:12.5px;font-weight:500;color:var(--blue-tx);background:#fff;border:1px solid var(--mod-bd);border-radius:8px;padding:6px 12px;line-height:1.45}
+  .mid{display:flex;gap:10px;align-items:stretch}
+  .pillar{width:86px;flex:none;border:1px solid var(--blue-bd);background:var(--blue-bg);border-radius:var(--r);display:flex;align-items:center;justify-content:center;gap:5px;position:relative;cursor:pointer;transition:.2s}
+  .pillar:hover{transform:translateY(-2px);box-shadow:var(--shadow-h)}
+  .pillar .pc{font-size:17px;font-weight:600;color:var(--blue-tx);writing-mode:vertical-rl;letter-spacing:6px}
+  .pcsub{writing-mode:vertical-rl;font-size:11px;font-weight:500;color:var(--blue-tx);opacity:.62;letter-spacing:1px}
+  .bands{flex:1;display:flex;flex-direction:column;gap:10px;position:relative}
+  .band{border:1px solid var(--blue-bd);background:var(--blue-bg);border-radius:var(--r);padding:9px 12px}
+  .bt{font-size:14px;font-weight:600;color:var(--blue-tx);text-align:center;margin-bottom:2px}
+  .bsub{font-size:11.5px;color:var(--blue-tx);opacity:.66;text-align:center;margin-bottom:8px}
+  .mods{display:flex;align-items:center;gap:8px}
+  .mod{flex:1;border:1px solid var(--mod-bd);background:var(--mod-bg);border-radius:8px;padding:11px 6px;text-align:center;font-size:13px;color:var(--ink)}
+  .plus{font-size:17px;color:var(--blue-bd);flex:none}
+  .base{border:1px solid var(--base-bd);background:var(--base-bg);border-radius:var(--r);padding:14px;text-align:center;font-size:15px;font-weight:600;color:var(--ink2);position:relative}
+  .base-main{font-size:15px;font-weight:600}
+  .basesub{font-size:12px;font-weight:500;color:var(--muted);margin-top:5px;letter-spacing:.5px}
+  .num-strip{display:flex;justify-content:center;gap:18px;margin-top:18px;flex-wrap:wrap}
+  .ns{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--ink2)}
+  .ns b{display:inline-flex;width:22px;height:22px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-weight:800;font-size:12px;align-items:center;justify-content:center}
+  .d-head{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+  .d-num{width:46px;height:46px;border-radius:12px;background:var(--accent);color:#fff;font-size:22px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none}
+  .d-title{font-size:22px;font-weight:700}
+  .d-ess{color:var(--ink2);font-size:14.5px;margin:4px 0 16px;padding-left:60px}
+  .sec-h{font-size:15px;font-weight:700;color:var(--accent);margin:22px 0 10px;display:flex;align-items:center;gap:8px}
+  .sec-h::before{content:"";width:8px;height:8px;border-radius:2px;background:var(--accent);flex:none}
+  .cards{display:grid;gap:14px}
+  .g2{grid-template-columns:1fr 1fr}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow)}
+  .card.hi{border-color:#bcd5f0;background:#fbfdff}
+  .c-name{font-size:16px;font-weight:700;color:var(--ink)}
+  .c-tag{display:inline-block;font-size:11.5px;color:var(--accent);background:var(--accent-soft);border:1px solid #cfe0f3;padding:2px 9px;border-radius:999px;margin-left:8px;vertical-align:middle}
+  .c-pts{margin:11px 0 0;padding:0;list-style:none}
+  .c-pts li{position:relative;padding-left:18px;font-size:13.5px;color:var(--ink2);margin:6px 0}
+  .c-pts li::before{content:"";position:absolute;left:2px;top:8px;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+  .cmp{display:flex;gap:10px;margin-top:12px;font-size:12.5px;flex-wrap:wrap}
+  .cmp .old,.cmp .new{flex:1;min-width:160px;border-radius:9px;padding:8px 11px;line-height:1.5}
+  .cmp .old{background:#f4f5f6;color:#6b7178}
+  .cmp .new{background:var(--accent-soft);color:var(--blue-tx);border:1px solid #cfe0f3}
+  .cmp .lab{font-weight:700;font-size:11px;display:block;margin-bottom:2px;opacity:.8}
+  .back{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--accent);cursor:pointer;margin-top:24px}
+  .back:hover{text-decoration:underline}
+  /* engine module blocks (layer 2 - d3) */
+  .eng{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow);margin-bottom:16px}
+  .eng-h{display:flex;align-items:center;gap:10px;margin-bottom:2px}
+  .eng-name{font-size:16px;font-weight:700;color:var(--ink)}
+  .eng-tag{font-size:11.5px;color:var(--accent);background:var(--accent-soft);border:1px solid #cfe0f3;padding:2px 9px;border-radius:999px;white-space:nowrap}
+  .eng-intro{font-size:13px;color:var(--ink2);margin:6px 0 6px;line-height:1.65}
+  .grp{margin-top:12px}
+  .grp-h{font-size:13px;font-weight:600;color:var(--accent);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+  .grp-h::before{content:"";width:6px;height:6px;border-radius:2px;background:var(--accent);flex:none}
+  .grp-mods{display:flex;flex-wrap:wrap;gap:8px}
+  .grp-mods.vert{flex-direction:column;align-items:stretch}
+  .mbox{border:1px solid var(--mod-bd);background:var(--blue-bg);color:var(--blue-tx);border-radius:8px;padding:9px 13px;font-size:13px;font-weight:500;text-align:center}
+  .mbox.hot{background:#fff3e3;border-color:#e8943a;color:#a9620f}
+  .grp-row{display:flex;gap:12px;flex-wrap:wrap}
+  .grp.col{flex:1;min-width:170px;background:#f7fafd;border:1px solid var(--line);border-radius:10px;padding:11px 12px;margin-top:12px}
+  .eng-foot{font-size:12px;color:var(--muted);margin-top:14px;border-top:1px dashed var(--line);padding-top:9px}
+  .pptflow{display:flex;align-items:stretch;gap:6px;margin-top:12px;flex-wrap:wrap}
+  .pcol{flex:1;min-width:180px;background:#f7fafd;border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column}
+  .pcol-h{font-size:13.5px;font-weight:700;color:var(--blue-tx);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+  .pcol-h::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--blue-bd);flex:none}
+  .pcol-body{display:flex;flex-direction:column;gap:8px;flex:1}
+  .pcol-body.center{justify-content:center}
+  .ppill{background:var(--blue-bg);border:1px solid var(--mod-bd);border-radius:8px;padding:9px 8px;text-align:center;font-size:13px;color:var(--blue-tx);font-weight:500}
+  .pmol{background:#fff3e3;border:1px solid #e8943a;border-radius:10px;padding:16px 10px;text-align:center;font-size:13.5px;color:#a9620f;font-weight:600}
+  .pcyl-row{display:flex;gap:8px}
+  .pcyl{flex:1;position:relative;background:#dfeaf8;border:1px solid #9cc0e8;border-radius:9px;padding:15px 4px 9px;text-align:center;font-size:11.5px;color:var(--blue-tx);font-weight:500;line-height:1.3}
+  .pcyl::before{content:"";position:absolute;top:4px;left:50%;transform:translateX(-50%);width:58%;height:6px;border:1px solid #9cc0e8;border-radius:50%;background:#eef4fc}
+  .pwide{margin-top:8px;background:var(--blue-bd);border:1px solid var(--blue-bd);border-radius:9px;padding:11px 8px;text-align:center;font-size:13px;color:#fff;font-weight:600}
+  .parrow{display:flex;align-items:center;font-size:22px;color:var(--blue-bd);font-weight:700;flex:none}
+  @media(max-width:720px){.parrow{transform:rotate(90deg)}.pcol{min-width:180px}}
+  .flow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:6px 0 10px}
+  .fbox{border:1px solid var(--mod-bd);background:#fff;border-radius:8px;padding:9px 12px;font-size:13px;color:var(--ink);text-align:center}
+  .fbox.fstart{background:var(--blue-bg);border-color:var(--blue-bd);color:var(--blue-tx);font-weight:600}
+  .frow-lab{font-size:12px;color:var(--accent);font-weight:600;margin:10px 0 2px}
+  .sandbox{border:1.5px solid var(--blue-bd);border-radius:12px;padding:13px;background:#f7fafd;margin:12px 0}
+  .sandbox-h{font-size:14px;font-weight:700;color:var(--blue-tx);text-align:center;margin-bottom:10px}
+  .sandbox-row{display:flex;align-items:center;gap:8px;justify-content:center;flex-wrap:wrap}
+  .toolwrap{display:flex;flex-direction:column;gap:6px}
+  .pcyl-lg{min-width:96px;padding:16px 10px 10px;font-size:12.5px}
+  .lk-go{font-size:11px;color:var(--accent);font-weight:700;margin-left:8px;white-space:nowrap}
+  .card.lk{cursor:pointer}
+  .card.lk:hover{transform:translateY(-2px);box-shadow:var(--shadow-h);border-color:#bcd5f0}
+  .actors{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:4px}
+  .actor{border:1px solid var(--mod-bd);background:#fff;border-radius:8px;padding:8px 16px;font-size:13px;color:var(--ink);font-weight:500}
+  .cloud{background:#efeefb;border:1px solid #cfcbf3;border-radius:22px;padding:16px 18px;margin:6px 0}
+  .cloud-h{text-align:center;font-weight:700;color:#4a3fa6;font-size:14px;margin-bottom:12px}
+  .cloud-body{display:flex;align-items:stretch;gap:10px;justify-content:center;flex-wrap:wrap}
+  .cloud-side{display:flex;align-items:center;justify-content:center;min-width:108px;font-weight:600}
+  .cloud-caps,.cloud-data{display:flex;flex-direction:column;gap:7px}
+  .orgs{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:4px}
+  .org{border:1px solid #9cc0e8;background:#eaf2fb;border-radius:8px;padding:7px 12px;font-size:12.5px;color:var(--blue-tx);font-weight:500}
+  .edit{transition:background .15s}
+  body.editing .edit{outline:1px dashed #a9c1de;border-radius:3px;padding:0 2px;cursor:text;background:rgba(31,99,168,.05)}
+  body.editing .edit:focus{outline:1.5px solid var(--accent);background:#fff}
+  body.editing .tier,body.editing .pillar{cursor:default}
+  body.editing .tier:hover,body.editing .pillar:hover{transform:none;box-shadow:var(--shadow)}
+  body.editing .tier::after{display:none}
+  @media(max-width:720px){.g2{grid-template-columns:1fr}.toprow{flex-wrap:wrap}.dbox{min-width:45%}.grp.col{min-width:100%}}
+  /* ===== 2026–2030 建设进度时间轴 ===== */
+  .yr-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;margin:10px 0 8px}
+  .yr-bar-h{font-size:13px;font-weight:700;color:var(--ink2)}
+  .yr-chip{font:inherit;font-size:13px;font-weight:700;border:1px solid var(--mod-bd);background:#fff;color:var(--blue-tx);padding:6px 15px;border-radius:999px;cursor:pointer;transition:.18s}
+  .yr-chip:hover{border-color:var(--accent);box-shadow:var(--shadow)}
+  .yr-chip.on{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 2px 8px rgba(31,99,168,.3)}
+  .yr-play,.yr-reset{font:inherit;font-size:12.5px;border:1px solid var(--line);background:#fff;color:var(--ink2);padding:6px 12px;border-radius:999px;cursor:pointer;transition:.15s}
+  .yr-play:hover,.yr-reset:hover{border-color:var(--accent);color:var(--accent)}
+  .yr-legend{display:flex;gap:16px;justify-content:center;font-size:12px;color:var(--ink2);margin-bottom:6px;flex-wrap:wrap}
+  .yr-legend .lg{display:inline-flex;align-items:center;gap:6px}
+  .yr-legend .lg::before{content:"";width:13px;height:13px;border-radius:4px;border:1px solid;flex:none}
+  .yr-legend .lg-new::before{background:#fff3e3;border-color:#e8943a}
+  .yr-legend .lg-done::before{background:#e9f7ef;border-color:#3a9d63}
+  .yr-cap{text-align:center;font-size:12.5px;color:#a9620f;background:#fff8ee;border:1px solid #f0d8b5;border-radius:8px;padding:7px 12px;margin:0 auto 14px;max-width:780px}
+  .yr-cap:empty{display:none}
+  .hl-done{border-color:#3a9d63 !important;background:#e9f7ef !important;box-shadow:inset 0 0 0 1px #3a9d63,0 2px 8px rgba(58,157,99,.16) !important}
+  .hl-done .dt,.hl-done .dsum,.hl-done .dsub,.hl-done .pc,.hl-done .bt,.hl-done .base-main{color:#1f6b40 !important}
+  .hl-new{border-color:#e8943a !important;background:#fff3e3 !important;box-shadow:inset 0 0 0 1px #e8943a,0 2px 8px rgba(232,148,58,.18) !important}
+  .hl-new .dt,.hl-new .dsum,.hl-new .dsub,.hl-new .pc,.hl-new .bt,.hl-new .base-main{color:#a9620f !important}
+  .hlp{position:relative}
+  .pct-bar{position:absolute;left:8px;right:8px;bottom:5px;height:4px;border-radius:3px;background:rgba(40,50,60,.10);z-index:2}
+  .pct-bar>i{display:block;height:100%;border-radius:3px;background:#e8943a;transition:width .55s ease}
+  .hl-done .pct-bar>i{background:#3a9d63}
+  .pct-badge{position:absolute;top:4px;right:5px;font-size:10px;font-weight:800;line-height:1;padding:2px 5px;border-radius:7px;background:#fff;border:1px solid #e8943a;color:#a9620f;z-index:2}
+  .hl-done .pct-badge{border-color:#3a9d63;color:#1f6b40}
+  .hl-new.hl-pulse{animation:pulseAmber 1.15s ease-in-out infinite}
+  .hl-done.hl-pulse{animation:pulseGreen 1.15s ease-in-out infinite}
+  @keyframes pulseAmber{0%,100%{box-shadow:inset 0 0 0 1px #e8943a,0 0 0 3px rgba(232,148,58,.16)}50%{box-shadow:inset 0 0 0 1px #e8943a,0 0 0 9px rgba(232,148,58,.32)}}
+  @keyframes pulseGreen{0%,100%{box-shadow:inset 0 0 0 1px #3a9d63,0 0 0 3px rgba(58,157,99,.16)}50%{box-shadow:inset 0 0 0 1px #3a9d63,0 0 0 9px rgba(58,157,99,.34)}}
+  .yr-play.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .rm-editor{border:1px dashed var(--accent);background:#fbfdff;border-radius:12px;padding:13px 16px;margin:0 auto 14px;max-width:820px}
+  .rm-h{font-size:13.5px;font-weight:700;color:var(--accent);margin-bottom:10px}
+  .rm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:5px 18px}
+  .rm-grp-h{grid-column:1/-1;font-size:11.5px;font-weight:700;color:var(--ink2);margin-top:7px;border-top:1px solid var(--line);padding-top:7px}
+  .rm-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .rm-name{font-size:12.5px;color:var(--ink)}
+  .rm-in{width:62px;font:inherit;font-size:12.5px;text-align:right;border:1px solid var(--mod-bd);border-radius:6px;padding:3px 7px;color:var(--ink)}
+  .rm-in:focus{outline:1.5px solid var(--accent)}
+  .rm-note{font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="toolbar">
+    <button class="tb-btn" id="btnEdit" onclick="toggleEdit()">✎ 编辑文字：关</button>
+    <span class="tb-sep"></span>
+    <button class="tb-btn" onclick="nav('home')">首页</button>
+    <button class="tb-btn" onclick="nav('d1')">①</button>
+    <button class="tb-btn" onclick="nav('d2')">②</button>
+    <button class="tb-btn" onclick="nav('d3')">③</button>
+    <button class="tb-btn" onclick="nav('d4')">④</button>
+    <span class="tb-sep"></span>
+    <button class="tb-btn" onclick="downloadEdited()">⬇ 下载编辑版</button>
+    <button class="tb-btn" onclick="resetData()">↺ 恢复初始</button>
+    <span class="tb-note">打开「编辑文字」后点任意文字即可修改；用 ①②③④ 切换页面编辑各层；改完点「下载编辑版」保存为新的 HTML。</span>
+  </div>
+  <div class="crumbs" id="crumbs"><span class="crumb cur">新一代大数据平台 · 1234 架构</span></div>
+  <div id="stage"><div class="view">
+    <div class="h-title"><span class="edit" data-k="title" contenteditable="false">新一代大数据平台</span></div>
+    <div class="h-tag"><span class="edit" data-k="tagline" contenteditable="false">云原生 · AI 原生 · 数据驱动 · 安全共享</span></div>
+    <div class="yr-bar">
+      <span class="yr-bar-h">🏗 建设路线图 2026–2030</span>
+      <button class="yr-chip on" data-yr="2026" onclick="selectYear(2026)">2026</button>
+      <button class="yr-chip" data-yr="2027" onclick="selectYear(2027)">2027</button>
+      <button class="yr-chip" data-yr="2028" onclick="selectYear(2028)">2028</button>
+      <button class="yr-chip" data-yr="2029" onclick="selectYear(2029)">2029</button>
+      <button class="yr-chip" data-yr="2030" onclick="selectYear(2030)">2030</button>
+      <button id="yrPlay" class="yr-play" onclick="playYears()">▶ 自动播放</button>
+      <button class="yr-reset" onclick="clearYear()">清除</button>
+      <button id="rmBtn" class="yr-play" onclick="toggleRoadmapEdit()">✎ 编辑进度</button>
+    </div>
+    <div class="yr-legend"><span class="lg lg-new">建设中（未满 100%）</span><span class="lg lg-done">已完成（100%）</span></div>
+    <div class="yr-cap" id="yrCap">（2026 年）建设中 云原生底座 60%、数据资源治理 10%、AI 驱动数据挖掘 30%、数据安全 50%、数据质量 40%、Data for Users 30%、Data for APP 20%、全域实时数据湖 20%</div>
+    <div id="rmEditor"></div>
+    <div class="frame">
+      <div class="tier" onclick="go('d4')"><span class="badge">4</span><div class="toprow"><div class="dbox" data-hl="sc0"><div class="dt"><span class="edit" data-k="scenarios.0.t" contenteditable="false">Data for AI</span></div><div class="dsum"><span class="edit" data-k="scenarios.0.sum" contenteditable="false">数模共振</span></div><div class="dsub"><span class="edit" data-k="scenarios.0.s" contenteditable="false">AI 中台 · 智能体应用 · 人机协同</span></div></div><div class="dbox hlp hl-new hl-pulse" data-hl="sc1"><div class="dt"><span class="edit" data-k="scenarios.1.t" contenteditable="false">Data for APP</span></div><div class="dsum"><span class="edit" data-k="scenarios.1.sum" contenteditable="false">指标中台 · 数据驱动业务决策</span></div><div class="dsub"><span class="edit" data-k="scenarios.1.s" contenteditable="false">医 · 教 · 研 · 管 · 服</span></div><span class="pct-bar"><i style="width: 20%;"></i></span><span class="pct-badge">20%</span></div><div class="dbox hlp hl-new hl-pulse" data-hl="sc2"><div class="dt"><span class="edit" data-k="scenarios.2.t" contenteditable="false">Data for Users</span></div><div class="dsum"><span class="edit" data-k="scenarios.2.sum" contenteditable="false">用户友好</span></div><div class="dsub"><span class="edit" data-k="scenarios.2.s" contenteditable="false">数据广场 · 安全沙箱 · 数据分析</span></div><span class="pct-bar"><i style="width: 30%;"></i></span><span class="pct-badge">30%</span></div><div class="dbox" data-hl="sc3"><div class="dt"><span class="edit" data-k="scenarios.3.t" contenteditable="false">Data for Oper</span></div><div class="dsum"><span class="edit" data-k="scenarios.3.sum" contenteditable="false">数据开放生态</span></div><div class="dsub"><span class="edit" data-k="scenarios.3.s" contenteditable="false">可信空间 · 数据超市 · 运营流通</span></div></div></div></div>
+      <div class="mid">
+        <div class="pillar hlp hl-new hl-pulse" data-hl="pil0" onclick="go('d2')"><span class="badge">2</span><div class="pc"><span class="edit" data-k="pillars.0" contenteditable="false">数据质量</span></div><div class="pcsub"><span class="edit" data-k="pillarSubs.0" contenteditable="false">全链路质检 · 实时拦截</span></div><span class="pct-bar"><i style="width: 40%;"></i></span><span class="pct-badge">40%</span></div>
+        <div class="tier bands" onclick="go('d3')"><span class="badge">3</span><div class="band" data-hl="band0"><div class="bt"><span class="edit" data-k="bands.0.bt" contenteditable="false">数据资产管理</span></div><div class="bsub"><span class="edit" data-k="bands.0.sub" contenteditable="false">资产明晰 · 数据产品 · AI 就绪 · 数据分类</span></div><div class="mods"><div class="mod" data-hl="b0m0"><span class="edit" data-k="bands.0.mods.0" contenteditable="false">全生命周期管理</span></div><span class="plus">+</span><div class="mod" data-hl="b0m1"><span class="edit" data-k="bands.0.mods.1" contenteditable="false">高质量数据集</span></div><span class="plus">+</span><div class="mod" data-hl="b0m2"><span class="edit" data-k="bands.0.mods.2" contenteditable="false">数据资产运营</span></div></div></div><div class="band" data-hl="band1"><div class="bt"><span class="edit" data-k="bands.1.bt" contenteditable="false">数据要素挖掘</span></div><div class="bsub"><span class="edit" data-k="bands.1.sub" contenteditable="false">语义即服务 · 知识沉淀</span></div><div class="mods"><div class="mod" data-hl="b1m0"><span class="edit" data-k="bands.1.mods.0" contenteditable="false">知识中心</span></div><span class="plus">+</span><div class="mod hlp hl-new hl-pulse" data-hl="b1m1"><span class="edit" data-k="bands.1.mods.1" contenteditable="false">AI 驱动数据挖掘</span><span class="pct-bar"><i style="width: 30%;"></i></span><span class="pct-badge">30%</span></div><span class="plus">+</span><div class="mod" data-hl="b1m2"><span class="edit" data-k="bands.1.mods.2" contenteditable="false">多模态标注与融合</span></div></div></div><div class="band hlp hl-new hl-pulse" data-hl="band2"><div class="bt"><span class="edit" data-k="bands.2.bt" contenteditable="false">数据资源治理</span></div><div class="bsub"><span class="edit" data-k="bands.2.sub" contenteditable="false">核心数据模型 · 国际标准 · AI 驱动</span></div><div class="mods"><div class="mod hlp hl-new hl-pulse" data-hl="b2m0"><span class="edit" data-k="bands.2.mods.0" contenteditable="false">全域实时数据湖</span><span class="pct-bar"><i style="width: 20%;"></i></span><span class="pct-badge">20%</span></div><span class="plus">+</span><div class="mod" data-hl="b2m1"><span class="edit" data-k="bands.2.mods.1" contenteditable="false">AI 驱动数据治理</span></div></div><span class="pct-bar"><i style="width: 10%;"></i></span><span class="pct-badge">10%</span></div></div>
+        <div class="pillar hlp hl-new hl-pulse" data-hl="pil1" onclick="go('d2')"><div class="pc"><span class="edit" data-k="pillars.1" contenteditable="false">数据安全</span></div><div class="pcsub"><span class="edit" data-k="pillarSubs.1" contenteditable="false">数据分级 · 去隐私化 · 可用不可见</span></div><span class="pct-bar"><i style="width: 50%;"></i></span><span class="pct-badge">50%</span></div>
+      </div>
+      <div class="tier base hlp hl-new hl-pulse" data-hl="base" onclick="go('d1')"><span class="badge">1</span><div class="base-main"><span class="edit" data-k="base" contenteditable="false">云原生底座</span></div><div class="basesub"><span class="edit" data-k="baseSub" contenteditable="false">弹性伸缩 · 存算分离 · 湖仓一体 · 容器编排 · 信创就绪</span></div><span class="pct-bar"><i style="width: 60%;"></i></span><span class="pct-badge">60%</span></div>
+    </div>
+    <div class="num-strip"><span class="ns"><b>1</b><span class="edit" data-k="numstrip.0" contenteditable="false">一个底座</span></span><span class="ns"><b>2</b><span class="edit" data-k="numstrip.1" contenteditable="false">两大支柱</span></span><span class="ns"><b>3</b><span class="edit" data-k="numstrip.2" contenteditable="false">三大引擎</span></span><span class="ns"><b>4</b><span class="edit" data-k="numstrip.3" contenteditable="false">四大场景</span></span></div>
+  </div></div>
+</div>
+
+<script id="seed" type="application/json">{
+ "title": "新一代大数据平台",
+ "mnemo": "一个底座 · 两大支柱 · 三大引擎 · 四大场景",
+ "tagline": "云原生 · AI 原生 · 数据驱动 · 安全共享",
+ "hint": "👆 编辑模式关闭时，点击 ①②③④ 区块下钻；打开编辑模式可直接改文字",
+ "scenarios": [
+  {
+   "t": "Data for AI",
+   "sum": "数模共振",
+   "s": "AI 中台 · 智能体应用 · 人机协同"
+  },
+  {
+   "t": "Data for APP",
+   "sum": "指标中台 · 数据驱动业务决策",
+   "s": "医 · 教 · 研 · 管 · 服"
+  },
+  {
+   "t": "Data for Users",
+   "sum": "用户友好",
+   "s": "数据广场 · 安全沙箱 · 数据分析"
+  },
+  {
+   "t": "Data for Oper",
+   "sum": "数据开放生态",
+   "s": "可信空间 · 数据超市 · 运营流通"
+  }
+ ],
+ "pillars": [
+  "数据质量",
+  "数据安全"
+ ],
+ "pillarSubs": [
+  "全链路质检 · 实时拦截",
+  "数据分级 · 去隐私化 · 可用不可见"
+ ],
+ "bands": [
+  {
+   "bt": "数据资产管理",
+   "sub": "资产明晰 · 数据产品 · AI 就绪 · 数据分类",
+   "mods": [
+    "全生命周期管理",
+    "高质量数据集",
+    "数据资产运营"
+   ]
+  },
+  {
+   "bt": "数据要素挖掘",
+   "sub": "语义即服务 · 知识沉淀",
+   "mods": [
+    "知识中心",
+    "AI 驱动数据挖掘",
+    "多模态标注与融合"
+   ]
+  },
+  {
+   "bt": "数据资源治理",
+   "sub": "核心数据模型 · 国际标准 · AI 驱动",
+   "mods": [
+    "全域实时数据湖",
+    "AI 驱动数据治理"
+   ]
+  }
+ ],
+ "base": "云原生底座",
+ "baseSub": "弹性伸缩 · 存算分离 · 湖仓一体 · 容器编排 · 信创就绪",
+ "numstrip": [
+  "一个底座",
+  "两大支柱",
+  "三大引擎",
+  "四大场景"
+ ],
+ "roadmap": {
+  "2026": {
+   "base": 60,
+   "band2": 10,
+   "b1m1": 30,
+   "pil1": 50,
+   "pil0": 40,
+   "sc2": 30,
+   "sc0": 0,
+   "sc1": 20,
+   "b2m0": 20
+  },
+  "2027": {
+   "base": 100,
+   "band2": 40,
+   "b1m1": 80,
+   "b1m0": 60,
+   "sc1": 40,
+   "b1m2": 30,
+   "pil0": 50,
+   "pil1": 70,
+   "b0m0": 100,
+   "sc2": 30,
+   "sc0": 0,
+   "b2m0": 100,
+   "b2m1": 30
+  },
+  "2028": {
+   "base": 100,
+   "band2": 70,
+   "b1m1": 100,
+   "b1m0": 100,
+   "sc1": 80,
+   "sc0": 30,
+   "b1m2": 50,
+   "pil0": 100,
+   "pil1": 100,
+   "b0m0": 100,
+   "b0m1": 100,
+   "sc2": 100,
+   "b2m0": 100,
+   "b2m1": 60
+  },
+  "2029": {
+   "base": 100,
+   "band2": 90,
+   "b1m1": 100,
+   "b1m0": 100,
+   "sc0": 60,
+   "b1m2": 70,
+   "pil0": 100,
+   "pil1": 100,
+   "b0m0": 100,
+   "b0m1": 100,
+   "sc2": 100,
+   "sc1": 90,
+   "b0m2": 80,
+   "sc3": 70,
+   "b2m0": 100,
+   "b2m1": 80
+  },
+  "2030": {
+   "sc0": 100,
+   "sc1": 100,
+   "sc2": 100,
+   "sc3": 100,
+   "pil0": 100,
+   "pil1": 100,
+   "band0": 100,
+   "b0m0": 100,
+   "b0m1": 100,
+   "b0m2": 100,
+   "band1": 100,
+   "b1m0": 100,
+   "b1m1": 100,
+   "b1m2": 100,
+   "band2": 100,
+   "b2m0": 100,
+   "b2m1": 100,
+   "base": 100
+  }
+ },
+ "details": {
+  "d1": {
+   "title": "一个底座 · 云原生底座",
+   "ess": "支撑 PB 级数据规模下的实时计算，是整套平台的统一算力与运行基座。",
+   "sections": [
+    {
+     "h": "",
+     "g2": true,
+     "cards": [
+      {
+       "name": "统一算力",
+       "tag": "",
+       "pts": [
+        "多院区算力统一调度、按需分配",
+        "为 AI 训练与实时分析提供弹性算力"
+       ]
+      },
+      {
+       "name": "弹性扩容",
+       "tag": "",
+       "pts": [
+        "业务高峰自动扩、闲时自动缩",
+        "成本可控，不用一次性堆硬件"
+       ]
+      },
+      {
+       "name": "存算分离",
+       "tag": "",
+       "pts": [
+        "存储与计算独立扩展",
+        "告别传统一体机的算力与存储捆绑"
+       ]
+      },
+      {
+       "name": "智能运维",
+       "tag": "",
+       "pts": [
+        "故障自愈、容量预测、统一监控",
+        "信创国产化适配，降低运维负担"
+       ]
+      }
+     ]
+    },
+    {
+     "h": "",
+     "g2": false,
+     "cards": [
+      {
+       "name": "为什么这套底座算“新”",
+       "tag": "对比传统 Hadoop",
+       "pts": [
+        "存算分离：传统 Hadoop 存算耦合，扩存储被迫一起扩算力；现在各扩各的，钱花在刀刃上",
+        "弹性伸缩：传统按峰值常驻、利用率低；现在按需弹性、闲时缩容，不烧钱",
+        "湖仓一体与实时 AI：传统以批处理为主、HDFS 绑定集群；现在对象存储 + 流批一体 + GPU 调度，AI 就绪"
+       ],
+       "old": "传统 / Hadoop：存算耦合、按峰值常驻、批处理为主，扩容靠堆硬件",
+       "nw": "云原生：存算分离 · 弹性伸缩 · 湖仓一体实时 · AI 与信创就绪，一套底座撑住全院实时计算",
+       "hi": true
+      }
+     ]
+    }
+   ]
+  },
+  "d2": {
+   "title": "两大支柱 · 数据质量 + 数据安全",
+   "ess": "两根柱子贯穿平台全过程——前者保证数据“高质量”，后者保证数据“安全可控”。",
+   "sections": [
+    {
+     "h": "数据质量",
+     "g2": false,
+     "cards": [
+      {
+       "name": "全链路质检",
+       "tag": "贯穿全过程",
+       "pts": [
+        "完整性 · 准确性 · 一致性 · 规范性 · 可追溯性",
+        "从采集到资产，每一环都带质检关卡"
+       ],
+       "old": "事后人工抽查，问题发现滞后",
+       "nw": "AI 实时内生质检，问题即时拦截、提醒",
+       "hi": true
+      },
+      {
+       "name": "高质量数据集质检平台",
+       "tag": "AI 质检",
+       "pts": [
+        "说明文档 / 数据质量 / 模型应用 三维质检",
+        "结构化、非结构化、多模态统一质检",
+        "统一质量标准"
+       ]
+      }
+     ]
+    },
+    {
+     "h": "数据安全",
+     "g2": false,
+     "cards": [
+      {
+       "name": "分类分级与去隐私",
+       "tag": "合规底线",
+       "pts": [
+        "数据分类分级、敏感数据识别",
+        "去隐私化：结构化、非结构化数据脱敏 / 数据匿名化 / 数据水印"
+       ],
+       "old": "靠边界与权限，数据流通=拷贝外发，难合规",
+       "nw": "对标《数据安全法》《个人信息保护法》",
+       "hi": true
+      },
+      {
+       "name": "可用不可见",
+       "tag": "安全流通",
+       "pts": [
+        "原始数据不出域、可用不可见",
+        "安全沙箱用数 + 密态计算",
+        "让高价值数据“能用起来”又“不泄露”"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "d3": {
+   "title": "三大引擎 · 数据治理 / 数据挖掘 / 数据资产",
+   "ess": "数据“管好 → 用活 → 变现”的核心处理链，也是平台区别于传统最关键的三个引擎；每个引擎拆成独立模块板块。",
+   "blocks": [
+    {
+     "name": "数据治理引擎",
+     "tag": "治理 · 打地基",
+     "cols": false,
+     "intro": "统一标准 + AI 实时治理，把多源脏乱数据变成干净、合规、可用的标准数据，为语义层与高质量数据集打地基。",
+     "old": "标准各系统不一、烟囱林立；治理靠人工事后运动式",
+     "nw": "国际标准统一对标；治理 AI 实时、内生、可持续",
+     "groups": [
+      {
+       "gh": "国际标准对标",
+       "mods": [
+        "SNOMED-CT",
+        "HL7",
+        "梅奥临床标准",
+        "统一术语标准"
+       ]
+      },
+      {
+       "gh": "AI 驱动治理",
+       "mods": [
+        "规则解析",
+        "字段候选匹配",
+        "整改建议生成",
+        "人工复核"
+       ]
+      }
+     ]
+    },
+    {
+     "name": "数据挖掘引擎",
+     "tag": "挖掘",
+     "cols": true,
+     "intro": "以业务对象（而非表）作为数据组织的基本单元，在数据标准层之上构建一层稳定、统一、可治理的业务语义层，让数据“组合”而非“复制”，分析、AI 模型、业务决策共用同一套语义底座。",
+     "old": "取数靠 IT 写 SQL，业务看不懂库表，效率低",
+     "nw": "语义即服务，用业务语言直接取数，不写 SQL",
+     "groups": [
+      {
+       "gh": "医学语义模型",
+       "mods": [
+        "规则模型",
+        "指标模型",
+        "对象子集（队列）",
+        "对象 + 属性（变量）",
+        "术语 + 概念集合"
+       ]
+      },
+      {
+       "gh": "语义即服务",
+       "hot": true,
+       "mods": [
+        "医学对象语言引擎（MOL）"
+       ]
+      },
+      {
+       "gh": "场景数据集",
+       "mods": [
+        "专科 / 专病数据集",
+        "标准指标集",
+        "质控规则集",
+        "医院通用业务模型"
+       ]
+      },
+      {
+       "gh": "知识中心（医疗健康知识体系建设）",
+       "mods": [
+        "医学知识图谱",
+        "临床规则库",
+        "文档 / 指南库",
+        "术语本体集"
+       ]
+      }
+     ],
+     "foot": "底层：多模态全域数据湖 · DWD-DIM（标准数据模型）　｜　侧：LLM 多模态数据挖掘与标注　｜　知识中心沉淀院内可复用的知识资产"
+    },
+    {
+     "name": "数据资产引擎",
+     "tag": "资产 · 变现",
+     "cols": false,
+     "intro": "挖掘出的高质量数据经质检封装后，沉淀为可管理、可评估、可变现的数据资产。",
+     "old": "数据是成本负担，用完即弃、不沉淀",
+     "nw": "数据当资产管，可盘点、可评估、可入表变现",
+     "groups": [
+      {
+       "gh": "高质量数据集质检与封装",
+       "mods": [
+        "数据质量检测",
+        "数据标准检测",
+        "合规检测",
+        "标注检测",
+        "AI 场景化封装"
+       ]
+      },
+      {
+       "gh": "全生命周期管理",
+       "mods": [
+        "采集→销毁",
+        "数据血缘",
+        "版本管理"
+       ]
+      },
+      {
+       "gh": "数据资产化",
+       "mods": [
+        "资产盘点",
+        "价值评估",
+        "入表",
+        "计价"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "d4": {
+   "title": "四大场景 · Data for AI / APP / Users / Oper",
+   "ess": "平台对外的四个用数方向——同一份高质量数据，分别服务于 AI、业务应用、院内用户和对外运营。点击 Data for Users / Oper 可展开详细流程。",
+   "sections": [
+    {
+     "h": "",
+     "g2": true,
+     "cards": [
+      {
+       "name": "Data for AI",
+       "tag": "供 AI 用数",
+       "pts": [
+        "大模型底座 + 智能体（Agent）中心",
+        "AI 中台：模型注册 / 训练推理 / MLOps 统一纳管",
+        "专科专病垂直大模型、Agent 即插即用",
+        "高质量数据集直接喂模型，数模共振"
+       ]
+      },
+      {
+       "name": "Data for APP",
+       "tag": "供业务用数",
+       "pts": [
+        "医 · 教 · 研 · 管 · 服 五大智慧应用",
+        "患者 360、辅助诊断、科研平台、运营管理等",
+        "应用长在平台上，数据口径统一"
+       ]
+      },
+      {
+       "name": "Data for Users",
+       "tag": "供院内用户",
+       "link": "d4u",
+       "pts": [
+        "安全沙箱 · 院内开放",
+        "医生 / 科研人员自助取数、自助分析",
+        "原始数据不出域，成果导出受控"
+       ]
+      },
+      {
+       "name": "Data for Oper",
+       "tag": "供对外运营",
+       "link": "d4o",
+       "pts": [
+        "可信数据空间 · 流通交易",
+        "对外开放：区域医联体 + 外部产业",
+        "数据生态 / 梅奥模式，让数据价值变现"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "d4u": {
+   "title": "Data for Users · 数据安全共享使用平台（院内用户）",
+   "ess": "院内用户从提出需求到需求落地的全流程：浏览检索或申请交付两条路径，统一在安全沙箱内分析，导出需经审批。",
+   "start": "数据需求",
+   "pathA": {
+    "lab": "路径一 · 浏览检索",
+    "steps": [
+     "数据广场",
+     "数据浏览",
+     "数据检索",
+     "检索结果"
+    ]
+   },
+   "pathB": {
+    "lab": "路径二 · 申请交付（信息中心）",
+    "steps": [
+     "数据申请（OA）",
+     "数据审批",
+     "数据交付",
+     "数据探查（自助 SQL）",
+     "查询结果"
+    ]
+   },
+   "sandbox": {
+    "title": "安全沙箱（数据分析）",
+    "cyl_in": "导入数据集",
+    "tools": [
+     "虚拟桌面",
+     "通用工具",
+     "专业工具"
+    ],
+    "cyl_out": "结果数据集"
+   },
+   "tail": [
+    "数据导出审批",
+    "本地数据集",
+    "需求落地"
+   ]
+  },
+  "d4o": {
+   "title": "Data for Oper · 可信数据空间（院外用户）",
+   "ess": "Data Behind Glass：原始数据不出域，外部机构通过节点注册接入，在可信空间内完成产品交易、联邦学习、隐私计算与分析，结果交付给科研人员、药企、数据需求方。",
+   "users": [
+    "科研人员",
+    "药企",
+    "数据需求方"
+   ],
+   "space": {
+    "name": "数据安全共享平台 / 可信数据空间（Data Behind Glass）",
+    "left": "数据产品超市",
+    "caps": [
+     "Solutions Studio 环境",
+     "联邦学习",
+     "隐私计算",
+     "安全沙箱"
+    ],
+    "data": [
+     "结果数据集",
+     "分析数据集（汇聚式 / 分布式）",
+     "原始数据集"
+    ],
+    "right": "数据需求交付"
+   },
+   "orgs": [
+    "医疗机构 A",
+    "医疗机构 B",
+    "医疗机构 C",
+    "医疗机构 D",
+    "医疗机构 E"
+   ]
+  }
+ }
+}</script>
+
+<script>
+const KEY="bp1234_v7";
+let DATA;
+try{ const s=localStorage.getItem(KEY); DATA=JSON.parse(s||document.getElementById('seed').textContent); }
+catch(e){ DATA=JSON.parse(document.getElementById('seed').textContent); }
+try{ if(!DATA.roadmap){ DATA.roadmap=JSON.parse(document.getElementById('seed').textContent).roadmap; } }catch(e){}
+let cur="home", editMode=false;
+
+function gp(o,p){return p.split('.').reduce((a,k)=>(a==null?a:a[k]),o);}
+function sp(o,p,v){const ks=p.split('.');const last=ks.pop();let t=o;for(const k of ks)t=t[k];t[last]=v;}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function E(path){return '<span class="edit" data-k="'+path+'">'+esc(gp(DATA,path))+'</span>';}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(DATA));}catch(e){}}
+
+const TITLE={home:"新一代大数据平台 · 1234 架构",d1:"① 一个底座",d2:"② 两大支柱",d3:"③ 三大引擎",d4:"④ 四大场景",d4u:"Data for Users",d4o:"Data for Oper"};
+const PARENT={d1:"home",d2:"home",d3:"home",d4:"home",d4u:"d4",d4o:"d4"};
+function crumbs(){
+  const path=[];let n=cur;while(n){path.unshift(n);n=PARENT[n];}
+  document.getElementById("crumbs").innerHTML=path.map((id,i)=>{
+    const last=i===path.length-1;
+    return '<span class="crumb'+(last?' cur':'')+'"'+(last?'':' onclick="nav(\''+id+'\')"')+'>'+TITLE[id]+'</span>';
+  }).join('<span class="sep">›</span>');
+}
+
+function V_home(){
+  const sc=DATA.scenarios.map((x,i)=>`<div class="dbox" data-hl="sc${i}"><div class="dt">${E('scenarios.'+i+'.t')}</div><div class="dsum">${E('scenarios.'+i+'.sum')}</div><div class="dsub">${E('scenarios.'+i+'.s')}</div></div>`).join('');
+  const bands=DATA.bands.map((b,i)=>{
+    const mods=b.mods.map((m,j)=>`<div class="mod" data-hl="b${i}m${j}">${E('bands.'+i+'.mods.'+j)}</div>`).join('<span class="plus">+</span>');
+    const sub=(b.sub!==undefined&&b.sub!=='')?`<div class="bsub">${E('bands.'+i+'.sub')}</div>`:'';
+    return `<div class="band" data-hl="band${i}"><div class="bt">${E('bands.'+i+'.bt')}</div>${sub}<div class="mods">${mods}</div></div>`;
+  }).join('');
+  const ns=DATA.numstrip.map((x,i)=>`<span class="ns"><b>${i+1}</b>${E('numstrip.'+i)}</span>`).join('');
+  return `<div class="view">
+    <div class="h-title">${E('title')}</div>
+    <div class="h-tag">${E('tagline')}</div>
+    <div class="yr-bar">
+      <span class="yr-bar-h">🏗 建设路线图 2026–2030</span>
+      <button class="yr-chip" data-yr="2026" onclick="selectYear(2026)">2026</button>
+      <button class="yr-chip" data-yr="2027" onclick="selectYear(2027)">2027</button>
+      <button class="yr-chip" data-yr="2028" onclick="selectYear(2028)">2028</button>
+      <button class="yr-chip" data-yr="2029" onclick="selectYear(2029)">2029</button>
+      <button class="yr-chip" data-yr="2030" onclick="selectYear(2030)">2030</button>
+      <button id="yrPlay" class="yr-play" onclick="playYears()">▶ 自动播放</button>
+      <button class="yr-reset" onclick="clearYear()">清除</button>
+      <button id="rmBtn" class="yr-play" onclick="toggleRoadmapEdit()">✎ 编辑进度</button>
+    </div>
+    <div class="yr-legend"><span class="lg lg-new">建设中（未满 100%）</span><span class="lg lg-done">已完成（100%）</span></div>
+    <div class="yr-cap" id="yrCap"></div>
+    <div id="rmEditor"></div>
+    <div class="frame">
+      <div class="tier" onclick="go('d4')"><span class="badge">4</span><div class="toprow">${sc}</div></div>
+      <div class="mid">
+        <div class="pillar" data-hl="pil0" onclick="go('d2')"><span class="badge">2</span><div class="pc">${E('pillars.0')}</div><div class="pcsub">${E('pillarSubs.0')}</div></div>
+        <div class="tier bands" onclick="go('d3')"><span class="badge">3</span>${bands}</div>
+        <div class="pillar" data-hl="pil1" onclick="go('d2')"><div class="pc">${E('pillars.1')}</div><div class="pcsub">${E('pillarSubs.1')}</div></div>
+      </div>
+      <div class="tier base" data-hl="base" onclick="go('d1')"><span class="badge">1</span><div class="base-main">${E('base')}</div><div class="basesub">${E('baseSub')}</div></div>
+    </div>
+    <div class="num-strip">${ns}</div>
+  </div>`;
+}
+
+function V_detail(id){
+  const d=gp(DATA,'details.'+id);
+  let body='';
+  d.sections.forEach((s,si)=>{
+    if(s.h) body+='<div class="sec-h">'+E('details.'+id+'.sections.'+si+'.h')+'</div>';
+    body+='<div class="cards'+(s.g2?' g2':'')+'">';
+    s.cards.forEach((c,ci)=>{
+      const base='details.'+id+'.sections.'+si+'.cards.'+ci;
+      let pts=(c.pts&&c.pts.length)?'<ul class="c-pts">'+c.pts.map((p,pi)=>'<li>'+E(base+'.pts.'+pi)+'</li>').join('')+'</ul>':'';
+      let tag=(c.tag!==undefined&&c.tag!=='')?'<span class="c-tag">'+E(base+'.tag')+'</span>':'';
+      let cmp=(c.old!==undefined)?'<div class="cmp"><div class="old"><span class="lab">传统 / Hadoop</span>'+E(base+'.old')+'</div><div class="new"><span class="lab">新一代</span>'+E(base+'.nw')+'</div></div>':'';
+      let lk=c.link?'<span class="lk-go" onclick="event.stopPropagation();nav(\''+c.link+'\')">展开 →</span>':'';
+      let oc=c.link?(' onclick="go(\''+c.link+'\')"'):'';
+      body+='<div class="card'+(c.hi?' hi':'')+(c.link?' lk':'')+'"'+oc+'><div><span class="c-name">'+E(base+'.name')+'</span>'+tag+lk+'</div>'+pts+cmp+'</div>';
+    });
+    body+='</div>';
+  });
+  return '<div class="view"><div class="d-head"><div class="d-num">'+id.slice(1)+'</div><div class="d-title">'+E('details.'+id+'.title')+'</div></div>'+
+    '<div class="d-ess">'+E('details.'+id+'.ess')+'</div>'+body+
+    '<div class="back" onclick="nav(\'home\')">← 返回第一层蓝图</div></div>';
+}
+
+function V_d3(){
+  const d=DATA.details.d3;
+  let blocks='';
+  d.blocks.forEach((b,bi)=>{
+    const bp='details.d3.blocks.'+bi;
+    let wrap;
+    if(b.cols){
+      const g0=bp+'.groups.0',g1=bp+'.groups.1',g2=bp+'.groups.2';
+      const pills=b.groups[0].mods.map((m,mi)=>`<div class="ppill">${E(g0+'.mods.'+mi)}</div>`).join('');
+      const mol=`<div class="pmol">${E(g1+'.mods.0')}</div>`;
+      const sm=b.groups[2].mods;
+      const cyls=sm.slice(0,-1).map((m,mi)=>`<div class="pcyl">${E(g2+'.mods.'+mi)}</div>`).join('');
+      const wide=`<div class="pwide">${E(g2+'.mods.'+(sm.length-1))}</div>`;
+      let extra='';
+      for(let gi=3;gi<b.groups.length;gi++){
+        const gpth=bp+'.groups.'+gi, g=b.groups[gi];
+        const ms=g.mods.map((m,mi)=>`<div class="mbox${g.hot?' hot':''}">${E(gpth+'.mods.'+mi)}</div>`).join('');
+        extra+=`<div class="grp"><div class="grp-h">${E(gpth+'.gh')}</div><div class="grp-mods">${ms}</div></div>`;
+      }
+      wrap='<div class="pptflow">'
+        +'<div class="pcol"><div class="pcol-h">'+E(g0+'.gh')+'</div><div class="pcol-body">'+pills+'</div></div>'
+        +'<div class="parrow">→</div>'
+        +'<div class="pcol"><div class="pcol-h">'+E(g1+'.gh')+'</div><div class="pcol-body center">'+mol+'</div></div>'
+        +'<div class="parrow">→</div>'
+        +'<div class="pcol"><div class="pcol-h">'+E(g2+'.gh')+'</div><div class="pcol-body"><div class="pcyl-row">'+cyls+'</div>'+wide+'</div></div>'
+        +'</div>'+extra;
+    }else{
+      let groups='';
+      b.groups.forEach((g,gi)=>{
+        const gpth=bp+'.groups.'+gi;
+        const mods=g.mods.map((m,mi)=>`<div class="mbox${g.hot?' hot':''}">${E(gpth+'.mods.'+mi)}</div>`).join('');
+        groups+=`<div class="grp"><div class="grp-h">${E(gpth+'.gh')}</div><div class="grp-mods">${mods}</div></div>`;
+      });
+      wrap=groups;
+    }
+    const intro=b.intro?`<div class="eng-intro">${E(bp+'.intro')}</div>`:'';
+    const foot=b.foot?`<div class="eng-foot">${E(bp+'.foot')}</div>`:'';
+    const cmp=(b.old!==undefined)?`<div class="cmp"><div class="old"><span class="lab">传统数据平台</span>${E(bp+'.old')}</div><div class="new"><span class="lab">新一代</span>${E(bp+'.nw')}</div></div>`:'';
+    const tag=b.tag?`<span class="eng-tag">${E(bp+'.tag')}</span>`:'';
+    blocks+=`<div class="eng"><div class="eng-h"><span class="eng-name">${E(bp+'.name')}</span>${tag}</div>${intro}${wrap}${cmp}${foot}</div>`;
+  });
+  return '<div class="view"><div class="d-head"><div class="d-num">3</div><div class="d-title">'+E('details.d3.title')+'</div></div>'+
+    '<div class="d-ess">'+E('details.d3.ess')+'</div>'+blocks+
+    '<div class="back" onclick="nav(\'home\')">← 返回第一层蓝图</div></div>';
+}
+
+function subhead(bp){return '<div class="d-head"><div class="d-num">④</div><div class="d-title">'+E(bp+'.title')+'</div></div><div class="d-ess">'+E(bp+'.ess')+'</div>';}
+function V_d4u(){
+  const d=DATA.details.d4u,bp='details.d4u';
+  const fl=(steps,base)=>steps.map((s,i)=>'<div class="fbox">'+E(base+'.'+i)+'</div>').join('<span class="parrow">→</span>');
+  const tools=d.sandbox.tools.map((t,i)=>'<div class="mbox">'+E(bp+'.sandbox.tools.'+i)+'</div>').join('');
+  return '<div class="view">'+subhead(bp)+
+    '<div class="flow"><div class="fbox fstart">'+E(bp+'.start')+'</div></div>'+
+    '<div class="frow-lab">'+E(bp+'.pathA.lab')+'</div><div class="flow">'+fl(d.pathA.steps,bp+'.pathA.steps')+'</div>'+
+    '<div class="frow-lab">'+E(bp+'.pathB.lab')+'</div><div class="flow">'+fl(d.pathB.steps,bp+'.pathB.steps')+'</div>'+
+    '<div class="sandbox"><div class="sandbox-h">'+E(bp+'.sandbox.title')+'</div><div class="sandbox-row">'+
+      '<div class="pcyl pcyl-lg">'+E(bp+'.sandbox.cyl_in')+'</div><span class="parrow">→</span>'+
+      '<div class="toolwrap">'+tools+'</div><span class="parrow">→</span>'+
+      '<div class="pcyl pcyl-lg">'+E(bp+'.sandbox.cyl_out')+'</div></div></div>'+
+    '<div class="flow">'+fl(d.tail,bp+'.tail')+'</div>'+
+    '<div class="back" onclick="nav(\'d4\')">← 返回四大场景</div></div>';
+}
+function V_d4o(){
+  const d=DATA.details.d4o,bp='details.d4o';
+  const users=d.users.map((u,i)=>'<div class="actor">'+E(bp+'.users.'+i)+'</div>').join('');
+  const caps=d.space.caps.map((c,i)=>'<div class="mbox">'+E(bp+'.space.caps.'+i)+'</div>').join('');
+  const data=d.space.data.map((c,i)=>'<div class="pcyl pcyl-lg">'+E(bp+'.space.data.'+i)+'</div>').join('');
+  const orgs=d.orgs.map((o,i)=>'<div class="org">'+E(bp+'.orgs.'+i)+'</div>').join('');
+  return '<div class="view">'+subhead(bp)+
+    '<div class="frow-lab" style="text-align:center">↓ 提出数据需求 / 获取交付</div>'+
+    '<div class="actors">'+users+'</div>'+
+    '<div class="cloud"><div class="cloud-h">'+E(bp+'.space.name')+'</div><div class="cloud-body">'+
+      '<div class="mbox cloud-side">'+E(bp+'.space.left')+'</div>'+
+      '<div class="cloud-caps">'+caps+'</div>'+
+      '<div class="cloud-data">'+data+'</div>'+
+      '<div class="mbox cloud-side">'+E(bp+'.space.right')+'</div></div></div>'+
+    '<div class="frow-lab" style="text-align:center">↑ 节点注册接入（原始数据不出域）</div>'+
+    '<div class="orgs">'+orgs+'</div>'+
+    '<div class="back" onclick="nav(\'d4\')">← 返回四大场景</div></div>';
+}
+const VIEWS={home:V_home,d1:()=>V_detail('d1'),d2:()=>V_detail('d2'),d3:V_d3,d4:()=>V_detail('d4'),d4u:V_d4u,d4o:V_d4o};
+
+// ===== 2026–2030 建设进度交互 =====
+const YEARS=[2026,2027,2028,2029,2030];
+let hlYear=null, playTimer=null, editProgress=false;
+function nameOf(id){
+  if(id==='base')return DATA.base;
+  let m;
+  if(id.indexOf('sc')===0)return DATA.scenarios[+id.slice(2)].t;
+  if(id.indexOf('pil')===0)return DATA.pillars[+id.slice(3)];
+  if((m=id.match(/^b(\d+)m(\d+)$/)))return DATA.bands[+m[1]].mods[+m[2]];
+  if((m=id.match(/^band(\d+)$/)))return DATA.bands[+m[1]].bt;
+  return id;
+}
+function roadmapIds(){const a=[];DATA.scenarios.forEach((s,i)=>a.push('sc'+i));DATA.pillars.forEach((p,i)=>a.push('pil'+i));DATA.bands.forEach((b,i)=>{a.push('band'+i);b.mods.forEach((m,j)=>a.push('b'+i+'m'+j));});a.push('base');return a;}
+function resolveMap(raw){if(raw==="ALL"){const m={};roadmapIds().forEach(id=>m[id]=100);return m;}return raw||{};}
+function clearHL(){
+  document.querySelectorAll('[data-hl]').forEach(e=>e.classList.remove('hl-new','hl-done','hlp','hl-pulse'));
+  document.querySelectorAll('.pct-bar,.pct-badge').forEach(e=>e.remove());
+}
+function markPct(id,pct,changed){
+  const v=Math.max(0,Math.min(100,pct));
+  document.querySelectorAll('[data-hl="'+id+'"]').forEach(e=>{
+    e.classList.add('hlp', v>=100?'hl-done':'hl-new');
+    if(changed)e.classList.add('hl-pulse');
+    if(v<100){
+      const bar=document.createElement('span');bar.className='pct-bar';
+      const fill=document.createElement('i');fill.style.width=v+'%';bar.appendChild(fill);
+      const badge=document.createElement('span');badge.className='pct-badge';badge.textContent=v+'%';
+      e.appendChild(bar);e.appendChild(badge);
+    }
+  });
+}
+function applyHighlight(){
+  clearHL();
+  document.querySelectorAll('.yr-chip').forEach(c=>c.classList.toggle('on',+c.dataset.yr===hlYear));
+  const cap=document.getElementById('yrCap');
+  if(!hlYear){if(cap)cap.textContent='';return;}
+  const raw=DATA.roadmap[hlYear];
+  const isAll=(raw==="ALL");
+  const map=resolveMap(raw);
+  const idx=YEARS.indexOf(hlYear);
+  const prevMap=resolveMap(idx>0?DATA.roadmap[YEARS[idx-1]]:{});
+  const entries=Object.entries(map).filter(e=>e[1]>0);
+  entries.forEach(e=>markPct(e[0],e[1],(prevMap[e[0]]||0)!==e[1]));
+  if(cap){
+    if(isAll){cap.textContent='（2030 年）平台全部建成上线 · 各模块 100%';}
+    else{
+      const prog=entries.filter(e=>e[1]<100), done=entries.filter(e=>e[1]>=100);
+      let s='（'+hlYear+' 年）';
+      if(prog.length)s+='建设中 '+prog.map(e=>nameOf(e[0])+' '+e[1]+'%').join('、');
+      if(prog.length&&done.length)s+='　｜　';
+      if(done.length)s+='已完成 '+done.length+' 项（100%）';
+      cap.textContent=s;
+    }
+  }
+}
+function syncEditor(){
+  const btn=document.getElementById('rmBtn');
+  if(btn){btn.textContent=editProgress?'✎ 编辑进度：开':'✎ 编辑进度';btn.classList.toggle('on',editProgress);}
+  const box=document.getElementById('rmEditor');
+  if(!box)return;
+  if(!editProgress){box.innerHTML='';return;}
+  if(!hlYear){box.innerHTML='<div class="rm-editor"><div class="rm-note">先点选上方某个年份，即可编辑该年各模块的建设比例（0–100；0 表示当年不高亮）。</div></div>';return;}
+  if(DATA.roadmap[hlYear]==="ALL"){const m={};roadmapIds().forEach(id=>m[id]=100);DATA.roadmap[hlYear]=m;save();}
+  const yr=DATA.roadmap[hlYear];
+  const sections=[{h:'四大场景',ids:DATA.scenarios.map((s,i)=>'sc'+i)},{h:'两大支柱',ids:DATA.pillars.map((p,i)=>'pil'+i)}];
+  DATA.bands.forEach((b,i)=>sections.push({h:b.bt,ids:['band'+i].concat(b.mods.map((m,j)=>'b'+i+'m'+j))}));
+  sections.push({h:'底座',ids:['base']});
+  let rows='';
+  sections.forEach(sec=>{
+    rows+='<div class="rm-grp-h">'+esc(sec.h)+'</div>';
+    sec.ids.forEach(id=>{
+      let nm=esc(nameOf(id));if(/^band\d+$/.test(id))nm+='（整带）';
+      const val=(yr[id]==null?0:yr[id]);
+      rows+='<div class="rm-row"><span class="rm-name">'+nm+'</span><input class="rm-in" type="number" min="0" max="100" step="10" value="'+val+'" data-id="'+id+'"></div>';
+    });
+  });
+  box.innerHTML='<div class="rm-editor"><div class="rm-h">编辑 '+hlYear+' 年建设比例</div><div class="rm-grid">'+rows+'</div><div class="rm-note">数值＝该模块在 '+hlYear+' 年的累计完成度：100＝整块标绿（无标签）；1–99＝橙色进度条；0＝不高亮。比上一年有变化的模块会闪烁。改完点「下载编辑版」即可保存。</div></div>';
+}
+function refresh(){applyHighlight();syncEditor();}
+function toggleRoadmapEdit(){editProgress=!editProgress;syncEditor();}
+function stopPlay(){if(playTimer){clearInterval(playTimer);playTimer=null;const b=document.getElementById('yrPlay');if(b)b.textContent='▶ 自动播放';}}
+function selectYear(y){stopPlay();hlYear=(hlYear===y?null:y);refresh();}
+function clearYear(){stopPlay();hlYear=null;refresh();}
+function playYears(){
+  const btn=document.getElementById('yrPlay');
+  if(playTimer){stopPlay();return;}
+  let i=0;hlYear=YEARS[0];refresh();if(btn)btn.textContent='⏸ 暂停';
+  playTimer=setInterval(()=>{i++;if(i>=YEARS.length){stopPlay();return;}hlYear=YEARS[i];refresh();},1200);
+}
+document.addEventListener('input',e=>{const t=e.target;if(t.classList&&t.classList.contains('rm-in')&&hlYear){let v=parseInt(t.value,10);if(isNaN(v))v=0;v=Math.max(0,Math.min(100,v));if(typeof DATA.roadmap[hlYear]!=='object'||!DATA.roadmap[hlYear])DATA.roadmap[hlYear]={};DATA.roadmap[hlYear][t.dataset.id]=v;save();applyHighlight();}});
+document.addEventListener('change',e=>{const t=e.target;if(t.classList&&t.classList.contains('rm-in')&&hlYear){let v=parseInt(t.value,10);if(isNaN(v))v=0;v=Math.max(0,Math.min(100,v));t.value=v;DATA.roadmap[hlYear][t.dataset.id]=v;save();applyHighlight();}});
+function applyCE(){document.querySelectorAll('.edit').forEach(e=>e.setAttribute('contenteditable',editMode?'true':'false'));}
+function render(){crumbs();document.getElementById('stage').innerHTML=VIEWS[cur]();applyCE();if(cur==='home')refresh();}
+function nav(id){stopPlay();cur=id;render();window.scrollTo({top:0,behavior:'smooth'});}
+function go(id){if(editMode)return;nav(id);}
+function toggleEdit(){
+  editMode=!editMode;
+  document.body.classList.toggle('editing',editMode);
+  const be=document.getElementById('btnEdit');
+  be.textContent=editMode?'✎ 编辑文字：开':'✎ 编辑文字：关';
+  be.classList.toggle('on',editMode);
+  applyCE();
+}
+document.addEventListener('input',e=>{const t=e.target;if(t.classList&&t.classList.contains('edit')&&t.isContentEditable){sp(DATA,t.dataset.k,t.innerText);save();}});
+document.addEventListener('keydown',e=>{const t=e.target;if(t.classList&&t.classList.contains('edit')&&e.key==='Enter'){e.preventDefault();t.blur();}});
+function resetData(){if(!confirm('恢复到文件打开时的初始文字？已编辑内容将丢失。'))return;try{localStorage.removeItem(KEY);}catch(e){}DATA=JSON.parse(document.getElementById('seed').textContent);render();}
+function downloadEdited(){
+  const clone=document.documentElement.cloneNode(true);
+  clone.querySelector('#seed').textContent=JSON.stringify(DATA,null,1);
+  const b=clone.querySelector('body'); if(b)b.classList.remove('editing');
+  const be=clone.querySelector('#btnEdit'); if(be){be.textContent='✎ 编辑文字：关';be.classList.remove('on');}
+  const html='<!DOCTYPE html>\n'+clone.outerHTML;
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='新一代大数据平台_1234蓝图_已编辑.html';
+  document.body.appendChild(a);a.click();a.remove();
+}
+render();
+</script>
+
+</body></html>

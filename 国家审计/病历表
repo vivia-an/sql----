@@ -1,0 +1,89 @@
+ 
+  select
+  t.JZBS as JZBS,
+  t.BLID as BLID,
+  t.HZID as HZID,
+  t.HZXM as HZXM,
+  t.HZSFZHM as HZSFZHM,
+  t.JZYS as JZYS,
+  t.BLCJSJ as BLCJSJ,
+  t.JZKS as JZKS,
+  t.BLLX as BLLX,
+  t.BLBT as BLBT,
+  t.BLXXMC as BLXXMC,
+  t.BLXXSXH as BLXXSXH,
+  t.BLXXZXSJ as BLXXZXSJ,
+  t.BLXXZXYS as BLXXZXYS,
+  t.BLNR as BLNR,
+  t.YLJGBM as YLJGBM,
+  t.YLJGMC as YLJGMC
+from
+  (
+    select
+      case_cdadet.case_cdadet_visitno as JZBS,
+      case_cdadet.case_cdadet_maintableid as BLID,
+      case_cdadet.case_cdadet_persno as HZID,
+      visit_record.visit_record_persname as HZXM,
+      coalesce(
+        nullif(trim(pers_basicinfo.pers_basicinfo_certno), ''),
+        nullif(trim(pa_patmas.papmi_dvanumber), ''),
+        nullif(trim(pa_person.paper_id), ''),
+        ''
+      ) as HZSFZHM,
+      visit_record.visit_record_attendingdoctname as JZYS,
+      case_cdadet.case_cdadet_createdttm as BLCJSJ,
+      visit_record.visit_record_visitdeptname as JZKS,
+      visit_record.visit_record_visittypename as BLLX,
+      case_cdadet.case_cdadet_templatename as BLBT,
+      case_cdadet.case_cdadet_datasetname as BLXXMC,
+      case_cdadet.case_cdadet_datasetid as BLXXSXH,
+      case_cdadet.case_cdadet_createdttm as BLXXZXSJ,
+      case_cdadet.case_cdadet_createpersname as BLXXZXYS,
+      case_cdadet.case_cdadet_datasetvalue as BLNR,
+      '12510000450756139Y' as YLJGBM,
+      '四川大学华西医院(四川省国际医院)' as YLJGMC,
+      row_number() over(
+        partition by case_cdadet.case_cdadet_maintableid,
+        case_cdadet.case_cdadet_datasetname,
+        case_cdadet.case_cdadet_datasetid
+        order by case_cdadet.case_cdadet_maintableid
+      ) as rn
+    from
+      datacenter_db.case_cdadet case_cdadet
+      left join datacenter_db.visit_record visit_record
+        on case_cdadet.case_cdadet_visitid = visit_record.visit_record_visitid
+      left join datacenter_db.pers_basicinfo pers_basicinfo
+        on case_cdadet.case_cdadet_persid = pers_basicinfo.pers_basicinfo_persid
+        and case_cdadet.case_cdadet_datasourceflag = pers_basicinfo.pers_basicinfo_datasourceflag
+      left join hid0101_cache_his_dhcapp_sqluser.pa_patmas pa_patmas
+        on case_cdadet.case_cdadet_persno = pa_patmas.papmi_ipno
+      left join hid0101_cache_his_dhcapp_sqluser.pa_person pa_person
+        on pa_patmas.papmi_rowid1 = pa_person.paper_papmi_dr
+      left join hid0101_cache_his_dhcapp_sqluser.pa_adm pa_adm
+        on case_cdadet.case_cdadet_visitno = pa_adm.paadm_admno
+      left join hid0101_cache_his_dhcapp_sqluser.pac_admreason pac_admreason
+        on pa_adm.paadm_admreason_dr = pac_admreason.rea_rowid
+    where
+      pac_admreason.rea_desc not in (
+        '副省以上干部',
+        '正厅15年及省级干部(省医保)',
+        '省医保异地(省级干部)',
+        '省级干部(市医保)',
+        '省级干部(省医保联网)',
+        '老干部(省级)'
+      )
+      and visit_record.datasourceflag = '2'
+      and case_cdadet.case_cdadet_datasourceflag = '29'
+      and case_cdadet.case_cdadet_templatename like '%出院记录%'
+      and visit_record.visit_record_outhospdttm >=  '2022-01-01 00:00:00'
+      and visit_record.visit_record_outhospdttm < '2026-05-31 00:00:00'
+      and case_cdadet.case_cdadet_visitno is not null
+      and case_cdadet.case_cdadet_maintableid is not null
+      and case_cdadet.case_cdadet_persno is not null
+      and case_cdadet.case_cdadet_createdttm is not null
+      and visit_record.visit_record_visittypename is not null
+      and case_cdadet.case_cdadet_templatename is not null
+      and case_cdadet.case_cdadet_datasetvalue is not null
+  ) t
+where
+  t.rn = 1

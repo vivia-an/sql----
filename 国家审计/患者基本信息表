@@ -1,0 +1,80 @@
+      
+
+select
+  t.HZID as HZID ,
+  t.HZXM as HZXM ,
+  t.JZZJLX as JZZJLX ,
+  t.JZZJHM as JZZJHM ,
+  t.SFZJLX as SFZJLX ,
+  t.SFZJHM as SFZJHM ,
+  t.XB as XB ,
+  t.GJ as GJ ,
+  t.MZ as MZ ,
+  t.CSRQ as CSRQ ,
+  t.YLZGLX as YLZGLX ,
+  t.XSEBS as XSEBS ,
+  t.MQBH as MQBH ,
+  t.ZYe as ZYe ,
+  t.BWBBS as BWBBS ,
+  t.LXHM as LXHM ,
+  t.CJRQ as CJRQ ,
+  t.YLJGBM as YLJGBM ,
+  t.YLJGMC as YLJGMC 
+from
+  (
+    select
+      papmi_ipno as HZID,
+      papmi_name as HZXM,
+      case
+        when trim(coalesce(dhc_cardref.cf_cardno, '')) <> ''
+          and trim(coalesce(dhc_cardref.cf_cardno, '')) = trim(coalesce(pa_patmas.papmi_dvanumber, ''))
+          then '身份证'
+        else pac_cardtype.card_desc
+      end as JZZJLX,
+      dhc_cardref.cf_cardno as JZZJHM,
+      case
+        when regexp_like(trim(coalesce(pa_patmas.papmi_dvanumber, '')), '^[0-9]{17}[0-9Xx]$')
+          then '身份证'
+        else pac_cardtype.card_desc
+      end as SFZJLX,
+      pa_patmas.papmi_dvanumber as SFZJHM,
+      coalesce(ct_sex.ctsex_desc, '') as XB,
+      vwregisterhxmig.bcountry as GJ,
+      vwregisterhxmig.bnation as MZ,
+      papmi_dob as CSRQ,
+      '' as YLZGLX,
+      '' as XSEBS,
+      '' as MQBH,
+      coalesce(ct_occupation.ctocc_desc, '') as ZYe,
+      vwregisterhxmig.pasourcedesc as BWBBS,
+      pa_patmas.papmi_mobphone as LXHM,
+      pa_person.paper_updatedate as CJRQ,
+      '12510000450756139Y' as YLJGBM,
+      '四川大学华西医院(四川省国际医院)' as YLJGMC,
+      row_number() over(
+        partition by papmi_ipno
+        order by papmi_ipno
+      ) as rn
+    from
+      hid0101_cache_his_dhcapp_sqluser.pa_patmas pa_patmas
+      left join hid0101_cache_his_dhcapp_sqluser.dhc_cardref dhc_cardref
+        on pa_patmas.papmi_rowid1 = dhc_cardref.cf_papmi_dr
+      left join hid0101_cache_his_dhcapp_sqluser.pac_cardtype pac_cardtype
+        on pac_cardtype.card_rowid = dhc_cardref.cf_cardno
+      left join hid0101_cache_his_dhcapp_sqluser.pa_person pa_person
+        on pa_patmas.papmi_rowid1 = pa_person.paper_papmi_dr
+      left join hid0101_cache_his_dhcapp_sqluser.ct_sex ct_sex
+        on cast(pa_person.paper_sex_dr as varchar) = cast(ct_sex.ctsex_rowid as varchar)
+      left join hid0101_cache_his_dhcapp_sqluser.ct_occupation ct_occupation
+        on cast(pa_person.paper_occupation_dr as varchar) = cast(ct_occupation.ctocc_rowid as varchar)
+      left join cache53.vwregisterhxmig vwregisterhxmig
+        on vwregisterhxmig.bpapmidr = pa_person.paper_papmi_dr
+    where
+      not exists (
+        select 1
+        from clin.sj_idcard s
+        where trim(cast(s.idcard as varchar)) = trim(cast(pa_patmas.papmi_dvanumber as varchar))
+      )
+  ) t
+where
+  t.rn = 1

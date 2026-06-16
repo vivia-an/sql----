@@ -1,0 +1,20 @@
+select
+  a.paadmdr as "D01",
+  a.OEORIDR as "D02",
+  a.orderdocdesc as "D03",
+  a.orderdoccode as "D04",
+  a.ordlocdesc as "D05",
+  concat(a.orddate, ' ', a.ordtime) as "D06",
+  a.TarECTECdesc as "D07",
+  a.TarECTECdr as "D08",
+  a.arcimdesc as "D09",
+  cast(a.quantity as deciMAL(18, 4)) as "D10",
+  c.ctuom_desc as "D11",
+  '12510000450756139Y' AS "D12",
+  '四川大学华西医院(四川省国际医院)' AS "D13" -- paadmtype
+from
+  cache53.vwworkloadhxmig a
+  left join hid0101_cache_his_dhcapp_sqluser.DHC_TarItem b on cast(a.TarItemDR as varchar) = b.tari_rowid
+  left join hid0101_cache_his_dhcapp_sqluser.CT_UOM c on b.TARI_UOM = c.ctuom_rowid
+  left join hid0101_cache_his_dhcapp_sqluser.PAC_AdmREASON d on cast(a.ADMReason as varchar) = d.rea_rowid
+  left join cache53.hqms_intf3 e on a.paadmdr = e.PAADMDR

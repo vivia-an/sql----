@@ -1,0 +1,1668 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>新一代大数据平台 · 1234 架构蓝图（整合·可编辑）</title>
+<style>
+  :root{
+    --ink:#222a31; --ink2:#566069; --muted:#8a929b;
+    --line:#e4e8ec;
+    --blue-bg:#e9f2fc; --blue-bd:#1f63a8; --blue-tx:#0c447c;
+    --app-bg:#f5f5f2; --app-bd:#dedcd5; --app-tx:#5f5e5a;
+    --mod-bg:#ffffff; --mod-bd:#aecae9;
+    --base-bg:#f1efe8; --base-bd:#dedcd5;
+    --page:#f9fafb; --accent:#1f63a8; --accent-soft:#e9f2fc;
+    --r:12px; --shadow:0 1px 2px rgba(20,40,60,.05),0 6px 20px rgba(20,40,60,.07);
+    --shadow-h:0 2px 6px rgba(20,40,60,.08),0 16px 40px rgba(31,99,168,.16);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"PingFang SC","Microsoft YaHei","Noto Sans CJK SC","Hiragino Sans GB",sans-serif;
+    color:var(--ink);background:var(--page);-webkit-font-smoothing:antialiased;line-height:1.6}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px 64px}
+  .toolbar{position:sticky;top:0;z-index:10;background:rgba(249,250,251,.94);backdrop-filter:blur(6px);
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 0 10px;margin-bottom:8px;border-bottom:1px solid var(--line)}
+  .tb-btn{font:inherit;font-size:13px;border:1px solid var(--line);background:#fff;color:var(--ink2);padding:6px 12px;border-radius:8px;cursor:pointer;transition:.15s}
+  .tb-btn:hover{border-color:var(--accent);color:var(--accent)}
+  .tb-btn.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .tb-sep{width:1px;height:20px;background:var(--line);margin:0 2px}
+  .tb-note{flex-basis:100%;font-size:12px;color:var(--muted)}
+  .crumbs{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-bottom:16px;flex-wrap:wrap}
+  .crumb{cursor:pointer;padding:4px 9px;border-radius:8px;transition:.18s;white-space:nowrap}
+  .crumb:hover{background:#fff;color:var(--accent);box-shadow:var(--shadow)}
+  .crumb.cur{color:var(--ink);font-weight:600;cursor:default}
+  .crumb.cur:hover{background:none;box-shadow:none}
+  .sep{color:var(--line)}
+  .view{animation:fade .35s ease both}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .h-title{text-align:center;font-size:24px;font-weight:700}
+  .h-mnemo{text-align:center;color:var(--ink2);font-size:14px;margin-top:6px}
+  .h-tag{text-align:center;font-size:13.5px;font-weight:600;color:var(--accent);letter-spacing:1px;margin-top:8px;margin-bottom:6px}
+  .arch-entry{margin:14px auto 16px;max-width:640px;border:1px solid #cfe0f3;background:linear-gradient(135deg,#ffffff,#eef6ff);border-radius:14px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:14px;box-shadow:var(--shadow);cursor:pointer;transition:.18s}
+  .arch-entry:hover{transform:translateY(-1px);box-shadow:var(--shadow-h);border-color:var(--accent)}
+  .arch-entry b{display:block;font-size:15px;color:var(--ink)}
+  .arch-entry span{display:block;font-size:12.5px;color:var(--ink2);margin-top:2px}
+  .arch-entry em{font-style:normal;font-size:12.5px;font-weight:700;color:var(--accent);white-space:nowrap}
+  .h-hint{text-align:center;font-size:12.5px;color:var(--accent);background:var(--accent-soft);border:1px solid #cfe0f3;display:inline-block;padding:5px 13px;border-radius:999px;margin:14px auto 0}
+  .hint-row{text-align:center;margin-bottom:20px}
+  .frame{border:1px solid #d6dee6;border-radius:18px;padding:16px;background:#fff;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px}
+  .tier{position:relative;border-radius:var(--r);transition:.2s;cursor:pointer}
+  .tier:hover{transform:translateY(-2px);box-shadow:var(--shadow-h)}
+  .tier::after{content:"展开 →";position:absolute;top:8px;right:12px;font-size:11px;font-weight:700;color:var(--accent);opacity:0;transition:.2s}
+  .tier:hover::after{opacity:1}
+  .badge{position:absolute;top:-10px;left:-10px;width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(31,99,168,.35);z-index:3}
+  .toprow{display:flex;gap:10px;padding:4px}
+  .dbox{flex:1;border:1px solid var(--app-bd);background:var(--app-bg);border-radius:10px;padding:11px 8px;text-align:center}
+  .dt{font-size:14px;font-weight:600;color:var(--app-tx)}
+  .dsum{font-size:11.5px;font-weight:500;color:var(--app-tx);opacity:.7;margin-top:2px}
+  .dsub{display:inline-block;margin-top:7px;font-size:12.5px;font-weight:500;color:var(--blue-tx);background:#fff;border:1px solid var(--mod-bd);border-radius:8px;padding:6px 12px;line-height:1.45}
+  .mid{display:flex;gap:10px;align-items:stretch}
+  .pillar{width:86px;flex:none;border:1px solid var(--blue-bd);background:var(--blue-bg);border-radius:var(--r);display:flex;align-items:center;justify-content:center;gap:5px;position:relative;cursor:pointer;transition:.2s}
+  .pillar:hover{transform:translateY(-2px);box-shadow:var(--shadow-h)}
+  .pillar .pc{font-size:17px;font-weight:600;color:var(--blue-tx);writing-mode:vertical-rl;letter-spacing:6px}
+  .pcsub{writing-mode:vertical-rl;font-size:11px;font-weight:500;color:var(--blue-tx);opacity:.62;letter-spacing:1px}
+  .bands{flex:1;display:flex;flex-direction:column;gap:10px;position:relative}
+  .band{border:1px solid var(--blue-bd);background:var(--blue-bg);border-radius:var(--r);padding:9px 12px}
+  .bt{font-size:14px;font-weight:600;color:var(--blue-tx);text-align:center;margin-bottom:2px}
+  .bsub{font-size:11.5px;color:var(--blue-tx);opacity:.66;text-align:center;margin-bottom:8px}
+  .mods{display:flex;align-items:center;gap:8px}
+  .mod{flex:1;border:1px solid var(--mod-bd);background:var(--mod-bg);border-radius:8px;padding:11px 6px;text-align:center;font-size:13px;color:var(--ink)}
+  .plus{font-size:17px;color:var(--blue-bd);flex:none}
+  .base{border:1px solid var(--base-bd);background:var(--base-bg);border-radius:var(--r);padding:14px;text-align:center;font-size:15px;font-weight:600;color:var(--ink2);position:relative}
+  .base-main{font-size:15px;font-weight:600}
+  .basesub{font-size:12px;font-weight:500;color:var(--muted);margin-top:5px;letter-spacing:.5px}
+  .num-strip{display:flex;justify-content:center;gap:18px;margin-top:18px;flex-wrap:wrap}
+  .ns{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--ink2)}
+  .ns b{display:inline-flex;width:22px;height:22px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-weight:800;font-size:12px;align-items:center;justify-content:center}
+  .d-head{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+  .d-num{width:46px;height:46px;border-radius:12px;background:var(--accent);color:#fff;font-size:22px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none}
+  .d-title{font-size:22px;font-weight:700}
+  .d-ess{color:var(--ink2);font-size:14.5px;margin:4px 0 16px;padding-left:60px}
+  .sec-h{font-size:15px;font-weight:700;color:var(--accent);margin:22px 0 10px;display:flex;align-items:center;gap:8px}
+  .sec-h::before{content:"";width:8px;height:8px;border-radius:2px;background:var(--accent);flex:none}
+  .cards{display:grid;gap:14px}
+  .g2{grid-template-columns:1fr 1fr}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow)}
+  .card.hi{border-color:#bcd5f0;background:#fbfdff}
+  .c-name{font-size:16px;font-weight:700;color:var(--ink)}
+  .c-tag{display:inline-block;font-size:11.5px;color:var(--accent);background:var(--accent-soft);border:1px solid #cfe0f3;padding:2px 9px;border-radius:999px;margin-left:8px;vertical-align:middle}
+  .c-pts{margin:11px 0 0;padding:0;list-style:none}
+  .c-pts li{position:relative;padding-left:18px;font-size:13.5px;color:var(--ink2);margin:6px 0}
+  .c-pts li::before{content:"";position:absolute;left:2px;top:8px;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+  .cmp{display:flex;gap:10px;margin-top:12px;font-size:12.5px;flex-wrap:wrap}
+  .cmp .old,.cmp .new{flex:1;min-width:160px;border-radius:9px;padding:8px 11px;line-height:1.5}
+  .cmp .old{background:#f4f5f6;color:#6b7178}
+  .cmp .new{background:var(--accent-soft);color:var(--blue-tx);border:1px solid #cfe0f3}
+  .cmp .lab{font-weight:700;font-size:11px;display:block;margin-bottom:2px;opacity:.8}
+  .back{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--accent);cursor:pointer;margin-top:24px}
+  .back:hover{text-decoration:underline}
+  .ver-old{margin-top:22px;border:1px solid var(--line);border-radius:12px;background:#fbfbfa;overflow:hidden}
+  .ver-old>summary{cursor:pointer;list-style:none;padding:12px 16px;font-size:13.5px;font-weight:600;color:var(--ink2);display:flex;align-items:center;gap:8px;user-select:none}
+  .ver-old>summary::-webkit-details-marker{display:none}
+  .ver-old>summary::before{content:"▸";color:var(--accent);font-weight:800;transition:transform .2s}
+  .ver-old[open]>summary::before{transform:rotate(90deg)}
+  .ver-old>summary:hover{color:var(--accent)}
+  .ver-old-body{padding:2px 16px 16px}
+  /* engine module blocks (layer 2 - d3) */
+  .eng{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow);margin-bottom:16px}
+  .eng-h{display:flex;align-items:center;gap:10px;margin-bottom:2px}
+  .eng-name{font-size:16px;font-weight:700;color:var(--ink)}
+  .eng-tag{font-size:11.5px;color:var(--accent);background:var(--accent-soft);border:1px solid #cfe0f3;padding:2px 9px;border-radius:999px;white-space:nowrap}
+  .eng-intro{font-size:13px;color:var(--ink2);margin:6px 0 6px;line-height:1.65}
+  .grp{margin-top:12px}
+  .grp-h{font-size:13px;font-weight:600;color:var(--accent);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+  .grp-h::before{content:"";width:6px;height:6px;border-radius:2px;background:var(--accent);flex:none}
+  .grp-mods{display:flex;flex-wrap:wrap;gap:8px}
+  .grp-mods.vert{flex-direction:column;align-items:stretch}
+  .mbox{border:1px solid var(--mod-bd);background:var(--blue-bg);color:var(--blue-tx);border-radius:8px;padding:9px 13px;font-size:13px;font-weight:500;text-align:center}
+  .mbox.hot{background:#fff3e3;border-color:#e8943a;color:#a9620f}
+  .grp-row{display:flex;gap:12px;flex-wrap:wrap}
+  .grp.col{flex:1;min-width:170px;background:#f7fafd;border:1px solid var(--line);border-radius:10px;padding:11px 12px;margin-top:12px}
+  .eng-foot{font-size:12px;color:var(--muted);margin-top:14px;border-top:1px dashed var(--line);padding-top:9px}
+  .pptflow{display:flex;align-items:stretch;gap:6px;margin-top:12px;flex-wrap:wrap}
+  .pcol{flex:1;min-width:180px;background:#f7fafd;border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column}
+  .pcol-h{font-size:13.5px;font-weight:700;color:var(--blue-tx);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+  .pcol-h::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--blue-bd);flex:none}
+  .pcol-body{display:flex;flex-direction:column;gap:8px;flex:1}
+  .pcol-body.center{justify-content:center}
+  .ppill{background:var(--blue-bg);border:1px solid var(--mod-bd);border-radius:8px;padding:9px 8px;text-align:center;font-size:13px;color:var(--blue-tx);font-weight:500}
+  .pmol{background:#fff3e3;border:1px solid #e8943a;border-radius:10px;padding:16px 10px;text-align:center;font-size:13.5px;color:#a9620f;font-weight:600}
+  .pcyl-row{display:flex;gap:8px}
+  .pcyl{flex:1;position:relative;background:#dfeaf8;border:1px solid #9cc0e8;border-radius:9px;padding:15px 4px 9px;text-align:center;font-size:11.5px;color:var(--blue-tx);font-weight:500;line-height:1.3}
+  .pcyl::before{content:"";position:absolute;top:4px;left:50%;transform:translateX(-50%);width:58%;height:6px;border:1px solid #9cc0e8;border-radius:50%;background:#eef4fc}
+  .pwide{margin-top:8px;background:var(--blue-bd);border:1px solid var(--blue-bd);border-radius:9px;padding:11px 8px;text-align:center;font-size:13px;color:#fff;font-weight:600}
+  .parrow{display:flex;align-items:center;font-size:22px;color:var(--blue-bd);font-weight:700;flex:none}
+  @media(max-width:720px){.parrow{transform:rotate(90deg)}.pcol{min-width:180px}}
+  .flow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:6px 0 10px}
+  .fbox{border:1px solid var(--mod-bd);background:#fff;border-radius:8px;padding:9px 12px;font-size:13px;color:var(--ink);text-align:center}
+  .fbox.fstart{background:var(--blue-bg);border-color:var(--blue-bd);color:var(--blue-tx);font-weight:600}
+  .frow-lab{font-size:12px;color:var(--accent);font-weight:600;margin:10px 0 2px}
+  .sandbox{border:1.5px solid var(--blue-bd);border-radius:12px;padding:13px;background:#f7fafd;margin:12px 0}
+  .sandbox-h{font-size:14px;font-weight:700;color:var(--blue-tx);text-align:center;margin-bottom:10px}
+  .sandbox-row{display:flex;align-items:center;gap:8px;justify-content:center;flex-wrap:wrap}
+  .toolwrap{display:flex;flex-direction:column;gap:6px}
+  .pcyl-lg{min-width:96px;padding:16px 10px 10px;font-size:12.5px}
+  .lk-go{font-size:11px;color:var(--accent);font-weight:700;margin-left:8px;white-space:nowrap}
+  .card.lk{cursor:pointer}
+  .card.lk:hover{transform:translateY(-2px);box-shadow:var(--shadow-h);border-color:#bcd5f0}
+  .actors{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:4px}
+  .actor{border:1px solid var(--mod-bd);background:#fff;border-radius:8px;padding:8px 16px;font-size:13px;color:var(--ink);font-weight:500}
+  .cloud{background:#efeefb;border:1px solid #cfcbf3;border-radius:22px;padding:16px 18px;margin:6px 0}
+  .cloud-h{text-align:center;font-weight:700;color:#4a3fa6;font-size:14px;margin-bottom:12px}
+  .cloud-body{display:flex;align-items:stretch;gap:10px;justify-content:center;flex-wrap:wrap}
+  .cloud-side{display:flex;align-items:center;justify-content:center;min-width:108px;font-weight:600}
+  .cloud-caps,.cloud-data{display:flex;flex-direction:column;gap:7px}
+  .orgs{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:4px}
+  .org{border:1px solid #9cc0e8;background:#eaf2fb;border-radius:8px;padding:7px 12px;font-size:12.5px;color:var(--blue-tx);font-weight:500}
+  .edit{transition:background .15s}
+  body.editing .edit{outline:1px dashed #a9c1de;border-radius:3px;padding:0 2px;cursor:text;background:rgba(31,99,168,.05)}
+  body.editing .edit:focus{outline:1.5px solid var(--accent);background:#fff}
+  body.editing .tier,body.editing .pillar{cursor:default}
+  body.editing .tier:hover,body.editing .pillar:hover{transform:none;box-shadow:var(--shadow)}
+  body.editing .tier::after{display:none}
+  @media(max-width:720px){.g2{grid-template-columns:1fr}.toprow{flex-wrap:wrap}.dbox{min-width:45%}.grp.col{min-width:100%}}
+  /* ===== 2026–2030 建设进度时间轴 ===== */
+  .yr-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;margin:10px 0 8px}
+  .yr-bar-h{font-size:13px;font-weight:700;color:var(--ink2)}
+  .yr-chip{font:inherit;font-size:13px;font-weight:700;border:1px solid var(--mod-bd);background:#fff;color:var(--blue-tx);padding:6px 15px;border-radius:999px;cursor:pointer;transition:.18s}
+  .yr-chip:hover{border-color:var(--accent);box-shadow:var(--shadow)}
+  .yr-chip.on{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 2px 8px rgba(31,99,168,.3)}
+  .yr-play,.yr-reset{font:inherit;font-size:12.5px;border:1px solid var(--line);background:#fff;color:var(--ink2);padding:6px 12px;border-radius:999px;cursor:pointer;transition:.15s}
+  .yr-play:hover,.yr-reset:hover{border-color:var(--accent);color:var(--accent)}
+  .yr-legend{display:flex;gap:16px;justify-content:center;font-size:12px;color:var(--ink2);margin-bottom:6px;flex-wrap:wrap}
+  .yr-legend .lg{display:inline-flex;align-items:center;gap:6px}
+  .yr-legend .lg::before{content:"";width:13px;height:13px;border-radius:4px;border:1px solid;flex:none}
+  .yr-legend .lg-new::before{background:#fff3e3;border-color:#e8943a}
+  .yr-legend .lg-done::before{background:#e9f7ef;border-color:#3a9d63}
+  .yr-cap{text-align:center;font-size:12.5px;color:#a9620f;background:#fff8ee;border:1px solid #f0d8b5;border-radius:8px;padding:7px 12px;margin:0 auto 14px;max-width:780px}
+  .yr-cap:empty{display:none}
+  .hl-done{border-color:#3a9d63 !important;background:#e9f7ef !important;box-shadow:inset 0 0 0 1px #3a9d63,0 2px 8px rgba(58,157,99,.16) !important}
+  .hl-done .dt,.hl-done .dsum,.hl-done .dsub,.hl-done .pc,.hl-done .bt,.hl-done .base-main{color:#1f6b40 !important}
+  .hl-new{border-color:#e8943a !important;background:#fff3e3 !important;box-shadow:inset 0 0 0 1px #e8943a,0 2px 8px rgba(232,148,58,.18) !important}
+  .hl-new .dt,.hl-new .dsum,.hl-new .dsub,.hl-new .pc,.hl-new .bt,.hl-new .base-main{color:#a9620f !important}
+  .hlp{position:relative}
+  .pct-bar{position:absolute;left:8px;right:8px;bottom:5px;height:4px;border-radius:3px;background:rgba(40,50,60,.10);z-index:2}
+  .pct-bar>i{display:block;height:100%;border-radius:3px;background:#e8943a;transition:width .55s ease}
+  .hl-done .pct-bar>i{background:#3a9d63}
+  .pct-badge{position:absolute;top:4px;right:5px;font-size:10px;font-weight:800;line-height:1;padding:2px 5px;border-radius:7px;background:#fff;border:1px solid #e8943a;color:#a9620f;z-index:2}
+  .hl-done .pct-badge{border-color:#3a9d63;color:#1f6b40}
+  .hl-new.hl-pulse{animation:pulseAmber 1.15s ease-in-out infinite}
+  .hl-done.hl-pulse{animation:pulseGreen 1.15s ease-in-out infinite}
+  @keyframes pulseAmber{0%,100%{box-shadow:inset 0 0 0 1px #e8943a,0 0 0 3px rgba(232,148,58,.16)}50%{box-shadow:inset 0 0 0 1px #e8943a,0 0 0 9px rgba(232,148,58,.32)}}
+  @keyframes pulseGreen{0%,100%{box-shadow:inset 0 0 0 1px #3a9d63,0 0 0 3px rgba(58,157,99,.16)}50%{box-shadow:inset 0 0 0 1px #3a9d63,0 0 0 9px rgba(58,157,99,.34)}}
+  .yr-play.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .rm-editor{border:1px dashed var(--accent);background:#fbfdff;border-radius:12px;padding:13px 16px;margin:0 auto 14px;max-width:820px}
+  .rm-h{font-size:13.5px;font-weight:700;color:var(--accent);margin-bottom:10px}
+  .rm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:5px 18px}
+  .rm-grp-h{grid-column:1/-1;font-size:11.5px;font-weight:700;color:var(--ink2);margin-top:7px;border-top:1px solid var(--line);padding-top:7px}
+  .rm-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .rm-name{font-size:12.5px;color:var(--ink)}
+  .rm-in{width:62px;font:inherit;font-size:12.5px;text-align:right;border:1px solid var(--mod-bd);border-radius:6px;padding:3px 7px;color:var(--ink)}
+  .rm-in:focus{outline:1.5px solid var(--accent)}
+  .rm-note{font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.6}
+  .arch-panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:var(--shadow);overflow:auto}
+  .arch-tip{font-size:12px;color:var(--muted);margin:0 0 10px 60px}
+  .arch-tip b{color:var(--accent)}
+  .arch-svg-host{min-width:920px}
+  .arch-svg-host svg{display:block;width:100%;height:auto;border-radius:12px;background:#f6f9fc}
+  body.editing .arch-svg-host{box-shadow:inset 0 0 0 2px rgba(31,99,168,.22);border-radius:12px}
+  body.editing .arch-svg-host text.svg-edit{cursor:text}
+  .svg-editor-pop{position:fixed;z-index:50;display:flex;gap:6px;align-items:center;background:#fff;border:1px solid var(--accent);box-shadow:var(--shadow-h);border-radius:10px;padding:8px}
+  .svg-editor-pop input{width:260px;max-width:48vw;font:inherit;font-size:13px;border:1px solid var(--mod-bd);border-radius:7px;padding:6px 8px;color:var(--ink)}
+  .svg-editor-pop input:focus{outline:1.5px solid var(--accent)}
+  .svg-editor-pop button{font:inherit;font-size:12px;border:1px solid var(--line);background:#fff;color:var(--ink2);border-radius:7px;padding:5px 9px;cursor:pointer}
+  .svg-editor-pop button.ok{background:var(--accent);border-color:var(--accent);color:#fff}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="toolbar">
+    <button class="tb-btn" id="btnEdit" onclick="toggleEdit()">✎ 编辑文字：关</button>
+    <span class="tb-sep"></span>
+    <button class="tb-btn" onclick="nav('home')">首页</button>
+    <button class="tb-btn" onclick="nav('arch')">总览图</button>
+    <button class="tb-btn" onclick="nav('d1')">①</button>
+    <button class="tb-btn" onclick="nav('d2')">②</button>
+    <button class="tb-btn" onclick="nav('d3')">③</button>
+    <button class="tb-btn" onclick="nav('d4')">④</button>
+    <span class="tb-sep"></span>
+    <button class="tb-btn" onclick="downloadEdited()">⬇ 下载编辑版</button>
+    <button class="tb-btn" onclick="resetData()">↺ 恢复初始</button>
+    <span class="tb-note">打开「编辑文字」后点任意文字即可修改；用「总览图」或 ①②③④ 切换页面编辑各层；改完点「下载编辑版」保存为新的 HTML。</span>
+  </div>
+  <div class="crumbs" id="crumbs"></div>
+  <div id="stage"></div>
+</div>
+
+<script id="seed" type="application/json">
+{
+ "title": "新一代大数据平台",
+ "mnemo": "一个底座 · 两大支柱 · 三大引擎 · 四大场景",
+ "tagline": "云原生 · AI 原生 · 数据驱动 · 安全共享",
+ "hint": "👆 编辑模式关闭时，点击 ①②③④ 区块下钻；打开编辑模式可直接改文字",
+ "scenarios": [
+  {
+   "t": "Data for AI",
+   "sum": "数模共振",
+   "s": "AI 中台 · 智能体应用 · 人机协同"
+  },
+  {
+   "t": "Data for APP",
+   "sum": "指标中台 · 数据驱动业务决策",
+   "s": "医 · 教 · 研 · 管 · 服"
+  },
+  {
+   "t": "Data for Users",
+   "sum": "用户友好",
+   "s": "数据广场 · 安全沙箱 · 数据分析"
+  },
+  {
+   "t": "Data for Oper",
+   "sum": "数据开放生态",
+   "s": "可信空间 · 数据超市 · 运营流通"
+  }
+ ],
+ "pillars": [
+  "数据质量",
+  "数据安全"
+ ],
+ "pillarSubs": [
+  "全链路质检 · 实时拦截",
+  "数据分级 · 去隐私化 · 可用不可见"
+ ],
+ "bands": [
+  {
+   "bt": "数据资产管理",
+   "sub": "资产明晰 · 数据产品 · AI 就绪 · 数据分类",
+   "mods": [
+    "全生命周期管理",
+    "高质量数据集",
+    "数据资产运营"
+   ]
+  },
+  {
+   "bt": "数据要素挖掘",
+   "sub": "语义即服务 · 知识沉淀",
+   "mods": [
+    "知识中心",
+    "AI 驱动数据挖掘",
+    "多模态标注与融合"
+   ]
+  },
+  {
+   "bt": "数据资源治理",
+   "sub": "核心数据模型 · 国际标准 · AI 驱动",
+   "mods": [
+    "全域实时数据湖",
+    "AI 驱动数据治理"
+   ]
+  }
+ ],
+ "base": "云原生底座",
+ "baseSub": "弹性伸缩 · 存算分离 · 湖仓一体 · 容器编排 · 信创就绪",
+ "numstrip": [
+  "一个底座",
+  "两大支柱",
+  "三大引擎",
+  "四大场景"
+ ],
+ "roadmap": {
+  "2026": {
+   "base": 60,
+   "band2": 10,
+   "b1m1": 30,
+   "pil1": 50,
+   "pil0": 40,
+   "sc2": 30,
+   "sc0": 0,
+   "sc1": 20,
+   "b2m0": 20
+  },
+  "2027": {
+   "base": 100,
+   "band2": 40,
+   "b1m1": 80,
+   "b1m0": 60,
+   "sc1": 40,
+   "b1m2": 30,
+   "pil0": 50,
+   "pil1": 70,
+   "b0m0": 100,
+   "sc2": 30,
+   "sc0": 0,
+   "b2m0": 100,
+   "b2m1": 30
+  },
+  "2028": {
+   "base": 100,
+   "band2": 70,
+   "b1m1": 100,
+   "b1m0": 100,
+   "sc1": 80,
+   "sc0": 30,
+   "b1m2": 50,
+   "pil0": 100,
+   "pil1": 100,
+   "b0m0": 100,
+   "b0m1": 100,
+   "sc2": 100,
+   "b2m0": 100,
+   "b2m1": 60
+  },
+  "2029": {
+   "base": 100,
+   "band2": 90,
+   "b1m1": 100,
+   "b1m0": 100,
+   "sc0": 60,
+   "b1m2": 70,
+   "pil0": 100,
+   "pil1": 100,
+   "b0m0": 100,
+   "b0m1": 100,
+   "sc2": 100,
+   "sc1": 90,
+   "b0m2": 80,
+   "sc3": 70,
+   "b2m0": 100,
+   "b2m1": 80
+  },
+  "2030": {
+   "sc0": 100,
+   "sc1": 100,
+   "sc2": 100,
+   "sc3": 100,
+   "pil0": 100,
+   "pil1": 100,
+   "band0": 100,
+   "b0m0": 100,
+   "b0m1": 100,
+   "b0m2": 100,
+   "band1": 100,
+   "b1m0": 100,
+   "b1m1": 100,
+   "b1m2": 100,
+   "band2": 100,
+   "b2m0": 100,
+   "b2m1": 100,
+   "base": 100
+  }
+ },
+ "details": {
+  "d1": {
+   "title": "一个底座 · 云原生底座",
+   "ess": "支撑 PB 级数据规模下的实时计算，是整套平台的统一算力与运行基座。",
+   "sections": [
+    {
+     "h": "",
+     "g2": true,
+     "cards": [
+      {
+       "name": "统一算力",
+       "tag": "",
+       "pts": [
+        "多院区算力统一调度、按需分配",
+        "为 AI 训练与实时分析提供弹性算力"
+       ]
+      },
+      {
+       "name": "弹性扩容",
+       "tag": "",
+       "pts": [
+        "业务高峰自动扩、闲时自动缩",
+        "成本可控，不用一次性堆硬件"
+       ]
+      },
+      {
+       "name": "存算分离",
+       "tag": "",
+       "pts": [
+        "存储与计算独立扩展",
+        "告别传统一体机的算力与存储捆绑"
+       ]
+      },
+      {
+       "name": "智能运维",
+       "tag": "",
+       "pts": [
+        "故障自愈、容量预测、统一监控",
+        "信创国产化适配，降低运维负担"
+       ]
+      }
+     ]
+    },
+    {
+     "h": "",
+     "g2": false,
+     "cards": [
+      {
+       "name": "为什么这套底座算“新”",
+       "tag": "对比传统 Hadoop",
+       "pts": [
+        "存算分离：传统 Hadoop 存算耦合，扩存储被迫一起扩算力；现在各扩各的，钱花在刀刃上",
+        "弹性伸缩：传统按峰值常驻、利用率低；现在按需弹性、闲时缩容，不烧钱",
+        "湖仓一体与实时 AI：传统以批处理为主、HDFS 绑定集群；现在对象存储 + 流批一体 + GPU 调度，AI 就绪"
+       ],
+       "old": "传统 / Hadoop：存算耦合、按峰值常驻、批处理为主，扩容靠堆硬件",
+       "nw": "云原生：存算分离 · 弹性伸缩 · 湖仓一体实时 · AI 与信创就绪，一套底座撑住全院实时计算",
+       "hi": true
+      }
+     ]
+    }
+   ],
+   "archives": [
+    {
+     "label": "版本2 · 医院价值对比版（旧版，点击展开）",
+     "sections": [
+      {
+       "h": "相比 Hadoop，新底座给医院带来的新价值",
+       "g2": true,
+       "cards": [
+        {
+         "name": "医院管理价值",
+         "tag": "实时运营",
+         "pts": [
+          "实时汇聚门诊、住院、手术、医技、收费、质控数据",
+          "支撑驾驶舱、运营监测、异常预警与资源调度"
+         ],
+         "old": "以 T+1／T+N 报表为主，问题往往等月报才发现",
+         "nw": "实时看运行、看趋势、看预警，决策不再等报表"
+        },
+        {
+         "name": "信息中心价值",
+         "tag": "统一承载",
+         "pts": [
+          "统一承载 HIS／EMR／LIS／PACS／手麻／病案等多源数据",
+          "存算分离＋容器编排，统一监控、统一运维"
+         ],
+         "old": "各院区各系统重复建链路、建集群，烟囱林立",
+         "nw": "全院一个底座统一承载，减少重复建设与运维负担"
+        },
+        {
+         "name": "临床业务价值",
+         "tag": "过程支撑",
+         "pts": [
+          "承载患者全流程、医嘱、检查检验、手术、病历数据",
+          "支撑患者 360、临床路径、专科质控、智能提醒"
+         ],
+         "old": "数据多在业务结束后汇总，医生只看到统计结果",
+         "nw": "数据回到业务现场，实时辅助诊疗与质控"
+        },
+        {
+         "name": "AI 与智能体价值",
+         "tag": "AI 就绪",
+         "pts": [
+          "面向结构化、非结构化、多模态数据",
+          "承接高质量数据集、专科专病模型、AI Agent 调用"
+         ],
+         "old": "偏离线批处理，对实时特征与模型调用支撑不足",
+         "nw": "数据直接喂模型与智能体，实现数模共振"
+        },
+        {
+         "name": "科研创新价值",
+         "tag": "科研复用",
+         "pts": [
+          "统一标准＋语义层＋血缘＋版本管理＋安全沙箱",
+          "科研队列、专病库、随访与多模态资料持续沉淀"
+         ],
+         "old": "科研靠临时 SQL 与一次性数据集，口径难复用",
+         "nw": "形成可治理、可复用、可追溯的科研数据资产"
+        },
+        {
+         "name": "数据治理价值",
+         "tag": "内生质检",
+         "pts": [
+          "采集→入湖→建模→服务→使用全过程可治理",
+          "标准映射、质量校验、血缘追踪、闭环整改"
+         ],
+         "old": "先汇聚后清洗再补救，问题在报表阶段才暴露",
+         "nw": "数据质量从事后排查变为平台过程内生能力"
+        },
+        {
+         "name": "数据资产价值",
+         "tag": "资产运营",
+         "pts": [
+          "数据集、指标集、规则集、知识库可管理可评估",
+          "支撑院内复用、可信数据空间与数据要素运营"
+         ],
+         "old": "数据是系统副产品，用完即弃、不沉淀",
+         "nw": "数据当资产管，可盘点、可评估、可入表变现"
+        },
+        {
+         "name": "安全合规价值",
+         "tag": "可用不可见",
+         "pts": [
+          "分类分级、脱敏匿名化、安全沙箱、访问审计",
+          "原始数据不出域，结果导出受控、全程留痕"
+         ],
+         "old": "靠边界与权限，数据外发即拷贝，难持续管控",
+         "nw": "对标《数据安全法》《个人信息保护法》，可用不可见"
+        }
+       ]
+      },
+      {
+       "h": "",
+       "g2": false,
+       "cards": [
+        {
+         "name": "为什么这套底座比 Hadoop 更“新”",
+         "tag": "价值导向对比",
+         "pts": [
+          "Hadoop 解决“数据集中、批量计算”；新底座解决“数据实时服务管理、临床、科研与 AI”",
+          "Hadoop 更像历史数据仓库；新底座更像全院数据操作系统",
+          "Hadoop 价值重心在 IT 后台；新底座价值重心在医院业务现场",
+          "Hadoop 支撑报表；新底座支撑智能体、模型、数据集、资产运营与可信共享"
+         ],
+         "old": "传统 / Hadoop：离线批处理、存算耦合、按峰值常驻，价值停在 IT 后台",
+         "nw": "云原生：实时＋弹性＋湖仓一体＋AI 信创就绪，价值落到管理、临床、科研与运营",
+         "hi": true
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "版本1 · 技术底座说明（旧版，点击展开）",
+     "sections": [
+      {
+       "h": "",
+       "g2": true,
+       "cards": [
+        {
+         "name": "统一算力",
+         "tag": "",
+         "pts": [
+          "多院区算力统一调度、按需分配",
+          "为 AI 训练与实时分析提供弹性算力"
+         ]
+        },
+        {
+         "name": "弹性扩容",
+         "tag": "",
+         "pts": [
+          "业务高峰自动扩、闲时自动缩",
+          "成本可控，不用一次性堆硬件"
+         ]
+        },
+        {
+         "name": "存算分离",
+         "tag": "",
+         "pts": [
+          "存储与计算独立扩展",
+          "告别传统一体机的算力与存储捆绑"
+         ]
+        },
+        {
+         "name": "智能运维",
+         "tag": "",
+         "pts": [
+          "故障自愈、容量预测、统一监控",
+          "信创国产化适配，降低运维负担"
+         ]
+        }
+       ]
+      },
+      {
+       "h": "",
+       "g2": false,
+       "cards": [
+        {
+         "name": "为什么这套底座算“新”",
+         "tag": "对比传统 Hadoop",
+         "pts": [
+          "存算分离：传统 Hadoop 存算耦合，扩存储被迫一起扩算力；现在各扩各的，钱花在刀刃上",
+          "弹性伸缩：传统按峰值常驻、利用率低；现在按需弹性、闲时缩容，不烧钱",
+          "湖仓一体与实时 AI：传统以批处理为主、HDFS 绑定集群；现在对象存储 + 流批一体 + GPU 调度，AI 就绪"
+         ],
+         "old": "传统 / Hadoop：存算耦合、按峰值常驻、批处理为主，扩容靠堆硬件",
+         "nw": "云原生：存算分离 · 弹性伸缩 · 湖仓一体实时 · AI 与信创就绪，一套底座撑住全院实时计算",
+         "hi": true
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "d2": {
+   "title": "两大支柱 · 数据质量 + 数据安全",
+   "ess": "两根柱子贯穿平台全过程——前者保证数据“高质量”，后者保证数据“安全可控”。",
+   "sections": [
+    {
+     "h": "数据质量",
+     "g2": false,
+     "cards": [
+      {
+       "name": "全链路质检",
+       "tag": "贯穿全过程",
+       "pts": [
+        "完整性 · 准确性 · 一致性 · 规范性 · 可追溯性",
+        "从采集到资产，每一环都带质检关卡"
+       ],
+       "old": "事后人工抽查，问题发现滞后",
+       "nw": "AI 实时内生质检，问题即时拦截、提醒",
+       "hi": true
+      },
+      {
+       "name": "高质量数据集质检平台",
+       "tag": "AI 质检",
+       "pts": [
+        "说明文档 / 数据质量 / 模型应用 三维质检",
+        "结构化、非结构化、多模态统一质检",
+        "统一质量标准"
+       ]
+      }
+     ]
+    },
+    {
+     "h": "数据安全",
+     "g2": false,
+     "cards": [
+      {
+       "name": "分类分级与去隐私",
+       "tag": "合规底线",
+       "pts": [
+        "数据分类分级、敏感数据识别",
+        "去隐私化：结构化、非结构化数据脱敏 / 数据匿名化 / 数据水印"
+       ],
+       "old": "靠边界与权限，数据流通=拷贝外发，难合规",
+       "nw": "对标《数据安全法》《个人信息保护法》",
+       "hi": true
+      },
+      {
+       "name": "可用不可见",
+       "tag": "安全流通",
+       "pts": [
+        "原始数据不出域、可用不可见",
+        "安全沙箱用数 + 密态计算",
+        "让高价值数据“能用起来”又“不泄露”"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "d3": {
+   "title": "三大引擎 · 数据治理 / 数据挖掘 / 数据资产",
+   "ess": "数据“管好 → 用活 → 变现”的核心处理链，也是平台区别于传统最关键的三个引擎；每个引擎拆成独立模块板块。",
+   "blocks": [
+    {
+     "name": "数据治理引擎",
+     "tag": "治理 · 打地基",
+     "cols": false,
+     "intro": "统一标准 + AI 实时治理，把多源脏乱数据变成干净、合规、可用的标准数据，为语义层与高质量数据集打地基。",
+     "old": "标准各系统不一、烟囱林立；治理靠人工事后运动式",
+     "nw": "国际标准统一对标；治理 AI 实时、内生、可持续",
+     "groups": [
+      {
+       "gh": "国际标准对标",
+       "mods": [
+        "SNOMED-CT",
+        "HL7",
+        "梅奥临床标准",
+        "统一术语标准"
+       ]
+      },
+      {
+       "gh": "AI 驱动治理",
+       "mods": [
+        "规则解析",
+        "字段候选匹配",
+        "整改建议生成",
+        "人工复核"
+       ]
+      }
+     ]
+    },
+    {
+     "name": "数据挖掘引擎",
+     "tag": "挖掘",
+     "cols": true,
+     "intro": "以业务对象（而非表）作为数据组织的基本单元，在数据标准层之上构建一层稳定、统一、可治理的业务语义层，让数据“组合”而非“复制”，分析、AI 模型、业务决策共用同一套语义底座。",
+     "old": "取数靠 IT 写 SQL，业务看不懂库表，效率低",
+     "nw": "语义即服务，用业务语言直接取数，不写 SQL",
+     "groups": [
+      {
+       "gh": "医学语义模型",
+       "mods": [
+        "规则模型",
+        "指标模型",
+        "对象子集（队列）",
+        "对象 + 属性（变量）",
+        "术语 + 概念集合"
+       ]
+      },
+      {
+       "gh": "语义即服务",
+       "hot": true,
+       "mods": [
+        "医学对象语言引擎（MOL）"
+       ]
+      },
+      {
+       "gh": "场景数据集",
+       "mods": [
+        "专科 / 专病数据集",
+        "标准指标集",
+        "质控规则集",
+        "医院通用业务模型"
+       ]
+      },
+      {
+       "gh": "知识中心（医疗健康知识体系建设）",
+       "mods": [
+        "医学知识图谱",
+        "临床规则库",
+        "文档 / 指南库",
+        "术语本体集"
+       ]
+      }
+     ],
+     "foot": "底层：多模态全域数据湖 · DWD-DIM（标准数据模型）　｜　侧：LLM 多模态数据挖掘与标注　｜　知识中心沉淀院内可复用的知识资产"
+    },
+    {
+     "name": "数据资产引擎",
+     "tag": "资产 · 变现",
+     "cols": false,
+     "intro": "挖掘出的高质量数据经质检封装后，沉淀为可管理、可评估、可变现的数据资产。",
+     "old": "数据是成本负担，用完即弃、不沉淀",
+     "nw": "数据当资产管，可盘点、可评估、可入表变现",
+     "groups": [
+      {
+       "gh": "高质量数据集质检与封装",
+       "mods": [
+        "数据质量检测",
+        "数据标准检测",
+        "合规检测",
+        "标注检测",
+        "AI 场景化封装"
+       ]
+      },
+      {
+       "gh": "全生命周期管理",
+       "mods": [
+        "采集→销毁",
+        "数据血缘",
+        "版本管理"
+       ]
+      },
+      {
+       "gh": "数据资产化",
+       "mods": [
+        "资产盘点",
+        "价值评估",
+        "入表",
+        "计价"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "d4": {
+   "title": "四大场景 · Data for AI / APP / Users / Oper",
+   "ess": "平台对外的四个用数方向——同一份高质量数据，分别服务于 AI、业务应用、院内用户和对外运营。点击 Data for Users / Oper 可展开详细流程。",
+   "sections": [
+    {
+     "h": "",
+     "g2": true,
+     "cards": [
+      {
+       "name": "Data for AI",
+       "tag": "供 AI 用数",
+       "pts": [
+        "大模型底座 + 智能体（Agent）中心",
+        "AI 中台：模型注册 / 训练推理 / MLOps 统一纳管",
+        "专科专病垂直大模型、Agent 即插即用",
+        "高质量数据集直接喂模型，数模共振"
+       ]
+      },
+      {
+       "name": "Data for APP",
+       "tag": "供业务用数",
+       "pts": [
+        "医 · 教 · 研 · 管 · 服 五大智慧应用",
+        "患者 360、辅助诊断、科研平台、运营管理等",
+        "应用长在平台上，数据口径统一"
+       ]
+      },
+      {
+       "name": "Data for Users",
+       "tag": "供院内用户",
+       "link": "d4u",
+       "pts": [
+        "安全沙箱 · 院内开放",
+        "医生 / 科研人员自助取数、自助分析",
+        "原始数据不出域，成果导出受控"
+       ]
+      },
+      {
+       "name": "Data for Oper",
+       "tag": "供对外运营",
+       "link": "d4o",
+       "pts": [
+        "可信数据空间 · 流通交易",
+        "对外开放：区域医联体 + 外部产业",
+        "数据生态 / 梅奥模式，让数据价值变现"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "d4u": {
+   "title": "Data for Users · 数据安全共享使用平台（院内用户）",
+   "ess": "院内用户从提出需求到需求落地的全流程：浏览检索或申请交付两条路径，统一在安全沙箱内分析，导出需经审批。",
+   "start": "数据需求",
+   "pathA": {
+    "lab": "路径一 · 浏览检索",
+    "steps": [
+     "数据广场",
+     "数据浏览",
+     "数据检索",
+     "检索结果"
+    ]
+   },
+   "pathB": {
+    "lab": "路径二 · 申请交付（信息中心）",
+    "steps": [
+     "数据申请（OA）",
+     "数据审批",
+     "数据交付",
+     "数据探查（自助 SQL）",
+     "查询结果"
+    ]
+   },
+   "sandbox": {
+    "title": "安全沙箱（数据分析）",
+    "cyl_in": "导入数据集",
+    "tools": [
+     "虚拟桌面",
+     "通用工具",
+     "专业工具"
+    ],
+    "cyl_out": "结果数据集"
+   },
+   "tail": [
+    "数据导出审批",
+    "本地数据集",
+    "需求落地"
+   ]
+  },
+  "d4o": {
+   "title": "Data for Oper · 可信数据空间（院外用户）",
+   "ess": "Data Behind Glass：原始数据不出域，外部机构通过节点注册接入，在可信空间内完成产品交易、联邦学习、隐私计算与分析，结果交付给科研人员、药企、数据需求方。",
+   "users": [
+    "科研人员",
+    "药企",
+    "数据需求方"
+   ],
+   "space": {
+    "name": "数据安全共享平台 / 可信数据空间（Data Behind Glass）",
+    "left": "数据产品超市",
+    "caps": [
+     "Solutions Studio 环境",
+     "联邦学习",
+     "隐私计算",
+     "安全沙箱"
+    ],
+    "data": [
+     "结果数据集",
+     "分析数据集（汇聚式 / 分布式）",
+     "原始数据集"
+    ],
+    "right": "数据需求交付"
+   },
+   "orgs": [
+    "医疗机构 A",
+    "医疗机构 B",
+    "医疗机构 C",
+    "医疗机构 D",
+    "医疗机构 E"
+   ]
+  }
+ },
+ "arch": {
+  "title": "整体架构蓝图",
+  "ess": "以一张总览图呈现平台从基础设施、业务数据、大数据平台、人工智能平台到可信数据空间的完整血缘关系，作为首页 1234 分块之外的全局视图。",
+  "entryTitle": "查看整体架构蓝图",
+  "entryDesc": "一张图查看数据平台全局血缘、层间依赖与能力边界"
+ }
+}
+</script>
+
+<template id="archSvgTpl">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1340 1226" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif"><defs><linearGradient id="g_trust" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6366f1"/><stop offset="1" stop-color="#4f46e5"/></linearGradient><linearGradient id="hi_trust" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6366f1"/><stop offset="1" stop-color="#4f46e5"/></linearGradient><linearGradient id="g_scn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d97706"/><stop offset="1" stop-color="#b45309"/></linearGradient><linearGradient id="hi_scn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d97706"/><stop offset="1" stop-color="#b45309"/></linearGradient><linearGradient id="g_ai" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0d9488"/><stop offset="1" stop-color="#0f766e"/></linearGradient><linearGradient id="hi_ai" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0d9488"/><stop offset="1" stop-color="#0f766e"/></linearGradient><linearGradient id="g_data" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2563eb"/><stop offset="1" stop-color="#1d4ed8"/></linearGradient><linearGradient id="hi_data" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2563eb"/><stop offset="1" stop-color="#1d4ed8"/></linearGradient><linearGradient id="g_biz" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0891b2"/><stop offset="1" stop-color="#0e7490"/></linearGradient><linearGradient id="hi_biz" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0891b2"/><stop offset="1" stop-color="#0e7490"/></linearGradient><linearGradient id="g_infra" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#475569"/><stop offset="1" stop-color="#334155"/></linearGradient><linearGradient id="hi_infra" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#475569"/><stop offset="1" stop-color="#334155"/></linearGradient><linearGradient id="ctaGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fb923c"/><stop offset="1" stop-color="#ea580c"/></linearGradient><linearGradient id="cylTop" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f0f5fe"/><stop offset="1" stop-color="#e2ecfb"/></linearGradient><linearGradient id="cylBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e3edfc"/><stop offset="1" stop-color="#cfe0f8"/></linearGradient><linearGradient id="gQual" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fef6df"/><stop offset="1" stop-color="#fde9b8"/></linearGradient><linearGradient id="gSec" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffeaec"/><stop offset="1" stop-color="#ffd4d9"/></linearGradient><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6f9fc"/><stop offset="1" stop-color="#eaeff6"/></linearGradient><filter id="sCard" x="-15%" y="-15%" width="130%" height="150%"><feDropShadow dx="0" dy="1" stdDeviation="1.6" flood-color="#1e293b" flood-opacity="0.10"/></filter><filter id="sPanel" x="-8%" y="-8%" width="116%" height="120%"><feDropShadow dx="0" dy="3" stdDeviation="7" flood-color="#1e293b" flood-opacity="0.10"/></filter><filter id="sHi" x="-25%" y="-25%" width="150%" height="160%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#1d4ed8" flood-opacity="0.30"/></filter><filter id="sCta" x="-25%" y="-25%" width="150%" height="160%"><feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#c2410c" flood-opacity="0.35"/></filter></defs><rect x="0" y="0" width="1340" height="1226" fill="url(#bg)"/>
+<rect x="116.0" y="92.0" width="1108.0" height="110.0" rx="14" fill="#eef0fd" stroke="#dfe2fb" stroke-width="1.2" filter="url(#sPanel)"/>
+<rect x="132.0" y="100.0" width="30.0" height="30.0" rx="8" fill="url(#g_trust)" stroke="none"/>
+<g stroke="#fff" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round">
+<polyline points="140.0,111.0 153.0,111.0"/>
+<polyline points="150.0,108.0 154.0,111.0 150.0,114.0"/>
+<polyline points="154.0,119.0 141.0,119.0"/>
+<polyline points="144.0,116.0 140.0,119.0 144.0,122.0"/>
+</g>
+<text x="174.0" y="114.0" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="15.5" font-weight="700" fill="#0f172a" text-anchor="start" letter-spacing="0.3">可信数据空间平台</text>
+<text x="174.0" y="129.0" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="10.5" font-weight="400" fill="#64748b" text-anchor="start">供需对接 · 数据流通 · 产品交易</text>
+<rect x="128.0" y="145.0" width="3.5" height="40.0" rx="2" fill="#6366f1" stroke="none"/>
+<text x="162.0" y="161.7" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="600" fill="#6366f1" text-anchor="middle">可信</text>
+<text x="162.0" y="176.7" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="600" fill="#6366f1" text-anchor="middle">空间</text>
+<rect x="198.0" y="142.0" width="158.3" height="46.0" rx="8" fill="#ffffff" stroke="#dfe2fb" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="277.2" y="169.2" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="500" fill="#0f172a" text-anchor="middle">供需对接</text>
+<rect x="368.3" y="142.0" width="158.3" height="46.0" rx="8" fill="#ffffff" stroke="#dfe2fb" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="447.5" y="169.2" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="500" fill="#0f172a" text-anchor="middle">数据产品超市</text>
+<rect x="538.7" y="142.0" width="158.3" height="46.0" rx="8" fill="#ffffff" stroke="#dfe2fb" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="617.8" y="169.2" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="500" fill="#0f172a" text-anchor="middle">连接器</text>
+<rect x="709.0" y="142.0" width="158.3" height="46.0" rx="8" fill="#ffffff" stroke="#dfe2fb" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="788.2" y="169.2" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="500" fill="#0f172a" text-anchor="middle">数据探查</text>
+<rect x="879.3" y="142.0" width="158.3" height="46.0" rx="8" fill="#ffffff" stroke="#dfe2fb" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="958.5" y="169.2" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="500" fill="#0f172a" text-anchor="middle">数字合约</text>
+<rect x="1049.7" y="142.0" width="158.3" height="46.0" rx="8" fill="#ffffff" stroke="#dfe2fb" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="1128.8" y="169.2" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="500" fill="#0f172a" text-anchor="middle">数据交付</text>
+<rect x="116.0" y="234.0" width="1108.0" height="168.0" rx="14" fill="#fdf4e3" stroke="#f1e0bb" stroke-width="1.2" filter="url(#sPanel)"/>
+<rect x="132.0" y="242.0" width="30.0" height="30.0" rx="8" fill="url(#g_scn)" stroke="none"/>
+<rect x="140.5" y="250.5" width="5.5" height="5.5" rx="1.4" fill="#fff"/>
+<rect x="148.0" y="250.5" width="5.5" height="5.5" rx="1.4" fill="#fff"/>
+<rect x="140.5" y="258.0" width="5.5" height="5.5" rx="1.4" fill="#fff"/>
+<rect x="148.0" y="258.0" width="5.5" height="5.5" rx="1.4" fill="#fff"/>
+<text x="174.0" y="256.0" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="15.5" font-weight="700" fill="#0f172a" text-anchor="start" letter-spacing="0.3">应用场景</text>
+<text x="174.0" y="271.0" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="10.5" font-weight="400" fill="#64748b" text-anchor="start">面向 医疗 / 教学 / 科研 / 管理 / 用数</text>
+<rect x="198.0" y="286.0" width="187.6" height="96.0" rx="8" fill="#ffffff" stroke="#f1e0bb" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="291.8" y="325.8" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="15" font-weight="700" fill="#0f172a" text-anchor="middle">医疗</text>
+<text x="291.8" y="345.8" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="10.5" font-weight="400" fill="#64748b" text-anchor="middle">患者360</text>
+<text x="291.8" y="360.3" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="10.5" font-weight="400" fill="#64748b" text-anchor="middle">员工360</text>
+<rect x="403.6" y="286.0" width="187.6" height="96.0" rx="8" fill="#ffffff" stroke="#f1e0bb" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="497.4" y="325.8" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="15" font-weight="700" fill="#0f172a" text-anchor="middle">教学</text>
+<text x="497.4" y="353.0" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="10.5" font-weight="400" fill="#64748b" text-anchor="middle">教学管理</text>
+<rect x="609.2" y="286.0" width="187.6" height="96.0" rx="8" fill="#ffffff" stroke="#f1e0bb" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="703.0" y="325.8" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="15" font-weight="700" fill="#0f172a" text-anchor="middle">科研</text>
+<text x="703.0" y="345.8" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="10.5" font-weight="400" fill="#64748b" text-anchor="middle">全院科研平台</text>
+<text x="703.0" y="360.3" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="10.5" font-weight="400" fill="#64748b" text-anchor="middle">专病科研平台</text>
+<rect x="814.8" y="286.0" width="187.6" height="96.0" rx="8" fill="#ffffff" stroke="#f1e0bb" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="908.6" y="325.8" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="15" font-weight="700" fill="#0f172a" text-anchor="middle">管理</text>
+<text x="908.6" y="345.8" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="10.5" font-weight="400" fill="#64748b" text-anchor="middle">多院区运营管理</text>
+<text x="908.6" y="360.3" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="10.5" font-weight="400" fill="#64748b" text-anchor="middle">医保飞检</text>
+<rect x="1020.4" y="286.0" width="187.6" height="96.0" rx="9" fill="url(#ctaGrad)" stroke="none" filter="url(#sCta)"/>
+<text x="1114.2" y="325.8" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="15" font-weight="700" fill="#fff" text-anchor="middle">用数</text>
+<text x="1114.2" y="355.0" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="10.5" font-weight="400" fill="#ffe9d6" text-anchor="middle">安全沙箱开放用数</text>
+<circle cx="1195.0" cy="299.0" r="3" fill="#fff" opacity="0.85"/>
+<rect x="116.0" y="434.0" width="1108.0" height="176.0" rx="14" fill="#e6f5f2" stroke="#c6ebe3" stroke-width="1.2" filter="url(#sPanel)"/>
+<rect x="132.0" y="442.0" width="30.0" height="30.0" rx="8" fill="url(#g_ai)" stroke="none"/>
+<polygon points="147,448.5 149.2,454.8 155.5,457 149.2,459.2 147,465.5 144.8,459.2 138.5,457 144.8,454.8" fill="#fff"/>
+<polygon points="153.5,448.32 154.424,449.58 155.18,450 154.424,450.42 153.5,451.68 152.576,450.42 151.82,450 152.576,449.58" fill="#fff"/>
+<text x="174.0" y="456.0" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="15.5" font-weight="700" fill="#0f172a" text-anchor="start" letter-spacing="0.3">人工智能平台</text>
+<text x="174.0" y="471.0" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="10.5" font-weight="400" fill="#64748b" text-anchor="start">AI 原生 · 数据语义驱动 Agent</text>
+<rect x="128.0" y="487.0" width="3.5" height="40.0" rx="2" fill="#0d9488" stroke="none"/>
+<text x="162.0" y="503.7" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="600" fill="#0d9488" text-anchor="middle">应用</text>
+<text x="162.0" y="518.7" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="600" fill="#0d9488" text-anchor="middle">层</text>
+<rect x="198.0" y="484.0" width="148.9" height="46.0" rx="8" fill="#ffffff" stroke="#c6ebe3" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="272.4" y="511.0" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="11.5" font-weight="500" fill="#0f172a" text-anchor="middle">智能问数</text>
+<rect x="357.9" y="484.0" width="148.9" height="46.0" rx="8" fill="#ffffff" stroke="#c6ebe3" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="432.3" y="511.0" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="11.5" font-weight="500" fill="#0f172a" text-anchor="middle">智能问答</text>
+<rect x="517.8" y="484.0" width="148.9" height="46.0" rx="8" fill="#ffffff" stroke="#c6ebe3" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="592.2" y="511.0" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="11.5" font-weight="500" fill="#0f172a" text-anchor="middle">医保飞检Agent</text>
+<rect x="677.7" y="484.0" width="148.9" height="46.0" rx="8" fill="#ffffff" stroke="#c6ebe3" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="752.1" y="511.0" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="11.5" font-weight="500" fill="#0f172a" text-anchor="middle">专科专病Agent</text>
+<rect x="837.6" y="484.0" width="148.9" height="46.0" rx="8" fill="#ffffff" stroke="#c6ebe3" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="912.0" y="511.0" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="11.5" font-weight="500" fill="#0f172a" text-anchor="middle">科研Agent</text>
+<rect x="997.5" y="484.0" width="148.9" height="46.0" rx="8" fill="#ffffff" stroke="#c6ebe3" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="1071.9" y="511.0" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="11.5" font-weight="500" fill="#0f172a" text-anchor="middle">运营管理Agent</text>
+<rect x="1160.4" y="489.0" width="44.6" height="36.0" rx="8" fill="none" stroke="#c4ccd8" stroke-width="1.2" stroke-dasharray="2,4"/>
+<circle cx="1176.7" cy="507.0" r="1.5" fill="#aab3c2"/>
+<circle cx="1182.7" cy="507.0" r="1.5" fill="#aab3c2"/>
+<circle cx="1188.7" cy="507.0" r="1.5" fill="#aab3c2"/>
+<rect x="128.0" y="549.0" width="3.5" height="40.0" rx="2" fill="#0d9488" stroke="none"/>
+<text x="162.0" y="565.7" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="600" fill="#0d9488" text-anchor="middle">能力</text>
+<text x="162.0" y="580.7" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="600" fill="#0d9488" text-anchor="middle">层</text>
+<rect x="198.0" y="546.0" width="148.9" height="46.0" rx="8" fill="#ffffff" stroke="#c6ebe3" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="272.4" y="566.9" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12.5" font-weight="700" fill="#0f172a" text-anchor="middle">模型管理</text>
+<text x="272.4" y="579.7" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="9.5" font-weight="400" fill="#64748b" text-anchor="middle">( LLM )</text>
+<rect x="357.9" y="546.0" width="148.9" height="46.0" rx="8" fill="#ffffff" stroke="#c6ebe3" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="432.3" y="566.9" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12.5" font-weight="700" fill="#0f172a" text-anchor="middle">RAG向量库</text>
+<text x="432.3" y="579.7" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="9.5" font-weight="400" fill="#64748b" text-anchor="middle">( 知识文档 )</text>
+<rect x="517.8" y="546.0" width="148.9" height="46.0" rx="8" fill="#ffffff" stroke="#c6ebe3" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="592.2" y="566.9" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12.5" font-weight="700" fill="#0f172a" text-anchor="middle">Skills管理</text>
+<text x="592.2" y="579.7" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="9.5" font-weight="400" fill="#64748b" text-anchor="middle">( 业务经验 )</text>
+<rect x="677.7" y="546.0" width="148.9" height="46.0" rx="8" fill="#ffffff" stroke="#c6ebe3" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="752.1" y="566.9" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12.5" font-weight="700" fill="#0f172a" text-anchor="middle">Tools管理</text>
+<text x="752.1" y="579.7" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="9.5" font-weight="400" fill="#64748b" text-anchor="middle">( 通用能力 )</text>
+<rect x="837.6" y="546.0" width="148.9" height="46.0" rx="8" fill="#ffffff" stroke="#c6ebe3" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="912.0" y="566.9" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12.5" font-weight="700" fill="#0f172a" text-anchor="middle">Agent编排</text>
+<text x="912.0" y="579.7" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="9.5" font-weight="400" fill="#64748b" text-anchor="middle">( 场景任务 )</text>
+<rect x="997.5" y="546.0" width="148.9" height="46.0" rx="8" fill="#ffffff" stroke="#c6ebe3" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="1071.9" y="573.2" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="500" fill="#0f172a" text-anchor="middle">语义层对接</text>
+<rect x="1160.4" y="551.0" width="44.6" height="36.0" rx="8" fill="none" stroke="#c4ccd8" stroke-width="1.2" stroke-dasharray="2,4"/>
+<circle cx="1176.7" cy="569.0" r="1.5" fill="#aab3c2"/>
+<circle cx="1182.7" cy="569.0" r="1.5" fill="#aab3c2"/>
+<circle cx="1188.7" cy="569.0" r="1.5" fill="#aab3c2"/>
+<rect x="116.0" y="642.0" width="1108.0" height="280.0" rx="14" fill="#e9f1fd" stroke="#cee0fb" stroke-width="1.2" filter="url(#sPanel)"/>
+<rect x="132.0" y="650.0" width="30.0" height="30.0" rx="8" fill="url(#g_data)" stroke="none"/>
+<g stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round">
+<ellipse cx="147.0" cy="659.0" rx="8" ry="3.2"/>
+<path d="M139.0,659.0 L139.0,671.0 A8,3.2 0 0 0 155.0,671.0 L155.0,659.0"/>
+<path d="M139.0,665.0 A8,3.2 0 0 0 155.0,665.0"/>
+</g>
+<text x="174.0" y="664.0" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="15.5" font-weight="700" fill="#0f172a" text-anchor="start" letter-spacing="0.3">新一代大数据平台</text>
+<text x="174.0" y="679.0" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="10.5" font-weight="400" fill="#64748b" text-anchor="start">数据要素驱动 · 语义即服务 · 数据资产化 · 数据 AI Ready</text>
+<text x="1208.0" y="664.0" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="10" font-weight="600" fill="#1d4ed8" text-anchor="end">自下而上：数据实体 → 语义 → 资产目录</text>
+<rect x="128.0" y="699.0" width="3.5" height="40.0" rx="2" fill="#2563eb" stroke="none"/>
+<text x="162.0" y="708.2" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="600" fill="#2563eb" text-anchor="middle">数据</text>
+<text x="162.0" y="723.2" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="600" fill="#2563eb" text-anchor="middle">资产</text>
+<text x="162.0" y="738.2" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="600" fill="#2563eb" text-anchor="middle">管理</text>
+<rect x="198.0" y="696.0" width="111.2" height="46.0" rx="8" fill="#ffffff" stroke="#cee0fb" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="253.6" y="722.7" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="10.5" font-weight="500" fill="#0f172a" text-anchor="middle">数据资源目录</text>
+<rect x="323.2" y="696.0" width="111.2" height="46.0" rx="8" fill="#ffffff" stroke="#cee0fb" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="378.8" y="722.7" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="10.5" font-weight="500" fill="#0f172a" text-anchor="middle">数据要素目录</text>
+<rect x="448.3" y="696.0" width="111.2" height="46.0" rx="8" fill="url(#hi_data)" stroke="none" filter="url(#sHi)"/>
+<text x="503.9" y="715.5" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="10" font-weight="600" fill="#ffffff" text-anchor="middle">数据产品目录</text>
+<text x="503.9" y="729.5" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="10" font-weight="600" fill="#ffffff" text-anchor="middle">（高质量数据集）</text>
+<circle cx="548.5" cy="707.0" r="2.6" fill="#ffffff" opacity="0.9"/>
+<rect x="573.5" y="696.0" width="111.2" height="46.0" rx="8" fill="#ffffff" stroke="#cee0fb" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="629.1" y="722.7" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="10.5" font-weight="500" fill="#0f172a" text-anchor="middle">数据产品评测</text>
+<rect x="698.7" y="696.0" width="111.2" height="46.0" rx="8" fill="#ffffff" stroke="#cee0fb" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="754.3" y="715.4" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="10.5" font-weight="500" fill="#0f172a" text-anchor="middle">数据全生命周期</text>
+<text x="754.3" y="729.9" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="10.5" font-weight="500" fill="#0f172a" text-anchor="middle">管理</text>
+<rect x="823.9" y="696.0" width="111.2" height="46.0" rx="8" fill="#ffffff" stroke="#cee0fb" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="879.4" y="722.7" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="10.5" font-weight="500" fill="#0f172a" text-anchor="middle">数据价值评估</text>
+<rect x="949.0" y="696.0" width="111.2" height="46.0" rx="8" fill="#ffffff" stroke="#cee0fb" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="1004.6" y="722.7" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="10.5" font-weight="500" fill="#0f172a" text-anchor="middle">资产全景</text>
+<rect x="1077.2" y="701.0" width="31.8" height="36.0" rx="8" fill="none" stroke="#c4ccd8" stroke-width="1.2" stroke-dasharray="2,4"/>
+<circle cx="1087.1" cy="719.0" r="1.5" fill="#aab3c2"/>
+<circle cx="1093.1" cy="719.0" r="1.5" fill="#aab3c2"/>
+<circle cx="1099.1" cy="719.0" r="1.5" fill="#aab3c2"/>
+<line x1="310.2" y1="719.0" x2="316.7" y2="719.0" stroke="#1d4ed8" stroke-width="1.9" stroke-linecap="round" opacity="0.9"/>
+<polygon points="316.7,715.6 316.7,722.4 321.7,719.0" fill="#1d4ed8" opacity="0.9"/>
+<line x1="435.3" y1="719.0" x2="441.8" y2="719.0" stroke="#1d4ed8" stroke-width="1.9" stroke-linecap="round" opacity="0.9"/>
+<polygon points="441.8,715.6 441.8,722.4 446.8,719.0" fill="#1d4ed8" opacity="0.9"/>
+<line x1="560.5" y1="719.0" x2="567.0" y2="719.0" stroke="#1d4ed8" stroke-width="1.9" stroke-linecap="round" opacity="0.9"/>
+<polygon points="567.0,715.6 567.0,722.4 572.0,719.0" fill="#1d4ed8" opacity="0.9"/>
+<line x1="685.7" y1="719.0" x2="692.2" y2="719.0" stroke="#1d4ed8" stroke-width="1.9" stroke-linecap="round" opacity="0.9"/>
+<polygon points="692.2,715.6 692.2,722.4 697.2,719.0" fill="#1d4ed8" opacity="0.9"/>
+<line x1="810.9" y1="719.0" x2="817.4" y2="719.0" stroke="#1d4ed8" stroke-width="1.9" stroke-linecap="round" opacity="0.9"/>
+<polygon points="817.4,715.6 817.4,722.4 822.4,719.0" fill="#1d4ed8" opacity="0.9"/>
+<line x1="936.0" y1="719.0" x2="942.5" y2="719.0" stroke="#1d4ed8" stroke-width="1.9" stroke-linecap="round" opacity="0.9"/>
+<polygon points="942.5,715.6 942.5,722.4 947.5,719.0" fill="#1d4ed8" opacity="0.9"/>
+<rect x="128.0" y="773.0" width="3.5" height="48.0" rx="2" fill="#2563eb" stroke="none"/>
+<text x="162.0" y="786.2" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="600" fill="#2563eb" text-anchor="middle">数据</text>
+<text x="162.0" y="801.2" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="600" fill="#2563eb" text-anchor="middle">要素</text>
+<text x="162.0" y="816.2" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="600" fill="#2563eb" text-anchor="middle">挖掘</text>
+<path d="M198.0,780.0 A111.9,10 0 0 1 421.7,780.0 L421.7,814.0 A111.9,10 0 0 1 198.0,814.0 Z" fill="url(#cylBody)" stroke="#1d4ed8" stroke-width="1.2" filter="url(#sCard)"/>
+<ellipse cx="309.9" cy="780.0" rx="111.9" ry="10" fill="url(#cylTop)" stroke="#1d4ed8" stroke-width="1.2"/>
+<text x="309.9" y="787.0" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="10.5" font-weight="700" fill="#1d4ed8" text-anchor="middle">新一代数据要素中心</text>
+<text x="309.9" y="804.0" font-family="'SF Mono','JetBrains Mono','Roboto Mono',ui-monospace,Menlo,Consolas,monospace" font-size="10" font-weight="400" fill="#0f172a" text-anchor="middle">CDR · ODR · RDR · HDR</text>
+<text x="309.9" y="819.0" font-family="'SF Mono','JetBrains Mono','Roboto Mono',ui-monospace,Menlo,Consolas,monospace" font-size="10" font-weight="400" fill="#0f172a" text-anchor="middle">（语义层）</text>
+<rect x="435.7" y="770.0" width="111.9" height="54.0" rx="8" fill="#ffffff" stroke="#cee0fb" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="491.6" y="800.7" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="10.5" font-weight="500" fill="#0f172a" text-anchor="middle">多模态标注</text>
+<rect x="561.6" y="770.0" width="111.9" height="54.0" rx="8" fill="#ffffff" stroke="#cee0fb" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="617.5" y="793.4" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="10.5" font-weight="500" fill="#0f172a" text-anchor="middle">医学术语</text>
+<text x="617.5" y="807.9" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="10.5" font-weight="500" fill="#0f172a" text-anchor="middle">知识图谱</text>
+<rect x="687.4" y="770.0" width="111.9" height="54.0" rx="8" fill="#ffffff" stroke="#cee0fb" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="743.4" y="793.4" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="10.5" font-weight="500" fill="#0f172a" text-anchor="middle">变量中心</text>
+<text x="743.4" y="807.9" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="10.5" font-weight="500" fill="#0f172a" text-anchor="middle">语义引擎</text>
+<rect x="813.3" y="770.0" width="111.9" height="54.0" rx="8" fill="#ffffff" stroke="#cee0fb" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="869.2" y="800.7" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="10.5" font-weight="500" fill="#0f172a" text-anchor="middle">指标管理中心</text>
+<rect x="939.2" y="770.0" width="111.9" height="54.0" rx="8" fill="#ffffff" stroke="#cee0fb" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="995.1" y="800.7" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="10.5" font-weight="500" fill="#0f172a" text-anchor="middle">规则管理中心</text>
+<rect x="1068.0" y="775.0" width="41.0" height="44.0" rx="8" fill="none" stroke="#c4ccd8" stroke-width="1.2" stroke-dasharray="2,4"/>
+<circle cx="1082.5" cy="797.0" r="1.5" fill="#aab3c2"/>
+<circle cx="1088.5" cy="797.0" r="1.5" fill="#aab3c2"/>
+<circle cx="1094.5" cy="797.0" r="1.5" fill="#aab3c2"/>
+<line x1="548.6" y1="797.0" x2="555.1" y2="797.0" stroke="#1d4ed8" stroke-width="1.9" stroke-linecap="round" opacity="0.9"/>
+<polygon points="555.1,793.6 555.1,800.4 560.1,797.0" fill="#1d4ed8" opacity="0.9"/>
+<line x1="674.4" y1="797.0" x2="680.9" y2="797.0" stroke="#1d4ed8" stroke-width="1.9" stroke-linecap="round" opacity="0.9"/>
+<polygon points="680.9,793.6 680.9,800.4 685.9,797.0" fill="#1d4ed8" opacity="0.9"/>
+<line x1="800.3" y1="797.0" x2="806.8" y2="797.0" stroke="#1d4ed8" stroke-width="1.9" stroke-linecap="round" opacity="0.9"/>
+<polygon points="806.8,793.6 806.8,800.4 811.8,797.0" fill="#1d4ed8" opacity="0.9"/>
+<line x1="926.2" y1="797.0" x2="932.7" y2="797.0" stroke="#1d4ed8" stroke-width="1.9" stroke-linecap="round" opacity="0.9"/>
+<polygon points="932.7,793.6 932.7,800.4 937.7,797.0" fill="#1d4ed8" opacity="0.9"/>
+<rect x="128.0" y="855.0" width="3.5" height="48.0" rx="2" fill="#2563eb" stroke="none"/>
+<text x="162.0" y="868.2" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="600" fill="#2563eb" text-anchor="middle">数据</text>
+<text x="162.0" y="883.2" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="600" fill="#2563eb" text-anchor="middle">资源</text>
+<text x="162.0" y="898.2" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="600" fill="#2563eb" text-anchor="middle">治理</text>
+<path d="M198.0,862.0 A111.9,10 0 0 1 421.7,862.0 L421.7,896.0 A111.9,10 0 0 1 198.0,896.0 Z" fill="url(#cylBody)" stroke="#1d4ed8" stroke-width="1.2" filter="url(#sCard)"/>
+<ellipse cx="309.9" cy="862.0" rx="111.9" ry="10" fill="url(#cylTop)" stroke="#1d4ed8" stroke-width="1.2"/>
+<text x="309.9" y="869.0" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="10.5" font-weight="700" fill="#1d4ed8" text-anchor="middle">多模态全域实时数据湖</text>
+<text x="309.9" y="886.0" font-family="'SF Mono','JetBrains Mono','Roboto Mono',ui-monospace,Menlo,Consolas,monospace" font-size="10" font-weight="400" fill="#0f172a" text-anchor="middle">ODS · DWD · DIM</text>
+<text x="309.9" y="901.0" font-family="'SF Mono','JetBrains Mono','Roboto Mono',ui-monospace,Menlo,Consolas,monospace" font-size="10" font-weight="400" fill="#0f172a" text-anchor="middle">（数据工程层）</text>
+<rect x="435.7" y="852.0" width="111.9" height="54.0" rx="8" fill="#ffffff" stroke="#cee0fb" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="491.6" y="882.9" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="11" font-weight="500" fill="#0f172a" text-anchor="middle">数据采集</text>
+<rect x="561.6" y="852.0" width="111.9" height="54.0" rx="8" fill="#ffffff" stroke="#cee0fb" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="617.5" y="882.9" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="11" font-weight="500" fill="#0f172a" text-anchor="middle">数据标准</text>
+<rect x="687.4" y="852.0" width="111.9" height="54.0" rx="8" fill="#ffffff" stroke="#cee0fb" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="743.4" y="882.9" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="11" font-weight="500" fill="#0f172a" text-anchor="middle">数据治理</text>
+<rect x="813.3" y="852.0" width="111.9" height="54.0" rx="8" fill="url(#hi_data)" stroke="none" filter="url(#sHi)"/>
+<text x="869.2" y="882.9" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="11" font-weight="600" fill="#ffffff" text-anchor="middle">数据质控</text>
+<circle cx="914.2" cy="863.0" r="2.6" fill="#ffffff" opacity="0.9"/>
+<rect x="939.2" y="852.0" width="111.9" height="54.0" rx="8" fill="#ffffff" stroke="#cee0fb" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="995.1" y="882.9" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="11" font-weight="500" fill="#0f172a" text-anchor="middle">数据安全</text>
+<rect x="1068.0" y="857.0" width="41.0" height="44.0" rx="8" fill="none" stroke="#c4ccd8" stroke-width="1.2" stroke-dasharray="2,4"/>
+<circle cx="1082.5" cy="879.0" r="1.5" fill="#aab3c2"/>
+<circle cx="1088.5" cy="879.0" r="1.5" fill="#aab3c2"/>
+<circle cx="1094.5" cy="879.0" r="1.5" fill="#aab3c2"/>
+<line x1="548.6" y1="879.0" x2="555.1" y2="879.0" stroke="#1d4ed8" stroke-width="1.9" stroke-linecap="round" opacity="0.9"/>
+<polygon points="555.1,875.6 555.1,882.4 560.1,879.0" fill="#1d4ed8" opacity="0.9"/>
+<line x1="674.4" y1="879.0" x2="680.9" y2="879.0" stroke="#1d4ed8" stroke-width="1.9" stroke-linecap="round" opacity="0.9"/>
+<polygon points="680.9,875.6 680.9,882.4 685.9,879.0" fill="#1d4ed8" opacity="0.9"/>
+<line x1="800.3" y1="879.0" x2="806.8" y2="879.0" stroke="#1d4ed8" stroke-width="1.9" stroke-linecap="round" opacity="0.9"/>
+<polygon points="806.8,875.6 806.8,882.4 811.8,879.0" fill="#1d4ed8" opacity="0.9"/>
+<line x1="926.2" y1="879.0" x2="932.7" y2="879.0" stroke="#1d4ed8" stroke-width="1.9" stroke-linecap="round" opacity="0.9"/>
+<polygon points="932.7,875.6 932.7,882.4 937.7,879.0" fill="#1d4ed8" opacity="0.9"/>
+<line x1="309.9" y1="850.0" x2="309.9" y2="835.0" stroke="#1d4ed8" stroke-width="2.8" stroke-linecap="round" opacity="1.0"/>
+<polygon points="304.4,835.0 315.4,835.0 309.9,826.0" fill="#1d4ed8" opacity="1.0"/>
+<rect x="319.9" y="829.5" width="106.6" height="17.0" rx="8" fill="#ffffff" stroke="#cee0fb" stroke-width="1"/>
+<text x="325.9" y="841.2" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="9.5" font-weight="600" fill="#1d4ed8" text-anchor="start">数据实体 · 数据工程</text>
+<line x1="309.9" y1="768.0" x2="309.9" y2="753.0" stroke="#1d4ed8" stroke-width="2.8" stroke-linecap="round" opacity="1.0"/>
+<polygon points="304.4,753.0 315.4,753.0 309.9,744.0" fill="#1d4ed8" opacity="1.0"/>
+<rect x="319.9" y="747.5" width="106.6" height="17.0" rx="8" fill="#ffffff" stroke="#cee0fb" stroke-width="1"/>
+<text x="325.9" y="759.2" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="9.5" font-weight="600" fill="#1d4ed8" text-anchor="start">语义 · 语义产生流程</text>
+<rect x="1126.0" y="696.0" width="78.0" height="210.0" rx="8" fill="#e9f1fd" stroke="#cee0fb" stroke-width="1.2" filter="url(#sCard)"/>
+<circle cx="1165.0" cy="710.0" r="3" fill="#2563eb"/>
+<text x="1165.0" y="766.7" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="700" fill="#0f172a" text-anchor="middle">高</text>
+<text x="1165.0" y="783.7" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="700" fill="#0f172a" text-anchor="middle">质</text>
+<text x="1165.0" y="800.7" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="700" fill="#0f172a" text-anchor="middle">量</text>
+<text x="1165.0" y="817.7" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="700" fill="#0f172a" text-anchor="middle">数</text>
+<text x="1165.0" y="834.7" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="700" fill="#0f172a" text-anchor="middle">据</text>
+<text x="1165.0" y="851.7" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="700" fill="#0f172a" text-anchor="middle">集</text>
+<text x="1165.0" y="897.0" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="8.5" font-weight="700" fill="#1d4ed8" text-anchor="middle">AI Ready</text>
+<rect x="116.0" y="954.0" width="1108.0" height="108.0" rx="14" fill="#e5f4f8" stroke="#c2e5ef" stroke-width="1.2" filter="url(#sPanel)"/>
+<rect x="132.0" y="962.0" width="30.0" height="30.0" rx="8" fill="url(#g_biz)" stroke="none"/>
+<g stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+<path d="M141.0,969.0 L150.0,969.0 L153.0,972.0 L153.0,985.0 L141.0,985.0 Z"/>
+<line x1="144.0" y1="974.5" x2="150.5" y2="974.5"/>
+<line x1="144.0" y1="978.0" x2="150.5" y2="978.0"/>
+<line x1="144.0" y1="981.5" x2="150.5" y2="981.5"/>
+</g>
+<text x="174.0" y="976.0" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="15.5" font-weight="700" fill="#0f172a" text-anchor="start" letter-spacing="0.3">业务数据</text>
+<text x="174.0" y="991.0" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="10.5" font-weight="400" fill="#64748b" text-anchor="start">核心源系统</text>
+<rect x="128.0" y="1007.0" width="3.5" height="40.0" rx="2" fill="#0891b2" stroke="none"/>
+<text x="162.0" y="1023.7" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="600" fill="#0891b2" text-anchor="middle">业务</text>
+<text x="162.0" y="1038.7" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="600" fill="#0891b2" text-anchor="middle">数据</text>
+<rect x="198.0" y="1004.0" width="111.5" height="46.0" rx="8" fill="#ffffff" stroke="#c2e5ef" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="253.8" y="1031.2" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="500" fill="#0f172a" text-anchor="middle">HIS</text>
+<rect x="319.5" y="1004.0" width="111.5" height="46.0" rx="8" fill="#ffffff" stroke="#c2e5ef" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="375.3" y="1031.2" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="500" fill="#0f172a" text-anchor="middle">LIS</text>
+<rect x="441.0" y="1004.0" width="111.5" height="46.0" rx="8" fill="#ffffff" stroke="#c2e5ef" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="496.8" y="1031.2" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="500" fill="#0f172a" text-anchor="middle">PACS</text>
+<rect x="562.5" y="1004.0" width="111.5" height="46.0" rx="8" fill="#ffffff" stroke="#c2e5ef" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="618.3" y="1031.2" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="500" fill="#0f172a" text-anchor="middle">EMR</text>
+<rect x="684.0" y="1004.0" width="111.5" height="46.0" rx="8" fill="#ffffff" stroke="#c2e5ef" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="739.8" y="1031.2" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="500" fill="#0f172a" text-anchor="middle">手术麻醉</text>
+<rect x="805.6" y="1004.0" width="111.5" height="46.0" rx="8" fill="#ffffff" stroke="#c2e5ef" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="861.3" y="1031.2" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="500" fill="#0f172a" text-anchor="middle">重症护理</text>
+<rect x="927.1" y="1004.0" width="111.5" height="46.0" rx="8" fill="#ffffff" stroke="#c2e5ef" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="982.8" y="1031.2" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="500" fill="#0f172a" text-anchor="middle">HRP</text>
+<rect x="1048.6" y="1004.0" width="111.5" height="46.0" rx="8" fill="#ffffff" stroke="#c2e5ef" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="1104.3" y="1031.2" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="500" fill="#0f172a" text-anchor="middle">旧数据湖</text>
+<rect x="1173.1" y="1009.0" width="31.9" height="36.0" rx="8" fill="none" stroke="#c4ccd8" stroke-width="1.2" stroke-dasharray="2,4"/>
+<circle cx="1183.0" cy="1027.0" r="1.5" fill="#aab3c2"/>
+<circle cx="1189.0" cy="1027.0" r="1.5" fill="#aab3c2"/>
+<circle cx="1195.0" cy="1027.0" r="1.5" fill="#aab3c2"/>
+<rect x="116.0" y="1094.0" width="1108.0" height="108.0" rx="14" fill="#eef1f5" stroke="#d9dfe8" stroke-width="1.2" filter="url(#sPanel)"/>
+<rect x="132.0" y="1102.0" width="30.0" height="30.0" rx="8" fill="url(#g_infra)" stroke="none"/>
+<g stroke="#fff" stroke-width="1.5" fill="none">
+<rect x="139.0" y="1110.0" width="16" height="4.2" rx="1.6"/>
+<circle cx="142.5" cy="1112.1" r="0.9" fill="#fff" stroke="none"/>
+<rect x="139.0" y="1116.5" width="16" height="4.2" rx="1.6"/>
+<circle cx="142.5" cy="1118.6" r="0.9" fill="#fff" stroke="none"/>
+<rect x="139.0" y="1123.0" width="16" height="4.2" rx="1.6"/>
+<circle cx="142.5" cy="1125.1" r="0.9" fill="#fff" stroke="none"/>
+</g>
+<text x="174.0" y="1116.0" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="15.5" font-weight="700" fill="#0f172a" text-anchor="start" letter-spacing="0.3">基础设施</text>
+<text x="174.0" y="1131.0" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="10.5" font-weight="400" fill="#64748b" text-anchor="start">算力 · 存储 · 网络 · 安全</text>
+<rect x="128.0" y="1147.0" width="3.5" height="40.0" rx="2" fill="#475569" stroke="none"/>
+<text x="162.0" y="1163.7" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="600" fill="#475569" text-anchor="middle">基础</text>
+<text x="162.0" y="1178.7" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="12" font-weight="600" fill="#475569" text-anchor="middle">设施</text>
+<rect x="198.0" y="1144.0" width="148.9" height="46.0" rx="8" fill="#ffffff" stroke="#d9dfe8" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="272.4" y="1171.0" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="11.5" font-weight="500" fill="#0f172a" text-anchor="middle">云服务器设备</text>
+<rect x="357.9" y="1144.0" width="148.9" height="46.0" rx="8" fill="#ffffff" stroke="#d9dfe8" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="432.3" y="1171.0" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="11.5" font-weight="500" fill="#0f172a" text-anchor="middle">存储备份设备</text>
+<rect x="517.8" y="1144.0" width="148.9" height="46.0" rx="8" fill="#ffffff" stroke="#d9dfe8" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="592.2" y="1171.0" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="11.5" font-weight="500" fill="#0f172a" text-anchor="middle">网络设施</text>
+<rect x="677.7" y="1144.0" width="148.9" height="46.0" rx="8" fill="#ffffff" stroke="#d9dfe8" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="752.1" y="1171.0" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="11.5" font-weight="500" fill="#0f172a" text-anchor="middle">安全设施</text>
+<rect x="837.6" y="1144.0" width="148.9" height="46.0" rx="8" fill="#ffffff" stroke="#d9dfe8" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="912.0" y="1171.0" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="11.5" font-weight="500" fill="#0f172a" text-anchor="middle">虚拟化技术</text>
+<rect x="997.5" y="1144.0" width="148.9" height="46.0" rx="8" fill="#ffffff" stroke="#d9dfe8" stroke-width="1.2" filter="url(#sCard)"/>
+<text x="1071.9" y="1171.0" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="11.5" font-weight="500" fill="#0f172a" text-anchor="middle">动态扩容技术</text>
+<rect x="1160.4" y="1149.0" width="44.6" height="36.0" rx="8" fill="none" stroke="#c4ccd8" stroke-width="1.2" stroke-dasharray="2,4"/>
+<circle cx="1176.7" cy="1167.0" r="1.5" fill="#aab3c2"/>
+<circle cx="1182.7" cy="1167.0" r="1.5" fill="#aab3c2"/>
+<circle cx="1188.7" cy="1167.0" r="1.5" fill="#aab3c2"/>
+<polygon points="670.0,205 682.0,220 673.5,220 673.5,231 666.5,231 666.5,220 658.0,220" fill="#d97706" stroke="#ffffff" stroke-width="1" stroke-linejoin="round"/>
+<polygon points="670.0,405 682.0,420 673.5,420 673.5,431 666.5,431 666.5,420 658.0,420" fill="#0d9488" stroke="#ffffff" stroke-width="1" stroke-linejoin="round"/>
+<polygon points="670.0,613 682.0,628 673.5,628 673.5,639 666.5,639 666.5,628 658.0,628" fill="#2563eb" stroke="#ffffff" stroke-width="1" stroke-linejoin="round"/>
+<polygon points="670.0,925 682.0,940 673.5,940 673.5,951 666.5,951 666.5,940 658.0,940" fill="#0891b2" stroke="#ffffff" stroke-width="1" stroke-linejoin="round"/>
+<polygon points="670.0,1065 682.0,1080 673.5,1080 673.5,1091 666.5,1091 666.5,1080 658.0,1080" fill="#475569" stroke="#ffffff" stroke-width="1" stroke-linejoin="round"/>
+<rect x="22.0" y="92.0" width="76.0" height="1110.0" rx="14" fill="url(#gQual)" stroke="#d97706" stroke-width="1.2" filter="url(#sPanel)"/>
+<rect x="43.0" y="108.0" width="34.0" height="34.0" rx="9" fill="#d97706" stroke="none"/>
+<path d="M60.0,115 L70.0,119.5 L70.0,128.5 Q70.0,137.5 60.0,141.5 Q50.0,137.5 50.0,128.5 L50.0,119.5 Z" fill="#fff"/>
+<polyline points="55.5,128 59.0,131.5 65.0,123.5" fill="none" stroke="#d97706" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="60.0" y="610.6" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="16" font-weight="700" fill="#92400e" text-anchor="middle">数</text>
+<text x="60.0" y="634.6" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="16" font-weight="700" fill="#92400e" text-anchor="middle">据</text>
+<text x="60.0" y="658.6" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="16" font-weight="700" fill="#92400e" text-anchor="middle">质</text>
+<text x="60.0" y="682.6" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="16" font-weight="700" fill="#92400e" text-anchor="middle">量</text>
+<text x="60.0" y="706.6" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="16" font-weight="700" fill="#92400e" text-anchor="middle">支</text>
+<text x="60.0" y="730.6" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="16" font-weight="700" fill="#92400e" text-anchor="middle">柱</text>
+<rect x="1242.0" y="92.0" width="76.0" height="1110.0" rx="14" fill="url(#gSec)" stroke="#e11d48" stroke-width="1.2" filter="url(#sPanel)"/>
+<rect x="1263.0" y="108.0" width="34.0" height="34.0" rx="9" fill="#e11d48" stroke="none"/>
+<path d="M1280.0,115 L1290.0,119.5 L1290.0,128.5 Q1290.0,137.5 1280.0,141.5 Q1270.0,137.5 1270.0,128.5 L1270.0,119.5 Z" fill="#fff"/>
+<path d="M1276.5,126 v-2.5 a3.5,3.5 0 0 1 7,0 v2.5" fill="none" stroke="#e11d48" stroke-width="1.8"/>
+<rect x="1275.5" y="126" width="9" height="7.5" rx="1.6" fill="#e11d48"/>
+<text x="1280.0" y="610.6" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="16" font-weight="700" fill="#9f1239" text-anchor="middle">数</text>
+<text x="1280.0" y="634.6" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="16" font-weight="700" fill="#9f1239" text-anchor="middle">据</text>
+<text x="1280.0" y="658.6" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="16" font-weight="700" fill="#9f1239" text-anchor="middle">安</text>
+<text x="1280.0" y="682.6" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="16" font-weight="700" fill="#9f1239" text-anchor="middle">全</text>
+<text x="1280.0" y="706.6" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="16" font-weight="700" fill="#9f1239" text-anchor="middle">支</text>
+<text x="1280.0" y="730.6" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="16" font-weight="700" fill="#9f1239" text-anchor="middle">柱</text>
+<text x="670.0" y="44.0" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="22" font-weight="700" fill="#0f172a" text-anchor="middle" letter-spacing="1.5">一体化数据平台 · 总体架构</text>
+<text x="670.0" y="66.0" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="11" font-weight="400" fill="#64748b" text-anchor="middle" letter-spacing="0.3">层级自下而上逐层支撑　·　大数据平台内部体现「数据实体 → 语义 → 资产目录」的生成顺序</text>
+<rect x="966.0" y="16.0" width="258.0" height="54.0" rx="10" fill="#ffffff" stroke="#e2e8f0" stroke-width="1" filter="url(#sCard)"/>
+<polygon points="988,31 996,41 990.5,41 990.5,54 985.5,54 985.5,41 980,41" fill="#475569" stroke="#ffffff" stroke-width="1" stroke-linejoin="round"/>
+<text x="1006.0" y="47.0" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="9.6" font-weight="500" fill="#0f172a" text-anchor="start">层间依赖：下层支撑上层（自下而上）</text>
+<line x1="984.0" y1="63.0" x2="990.5" y2="63.0" stroke="#2563eb" stroke-width="1.9" stroke-linecap="round" opacity="0.9"/>
+<polygon points="990.5,59.6 990.5,66.4 995.5,63.0" fill="#2563eb" opacity="0.9"/>
+<text x="1006.0" y="66.0" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Segoe UI',sans-serif" font-size="9.6" font-weight="500" fill="#0f172a" text-anchor="start">大数据平台内：处理 / 语义生成顺序（左→右）</text>
+</svg>
+</template>
+
+<script>
+const KEY="bp1234_v11";
+let DATA;
+try{ const s=localStorage.getItem(KEY); DATA=JSON.parse(s||document.getElementById('seed').textContent); }
+catch(e){ DATA=JSON.parse(document.getElementById('seed').textContent); }
+try{ if(!DATA.roadmap){ DATA.roadmap=JSON.parse(document.getElementById('seed').textContent).roadmap; } }catch(e){}
+let cur="home", editMode=false;
+
+function gp(o,p){return p.split('.').reduce((a,k)=>(a==null?a:a[k]),o);}
+function sp(o,p,v){const ks=p.split('.');const last=ks.pop();let t=o;for(const k of ks)t=t[k];t[last]=v;}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function E(path){return '<span class="edit" data-k="'+path+'">'+esc(gp(DATA,path))+'</span>';}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(DATA));}catch(e){}}
+
+const TITLE={home:"新一代大数据平台 · 1234 架构",arch:"整体架构蓝图",d1:"① 一个底座",d2:"② 两大支柱",d3:"③ 三大引擎",d4:"④ 四大场景",d4u:"Data for Users",d4o:"Data for Oper"};
+const PARENT={arch:"home",d1:"home",d2:"home",d3:"home",d4:"home",d4u:"d4",d4o:"d4"};
+function crumbs(){
+  const path=[];let n=cur;while(n){path.unshift(n);n=PARENT[n];}
+  document.getElementById("crumbs").innerHTML=path.map((id,i)=>{
+    const last=i===path.length-1;
+    return '<span class="crumb'+(last?' cur':'')+'"'+(last?'':' onclick="nav(\''+id+'\')"')+'>'+TITLE[id]+'</span>';
+  }).join('<span class="sep">›</span>');
+}
+
+function V_home(){
+  const sc=DATA.scenarios.map((x,i)=>`<div class="dbox" data-hl="sc${i}"><div class="dt">${E('scenarios.'+i+'.t')}</div><div class="dsum">${E('scenarios.'+i+'.sum')}</div><div class="dsub">${E('scenarios.'+i+'.s')}</div></div>`).join('');
+  const bands=DATA.bands.map((b,i)=>{
+    const mods=b.mods.map((m,j)=>`<div class="mod" data-hl="b${i}m${j}">${E('bands.'+i+'.mods.'+j)}</div>`).join('<span class="plus">+</span>');
+    const sub=(b.sub!==undefined&&b.sub!=='')?`<div class="bsub">${E('bands.'+i+'.sub')}</div>`:'';
+    return `<div class="band" data-hl="band${i}"><div class="bt">${E('bands.'+i+'.bt')}</div>${sub}<div class="mods">${mods}</div></div>`;
+  }).join('');
+  const ns=DATA.numstrip.map((x,i)=>`<span class="ns"><b>${i+1}</b>${E('numstrip.'+i)}</span>`).join('');
+  return `<div class="view">
+    <div class="h-title">${E('title')}</div>
+    <div class="h-tag">${E('tagline')}</div>
+    <div class="arch-entry" onclick="go('arch')"><div><b>${E('arch.entryTitle')}</b><span>${E('arch.entryDesc')}</span></div><em>进入总览图 →</em></div>
+    <div class="yr-bar">
+      <span class="yr-bar-h">🏗 建设路线图 2026–2030</span>
+      <button class="yr-chip" data-yr="2026" onclick="selectYear(2026)">2026</button>
+      <button class="yr-chip" data-yr="2027" onclick="selectYear(2027)">2027</button>
+      <button class="yr-chip" data-yr="2028" onclick="selectYear(2028)">2028</button>
+      <button class="yr-chip" data-yr="2029" onclick="selectYear(2029)">2029</button>
+      <button class="yr-chip" data-yr="2030" onclick="selectYear(2030)">2030</button>
+      <button id="yrPlay" class="yr-play" onclick="playYears()">▶ 自动播放</button>
+      <button class="yr-reset" onclick="clearYear()">清除</button>
+      <button id="rmBtn" class="yr-play" onclick="toggleRoadmapEdit()">✎ 编辑进度</button>
+    </div>
+    <div class="yr-legend"><span class="lg lg-new">建设中（未满 100%）</span><span class="lg lg-done">已完成（100%）</span></div>
+    <div class="yr-cap" id="yrCap"></div>
+    <div id="rmEditor"></div>
+    <div class="frame">
+      <div class="tier" onclick="go('d4')"><span class="badge">4</span><div class="toprow">${sc}</div></div>
+      <div class="mid">
+        <div class="pillar" data-hl="pil0" onclick="go('d2')"><span class="badge">2</span><div class="pc">${E('pillars.0')}</div><div class="pcsub">${E('pillarSubs.0')}</div></div>
+        <div class="tier bands" onclick="go('d3')"><span class="badge">3</span>${bands}</div>
+        <div class="pillar" data-hl="pil1" onclick="go('d2')"><div class="pc">${E('pillars.1')}</div><div class="pcsub">${E('pillarSubs.1')}</div></div>
+      </div>
+      <div class="tier base" data-hl="base" onclick="go('d1')"><span class="badge">1</span><div class="base-main">${E('base')}</div><div class="basesub">${E('baseSub')}</div></div>
+    </div>
+    <div class="num-strip">${ns}</div>
+  </div>`;
+}
+
+function renderCards(sections,pfx){
+  let body='';
+  sections.forEach((s,si)=>{
+    if(s.h) body+='<div class="sec-h">'+E(pfx+'.sections.'+si+'.h')+'</div>';
+    body+='<div class="cards'+(s.g2?' g2':'')+'">';
+    s.cards.forEach((c,ci)=>{
+      const base=pfx+'.sections.'+si+'.cards.'+ci;
+      let pts=(c.pts&&c.pts.length)?'<ul class="c-pts">'+c.pts.map((p,pi)=>'<li>'+E(base+'.pts.'+pi)+'</li>').join('')+'</ul>':'';
+      let tag=(c.tag!==undefined&&c.tag!=='')?'<span class="c-tag">'+E(base+'.tag')+'</span>':'';
+      let cmp=(c.old!==undefined)?'<div class="cmp"><div class="old"><span class="lab">传统 / Hadoop</span>'+E(base+'.old')+'</div><div class="new"><span class="lab">新一代</span>'+E(base+'.nw')+'</div></div>':'';
+      let lk=c.link?'<span class="lk-go" onclick="event.stopPropagation();nav(\''+c.link+'\')">展开 →</span>':'';
+      let oc=c.link?(' onclick="go(\''+c.link+'\')"'):'';
+      body+='<div class="card'+(c.hi?' hi':'')+(c.link?' lk':'')+'"'+oc+'><div><span class="c-name">'+E(base+'.name')+'</span>'+tag+lk+'</div>'+pts+cmp+'</div>';
+    });
+    body+='</div>';
+  });
+  return body;
+}
+function V_detail(id){
+  const d=gp(DATA,'details.'+id);
+  let body=renderCards(d.sections,'details.'+id);
+  let arch='';
+  if(d.archives&&d.archives.length){
+    d.archives.forEach((a,ai)=>{
+      const ap='details.'+id+'.archives.'+ai;
+      arch+='<details class="ver-old"><summary>'+E(ap+'.label')+'</summary><div class="ver-old-body">'+renderCards(a.sections,ap)+'</div></details>';
+    });
+  }
+  return '<div class="view"><div class="d-head"><div class="d-num">'+id.slice(1)+'</div><div class="d-title">'+E('details.'+id+'.title')+'</div></div>'+
+    '<div class="d-ess">'+E('details.'+id+'.ess')+'</div>'+body+arch+
+    '<div class="back" onclick="nav(\'home\')">← 返回第一层蓝图</div></div>';
+}
+
+function V_arch(){
+  return '<div class="view"><div class="d-head"><div class="d-num">总</div><div class="d-title">'+E('arch.title')+'</div></div>'+
+    '<div class="d-ess">'+E('arch.ess')+'</div>'+
+    '<div class="arch-tip">打开 <b>编辑文字</b> 后，点击总览图内文字可修改；修改会随「下载编辑版」一起保存。</div>'+
+    '<div class="arch-panel"><div id="archSvgHost" class="arch-svg-host"><div class="rm-note">正在加载整体架构蓝图...</div></div></div>'+
+    '<div class="back" onclick="nav(\'home\')">← 返回首页</div></div>';
+}
+
+function ensureArchLabels(texts){
+  if(!Array.isArray(DATA.archSvgLabels))DATA.archSvgLabels=texts.map(t=>t.textContent);
+  if(DATA.archSvgLabels.length<texts.length){
+    for(let i=DATA.archSvgLabels.length;i<texts.length;i++)DATA.archSvgLabels[i]=texts[i].textContent;
+  }
+  if(DATA.archSvgLabels.length!==texts.length)DATA.archSvgLabels=DATA.archSvgLabels.slice(0,texts.length);
+  save();
+}
+function applySvgEditMode(){
+  document.querySelectorAll('#archSvgHost text.svg-edit').forEach(t=>{
+    t.style.cursor=editMode?'text':'';
+    t.setAttribute('tabindex',editMode?'0':'-1');
+  });
+}
+function initArchSvg(){
+  const host=document.getElementById('archSvgHost');
+  if(!host)return;
+  const texts=[...host.querySelectorAll('svg text')];
+  ensureArchLabels(texts);
+  texts.forEach((t,i)=>{
+    t.textContent=DATA.archSvgLabels[i];
+    t.classList.add('svg-edit');
+    t.dataset.i=i;
+  });
+  applySvgEditMode();
+}
+function loadArchSvg(){
+  const host=document.getElementById('archSvgHost');
+  if(!host)return;
+  const tpl=document.getElementById('archSvgTpl');
+  if(tpl){
+    host.innerHTML=tpl.innerHTML.trim();
+    initArchSvg();
+    return;
+  }
+  fetch('architecture-v4.svg?bp=10',{cache:'no-store'})
+    .then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.text();})
+    .then(svg=>{host.innerHTML=svg;initArchSvg();})
+    .catch(e=>{
+      host.innerHTML='<div class="rm-note">整体架构蓝图加载失败：'+esc(e.message)+'。请确认 architecture-v4.svg 与当前 HTML 在同一目录。</div>';
+    });
+}
+let svgEditTarget=null;
+function closeSvgEditor(saveIt){
+  const pop=document.querySelector('.svg-editor-pop');
+  if(!pop)return;
+  if(saveIt&&svgEditTarget){
+    const input=pop.querySelector('input');
+    const i=+svgEditTarget.dataset.i;
+    DATA.archSvgLabels[i]=input.value;
+    svgEditTarget.textContent=input.value;
+    save();
+  }
+  pop.remove();
+  svgEditTarget=null;
+}
+function openSvgEditor(t){
+  closeSvgEditor(false);
+  svgEditTarget=t;
+  const rect=t.getBoundingClientRect();
+  const pop=document.createElement('div');
+  pop.className='svg-editor-pop';
+  const input=document.createElement('input');
+  input.value=DATA.archSvgLabels[+t.dataset.i]||t.textContent;
+  const ok=document.createElement('button');
+  ok.className='ok';
+  ok.textContent='保存';
+  const cancel=document.createElement('button');
+  cancel.textContent='取消';
+  ok.addEventListener('click',()=>closeSvgEditor(true));
+  cancel.addEventListener('click',()=>closeSvgEditor(false));
+  input.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){e.preventDefault();closeSvgEditor(true);}
+    if(e.key==='Escape'){e.preventDefault();closeSvgEditor(false);}
+  });
+  pop.appendChild(input);
+  pop.appendChild(ok);
+  pop.appendChild(cancel);
+  document.body.appendChild(pop);
+  const left=Math.min(Math.max(12,rect.left),window.innerWidth-pop.offsetWidth-12);
+  const top=Math.min(Math.max(12,rect.top-48),window.innerHeight-pop.offsetHeight-12);
+  pop.style.left=left+'px';
+  pop.style.top=top+'px';
+  input.focus();
+  input.select();
+}
+
+function V_d3(){
+  const d=DATA.details.d3;
+  let blocks='';
+  d.blocks.forEach((b,bi)=>{
+    const bp='details.d3.blocks.'+bi;
+    let wrap;
+    if(b.cols){
+      const g0=bp+'.groups.0',g1=bp+'.groups.1',g2=bp+'.groups.2';
+      const pills=b.groups[0].mods.map((m,mi)=>`<div class="ppill">${E(g0+'.mods.'+mi)}</div>`).join('');
+      const mol=`<div class="pmol">${E(g1+'.mods.0')}</div>`;
+      const sm=b.groups[2].mods;
+      const cyls=sm.slice(0,-1).map((m,mi)=>`<div class="pcyl">${E(g2+'.mods.'+mi)}</div>`).join('');
+      const wide=`<div class="pwide">${E(g2+'.mods.'+(sm.length-1))}</div>`;
+      let extra='';
+      for(let gi=3;gi<b.groups.length;gi++){
+        const gpth=bp+'.groups.'+gi, g=b.groups[gi];
+        const ms=g.mods.map((m,mi)=>`<div class="mbox${g.hot?' hot':''}">${E(gpth+'.mods.'+mi)}</div>`).join('');
+        extra+=`<div class="grp"><div class="grp-h">${E(gpth+'.gh')}</div><div class="grp-mods">${ms}</div></div>`;
+      }
+      wrap='<div class="pptflow">'
+        +'<div class="pcol"><div class="pcol-h">'+E(g0+'.gh')+'</div><div class="pcol-body">'+pills+'</div></div>'
+        +'<div class="parrow">→</div>'
+        +'<div class="pcol"><div class="pcol-h">'+E(g1+'.gh')+'</div><div class="pcol-body center">'+mol+'</div></div>'
+        +'<div class="parrow">→</div>'
+        +'<div class="pcol"><div class="pcol-h">'+E(g2+'.gh')+'</div><div class="pcol-body"><div class="pcyl-row">'+cyls+'</div>'+wide+'</div></div>'
+        +'</div>'+extra;
+    }else{
+      let groups='';
+      b.groups.forEach((g,gi)=>{
+        const gpth=bp+'.groups.'+gi;
+        const mods=g.mods.map((m,mi)=>`<div class="mbox${g.hot?' hot':''}">${E(gpth+'.mods.'+mi)}</div>`).join('');
+        groups+=`<div class="grp"><div class="grp-h">${E(gpth+'.gh')}</div><div class="grp-mods">${mods}</div></div>`;
+      });
+      wrap=groups;
+    }
+    const intro=b.intro?`<div class="eng-intro">${E(bp+'.intro')}</div>`:'';
+    const foot=b.foot?`<div class="eng-foot">${E(bp+'.foot')}</div>`:'';
+    const cmp=(b.old!==undefined)?`<div class="cmp"><div class="old"><span class="lab">传统数据平台</span>${E(bp+'.old')}</div><div class="new"><span class="lab">新一代</span>${E(bp+'.nw')}</div></div>`:'';
+    const tag=b.tag?`<span class="eng-tag">${E(bp+'.tag')}</span>`:'';
+    blocks+=`<div class="eng"><div class="eng-h"><span class="eng-name">${E(bp+'.name')}</span>${tag}</div>${intro}${wrap}${cmp}${foot}</div>`;
+  });
+  return '<div class="view"><div class="d-head"><div class="d-num">3</div><div class="d-title">'+E('details.d3.title')+'</div></div>'+
+    '<div class="d-ess">'+E('details.d3.ess')+'</div>'+blocks+
+    '<div class="back" onclick="nav(\'home\')">← 返回第一层蓝图</div></div>';
+}
+
+function subhead(bp){return '<div class="d-head"><div class="d-num">④</div><div class="d-title">'+E(bp+'.title')+'</div></div><div class="d-ess">'+E(bp+'.ess')+'</div>';}
+function V_d4u(){
+  const d=DATA.details.d4u,bp='details.d4u';
+  const fl=(steps,base)=>steps.map((s,i)=>'<div class="fbox">'+E(base+'.'+i)+'</div>').join('<span class="parrow">→</span>');
+  const tools=d.sandbox.tools.map((t,i)=>'<div class="mbox">'+E(bp+'.sandbox.tools.'+i)+'</div>').join('');
+  return '<div class="view">'+subhead(bp)+
+    '<div class="flow"><div class="fbox fstart">'+E(bp+'.start')+'</div></div>'+
+    '<div class="frow-lab">'+E(bp+'.pathA.lab')+'</div><div class="flow">'+fl(d.pathA.steps,bp+'.pathA.steps')+'</div>'+
+    '<div class="frow-lab">'+E(bp+'.pathB.lab')+'</div><div class="flow">'+fl(d.pathB.steps,bp+'.pathB.steps')+'</div>'+
+    '<div class="sandbox"><div class="sandbox-h">'+E(bp+'.sandbox.title')+'</div><div class="sandbox-row">'+
+      '<div class="pcyl pcyl-lg">'+E(bp+'.sandbox.cyl_in')+'</div><span class="parrow">→</span>'+
+      '<div class="toolwrap">'+tools+'</div><span class="parrow">→</span>'+
+      '<div class="pcyl pcyl-lg">'+E(bp+'.sandbox.cyl_out')+'</div></div></div>'+
+    '<div class="flow">'+fl(d.tail,bp+'.tail')+'</div>'+
+    '<div class="back" onclick="nav(\'d4\')">← 返回四大场景</div></div>';
+}
+function V_d4o(){
+  const d=DATA.details.d4o,bp='details.d4o';
+  const users=d.users.map((u,i)=>'<div class="actor">'+E(bp+'.users.'+i)+'</div>').join('');
+  const caps=d.space.caps.map((c,i)=>'<div class="mbox">'+E(bp+'.space.caps.'+i)+'</div>').join('');
+  const data=d.space.data.map((c,i)=>'<div class="pcyl pcyl-lg">'+E(bp+'.space.data.'+i)+'</div>').join('');
+  const orgs=d.orgs.map((o,i)=>'<div class="org">'+E(bp+'.orgs.'+i)+'</div>').join('');
+  return '<div class="view">'+subhead(bp)+
+    '<div class="frow-lab" style="text-align:center">↓ 提出数据需求 / 获取交付</div>'+
+    '<div class="actors">'+users+'</div>'+
+    '<div class="cloud"><div class="cloud-h">'+E(bp+'.space.name')+'</div><div class="cloud-body">'+
+      '<div class="mbox cloud-side">'+E(bp+'.space.left')+'</div>'+
+      '<div class="cloud-caps">'+caps+'</div>'+
+      '<div class="cloud-data">'+data+'</div>'+
+      '<div class="mbox cloud-side">'+E(bp+'.space.right')+'</div></div></div>'+
+    '<div class="frow-lab" style="text-align:center">↑ 节点注册接入（原始数据不出域）</div>'+
+    '<div class="orgs">'+orgs+'</div>'+
+    '<div class="back" onclick="nav(\'d4\')">← 返回四大场景</div></div>';
+}
+const VIEWS={home:V_home,arch:V_arch,d1:()=>V_detail('d1'),d2:()=>V_detail('d2'),d3:V_d3,d4:()=>V_detail('d4'),d4u:V_d4u,d4o:V_d4o};
+
+// ===== 2026–2030 建设进度交互 =====
+const YEARS=[2026,2027,2028,2029,2030];
+let hlYear=null, playTimer=null, editProgress=false;
+function nameOf(id){
+  if(id==='base')return DATA.base;
+  let m;
+  if(id.indexOf('sc')===0)return DATA.scenarios[+id.slice(2)].t;
+  if(id.indexOf('pil')===0)return DATA.pillars[+id.slice(3)];
+  if((m=id.match(/^b(\d+)m(\d+)$/)))return DATA.bands[+m[1]].mods[+m[2]];
+  if((m=id.match(/^band(\d+)$/)))return DATA.bands[+m[1]].bt;
+  return id;
+}
+function roadmapIds(){const a=[];DATA.scenarios.forEach((s,i)=>a.push('sc'+i));DATA.pillars.forEach((p,i)=>a.push('pil'+i));DATA.bands.forEach((b,i)=>{a.push('band'+i);b.mods.forEach((m,j)=>a.push('b'+i+'m'+j));});a.push('base');return a;}
+function resolveMap(raw){if(raw==="ALL"){const m={};roadmapIds().forEach(id=>m[id]=100);return m;}return raw||{};}
+function clearHL(){
+  document.querySelectorAll('[data-hl]').forEach(e=>e.classList.remove('hl-new','hl-done','hlp','hl-pulse'));
+  document.querySelectorAll('.pct-bar,.pct-badge').forEach(e=>e.remove());
+}
+function markPct(id,pct,changed){
+  const v=Math.max(0,Math.min(100,pct));
+  document.querySelectorAll('[data-hl="'+id+'"]').forEach(e=>{
+    e.classList.add('hlp', v>=100?'hl-done':'hl-new');
+    if(changed)e.classList.add('hl-pulse');
+    if(v<100){
+      const bar=document.createElement('span');bar.className='pct-bar';
+      const fill=document.createElement('i');fill.style.width=v+'%';bar.appendChild(fill);
+      const badge=document.createElement('span');badge.className='pct-badge';badge.textContent=v+'%';
+      e.appendChild(bar);e.appendChild(badge);
+    }
+  });
+}
+function applyHighlight(){
+  clearHL();
+  document.querySelectorAll('.yr-chip').forEach(c=>c.classList.toggle('on',+c.dataset.yr===hlYear));
+  const cap=document.getElementById('yrCap');
+  if(!hlYear){if(cap)cap.textContent='';return;}
+  const raw=DATA.roadmap[hlYear];
+  const isAll=(raw==="ALL");
+  const map=resolveMap(raw);
+  const idx=YEARS.indexOf(hlYear);
+  const prevMap=resolveMap(idx>0?DATA.roadmap[YEARS[idx-1]]:{});
+  const entries=Object.entries(map).filter(e=>e[1]>0);
+  entries.forEach(e=>markPct(e[0],e[1],(prevMap[e[0]]||0)!==e[1]));
+  if(cap){
+    if(isAll){cap.textContent='（2030 年）平台全部建成上线 · 各模块 100%';}
+    else{
+      const prog=entries.filter(e=>e[1]<100), done=entries.filter(e=>e[1]>=100);
+      let s='（'+hlYear+' 年）';
+      if(prog.length)s+='建设中 '+prog.map(e=>nameOf(e[0])+' '+e[1]+'%').join('、');
+      if(prog.length&&done.length)s+='　｜　';
+      if(done.length)s+='已完成 '+done.length+' 项（100%）';
+      cap.textContent=s;
+    }
+  }
+}
+function syncEditor(){
+  const btn=document.getElementById('rmBtn');
+  if(btn){btn.textContent=editProgress?'✎ 编辑进度：开':'✎ 编辑进度';btn.classList.toggle('on',editProgress);}
+  const box=document.getElementById('rmEditor');
+  if(!box)return;
+  if(!editProgress){box.innerHTML='';return;}
+  if(!hlYear){box.innerHTML='<div class="rm-editor"><div class="rm-note">先点选上方某个年份，即可编辑该年各模块的建设比例（0–100；0 表示当年不高亮）。</div></div>';return;}
+  if(DATA.roadmap[hlYear]==="ALL"){const m={};roadmapIds().forEach(id=>m[id]=100);DATA.roadmap[hlYear]=m;save();}
+  const yr=DATA.roadmap[hlYear];
+  const sections=[{h:'四大场景',ids:DATA.scenarios.map((s,i)=>'sc'+i)},{h:'两大支柱',ids:DATA.pillars.map((p,i)=>'pil'+i)}];
+  DATA.bands.forEach((b,i)=>sections.push({h:b.bt,ids:['band'+i].concat(b.mods.map((m,j)=>'b'+i+'m'+j))}));
+  sections.push({h:'底座',ids:['base']});
+  let rows='';
+  sections.forEach(sec=>{
+    rows+='<div class="rm-grp-h">'+esc(sec.h)+'</div>';
+    sec.ids.forEach(id=>{
+      let nm=esc(nameOf(id));if(/^band\d+$/.test(id))nm+='（整带）';
+      const val=(yr[id]==null?0:yr[id]);
+      rows+='<div class="rm-row"><span class="rm-name">'+nm+'</span><input class="rm-in" type="number" min="0" max="100" step="10" value="'+val+'" data-id="'+id+'"></div>';
+    });
+  });
+  box.innerHTML='<div class="rm-editor"><div class="rm-h">编辑 '+hlYear+' 年建设比例</div><div class="rm-grid">'+rows+'</div><div class="rm-note">数值＝该模块在 '+hlYear+' 年的累计完成度：100＝整块标绿（无标签）；1–99＝橙色进度条；0＝不高亮。比上一年有变化的模块会闪烁。改完点「下载编辑版」即可保存。</div></div>';
+}
+function refresh(){applyHighlight();syncEditor();}
+function toggleRoadmapEdit(){editProgress=!editProgress;syncEditor();}
+function stopPlay(){if(playTimer){clearInterval(playTimer);playTimer=null;const b=document.getElementById('yrPlay');if(b)b.textContent='▶ 自动播放';}}
+function selectYear(y){stopPlay();hlYear=(hlYear===y?null:y);refresh();}
+function clearYear(){stopPlay();hlYear=null;refresh();}
+function playYears(){
+  const btn=document.getElementById('yrPlay');
+  if(playTimer){stopPlay();return;}
+  let i=0;hlYear=YEARS[0];refresh();if(btn)btn.textContent='⏸ 暂停';
+  playTimer=setInterval(()=>{i++;if(i>=YEARS.length){stopPlay();return;}hlYear=YEARS[i];refresh();},1200);
+}
+document.addEventListener('input',e=>{const t=e.target;if(t.classList&&t.classList.contains('rm-in')&&hlYear){let v=parseInt(t.value,10);if(isNaN(v))v=0;v=Math.max(0,Math.min(100,v));if(typeof DATA.roadmap[hlYear]!=='object'||!DATA.roadmap[hlYear])DATA.roadmap[hlYear]={};DATA.roadmap[hlYear][t.dataset.id]=v;save();applyHighlight();}});
+document.addEventListener('change',e=>{const t=e.target;if(t.classList&&t.classList.contains('rm-in')&&hlYear){let v=parseInt(t.value,10);if(isNaN(v))v=0;v=Math.max(0,Math.min(100,v));t.value=v;DATA.roadmap[hlYear][t.dataset.id]=v;save();applyHighlight();}});
+function applyCE(){document.querySelectorAll('.edit').forEach(e=>e.setAttribute('contenteditable',editMode?'true':'false'));applySvgEditMode();}
+function render(){crumbs();document.getElementById('stage').innerHTML=VIEWS[cur]();applyCE();if(cur==='home')refresh();if(cur==='arch')loadArchSvg();}
+function nav(id){stopPlay();cur=id;render();window.scrollTo({top:0,behavior:'smooth'});}
+function go(id){if(editMode)return;nav(id);}
+function toggleEdit(){
+  editMode=!editMode;
+  document.body.classList.toggle('editing',editMode);
+  const be=document.getElementById('btnEdit');
+  be.textContent=editMode?'✎ 编辑文字：开':'✎ 编辑文字：关';
+  be.classList.toggle('on',editMode);
+  applyCE();
+}
+document.addEventListener('input',e=>{const t=e.target;if(t.classList&&t.classList.contains('edit')&&t.isContentEditable){sp(DATA,t.dataset.k,t.innerText);save();}});
+document.addEventListener('keydown',e=>{const t=e.target;if(t.classList&&t.classList.contains('edit')&&e.key==='Enter'){e.preventDefault();t.blur();}});
+document.addEventListener('click',e=>{
+  if(e.target&&e.target.closest&&e.target.closest('.svg-editor-pop'))return;
+  const t=e.target&&e.target.closest?e.target.closest('#archSvgHost text.svg-edit'):null;
+  if(!t){closeSvgEditor(false);return;}
+  if(!editMode)return;
+  e.preventDefault();
+  openSvgEditor(t);
+});
+function resetData(){if(!confirm('恢复到文件打开时的初始文字？已编辑内容将丢失。'))return;try{localStorage.removeItem(KEY);}catch(e){}DATA=JSON.parse(document.getElementById('seed').textContent);render();}
+function downloadEdited(){
+  const clone=document.documentElement.cloneNode(true);
+  clone.querySelector('#seed').textContent=JSON.stringify(DATA,null,1);
+  const b=clone.querySelector('body'); if(b)b.classList.remove('editing');
+  const be=clone.querySelector('#btnEdit'); if(be){be.textContent='✎ 编辑文字：关';be.classList.remove('on');}
+  const html='<!DOCTYPE html>\n'+clone.outerHTML;
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='新一代大数据平台_1234蓝图_已编辑.html';
+  document.body.appendChild(a);a.click();a.remove();
+}
+render();
+</script>
+</body>
+</html>
