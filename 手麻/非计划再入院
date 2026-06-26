@@ -1,0 +1,275 @@
+WITH patient_ipiNo AS (
+    SELECT /*+ MATERIALIZE */
+           NVL(ip.ipi_registration_no, op.opc_registration_no) AS ipiNo
+      FROM (
+        SELECT a.id,
+               NVL(MAX(r.ipi_registration_id), MAX(a.ipi_registration_id)) AS ipiId,
+               NVL(MAX(r.opc_registration_id), MAX(a.opc_registration_id)) AS opcId
+          FROM sam_apply a
+          LEFT JOIN sam_reg r ON r.id = a.id
+          LEFT JOIN sam_apply_op aop ON aop.sam_apply_id = a.id
+          LEFT JOIN sam_reg_op rop ON rop.sam_reg_id = r.id
+         WHERE a.oper_Type = 'ROOM_OPER'
+           AND a.SCHEDULED_DATE >= TRUNC(TO_DATE(#{info.startDate}, 'yyyy-MM-dd'))
+           AND a.SCHEDULED_DATE <  TRUNC(TO_DATE(#{info.endDate},   'yyyy-MM-dd')) + 1
+           AND a.health_service_org_id = 'HXSSMZK'
+           AND a.S_SSSYZT_DM > '40'
+           <if test="info.state != null and info.state.contains('4'.toString())">
+           AND a.unplanned_oper_check_status IS NULL
+           </if>
+           <if test="info.docVerifyFlag != null and info.docVerifyFlag != ''">
+           AND a.unplanned_oper_check_doc = #{info.docVerifyFlag}
+           </if>
+           <if test="info.nurVerifyFlag != null and info.nurVerifyFlag != ''">
+           AND a.unplanned_oper_check_nur = #{info.nurVerifyFlag}
+           </if>
+           <if test="info.operNameFilterSearch != null and info.operNameFilterSearch != ''">
+           AND (
+               <foreach collection="operNameFilterSearchs" item="item" separator="OR">
+                   INSTR(aop.OPERATION_NAME, #{item}) > 0
+               </foreach>
+               OR
+               <foreach collection="operNameFilterSearchs" item="item" separator="OR">
+                   INSTR(rop.OPERATION_NAME, #{item}) > 0
+               </foreach>
+           )
+           </if>
+         GROUP BY a.id
+      ) tjhz
+      LEFT JOIN ipi_registration ip ON tjhz.ipiId = ip.id
+      LEFT JOIN opc_registration op ON tjhz.opcId = op.id
+     WHERE NVL(ip.ipi_registration_no, op.opc_registration_no) IS NOT NULL
+),
+-- 获取患者所有手术申请（含麻醉开始时间）
+patient_apply AS (
+    SELECT sa.id,
+           sa.SCHEDULED_DATE,
+           sa.UNPLANNED_OPER_CHECK_STATUS,
+           NVL(ip.ipi_registration_no, op.opc_registration_no) AS ipiNo
+      FROM sam_apply sa
+      LEFT JOIN ipi_registration ip ON sa.ipi_registration_id = ip.id
+      LEFT JOIN opc_registration op ON sa.opc_registration_id = op.id
+      LEFT JOIN sam_anar ar ON ar.sam_apply_id = sa.id
+     WHERE sa.oper_Type = 'ROOM_OPER'
+       AND sa.SCHEDULED_DATE >= TRUNC(TO_DATE(#{info.startDate}, 'yyyy-MM-dd')) - 61
+       AND sa.SCHEDULED_DATE <  TRUNC(TO_DATE(#{info.endDate},   'yyyy-MM-dd')) + 1
+       AND (sa.is_reject IS NULL OR sa.is_reject IN ('2','4','7','8'))
+       AND ar.oper_beging_date IS NOT NULL
+       AND sa.S_SSSYZT_DM > '40'
+       AND EXISTS (SELECT 1 FROM patient_ipiNo p WHERE p.ipiNo = NVL(ip.ipi_registration_no, op.opc_registration_no))
+    UNION ALL
+    SELECT sa.id,
+           sa.SCHEDULED_DATE,
+           sa.UNPLANNED_OPER_CHECK_STATUS,
+           NVL(ip.ipi_registration_no, op.opc_registration_no) AS ipiNo
+      FROM sam_apply sa
+      LEFT JOIN ipi_registration ip ON sa.ipi_registration_id = ip.id
+      LEFT JOIN opc_registration op ON sa.opc_registration_id = op.id
+      LEFT JOIN sam_anar ar ON ar.sam_apply_id = sa.id
+     WHERE sa.oper_Type = 'ROOM_OPER'
+       AND sa.SCHEDULED_DATE >= TRUNC(TO_DATE(#{info.startDate}, 'yyyy-MM-dd')) - 31
+       AND sa.SCHEDULED_DATE <  TRUNC(TO_DATE(#{info.endDate},   'yyyy-MM-dd')) + 1
+       AND (sa.is_reject IS NULL OR sa.is_reject IN ('2','4','7','8'))
+       AND ar.oper_beging_date IS NOT NULL
+       AND sa.S_SSSYZT_DM > '40'
+       AND EXISTS (SELECT 1 FROM patient_ipiNo p WHERE p.ipiNo = NVL(ip.ipi_registration_no, op.opc_registration_no))
+),
+-- 聚合每个申请ID的最新信息
+patient_id AS (
+    SELECT id,
+           MAX(SCHEDULED_DATE) AS SCHEDULED_DATE,
+           MAX(ipiNo) AS ipiNo,
+           MAX(UNPLANNED_OPER_CHECK_STATUS) AS UNPLANNED_OPER_CHECK_STATUS
+      FROM patient_apply
+     GROUP BY id
+),
+-- 筛选多次手术的患者（非计划再次）
+filter_patient AS (
+    SELECT id
+      FROM (
+        SELECT id,
+               ipiNo,
+               COUNT(*) OVER(PARTITION BY ipiNo) AS cnt
+          FROM patient_id
+      ) t
+     WHERE cnt >= 2
+)
+-- 最终查询
+SELECT info.*,
+       ieg.ipi_registration_no,
+       ieg.IPNO,
+       ieg.ADMISSION_TIME,
+       h1.employee_name operDocName,
+       h2.employee_name mzDocName,
+       h3.employee_name sszs1Name,
+       h4.employee_name sszs2Name,
+       h5.employee_name gzDocName,
+       de.department_chinese_name deptName,
+       xb.s_xb_cmc xbCmc,
+       qkdj.s_ssqk_dj_cmc qkDjCmc,
+       ssjb.S_SSJB_CMC ssjbCmc,
+       room.OPER_ROOM roomName,
+       asa.S_ASAMZFJ_CMC asa,
+       pu.id pushId,
+       ieg.person_ident_id
+  FROM (
+    SELECT apply.apply_id applyId,
+           apply.op_time,
+           apply.s_sssyzt_dm ssztdm,
+           NVL(reg.is_emergency, apply.is_emergency) isEmergency,
+           NVL(reg.room_id, apply.room_id) roomId,
+           NVL(reg.s_xb_dm, apply.s_xb_dm) gender,
+           NVL(reg.patient_name, apply.patient_name) patientName,
+           NVL(reg.ipi_registration_id, apply.ipi_registration_id) ipiId,
+           NVL(reg.opc_registration_id, apply.opc_registration_id) opcId,
+           NVL(reg.patient_dept_id, apply.patient_dept_id) deptId,
+           NVL(reg.bed_no, apply.bed_no) bedNo1,
+           NVL(reg.ssdocid, apply.ssdocid) operDocId,
+           NVL(reg.mzdocid, apply.mzdocid) narDocId,
+           NVL(reg.sszsid1, apply.sszsid1) sszsid1,
+           NVL(reg.sszsid2, apply.sszsid2) sszsid2,
+           NVL(reg.gzDocId, apply.gzDocId) gzDocId,
+           NVL(reg.incision_site, apply.incision_site) incision_site,
+           NVL(reg.qkDjDm, apply.qkDjDm) qkDjDm,
+           apply.scheduled_date,
+           NVL(reg.operation_Name, apply.operation_Name) operName,
+           NVL(reg.disease, apply.disease) disease,
+           apply.receive_dept_id,
+           reg.is_checkcz isCheckCz,
+           reg.is_checkdrug isCheckDrug,
+           apply.operation_Name operationName,
+           reg.endoscopy_op endoscopyOp,
+           reg.specialCondition specialCondition,
+           apply.seRequire seRequire,
+           apply.patientSource patientSource,
+           apply.billing_hospital_area,
+           NVL(reg.isDayTime, apply.isDayTime) isDayTime,
+           apply.is_again_plan is_again_plan,
+           NVL(reg.s_ssjb_dm, apply.s_ssjb_dm) s_ssjb_dm,
+           NVL(reg.s_asamzfj_dm, apply.s_asamzfj_dm) s_asamzfj_dm,
+           apply.reason_oper_also reason_oper_also,
+           apply.is_unplanned_oper is_unplanned_oper,
+           apply.reason_oper_also_check reason_oper_also_check,
+           apply.is_new is_new,
+           apply.UNPLANNED_ADVERSE,
+           apply.SAFETY_EVENT,
+           apply.unplanned_oper_check_status,
+           apply.unplanned_oper_check_doc,
+           apply.unplanned_oper_doc_checktime,
+           apply.unplanned_oper_check_nur,
+           apply.unplanned_oper_nur_checktime,
+           apply.unplanned_oper_remark
+      FROM (
+        SELECT a.id apply_id,
+               MAX(a.patient_source) patientSource,
+               MAX(a.se_require) seRequire,
+               MAX(a.op_time) op_time,
+               MAX(a.ipi_registration_id) ipi_registration_id,
+               LISTAGG(o.operation_name, '+') WITHIN GROUP (ORDER BY a.id) operation_Name,
+               MAX(a.patient_name) patient_Name,
+               MAX(a.is_emergency) is_emergency,
+               MAX(a.s_xb_dm) s_xb_dm,
+               MAX(a.sam_room_id) room_id,
+               MAX(a.s_sssyzt_dm) s_sssyzt_dm,
+               MAX(a.bed_no) bed_no,
+               MAX(a.scheduled_date) scheduled_date,
+               MAX(a.main_diag) disease,
+               MAX(o.operator_doctor_id) ssdocid,
+               MAX(o.narcotic_doctor_id) mzdocid,
+               MAX(o.operator_assistant_1) sszsid1,
+               MAX(o.operator_assistant_2) sszsid2,
+               MAX(o.incision_site) incision_site,
+               MAX(o.s_ssqk_dj_dm) qkDjDm,
+               MAX(a.patient_dept_id) patient_dept_id,
+               MAX(a.receive_dept_id) receive_dept_id,
+               MAX(a.opc_registration_id) opc_registration_id,
+               MAX(a.billing_hospital_area) billing_hospital_area,
+               MAX(a.is_daytime) isDayTime,
+               MAX(o.perfusion_doctor_id) gzDocId,
+               MAX(a.is_again_plan) is_again_plan,
+               MAX(o.s_ssjb_dm) s_ssjb_dm,
+               MAX(o.s_asamzfj_dm) s_asamzfj_dm,
+               MAX(a.reason_oper_also) reason_oper_also,
+               MAX(a.IS_UNPLANNED_OPER) is_unplanned_oper,
+               MAX(a.reason_oper_also_check) reason_oper_also_check,
+               MAX(a.is_new) is_new,
+               MAX(a.UNPLANNED_ADVERSE) UNPLANNED_ADVERSE,
+               MAX(a.SAFETY_EVENT) SAFETY_EVENT,
+               MAX(a.unplanned_oper_check_status) unplanned_oper_check_status,
+               MAX(a.unplanned_oper_check_doc) unplanned_oper_check_doc,
+               MAX(a.unplanned_oper_doc_checktime) unplanned_oper_doc_checktime,
+               MAX(a.unplanned_oper_check_nur) unplanned_oper_check_nur,
+               MAX(a.unplanned_oper_nur_checktime) unplanned_oper_nur_checktime,
+               MAX(a.unplanned_oper_remark) unplanned_oper_remark
+          FROM sam_apply a
+          LEFT JOIN sam_apply_op o ON a.id = o.sam_apply_id
+         WHERE a.id IN (SELECT id FROM filter_patient)
+           AND a.S_SSSYZT_DM >= '70'
+           <choose>
+             <when test="info.state != null and info.size() > 0">
+               <if test="info.state.contains('1'.toString()) or info.state.contains('2'.toString()) or info.state.contains('3'.toString())">
+                 AND a.unplanned_oper_check_status IN
+                 <foreach collection="info.state" item="item" separator="," open="(" close=")">
+                   #{item}
+                 </foreach>
+               </if>
+               <if test="info.state.contains('4'.toString())">
+                 AND a.unplanned_oper_check_status IS NULL
+               </if>
+               <if test="info.state.contains('5'.toString())">
+                 AND a.unplanned_oper_check_status IN ('1', '2')
+               </if>
+             </when>
+             <otherwise>
+               <!-- 无额外过滤 -->
+             </otherwise>
+           </choose>
+         GROUP BY a.id
+      ) apply
+      LEFT JOIN (
+        SELECT r.id sam_reg_id,
+               MAX(r.sam_apply_id) apply_id,
+               MAX(r.ipi_registration_id) ipi_registration_id,
+               MAX(r.opc_registration_id) opc_registration_id,
+               LISTAGG(o.operation_name, '+') WITHIN GROUP (ORDER BY o.is_main_operation) operation_Name,
+               MAX(r.patient_name) patient_Name,
+               MAX(r.is_emergency) is_Emergency,
+               MAX(r.s_xb_dm) s_xb_dm,
+               MAX(r.sam_room_id) room_id,
+               MAX(o.operator_doctor_id) ssdocid,
+               MAX(o.narcotic_doctor_id) mzdocid,
+               MAX(o.operator_assistant_1) sszsid1,
+               MAX(o.operator_assistant_2) sszsid2,
+               MAX(o.incision_site) incision_site,
+               MAX(o.s_ssqk_dj_dm) qkDjDm,
+               MAX(r.bed_no) bed_no,
+               MAX(r.is_checkdrug) is_checkdrug,
+               MAX(r.is_checkcz) is_checkcz,
+               MAX(r.patient_dept_id) patient_dept_id,
+               MAX(r.main_diag) disease,
+               MAX(r.endoscopy_op) endoscopy_op,
+               MAX(r.is_daytime) isDayTime,
+               MAX(r.Special_condition) specialCondition,
+               MAX(o.perfusion_doctor_id) gzDocId,
+               MAX(o.s_ssjb_dm) s_ssjb_dm,
+               MAX(o.s_asamzfj_dm) s_asamzfj_dm
+          FROM sam_reg r
+          LEFT JOIN sam_reg_op o ON o.sam_reg_id = r.id
+         WHERE r.id IN (SELECT id FROM filter_patient)
+         GROUP BY r.id
+      ) reg ON apply.apply_id = reg.apply_id
+  ) info
+  LEFT JOIN ipi_registration ieg ON info.ipiId = ieg.id
+  LEFT JOIN hrm_employee h1 ON h1.id = info.operDocId
+  LEFT JOIN hrm_employee h2 ON h2.id = info.narDocId
+  LEFT JOIN hrm_employee h3 ON h3.id = info.sszsid1
+  LEFT JOIN hrm_employee h4 ON h4.id = info.sszsid2
+  LEFT JOIN hrm_employee h5 ON h5.id = info.gzDocId
+  LEFT JOIN hra00_department de ON de.id = info.deptId
+  LEFT JOIN GB_T_2261_1_2003 xb ON xb.s_xb_dm = info.gender
+  LEFT JOIN PUB_SSQK_DJ qkdj ON qkdj.S_SSQK_DJ_DM = info.qkDjDm
+  LEFT JOIN pub_ssjb ssjb ON ssjb.S_SSJB_DM = info.s_ssjb_dm
+  LEFT JOIN sam_room room ON room.id = info.roomId
+  LEFT JOIN pub_asamzfj asa ON asa.s_asamzfj_dm = info.s_asamzfj_dm
+  LEFT JOIN sam_his_push_record pu ON pu.sam_apply_id = info.applyId
+ ORDER BY ieg.ipi_registration_no, info.SCHEDULED_DATE;

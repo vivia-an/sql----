@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>医院 NL2SQL 论文 · 故事线幻灯</title>
+<style>
+  :root{
+    --bg:#0f172a; --card:#ffffff; --ink:#0f172a; --muted:#64748b;
+    --accent:#0891b2; --accent2:#0e7490; --line:#e2e8f0; --soft:#f1f5f9; --warn:#b45309;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",Roboto,Helvetica,Arial,sans-serif;
+    background:radial-gradient(1200px 800px at 70% -10%,#1e3a5f 0%,var(--bg) 55%);
+    color:var(--ink); display:flex; align-items:center; justify-content:center; min-height:100vh; padding:24px;
+  }
+  .deck{width:min(980px,96vw)}
+  .progress{height:4px;background:rgba(255,255,255,.15);border-radius:4px;overflow:hidden;margin-bottom:14px}
+  .progress > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),#22d3ee);transition:width .3s}
+  .slide{
+    background:var(--card);border-radius:18px;padding:40px 46px 18px;
+    box-shadow:0 30px 60px -20px rgba(0,0,0,.5);min-height:520px;display:none;flex-direction:column;
+    animation:fade .35s ease;
+  }
+  .slide.active{display:flex}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .kicker{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent2);font-weight:700;margin-bottom:10px}
+  h1{font-size:30px;line-height:1.25;margin:0 0 8px}
+  h2{font-size:26px;line-height:1.3;margin:0 0 18px}
+  .sub{color:var(--muted);font-size:15px;margin:-2px 0 18px}
+  ul{margin:6px 0 0;padding-left:0;list-style:none}
+  li{position:relative;padding:9px 0 9px 28px;font-size:17.5px;line-height:1.55;border-bottom:1px dashed var(--line)}
+  li:last-child{border-bottom:none}
+  li::before{content:"";position:absolute;left:4px;top:17px;width:9px;height:9px;border-radius:50%;
+    background:var(--accent);box-shadow:0 0 0 3px rgba(8,145,178,.15)}
+  .body{flex:1}
+  .pill{display:inline-block;font-size:12px;font-weight:700;color:#fff;background:var(--warn);
+    border-radius:999px;padding:2px 9px;margin-left:8px;vertical-align:middle}
+  .lead{font-size:19px;line-height:1.6;color:#0b3b46;background:var(--soft);border-left:4px solid var(--accent);
+    padding:14px 18px;border-radius:10px;margin:4px 0 0}
+  .details{max-height:0;overflow:hidden;transition:max-height .4s ease;background:var(--soft);
+    border-radius:12px;margin-top:14px}
+  .details.open{max-height:680px}
+  .details .inner{padding:16px 20px;font-size:15px;line-height:1.7;color:#334155}
+  .details .inner b{color:var(--accent2)}
+  .foot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;
+    padding-top:12px;border-top:1px solid var(--line)}
+  .toggle{appearance:none;border:1px solid var(--accent);background:#ecfeff;color:var(--accent2);
+    font-weight:700;font-size:14px;border-radius:10px;padding:9px 16px;cursor:pointer;transition:.15s}
+  .toggle:hover{background:var(--accent);color:#fff}
+  .toggle .chev{display:inline-block;transition:transform .3s;margin-right:6px}
+  .toggle.open .chev{transform:rotate(90deg)}
+  .nav{display:flex;align-items:center;gap:10px}
+  .nav button{appearance:none;border:1px solid var(--line);background:#fff;border-radius:10px;
+    width:40px;height:40px;font-size:18px;cursor:pointer;color:var(--ink)}
+  .nav button:hover{background:var(--soft)}
+  .nav button:disabled{opacity:.35;cursor:not-allowed}
+  .count{color:var(--muted);font-size:14px;min-width:52px;text-align:center}
+  .titleSlide{align-items:flex-start;justify-content:center}
+  .titleSlide h1{font-size:34px}
+  .en{color:var(--muted);font-size:16px;font-style:italic;margin:2px 0 16px}
+  .tag{display:inline-block;background:#0e7490;color:#fff;font-size:12.5px;padding:3px 10px;border-radius:6px;margin-right:8px;margin-top:6px}
+  @media (max-width:640px){.slide{padding:26px 22px 14px;min-height:560px}h1{font-size:24px}h2{font-size:21px}li{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="deck">
+  <div class="progress"><i id="bar"></i></div>
+  <div id="slides"></div>
+</div>
+
+<script>
+const SLIDES = [
+  { title:true, kicker:`故事线 · 演示版`,
+    html:`<h1>面向医院统计口径的元数据增强<br>RAG‑Text2SQL 生成与反馈校验</h1>
+      <div class="en">A Metadata‑Augmented Retrieval‑to‑SQL Generation and Execution‑Feedback Verification Framework for Hospital Statistical Queries</div>
+      <p class="lead">把大模型放进"元数据约束 + 子结构分解 + 执行反馈校验"的受控闭环，让医院统计 SQL 生成从"看着对"变成"可执行、口径可追溯"。</p>
+      <div><span class="tag">目标刊 JMIR Medical Informatics</span><span class="tag">应用/系统型 · IMRaD</span></div>`,
+    detail:`本片是<b>论文故事线的可视化大纲</b>，每页对应论文的一段叙事；底部"详细解释"展开该页背后的论文逻辑。<br>
+      核心主张：在真实医院数据平台上，单步让 LLM 生成 SQL 不可靠；把它置于<b>受控的元数据增强与执行反馈流程</b>中，可获得工程可用、口径可追溯的 SQL。注：片中数字均为<b>示意值</b>，投稿前以真实实测替换。`
+  },
+  { kicker:`01 · 背景与痛点`, heading:`业务要数据，取数却卡在人工写 SQL`,
+    bullets:[
+      `医院数据散在多业务系统：表多、字段命名规则不一、表间关联复杂。`,
+      `<b>统计口径强依赖人工经验</b>：同一"择期手术例数"，按入室 / 手术完成 / 出院 / 申请时间落月，结果都不同。`,
+      `业务人员只会用自然语言提需求，真正取数要工程师理解结构后手写 SQL。`,
+      `后果：响应慢、经验难复用、跨人跨时口径不一致。`
+    ],
+    detail:`这页确立<b>问题的真实性与价值</b>。医院信息系统多年积累诊疗/手术/病案/检验/收费数据，分散在多源系统；"口径"是医疗统计的核心难点——<b>选错时间字段就会算错指标</b>。论文以"人工写 SQL 的三大不足（响应效率、经验复用、口径一致性）"切入，奠定应用论文的动机。`
+  },
+  { kicker:`02 · 为何不能裸用大模型`, heading:`直接让 LLM 生成 SQL，在医院场景不安全`,
+    bullets:[
+      `<b>字段幻觉</b>：编出库里不存在的表/字段。`,
+      `<b>口径幻觉</b>：混用入室/出院/申请时间等不等价口径。`,
+      `<b>关联路径错</b>：错/漏 JOIN，结果偏多或偏少。`,
+      `<b>方言/类型不兼容</b>：日期截取、类型转换、中文别名写法不合目标库。`,
+      `→ 会生成"语义看着合理、口径却错"的语句。`
+    ],
+    detail:`这页是<b>立论转折</b>：承认 LLM 的语言/代码能力，但指出"单步裸生成"在医院统计场景的风险类别。正因这些风险，论文不采用"自然语言→大模型→SQL"一步式，而是把 LLM 放进<b>受控的元数据约束 + 执行反馈</b>流程——为第 03 页的方法铺垫。`
+  },
+  { kicker:`03 · 方法总览`, heading:`把 LLM 关进受控闭环：三杠杆 + 四层校验`,
+    bullets:[
+      `<b>① 元数据约束</b>：用真实表结构/字段注释/指标口径/历史 SQL 把生成"接地"。`,
+      `<b>② SQL 子结构分解</b>：按 SELECT/JOIN/WHERE/GROUP BY 分段生成，错误可定位。`,
+      `<b>③ 执行反馈闭环</b>：四层校验 + 错误归因 → 更新上下文 → 重生成。`,
+      `流程：问题 → 意图识别 → 检索召回+口径映射 → 子结构生成 → 候选合成 → 四层校验 →（过）输出+字段来源 /（不过）归因回流。`
+    ],
+    detail:`这页是论文的<b>方法主骨架</b>（对应正文框架图 Fig.1）。三个"杠杆"互补：<b>接地</b>缩小搜索空间、<b>分解</b>让错误可定位、<b>执行反馈</b>兜住静态校验抓不到的残余错误。后续 04–07 页逐一展开。`
+  },
+  { kicker:`04 · 知识库组织`, heading:`四类知识条目，把领域经验沉淀下来`,
+    bullets:[
+      `<b>表字段条目</b>：表名/字段/类型/注释/逻辑删除标识 → 约束可用真实字段。`,
+      `<b>指标口径条目</b>：指标定义/时间口径/筛选/分组 → 约束统计语义。`,
+      `<b>历史 SQL 条目</b>：自然语言需求 + 已验证 SQL + 关联路径 → 真实模板。`,
+      `<b>异常规则条目</b>：字段缺失/口径冲突/空结果处理 → 支持归因与人工确认。`
+    ],
+    detail:`这页解释"元数据增强"具体<b>增强什么</b>。表字段用关键词索引，术语与历史 SQL 用<b>向量+关键词混合检索</b>，既能命中明确字段名，也能处理口语化表达。历史 SQL 是关键资产——把"验证过的关联与口径"作为高优先上下文喂给模型。`
+  },
+  { kicker:`05 · 召回与口径映射`, heading:`加权召回：关键词 + 语义 + 历史命中`,
+    bullets:[
+      `召回打分 <b>Score(c)=α·key + β·sem + γ·hist</b>。`,
+      `历史 SQL 命中优先验证过的关联路径与指标口径。`,
+      `把口语/科室简称/指标简称映射到标准字段、字典值、口径。`,
+      `<b>遇歧义不瞎猜</b>：输出"待确认项"，列出候选口径。`
+    ],
+    detail:`对应论文 §3.3。本文把"加权召回"定位为 <b>schema linking</b> 角色；当下文献关注 recall 与 precision 的张力，本文用"历史 SQL + 待确认(abstention)"作<b>精确率控制</b>：宁可让人确认，也不过度纳入或编造。"待确认"机制与可靠性导向 EHR Text2SQL 评测奖励"弃答"相呼应。`
+  },
+  { kicker:`06 · 子结构生成`, heading:`按 SQL 结构拆段生成，降低一次性不稳定`,
+    bullets:[
+      `拆成 SELECT / FROM‑JOIN / WHERE / GROUP BY / ORDER BY 子结构。`,
+      `提示词<b>显式限定</b>：只能用召回到的真实表/字段/规则。`,
+      `关键字段多候选时 → 输出待确认，而非编造。`,
+      `每段都有明确校验要点（如 JOIN 是否与参考口径一致）。`
+    ],
+    detail:`解释"任务分解"为何有效：复杂 SQL 一次性生成易在多子句间<b>累积错误</b>；拆段后单个错误被隔离在单一子结构，校验可精确定位。这比"让大模型整条生成"更像工程系统，也更适合逐段校验。`
+  },
+  { kicker:`07 · 校验与反馈`, heading:`四层执行校验 + 错误归因闭环`,
+    bullets:[
+      `<b>语法</b>：结构/方言/别名；<b>字段</b>：表名/字段/类型存在性。`,
+      `<b>口径</b>：时间字段/指标字段/筛选是否一致；<b>结果</b>：空结果/异常偏低/重复计数。`,
+      `错误归因 → 更新召回上下文 → 重新生成。`,
+      `这是本文区别于"普通提示词生成"的关键环节。`
+    ],
+    detail:`本文相对纯 prompt 生成的<b>工程化增量</b>。四层校验把"能执行"升级为"字段真实、口径正确、结果合理"；执行反馈能发现静态检查抓不到的类型错、空结果、口径异常。与 execution‑guided / 自纠类 Text2SQL 同源，但本文加入<b>口径层</b>校验，贴合医院统计。`
+  },
+  { kicker:`08 · 评测设计`, heading:`30 条真实脱敏任务 · 四档递进消融`,
+    bullets:[
+      `任务集：月度 8 / 科室病区 6 / 并发症 6 / 多表明细 5 / 口径歧义 5。`,
+      `四档：<b>A 裸 → B +表结构 → C +RAG → D +执行反馈</b>（内部消融，看每个组件边际贡献）。`,
+      `主指标：execution accuracy（结果一致率，抽样）；辅：可执行率、关键字段一致率、条件识别准确率、人工修正次数、耗时。`,
+      `人评盲评 + 第三人仲裁（κ≈0.81，示意）。`
+    ],
+    detail:`交代<b>怎么验证、验证什么</b>。A→D 是<b>消融</b>而非与外部系统打擂：逐步加组件，观察各自贡献。主指标对齐可靠 EHR Text2SQL 实践（以 execution accuracy 为硬指标），人评作辅助且盲评，降低主观偏差。`
+  },
+  { kicker:`09 · 结果`, heading:`A→D 单调提升，复杂任务受益最大`,
+    bullets:[
+      `方案级（示意）<span class="pill">示意数据</span>：可执行率 62→74→86→<b>91</b>；关键字段一致 41→78；条件准确 48→79；人工修正 2.7→<b>0.6</b>。`,
+      `按复杂度分层（示意）：复杂多表/口径敏感任务 可执行率 33→<b>84</b>，提升最大。`,
+      `解读：+表结构主压字段幻觉；+RAG 主修口径；+反馈主提可执行、减返工。`,
+      `代价：端到端耗时上升（18→31s，示意）—— 该场景可靠性优先。`
+    ],
+    detail:`讲<b>证据与解读</b>，重点不是刷精度而是"工程可用 + 口径可追溯"。难度分层很关键——朴素生成在复杂多表/口径敏感查询上退化最严重，正是本框架价值最大处。<b>所有数字为示意</b>，投稿前以真实实测替换并删标记。`
+  },
+  { kicker:`10 · 错误类型学`, heading:`五类错误，"时间口径混淆"是医院特化`,
+    bullets:[
+      `字段不存在 / 时间口径混淆 / 条件值错 / 关联路径错 / 方言类型。`,
+      `映射到通用 Text2SQL 分类（schema‑linking / join / value / syntax）。`,
+      `<b>时间口径混淆</b>：入室/手术完成/出院/申请时间被混同——通用 schema‑linking 抓不到。`,
+      `据此设计针对性处理与反馈策略。`
+    ],
+    detail:`把本文的错误观察<b>锚定到文献</b>，显示本文 5 类是通用分类在医院场景的特化；尤其"时间口径混淆"是医院统计独有且后果严重的一类，呼应全文"口径"主线，强化贡献的领域独特性。`
+  },
+  { kicker:`11 · 讨论与贡献`, heading:`为何有效，以及相对最接近工作的增量`,
+    bullets:[
+      `三杠杆互补：接地缩小空间、分解使错误可定位、执行反馈闭环兜底。`,
+      `临床价值 = <b>可追溯</b>：每条输出带字段来源；拿不准就"待确认"而非瞎猜。`,
+      `相对最接近工作（metaclin2025：元数据+分解+检索+自纠）的增量：<b>四层执行反馈校验 + 口径可追溯 + 错误类型学</b>。`,
+      `生成的 SQL 不只是"能跑"，而是"口径可追溯"。`
+    ],
+    detail:`JMIR 式 Discussion 的"Principal findings + Comparison with prior work"。自信讲清机制与定位：与最接近的临床查询系统同走元数据+分解路线，但本文进一步引入<b>执行反馈四层校验与口径可追溯机制</b>，并给出错误类型学。（局限按投稿规范，于投稿前补入 Limitations 子节。）`
+  },
+  { kicker:`12 · 结语与未来`, heading:`可执行 + 口径可追溯，面向落地`,
+    bullets:[
+      `结论：把 LLM 关进"元数据约束 + 子结构分解 + 执行反馈"闭环，显著提升可执行性与口径可追溯性。`,
+      `本地自托管开源模型部署，<b>患者数据不出院</b>（隐私合规）。`,
+      `未来：关联路径自动推荐、口径自动对账、动态知识库、人机协同反馈学习。`,
+      `投稿前：以真实实测替换示意数字、回插 Limitations、套 JMIR 模板。`
+    ],
+    detail:`收束页。强调落地价值与隐私合规（本地部署、数据不出院），并给出前瞻工作。提醒：本故事线对应的论文稿当前为"形态可投"草稿，<b>数字为示意</b>、Limitations 已暂存待投稿前回插——这是发表流程的最后一步，不影响故事主线。`
+  }
+];
+
+const root = document.getElementById('slides');
+SLIDES.forEach((s,i)=>{
+  const sec = document.createElement('section');
+  sec.className = 'slide' + (i===0?' active':'') + (s.title?' titleSlide':'');
+  let bodyHtml = '';
+  if(s.title){ bodyHtml = `<div class="kicker">${s.kicker}</div>${s.html}`; }
+  else{
+    bodyHtml = `<div class="kicker">${s.kicker}</div><h2>${s.heading}</h2><div class="body"><ul>` +
+      s.bullets.map(b=>`<li>${b}</li>`).join('') + `</ul></div>`;
+  }
+  sec.innerHTML = bodyHtml +
+    `<div class="details" id="d${i}"><div class="inner">${s.detail}</div></div>
+     <div class="foot">
+       <button class="toggle" data-i="${i}"><span class="chev">▸</span>详细解释</button>
+       <div class="nav">
+         <button class="prev" aria-label="上一页">‹</button>
+         <span class="count"></span>
+         <button class="next" aria-label="下一页">›</button>
+       </div>
+     </div>`;
+  root.appendChild(sec);
+});
+
+let cur = 0;
+const slides = [...document.querySelectorAll('.slide')];
+const bar = document.getElementById('bar');
+function render(){
+  slides.forEach((el,i)=>el.classList.toggle('active', i===cur));
+  document.querySelectorAll('.count').forEach(c=>c.textContent = (cur+1)+' / '+slides.length);
+  document.querySelectorAll('.prev').forEach(b=>b.disabled = cur===0);
+  document.querySelectorAll('.next').forEach(b=>b.disabled = cur===slides.length-1);
+  bar.style.width = ((cur+1)/slides.length*100)+'%';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function go(n){ cur = Math.max(0, Math.min(slides.length-1, n)); render(); }
+
+document.addEventListener('click', e=>{
+  if(e.target.closest('.next')) go(cur+1);
+  else if(e.target.closest('.prev')) go(cur-1);
+  else if(e.target.closest('.toggle')){
+    const btn = e.target.closest('.toggle');
+    const d = document.getElementById('d'+btn.dataset.i);
+    const open = d.classList.toggle('open');
+    btn.classList.toggle('open', open);
+  }
+});
+document.addEventListener('keydown', e=>{
+  if(e.key==='ArrowRight'||e.key==='PageDown') go(cur+1);
+  else if(e.key==='ArrowLeft'||e.key==='PageUp') go(cur-1);
+});
+render();
+</script>
+</body>
+</html>
