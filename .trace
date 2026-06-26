@@ -603,3 +603,13 @@
   - **修改**：`z-间接骨架/基于大语言模型的医院数据查询SQL自动生成系统设计与应用_毛笔临帖修订稿.md`
   - **内容**：参考文献由 8 篇扩展到 18 篇；补全本刊相近论文作者卷期页码；新增 Spider、IRNet、RAT-SQL、PICARD、DIN-SQL、LLM 评测、RAG 与医疗 RAG 文献
   - **血缘**：本刊参考论文尾部引用 → Text-to-SQL/RAG 最新骨架 → 当前投稿稿参考文献支撑
+
+### 2026-06-26 | Cursor Cloud 开发环境搭建
+- **需求**：搭建并验证本仓库的开发环境（安装依赖、运行应用做 hello world 验证）
+- **新增**：`AGENTS.md`（`## Cursor Cloud specific instructions`：依赖、可运行部分、lint/test/build、项目约定）
+- **环境**：Python 3.12 + `pip3 install -r requirements.txt`（PyJWT）；`python3 jwt_utils.py` 生成 JWT 通过；`医保飞检/index.html` 经 `python3 -m http.server` 本地服务，浏览器渲染与交互（节点高亮、缩放）通过
+- **血缘**：`requirements.txt` → 根 Python 工具脚本；静态 HTML（`医保飞检`/`蓝图`）→ 本地预览；`agents/`（AutoGen+Selenium，依赖内网 BI 与 LLM Key）→ 云环境不可端到端运行，仅文档化
+  #### 2026-06-26 | 分支：澄清纯 SQL 库定位（不跑 service）
+  - **需求**：用户明确本仓库只是 SQL 库，不需 dev/运行 service，只按需求产出 SQL
+  - **修改**：`AGENTS.md` 改写 `## Cursor Cloud specific instructions`，以「SQL 生成约定」为主、运行环境降为可选备用
+  - **血缘**：`CLAUDE.md` + `.cursor/rules/sql-generator.mdc` → SQL 生成约定 → `AGENTS.md` 固化工作模式
