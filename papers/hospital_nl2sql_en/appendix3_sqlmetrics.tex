@@ -1,0 +1,186 @@
+%==============================================================================
+%  Multimedia Appendix 3 — SQL evaluation metrics
+%  Companion to main_rt.tex. Compiles standalone; export to DOCX for submission.
+%  The 72 expert-rating items referenced in Methods > SQL Query Validation.
+%==============================================================================
+\documentclass[10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=0.9in]{geometry}
+\usepackage{times}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{xcolor}
+\usepackage{caption}
+\usepackage{enumitem}
+\usepackage[colorlinks=true,allcolors=blue!55!black]{hyperref}
+
+\newcommand{\PH}[1]{{\color{red}\textbf{[#1]}}}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\captionsetup{labelsep=period,font=small,justification=justified,
+              singlelinecheck=false,skip=4pt}
+\setcounter{secnumdepth}{0}
+\pagestyle{plain}
+
+\begin{document}
+
+\begin{center}
+{\large\bfseries Multimedia Appendix 3. SQL evaluation metrics}\\[2pt]
+{\footnotesize Companion to: \emph{Large Language Models for Automating Hospital
+Statistical Criteria Conversion to Clinical Data Warehouse Queries: Validation
+and Evaluation Study}}
+\end{center}
+
+\vspace{6pt}
+\noindent
+Two experts independently rated every generated query against the 72 items
+below. Each item is scored on a 4-point scale: 1 = noncompliant, 2 = partially
+compliant with a defect that changes the result set, 3 = compliant with a defect
+that does not change the result set, 4 = fully compliant. An item that does not
+apply to a given query is scored NA and excluded from that query's mean.
+Dimension scores are the unweighted mean of the applicable items; the reported
+score is the mean of the two experts. Inter-rater reliability was computed with
+Cohen $\kappa$ over the dichotomized ratings ($\ge$3 vs $<$3), and disagreements
+were resolved by consensus discussion.
+
+\vspace{4pt}
+\noindent
+The column \textbf{Subset} marks the 18 items that constitute the restricted
+instrument applied to queries containing prevalidated criteria from the
+development set; those 18 items measure \emph{criterion inclusion accuracy}
+(12 items, prefix X) and \emph{field identifier correctness} (6 items,
+prefix C), reported separately in the Results.
+
+%------------------------------------------------------------------
+\begingroup\footnotesize
+\begin{longtable}{@{}L{1.0cm}L{12.4cm}C{1.4cm}@{}}
+\caption{The 72 expert-rating items, by dimension.}\\
+\toprule
+ID & Item & Subset\\
+\midrule
+\endfirsthead
+\multicolumn{3}{l}{\footnotesize\emph{Table continued from previous page}}\\
+\toprule
+ID & Item & Subset\\
+\midrule
+\endhead
+\bottomrule
+\multicolumn{3}{r}{\footnotesize\emph{Continued on next page}}\\
+\endfoot
+\bottomrule
+\endlastfoot
+\multicolumn{3}{@{}l}{\textbf{Dimension 1 --- SQL syntax adherence (24 items)}}\\
+S1  & Statement parses under the Presto grammar & \\
+S2  & Exactly one statement is returned, with no trailing fragment & \\
+S3  & Every referenced alias is defined & \\
+S4  & No duplicate alias within a scope & \\
+S5  & Every SELECT expression is aggregated or appears in GROUP BY & \\
+S6  & GROUP BY references valid expressions & \\
+S7  & ORDER BY references valid output columns & \\
+S8  & No reserved word used as an unquoted identifier & \\
+S9  & Non-ASCII identifiers are enclosed in double quotes & \\
+S10 & String literals use single quotes & \\
+S11 & No implicit comparison between a VARCHAR column and a date or number & \\
+S12 & Explicit cast or parse function before every date comparison & \\
+S13 & Explicit cast before every numeric comparison & \\
+S14 & Presto date function names used correctly & \\
+S15 & No function specific to another SQL dialect & \\
+S16 & Interval arithmetic uses Presto syntax & \\
+S17 & NULL tested with IS NULL / IS NOT NULL, never with equality & \\
+S18 & Division is guarded against a zero denominator & \\
+S19 & COUNT(DISTINCT $\cdot$) used wherever deduplication is required & \\
+S20 & Subqueries are correlated correctly & \\
+S21 & Common table expressions are uniquely named and referenced & \\
+S22 & No SELECT * in the returned statement & \\
+S23 & Output aliases are present and non-colliding & \\
+S24 & Statement executes without runtime error against the target instance & \\
+\addlinespace
+
+\multicolumn{3}{@{}l}{\textbf{Dimension 2 --- Warehouse schema compliance (26 items)}}\\
+C1  & Every referenced table exists in the catalog & \checkmark\\
+C2  & Every referenced column exists on its stated table & \checkmark\\
+C3  & Each column is qualified with the table that actually owns it & \checkmark\\
+C4  & Correct catalog and schema prefix for the subject area & \\
+C5  & Layer choice is justified; a DC-layer aggregate is used when one exists & \\
+C6  & No cross-layer join that double counts the same fact & \\
+C7  & Join keys are the documented keys for the pair & \\
+C8  & Join cardinality does not inflate the row set & \\
+C9  & No join that is unnecessary for the requested output and can only reduce rows & \\
+C10 & Every joined table carries its logical-deletion filter & \\
+C11 & Every multi-campus table carries its organization-code filter & \\
+C12 & Filters are placed in WHERE or ON correctly with respect to outer joins & \\
+C13 & Correct main-table pairing for the subject area & \\
+C14 & Required business-status filters are present & \\
+C15 & Coded columns are compared against their declared value domain & \\
+C16 & Code values are drawn from the value dictionary and not invented & \\
+C17 & Units are consistent with the column definition & \\
+C18 & Date columns are handled in their documented storage format & \\
+C19 & No deprecated column is used & \\
+C20 & No column with a population rate below threshold is used without a note & \\
+C21 & Partition or pruning columns are used where available & \\
+C22 & Field provenance is emitted for every selected column & \checkmark\\
+C23 & Provenance names the table, the layer, and the mapping entry & \checkmark\\
+C24 & No column is referenced that is absent from the resolved mapping & \checkmark\\
+C25 & Text comparisons normalize casing and whitespace where required & \\
+C26 & Output granularity matches the declared grouping & \\
+\addlinespace
+
+\multicolumn{3}{@{}l}{\textbf{Dimension 3 --- Criteria contextual accuracy (22 items)}}\\
+X1  & The counting object matches the requested indicator & \checkmark\\
+X2  & The time criterion matches the metric-criterion dictionary entry & \checkmark\\
+X3  & No timestamp is silently substituted for the requested one & \checkmark\\
+X4  & The reporting interval is the requested closed interval & \\
+X5  & Relative dates are resolved against the stated report date & \\
+X6  & Inclusion conditions are complete & \checkmark\\
+X7  & Exclusion conditions are complete and correctly scoped & \checkmark\\
+X8  & Negation scope is correct & \\
+X9  & Boolean precedence from the request is preserved & \\
+X10 & Grouping dimensions match the request & \\
+X11 & Ordering does not distort interpretation of the result & \\
+X12 & The denominator definition matches the indicator & \checkmark\\
+X13 & The numerator definition matches the indicator & \checkmark\\
+X14 & Compound institutional definitions are fully expanded & \checkmark\\
+X15 & Deduplication level matches the counting object & \\
+X16 & An ambiguous criterion is surfaced as TO-CONFIRM, not resolved silently & \checkmark\\
+X17 & The TO-CONFIRM item states the competing candidates and what separates them & \checkmark\\
+X18 & No condition appears in the query that is absent from the request & \checkmark\\
+X19 & No condition appears in the request that is absent from the query & \checkmark\\
+X20 & The indicator version in force on the reporting date is used & \\
+X21 & Cross-campus scope matches the request & \\
+X22 & A result-plausibility check is performed and reported & \\
+\end{longtable}
+\endgroup
+
+\vspace{-6pt}
+\noindent{\footnotesize Subset column: \checkmark\ marks the 18 items forming the
+restricted instrument for prevalidated-criterion queries (C1--C3, C22--C24 =
+field identifier correctness; X1--X3, X6, X7, X12--X14, X16--X19 = criterion
+inclusion accuracy).}
+
+%==============================================================================
+\section{Scoring worksheet}
+%==============================================================================
+\noindent
+For each query $q$ and expert $e$, with $A_{q}$ the set of applicable items in
+dimension $D$:
+\[
+\text{score}_{D}(q,e)=\frac{1}{|A_{q}\cap D|}\sum_{i\in A_{q}\cap D} r_{i}(q,e),
+\qquad
+\text{score}_{D}(q)=\tfrac{1}{2}\bigl(\text{score}_{D}(q,1)+\text{score}_{D}(q,2)\bigr).
+\]
+Reported dimension values are the mean $\pm$ SD of $\text{score}_{D}(q)$ over the
+evaluated queries. The LLM self-evaluation column was produced by issuing the
+same 72 items to the generating model as a checklist, with no access to the
+expert ratings.
+
+\vspace{6pt}
+\noindent
+\PH{Attach the completed per-query rating matrix (queries $\times$ 72 items
+$\times$ 2 raters) exported from the annotation tool on the compute cluster, and
+report the observed Cohen $\kappa$ per dimension alongside the pooled value.}
+
+\end{document}

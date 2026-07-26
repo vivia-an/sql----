@@ -1,0 +1,229 @@
+%==============================================================================
+%  Multimedia Appendix 2 — Prompt templates
+%  Companion to main_rt.tex. Compiles standalone; export to DOCX for submission.
+%  INTEGRITY: templates below are the deployed-system templates in normalized
+%  form. Replace \PH{...} slots with the exact production strings before
+%  submission so the appendix is byte-faithful to what was run.
+%==============================================================================
+\documentclass[10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{times}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{caption}
+\usepackage{fancyvrb}
+\usepackage{enumitem}
+\usepackage[colorlinks=true,allcolors=blue!55!black]{hyperref}
+
+\newcommand{\PH}[1]{{\color{red}\textbf{[#1]}}}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\captionsetup{labelsep=period,font=small,justification=justified,
+              singlelinecheck=false,skip=4pt}
+\setcounter{secnumdepth}{0}
+\pagestyle{plain}
+
+\begin{document}
+
+\begin{center}
+{\large\bfseries Multimedia Appendix 2. Prompt templates}\\[2pt]
+{\footnotesize Companion to: \emph{Large Language Models for Automating Hospital
+Statistical Criteria Conversion to Clinical Data Warehouse Queries: Validation
+and Evaluation Study}}
+\end{center}
+
+\vspace{6pt}
+\noindent
+This appendix lists every prompt used by the automated pipeline. Prompts are
+grouped into (1) \textbf{pipeline task prompts}, one per module, used in all
+experiments, and (2) \textbf{the five prompting strategies} that were varied in
+the factorial hallucination experiment. All prompts were issued with
+deterministic decoding (temperature 0, top-$p$ 1). Braces \verb|{...}| denote
+runtime substitution slots.
+
+%==============================================================================
+\section{Part 1 --- Pipeline task prompts}
+%==============================================================================
+
+\subsection{P1. Segmentation (preprocessing stage 1)}
+\begin{Verbatim}[fontsize=\footnotesize,frame=single,framesep=4pt]
+System: You split a free-text hospital statistical request into atomic
+statistical criteria. Preserve Boolean connectives (AND/OR/NOT) and any
+grouping hierarchy (by month, by department, by ward). Do not resolve,
+interpret, or normalize anything at this stage. Do not drop text.
+Output: a JSON array; each element is
+  {"id": <int>, "text": <verbatim span>, "connective": "AND"|"OR"|"NOT"|null,
+   "parent_id": <int|null>}
+Request:
+{raw_request_text}
+\end{Verbatim}
+
+\subsection{P2. Filtering (preprocessing stage 2)}
+\begin{Verbatim}[fontsize=\footnotesize,frame=single,framesep=4pt]
+System: You mark which atomic criteria are queryable against a relational
+clinical data warehouse. Mark as NON-QUERYABLE: formatting and delivery
+instructions, deadlines, narrative justification, requester contact details,
+and any statement that expresses a preference rather than a data condition.
+Do not delete; only label, with a one-clause reason.
+Output: JSON array of {"id": <int>, "queryable": true|false, "reason": <string>}
+Criteria:
+{segmented_criteria_json}
+\end{Verbatim}
+
+\subsection{P3. Simplification (preprocessing stage 3)}
+\begin{Verbatim}[fontsize=\footnotesize,frame=single,framesep=4pt]
+System: You rewrite each queryable criterion into one short, unambiguous
+sentence. Normalize temporal expressions to explicit closed intervals in the
+form [YYYY-MM-DD, YYYY-MM-DD). Resolve relative dates against {report_date}.
+Keep every clinical or administrative term verbatim -- never substitute a
+synonym. Never add a condition that is not present in the input.
+Output: JSON array of {"id": <int>, "simplified": <string>}
+Criteria:
+{filtered_criteria_json}
+\end{Verbatim}
+
+\subsection{P4. Information extraction (seven structured elements)}
+\begin{Verbatim}[fontsize=\footnotesize,frame=single,framesep=4pt]
+System: From each simplified criterion, extract exactly seven element types:
+  1 Business Terms      -- institutional terms as written
+  2 Metadata Systems    -- which knowledge source should resolve the term
+                           (warehouse schema | metric-criterion dictionary |
+                            historical SQL | exception rules)
+  3 Field Identifiers   -- only if the criterion names a column explicitly
+  4 Values              -- literal comparison values, with unit if present
+  5 Attributes          -- aggregation, grouping, ordering, distinctness
+  6 Temporal            -- the counting time criterion, if stated
+  7 Negation            -- scope of any exclusion
+Leave a slot null rather than inferring it. Do NOT emit column names here.
+Output: JSON array keyed by criterion id.
+Criteria:
+{simplified_criteria_json}
+\end{Verbatim}
+
+\subsection{P5. Field and criterion mapping (few-shot)}
+\begin{Verbatim}[fontsize=\footnotesize,frame=single,framesep=4pt]
+System: You map each business term to EXACTLY ONE warehouse field and, when the
+term denotes an indicator, to EXACTLY ONE counting criterion. You may only
+choose from the retrieved candidates supplied below. You may not invent a table
+name, a column name, or a criterion.
+
+Hard rules:
+  - If two or more candidate criteria are defensible, do NOT choose. Emit a
+    TO-CONFIRM item listing the candidates and what distinguishes them.
+  - If no candidate is defensible, emit TO-CONFIRM with reason "no candidate".
+  - Timestamps are never interchangeable. Room-in time, surgery-completion
+    time, discharge time and application time denote different counting
+    populations.
+  - Report the layer (DL/DC/MDR) of the field you chose.
+
+Retrieved candidates (top-k=8 per term, hybrid BM25 + dense):
+{retrieved_candidates_json}
+
+Worked examples:
+{few_shot_examples}
+
+Terms to map:
+{extracted_terms_json}
+
+Output: JSON array of
+  {"term": <string>, "table": <string>, "column": <string>, "layer": <string>,
+   "criterion_id": <string|null>, "confidence": <0-1>,
+   "to_confirm": <null | {"candidates": [...], "reason": <string>}>}
+\end{Verbatim}
+
+\subsection{P6. SQL generation (few-shot, sub-structure decomposition)}
+\begin{Verbatim}[fontsize=\footnotesize,frame=single,framesep=4pt]
+System: You generate Presto SQL for hospital statistical reporting. Use ONLY
+the tables, columns and value mappings in the resolved mapping below; never
+invent identifiers.
+
+Mandatory in every generated statement:
+  - every joined table carries its logical-deletion filter isdeleted = '0'
+  - every multi-campus table carries its organization-code filter
+  - all warehouse columns are VARCHAR: cast explicitly before any date or
+    numeric comparison; never rely on implicit coercion
+  - quote non-ASCII column names with double quotes
+
+Emit the query one sub-structure at a time, in this order, each with a
+one-line justification citing the mapping entry it comes from:
+  SELECT / FROM-JOIN / WHERE / GROUP BY / ORDER BY
+
+Then emit:
+  1) the assembled statement
+  2) field provenance: for every selected column, its source table, layer,
+     and the mapping entry id
+  3) any TO-CONFIRM items carried forward unresolved
+
+Resolved mapping:
+{mapping_json}
+Historical reference queries for this indicator family:
+{historical_sql_examples}
+Request:
+{simplified_criteria_json}
+\end{Verbatim}
+
+%==============================================================================
+\section{Part 2 --- The five prompting strategies (factorial experiment)}
+%==============================================================================
+
+\noindent
+In the factorial experiment (24 tasks $\times$ 8 models $\times$ 5 strategies),
+prompt P6 above was replaced by one of the following five variants. Everything
+else in the pipeline was held constant.
+
+\begin{table}[h]\centering
+\caption{The five prompting strategies varied in the factorial experiment.}
+\footnotesize
+\begin{tabular}{@{}L{3.0cm}L{11.5cm}@{}}
+\toprule
+Strategy & Instruction body appended to the task prompt\\
+\midrule
+zero\_shot &
+\emph{(no additional instruction)} --- the resolved mapping and the request are
+supplied and the model is asked directly for the Presto statement.\\
+\addlinespace
+structured\_ approach &
+``Work through the query one clause at a time. First decide the FROM-JOIN path,
+then the WHERE conditions, then the SELECT list, then GROUP BY, then ORDER BY.
+State your reasoning for each clause before writing it, then assemble.''\\
+\addlinespace
+explicit\_ uncertainty &
+``If any field or counting criterion is ambiguous, do not guess. Emit
+`TO-CONFIRM: <question>' in place of that clause and continue. A query with an
+honest TO-CONFIRM is preferred over a complete query that may count the wrong
+population.''\\
+\addlinespace
+validation\_ focused &
+``Before returning, verify each of: every identifier appears in the supplied
+mapping; every joined table has its logical-deletion filter; every multi-campus
+table has its organization-code filter; every date comparison has an explicit
+cast. Report the checklist result, then the query.''\\
+\addlinespace
+error\_aware &
+``The target instance has partial metadata coverage: many production columns are
+absent, and some flag columns are entirely unpopulated. Common failures are (a)
+selecting a structurally valid but unpopulated flag, (b) substituting a
+different timestamp for the requested counting criterion, and (c) leaving a
+placeholder literal. Avoid all three; if unavoidable, say which one you hit.''\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%==============================================================================
+\section{Part 3 --- Reproduction notes}
+%==============================================================================
+\begin{itemize}[leftmargin=1.4em,itemsep=1pt,topsep=2pt]
+  \item Decoding: temperature 0, top-$p$ 1, for all 8 models, all 5 strategies.
+  \item Retrieval: hybrid BM25 + dense sentence embeddings, top-$k$=8 per term,
+        over the metadata knowledge base; identical for every model.
+  \item Few-shot exemplars for P5/P6 were drawn only from the 30-task
+        development set and never from the 24-task evaluation set.
+  \item Exact model builds, endpoint versions, and serving configuration:
+        \PH{fill from the run manifest on the compute cluster}.
+  \item Random seeds are not applicable under deterministic decoding; the
+        SynHDW generator seed is \PH{fill}.
+\end{itemize}
+
+\end{document}
