@@ -748,7 +748,7 @@
   - **commit**：`18adaca` init → branch `main` 已 push
   - **血缘**：与 `sql----` 主仓分离；论文稿单独远端 paper_rag_hospital
   ############## 2026-07-27 | ApplSci MDPI 正式类投稿稿入库
-  - **新增**：`main_applsci_mdpicls.tex`（`\documentclass[...,applsci]{mdpi}`）
-  - **同步**：`main_applsci.tex`、`main_rt.tex`、appendix1–4、填数/审稿清单、校验脚本
+  - **paper 仓**：`3d0e3ea` ← `main_applsci_mdpicls.tex`
+  - **sql----**：`dbba932` ← ApplSci/JMIR 稿 + fill sheet + appendix + `.trace`
   - **血缘**：ApplSci 模拟稿 → 官方 mdpi.cls 投稿版；JMIR 形 `main_rt` 结果对齐实测填表
   - **仍阻**：作者/伦理/经费 `\PH`、官方 logo/enotez、SuSy 封面信
