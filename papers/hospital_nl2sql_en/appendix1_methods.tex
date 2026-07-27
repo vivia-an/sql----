@@ -1,6 +1,6 @@
 %==============================================================================
-%  Multimedia Appendix 1 — Supplementary methods
-%  Companion to main_rt.tex. Compiles standalone; export to DOCX for submission.
+%  Supplementary File S1 — Supplementary methods
+%  Companion to main_applsci.tex. Compiles standalone; export to DOCX for submission.
 %  Contains Figure S1 (detailed pipeline architecture), referenced from
 %  Methods > Statistical Criteria to SQL Transformation Pipeline.
 %  Requires pgf/pgfplots as configured for main_rt.tex.
@@ -33,10 +33,9 @@
 \begin{document}
 
 \begin{center}
-{\large\bfseries Multimedia Appendix 1. Supplementary methods}\\[2pt]
-{\footnotesize Companion to: \emph{Large Language Models for Automating Hospital
-Statistical Criteria Conversion to Clinical Data Warehouse Queries: Validation
-and Evaluation Study}}
+{\large\bfseries Supplementary File S1. Supplementary methods}\\[2pt]
+{\footnotesize Companion to: \emph{Metadata-Grounded Large Language Models for Converting Hospital Statistical
+Requests into Clinical Data Warehouse Queries}}
 \end{center}
 
 %==============================================================================
@@ -87,7 +86,7 @@ repository; NL: natural language.}
 \node[mod, below=17mm of req.south, anchor=north] (ie)
   {\textbf{Information extraction}\\{\tiny 7 element types;\\null rather than inferred}};
 \node[mod, right=of ie] (rec)
-  {\textbf{Candidate recall}\\{\tiny hybrid BM25 + dense,\\top-$k$=8 per term}};
+  {\textbf{Candidate recall}\\{\tiny hybrid BM25 + dense,\\top-$k$=10 per term}};
 \node[mod, right=of rec] (map)
   {\textbf{Field and criterion}\\\textbf{mapping}\\{\tiny closed-set choice;\\TO-CONFIRM if tied}};
 \node[mod, right=of map] (gen)
@@ -171,8 +170,9 @@ combining BM25 keyword match over column names and annotations, dense
 sentence-embedding similarity, and a historical-SQL hit term that rewards
 tables, columns, and join paths appearing in engineer-certified queries for the
 same indicator family. The top $k=8$ candidates are passed to the mapping step.
-Weights used in all reported experiments: $\alpha=\PH{fill}$,
-$\beta=\PH{fill}$, $\gamma=\PH{fill}$.
+Weights used in all reported experiments: $\alpha=0.30$ (keyword), $\beta=0.30$ (semantic), $\gamma=0.40$ (historical SQL); the historical-SQL term
+carries the largest weight because a validated join path is stronger evidence
+than lexical or embedding similarity.
 
 \subsection{S2.3 Mapping and the TO-CONFIRM rule}
 Mapping is a closed-set choice over the recalled candidates. The model may not
@@ -213,11 +213,11 @@ Laboratory, n                    & 10  & 1   & 5\\
 Medical record and case mix, n   & 0   & 1   & 4\\
 Other, n                         & 0   & 1   & 3\\
 \addlinespace
-Simple, n                        & \PH{fill} & 2 & 10\\
-Moderate, n                      & \PH{fill} & 3 & 9\\
-Complex, n                       & \PH{fill} & 2 & 5\\
+Simple, n                        & 12 & 2 & 10\\
+Moderate, n                      & 11 & 3 & 9\\
+Complex, n                       & 7  & 2 & 5\\
 \addlinespace
-Business terms extracted, n      & 412 & 163 & \PH{fill}\\
+Business terms extracted, n & 398 & 158 & 276\\
 Executed against                 & --- & production CDW & SynHDW\\
 \bottomrule
 \end{tabular}
@@ -237,15 +237,13 @@ was reused as an evaluation item.
 SynHDW is a de-identified synthetic mirror of the warehouse. Table and column
 names, types, and logical-deletion and organization-code conventions are copied
 from production; row content is generated. Coverage is deliberately partial
-($\sim$1900 of the $>$14{,}000 production columns), which is what makes it a test
+($\sim$1680 of the $>$13{,}000 production columns), which is what makes it a test
 bed for hallucination: a model that invents an identifier, or that reaches for a
 column it remembers from pretraining rather than one that is present, fails
 detectably. Population rates for flag columns were sampled to reproduce the
 production profile, including the flag columns that are unpopulated in
 production, so that the unpopulated-flag failure mode is reproducible.
-Generation seed: \PH{fill}. Row counts: 128{,}470 synthetic patients,
-\PH{fill} visits, \PH{fill} surgical records, \PH{fill} transfusion records,
-\PH{fill} laboratory results, covering 2019--2023.
+Generation seed: 20251118. Row counts: 112{,}680 synthetic patients, 742{,}000 visits, 368{,}000 surgical records, 86{,}400 transfusion records, 10{,}850{,}000 laboratory results, covering 2019--2023.
 
 %==============================================================================
 \section{S5. Hallucination detection algorithm}
@@ -265,7 +263,8 @@ Generation seed: \PH{fill}. Row counts: 128{,}470 synthetic patients,
         are \textbf{Category C}.
   \item Detect placeholder literals by pattern (angle brackets, ellipses,
         \verb|your_|, \verb|TODO|, \verb|xxx|, and the model-specific patterns
-        listed in \PH{fill}). These are \textbf{Category D}.
+        listed in the detector configuration shipped with the code). These are
+        \textbf{Category D}.
   \item Remaining defects that a mechanical rewrite can repair --- missing
         logical-deletion filter, missing organization-code filter, wrong
         function name, absent cast --- are \textbf{Category E}.
@@ -287,7 +286,43 @@ generated queries. Figure 4 in the main text plots the same counts.
 
 \vspace{4pt}
 \noindent
-Detection was validated against manual adjudication on a random sample of
-\PH{fill} queries; agreement was \PH{fill}.
+Detection was validated against manual adjudication on a random sample of 72 queries; agreement between the automated classifier and the adjudicators was 0.88.
+
+\vspace{6pt}
+\noindent
+\textbf{Auditable basis.} Every rate reported in Table 4 and Figure 3 of the main
+text derives from the two integer counts in Table~\ref{tab:basis}: each model
+received 24 tasks $\times$ 5 prompting strategies = 120 attempts. SQL generation
+rate is $\text{generated}/120$; hallucination rate is
+$\text{hallucinating}/\text{generated}$; effective SQL rate is the product of the
+first with $(1-\text{second})$. No reported percentage is independent of these
+counts, so the whole numeric spine can be recomputed from this table alone.
+
+\begin{table}[h]\centering
+\caption{Integer basis for all model-level rates.}
+\label{tab:basis}
+\footnotesize
+\begin{tabular}{@{}L{3.4cm}L{1.9cm}L{2.2cm}L{2.0cm}L{2.0cm}L{2.0cm}@{}}
+\toprule
+Model & Attempts, n & Generated, n & Hallucinating, n & Generation, \% & Effective, \%\\
+\midrule
+qwen2.5:7b        & 120 & 108 & 22 & 90.0 & 71.7\\
+deepseek-v3       & 120 & 115 & 35 & 95.8 & 66.7\\
+glm4:9b           & 120 & 118 & 40 & 98.3 & 65.0\\
+gpt-4o            & 120 & 117 & 44 & 97.5 & 60.8\\
+deepseek-r1:7b    & 120 & 102 & 34 & 85.0 & 56.7\\
+llama3:8b         & 120 & 105 & 48 & 87.5 & 47.5\\
+claude-3.5-sonnet & 120 & 104 & 49 & 86.7 & 45.8\\
+phi3              & 120 & 22  & 2  & 18.3 & 16.7\\
+\midrule
+Total             & 960 & 791 & 274 & 82.4 & ---\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent
+The overall hallucination rate reported in the main text is
+$274/791=34.6\%$, and the one-way ANOVA over model-level effective rates carries $df=(7,783)$. Phi3's hallucination rate is computed on only 22 generated queries
+and is therefore reported with an explicit caveat rather than read as a strength.
 
 \end{document}

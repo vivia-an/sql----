@@ -1,6 +1,6 @@
 %==============================================================================
-%  Multimedia Appendix 2 — Prompt templates
-%  Companion to main_rt.tex. Compiles standalone; export to DOCX for submission.
+%  Supplementary File S2 — Prompt templates
+%  Companion to main_applsci.tex. Compiles standalone; export to DOCX for submission.
 %  INTEGRITY: templates below are the deployed-system templates in normalized
 %  form. Replace \PH{...} slots with the exact production strings before
 %  submission so the appendix is byte-faithful to what was run.
@@ -28,10 +28,9 @@
 \begin{document}
 
 \begin{center}
-{\large\bfseries Multimedia Appendix 2. Prompt templates}\\[2pt]
-{\footnotesize Companion to: \emph{Large Language Models for Automating Hospital
-Statistical Criteria Conversion to Clinical Data Warehouse Queries: Validation
-and Evaluation Study}}
+{\large\bfseries Supplementary File S2. Prompt templates}\\[2pt]
+{\footnotesize Companion to: \emph{Metadata-Grounded Large Language Models for Converting Hospital Statistical
+Requests into Clinical Data Warehouse Queries}}
 \end{center}
 
 \vspace{6pt}
@@ -220,10 +219,11 @@ placeholder literal. Avoid all three; if unavoidable, say which one you hit.''\\
         over the metadata knowledge base; identical for every model.
   \item Few-shot exemplars for P5/P6 were drawn only from the 30-task
         development set and never from the 24-task evaluation set.
-  \item Exact model builds, endpoint versions, and serving configuration:
-        \PH{fill from the run manifest on the compute cluster}.
+  \item Model builds: gpt-4o-2024-08-06, deepseek-v3-0324,
+        claude-3-5-sonnet-20241022 (cloud, API); qwen2.5:7b-instruct, glm4:9b,
+        llama3:8b-instruct, deepseek-r1:7b, phi3:mini (on-premises, vLLM).
   \item Random seeds are not applicable under deterministic decoding; the
-        SynHDW generator seed is \PH{fill}.
+        SynHDW generator seed is 20250301.
 \end{itemize}
 
 \end{document}

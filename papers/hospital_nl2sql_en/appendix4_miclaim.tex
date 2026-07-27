@@ -1,0 +1,166 @@
+%==============================================================================
+%  Supplementary File 4 — Completed MI-CLAIM and MI-CLAIM-GEN checklists
+%  Companion to main_applsci.tex. Compiles standalone.
+%  The main text states that the study is reported following MI-CLAIM and its
+%  generative extension; this appendix supplies the completed instrument so the
+%  claim is checkable rather than asserted.
+%==============================================================================
+\documentclass[10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=0.85in]{geometry}
+\usepackage{times}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{amssymb}
+\usepackage{xcolor}
+\usepackage{caption}
+\usepackage{enumitem}
+\usepackage[colorlinks=true,allcolors=blue!55!black]{hyperref}
+
+\newcommand{\PH}[1]{{\color{red}\textbf{[#1]}}}
+\newcommand{\Y}{\checkmark}
+\newcommand{\NA}{n/a}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\captionsetup{labelsep=period,font=small,justification=justified,
+              singlelinecheck=false,skip=4pt}
+\setcounter{secnumdepth}{0}
+\pagestyle{plain}
+\renewcommand{\thetable}{S\arabic{table}}
+\setcounter{table}{2}
+
+\begin{document}
+
+\begin{center}
+{\large\bfseries Supplementary File S4. Completed MI-CLAIM and MI-CLAIM-GEN
+checklists}\\[2pt]
+{\footnotesize Companion to: \emph{Metadata-Grounded Large Language Models for Converting Hospital Statistical
+Requests into Clinical Data Warehouse Queries}}
+\end{center}
+
+\vspace{6pt}
+\noindent
+The main text states that this study is reported following the MI-CLAIM
+checklist for clinical AI modeling and its generative extension MI-CLAIM-GEN.
+This appendix supplies the completed instruments. Each item records where in the
+manuscript it is addressed, or states plainly that it is not met and why.
+Items marked \textbf{not met} are repeated in the Limitations section of the main
+text; nothing is claimed here that the manuscript does not support.
+
+%==============================================================================
+\section{Part 1 --- MI-CLAIM (Norgeot et al, 2020)}
+%==============================================================================
+
+\begingroup\footnotesize
+\begin{longtable}{@{}L{0.7cm}L{7.4cm}C{1.4cm}L{5.4cm}@{}}
+\caption{MI-CLAIM checklist, completed.}\\
+\toprule
+No. & Item & Status & Where addressed / comment\\
+\midrule
+\endfirsthead
+\toprule
+No. & Item & Status & Where addressed / comment\\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\bottomrule
+\endlastfoot
+
+\multicolumn{4}{@{}l}{\textbf{1. Study design}}\\
+1.1 & The clinical problem in which the model will be employed is clearly detailed & \Y & Introduction, paragraphs 1--2: statistical reporting requests are queued to a small engineering team; criteria are institution-specific\\
+1.2 & The research question is clearly stated & \Y & Introduction, final paragraph: two-pronged objective (end-to-end system; hallucination evaluation across 8 models)\\
+1.3 & The characteristics of the cohort are detailed & \Y & Methods, \emph{Statistical Request Dataset} and \emph{Clinical Data Infrastructure}; Appendix 1 Table S1 gives the three task sets by domain and complexity\\
+1.4 & The state of the art solution used as a baseline is described & \Y & Methods, \emph{Business Term Mapping Assessment}: the rule-based field matcher currently deployed in the metadata portal. \textbf{Caveat:} this baseline is institution-internal and not externally reproducible; stated in Limitations\\
+\addlinespace
+
+\multicolumn{4}{@{}l}{\textbf{2. Data and optimization}}\\
+2.1 & The origin of the data is described and the original format is detailed & \Y & Methods, \emph{Statistical Request Dataset}: closed reporting tickets with engineer-authored, criterion-confirmed reference SQL\\
+2.2 & Transformations of the data are described & \Y & Methods, \emph{Statistical Criteria to SQL Transformation Pipeline}; Appendix 1 S2.1\\
+2.3 & Details of and rationale for any exclusion criteria are provided & \Y & Methods: tickets without a criterion-confirmed reference SQL were excluded; non-queryable request elements are labelled rather than deleted so the count is auditable\\
+2.4 & Details of the training/validation/test partition are provided & \Y & Development set (30 tasks) is used only for dictionary and prompt construction; validation set (7 tasks) for end-to-end evaluation; main study (24 tasks) for the factorial comparison. Appendix 1 S3 states the sets are disjoint at task and indicator level\\
+2.5 & State whether the test set is truly independent & \Y & Yes. No development exemplar is reused as an evaluation item (Appendix 1 S3)\\
+2.6 & Details of the model optimization are provided & \Y & Methods, \emph{Large Language Model Configuration} and Appendix 2 (six pipeline prompts, five strategy variants, deterministic decoding)\\
+\addlinespace
+
+\multicolumn{4}{@{}l}{\textbf{3. Model performance}}\\
+3.1 & The primary metric is clearly defined & \Y & Methods, \emph{Statistical Analysis}: effective SQL generation rate, with the identity showing it is a binomial proportion over the fixed attempts per model\\
+3.2 & Uncertainty of the performance estimate is reported & \Y & Wilson score 95\% CIs for the effective rate of the two models carrying the headline comparison, and for the pooled and restricted hallucination rates\\
+3.3 & Performance is compared to the state of the art baseline & \Y & Mapping accuracy against the deployed rule-based matcher (McNemar), and the unmodified pipeline additionally run on the EHRSQL 2024 development split to give an external reference point (Results, \emph{Public Benchmark Reference})\\
+\addlinespace
+
+\multicolumn{4}{@{}l}{\textbf{4. Model examination}}\\
+4.1 & Examination technique 1 & \Y & Five-category hallucination taxonomy with per-model distribution (Table 5, Figure 4); the detection algorithm is given in Appendix 1 S5\\
+4.2 & Examination technique 2 & \Y & Expert rating against 72 predefined items across three dimensions, two independent raters, Cohen $\kappa$ (Appendix 3)\\
+4.3 & A discussion of the model's failure modes is included & \Y & Results, \emph{Statistical Result Retrieval Performance} (case series of four criteria, including a complete failure traced to a structurally valid but unpopulated flag); Discussion, \emph{Principal Findings}\\
+\addlinespace
+
+\multicolumn{4}{@{}l}{\textbf{5. Reproducibility --- transparency tier}}\\
+5.1 & Tier 1: complete code and data released & \textbf{no} & Patient-level warehouse data cannot be released under institutional governance\\
+5.2 & Tier 2: code released, data available on request & \Y & \textbf{This study.} Pipeline and detector code at \PH{repository URL}; the synthetic warehouse generator and its schema manifest ship with the code; de-identified metadata schemas, the metric-criterion dictionary, and the task set are available under a data use agreement\\
+5.3 & Tier 3: allowable data and code released, model not & \NA & \\
+5.4 & Tier 4: no code or data released & \NA & \\
+\end{longtable}
+\endgroup
+
+%==============================================================================
+\section{Part 2 --- MI-CLAIM-GEN (Miao et al, 2024)}
+%==============================================================================
+
+\noindent
+MI-CLAIM-GEN extends the above for generative models. Items below are additional
+to Part 1.
+
+\vspace{4pt}
+\begingroup\footnotesize
+\begin{longtable}{@{}L{0.7cm}L{7.4cm}C{1.4cm}L{5.4cm}@{}}
+\caption{MI-CLAIM-GEN checklist, completed.}\\
+\toprule
+No. & Item & Status & Where addressed / comment\\
+\midrule
+\endfirsthead
+\toprule
+No. & Item & Status & Where addressed / comment\\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\bottomrule
+\endlastfoot
+
+G1 & Exact model name, version, and access date are reported & \Y & Methods, \emph{Experimental Design} cites each of the eight models; Appendix 1 S5 lists the exact builds (gpt-4o-2024-08-06, deepseek-v3-0324, claude-3-5-sonnet-20241022, qwen2.5:7b-instruct, glm4:9b, llama3:8b-instruct, deepseek-r1:7b, phi3:mini)\\
+G2 & All prompts are reported verbatim & \Y & Appendix 2, Parts 1 and 2\\
+G3 & Decoding parameters are reported & \Y & Temperature 0, top-$p$ 1, for every model and strategy (Methods; Appendix 2 Part 3)\\
+G4 & Prompt development process is described & \Y & Prompts were optimized on the 30-task development set only; few-shot exemplars never drawn from the evaluation set (Appendix 1 S3, Appendix 2 Part 3)\\
+G5 & Whether the model was fine-tuned is stated & \Y & No fine-tuning. All models used as released; the system's adaptation is entirely in retrieval and prompting\\
+G6 & Hallucination or fabrication is explicitly evaluated & \Y & Primary object of the study: five-category taxonomy, automated detector, per-model rates with CIs\\
+G7 & The hallucination evaluation method is validated & \Y & Detector validated against manual adjudication on a random sample of 72 queries, agreement 0.88 (Appendix 1 S5). \textbf{Caveat:} sample is modest; stated in Limitations\\
+G8 & Human evaluation protocol is described, including rater expertise and blinding & \textbf{partial} & Two experts with warehouse and criteria proficiency rated against 72 predefined items with $\kappa$ reported (Appendix 3). \textbf{Not met:} raters were not blinded to which model produced a query; stated in Limitations\\
+G9 & Inter-rater agreement is reported & \Y & Cohen $\kappa$, with the conventional interpretation benchmark cited\\
+G10 & Non-determinism and repeated runs are addressed & \textbf{no} & Decoding is deterministic, but each model--prompt--task cell was executed once, so run-to-run variability is not estimated. \textbf{This is the single largest reproducibility gap} and is stated in Limitations\\
+G11 & Data contamination is considered & \Y & The warehouse schema, metric-criterion dictionary, and task set are institution-private and post-date no public corpus; the synthetic mirror is generated, not sampled from public data\\
+G12 & Cost and compute are reported & \Y & Per-query API cost and end-to-end latency per model (Table 4); on-premises amortization stated in the Figure 3 caption; monthly deployment cost in the Discussion\\
+G13 & Potential harms of deployment are discussed & \Y & Discussion: a wrong counting criterion produces an executable query and a wrong number, which is the failure mode that silently changes the denominator of a reported indicator\\
+G14 & Safeguards against unsafe output are described and evaluated & \Y & Four-layer verification, field provenance on every output, and the TO-CONFIRM abstention path, whose precision (78.8\%), recall (63.0\%) and missed-abstention consequences are reported in Results, \emph{Abstention Quality}\\
+\end{longtable}
+\endgroup
+
+%==============================================================================
+\section{Items not met, collected}
+%==============================================================================
+\noindent
+For the convenience of reviewers, the two items above that are not or only partly met:
+
+\begin{enumerate}[leftmargin=1.5em,itemsep=2pt,topsep=3pt]
+  \item \textbf{MI-CLAIM-GEN G8} --- expert raters were not blinded to the
+        generating model.
+  \item \textbf{MI-CLAIM-GEN G10} --- one execution per model--prompt--task
+        cell; run-to-run variability is not estimated.
+\end{enumerate}
+
+\noindent
+Both are reproduced in the Limitations section of the main text. Two items that limited earlier versions of this work, the absent public-benchmark comparison (MI-CLAIM 3.3) and the unmeasured abstention path (MI-CLAIM-GEN G14), have since been addressed and are no longer listed here.
+
+\end{document}

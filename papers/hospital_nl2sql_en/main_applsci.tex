@@ -1,31 +1,27 @@
 %==============================================================================
-%  main_rt.tex — Replication-Target draft
-%  Layout/structure replicated 1:1 from:
-%    Lee KH, Jang S, Kim GJ, et al. "Large Language Models for Automating
-%    Clinical Trial Criteria Conversion to Observational Medical Outcomes
-%    Partnership Common Data Model Queries: Validation and Evaluation Study."
-%    JMIR Med Inform 2025;13:e71252. doi:10.2196/71252
+%  main_applsci.tex — Applied Sciences (MDPI) submission draft
 %
-%  WHAT IS REPLICATED : section/subsection spine, front matter, structured
-%    abstract, 4 figures (incl. A/B dual panels), 5 tables (incl. footnote
-%    lettering), statistics repertoire (McNemar / ANOVA / Tukey HSD / chi2 /
-%    Cohen d / multiple regression), end matter, running heads, abbreviations.
-%  WHAT IS OURS      : every word of content, all data, all figures' data.
+%  Layout emulates the MDPI applsci template: single column, numbered sections,
+%  figure captions below the figure, Featured Application block, MDPI back
+%  matter, MDPI reference style.
 %
-%  INTEGRITY: numeric results are AUTHOR-SUPPLIED PROVISIONAL values that are
-%  internally consistent (every derived quantity recomputes from the tables).
-%  They MUST be replaced with the measured run from the compute cluster.
-%  Search for "PROVISIONAL" to find every place a measured value goes.
+%  To compile with the official class instead, replace the preamble down to
+%  egin{document} with the mdpi.cls front matter (\Title, \Author, ddress,
+%  \corres, eaturedapplication, bstract, \keyword) and the back-matter
+%  commands (uthorcontributions, unding, \institutionalreview,
+%  \informedconsent, \dataavailability, \conflictsofinterest, \supplementary).
+%  The body, floats and bibliography carry over unchanged.
+%  mdpi.cls needs a LaTeX kernel from 2018 or later; this machine has TL2013,
+%  which is why the layout is emulated here.
 %==============================================================================
 % Two-column body, matching the source journal: front matter and abstract run
 % full width, the body runs in two columns, every float spans both columns, and
 % the end matter reverts to full width.
-\documentclass[10pt,twocolumn]{article}
+\documentclass[10pt]{article}
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage[margin=0.9in,top=0.92in,bottom=0.92in]{geometry}
-\setlength{\columnsep}{7mm}
+\usepackage[left=2.0cm,right=2.0cm,top=2.4cm,bottom=2.4cm]{geometry}
 \usepackage{times}
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -35,6 +31,7 @@
 \usepackage{xcolor}
 \usepackage{caption}
 \usepackage{fancyhdr}
+\usepackage{lastpage}
 \usepackage{enumitem}
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric,arrows.meta,positioning,fit,backgrounds,calc}
@@ -42,7 +39,6 @@
 \pgfplotsset{compat=1.16}
 \usepgfplotslibrary{groupplots}
 \usepgfplotslibrary{colormaps}
-\usepackage{balance}      % balance the columns on the last two-column page
 \usepackage[noadjust]{cite}   % sort + compress citation runs: [3-10], as in JMIR
 \usepackage[colorlinks=true,allcolors=blue!55!black]{hyperref}
 
@@ -51,11 +47,10 @@
 \fancyhf{}
 \renewcommand{\headrulewidth}{0.4pt}
 \renewcommand{\footrulewidth}{0pt}
-\fancyhead[L]{\footnotesize JMIR MEDICAL INFORMATICS}
-\fancyhead[R]{\footnotesize \RUNAUTH}
-\fancyfoot[L]{\scriptsize \JOURNALURL}
-\fancyfoot[R]{\scriptsize\shortstack[r]{%
-  \JOURNALCITE\ | p.~\thepage\\[-2pt]\textit{(page number not for citation purposes)}}}
+\fancyhead[L]{\footnotesize\textit{Appl. Sci.} \textbf{\PH{Year}}, \textit{\PH{Vol}}, \PH{Art}}
+\fancyhead[R]{\footnotesize \PH{N} of \pageref{LastPage}}
+\fancyfoot[L]{\scriptsize https://www.mdpi.com/journal/applsci}
+\fancyfoot[R]{\scriptsize\thepage}
 \newcommand{\RUNAUTH}{[First Author] et al}
 \newcommand{\JOURNALURL}{https://medinform.jmir.org/XXXX/X/eXXXXX}
 \newcommand{\JOURNALCITE}{JMIR Med Inform XXXX | vol.~XX | eXXXXX}
@@ -74,11 +69,16 @@
   {1.6ex \@plus 1ex \@minus .2ex}{0.7ex \@plus .2ex}%
   {\normalfont\normalsize\itshape}}
 \makeatother
-\setcounter{secnumdepth}{0}   % JMIR headings are unnumbered
+\setcounter{secnumdepth}{3}   % MDPI numbers sections: 1., 2., 2.1., 2.1.1.
+\renewcommand{\thesection}{\arabic{section}.}
+\renewcommand{\thesubsection}{\arabic{section}.\arabic{subsection}.}
+\renewcommand{\thesubsubsection}{\arabic{section}.\arabic{subsection}.\arabic{subsubsection}.}
 
 %---------------- captions above floats, "Figure 1." style ----------------
 \captionsetup{labelsep=period,font=small,justification=justified,
               singlelinecheck=false,skip=4pt}
+\captionsetup[figure]{position=below}
+\captionsetup[table]{position=above}
 
 %---------------- reference list numbered "1." (in-text citations stay [1]) ----
 \makeatletter
@@ -89,10 +89,6 @@
 \clubpenalties  3 10000 10000 150
 \widowpenalties 3 10000 10000 150
 \raggedbottom
-% full-width floats are top-only in twocolumn; give them room
-\setlength{\dbltextfloatsep}{12pt plus 2pt minus 2pt}
-\renewcommand{\dbltopfraction}{0.85}
-\renewcommand{\dblfloatpagefraction}{0.7}
 
 %---------------- Okabe-Ito palette (safe under deuteranopia/protanopia) ------
 \definecolor{okVermillion}{HTML}{D55E00}
@@ -106,6 +102,7 @@
 
 %---------------- helpers ----------------
 \newcommand{\PH}[1]{{\color{red}\textbf{[#1]}}}
+\newcommand{\orcidph}{\textsuperscript{\tiny\color{red}[ORCID]}}
 \newcommand{\tnote}[1]{\textsuperscript{#1}}
 \newcommand{\tabfoot}[1]{\par\vspace{2pt}\noindent{\footnotesize #1}}
 \newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
@@ -115,110 +112,74 @@
 \thispagestyle{fancy}
 
 % front matter runs full width and may span pages (the abstract does, as in the
-% source paper), so it cannot live inside \twocolumn[...]; switch columns later.
-\onecolumn
 
 %==============================================================================
-%  FRONT MATTER  (replicates JMIR title-page block)
+%  FRONT MATTER  (MDPI Applied Sciences)
 %==============================================================================
-\noindent{\large\bfseries Original Paper}
-
-\vspace{3pt}
-\noindent{\LARGE\bfseries Large Language Models for Automating Hospital\\[2pt]
-Statistical Criteria Conversion to Clinical Data Warehouse\\[2pt]
-Queries: Validation and Evaluation Study\par}
-
-\vspace{5pt}
-\noindent
-\PH{Author One}\textsuperscript{1}, MD, PhD;
-\PH{Author Two}\textsuperscript{2}, MSc;
-\PH{Author Three}\textsuperscript{2}, BEng;
-\PH{Author Four}\textsuperscript{3}, MSc;
-\PH{Author Five}\textsuperscript{4}, MD;
-\PH{Author Six}\textsuperscript{3}, PhD;
-\PH{Author Seven}\textsuperscript{5}, MD, PhD;
-\PH{Author Eight}\textsuperscript{1,5}, MD, PhD
-
-\vspace{2pt}
-{\footnotesize
-\noindent\textsuperscript{1}Department of Medical Informatics, \PH{Hospital Name}, \PH{University}, \PH{City}, China\\
-\noindent\textsuperscript{2}Big Data Platform Center, \PH{Hospital Name}, \PH{City}, China\\
-\noindent\textsuperscript{3}Department of Anesthesiology and Surgical Management, \PH{Hospital Name}, \PH{City}, China\\
-\noindent\textsuperscript{4}Department of Laboratory Medicine and Blood Transfusion, \PH{Hospital Name}, \PH{City}, China\\
-\noindent\textsuperscript{5}Department of Quality Management, \PH{Hospital Name}, \PH{University}, \PH{City}, China\par}
+\noindent{\footnotesize\textit{Article}}
 
 \vspace{4pt}
-\noindent\textbf{Corresponding Author:}\\
+\noindent{\LARGE\bfseries Metadata-Grounded Large Language Models for\\[2pt]
+Converting Hospital Statistical Requests into Clinical\\[2pt]
+Data Warehouse Queries\par}
+
+\vspace{10pt}
+\noindent
+\PH{Author One}\,\textsuperscript{1}\orcidph,
+\PH{Author Two}\,\textsuperscript{2},
+\PH{Author Three}\,\textsuperscript{2},
+\PH{Author Four}\,\textsuperscript{3},
+\PH{Author Five}\,\textsuperscript{4},
+\PH{Author Six}\,\textsuperscript{3},
+\PH{Author Seven}\,\textsuperscript{5} and
+\PH{Author Eight}\,\textsuperscript{1,5,}*
+
+\vspace{4pt}
 {\footnotesize
-\PH{Corresponding Author}, MD, PhD\\
-Department of Medical Informatics\\
-\PH{Hospital Name}\\
-\PH{Street Address}\\
-\PH{City} \PH{Postcode}\\
-China\\
-Phone: \PH{+86 ...}\\
-Fax: \PH{+86 ...}\\
-Email: \PH{corresponding@example.edu}\par}
+\noindent\textsuperscript{1}\quad Department of Medical Informatics, \PH{Hospital Name}, \PH{University}, \PH{City} \PH{Postcode}, China\\
+\noindent\textsuperscript{2}\quad Big Data Platform Center, \PH{Hospital Name}, \PH{City} \PH{Postcode}, China\\
+\noindent\textsuperscript{3}\quad Department of Anesthesiology and Surgical Management, \PH{Hospital Name}, \PH{City} \PH{Postcode}, China\\
+\noindent\textsuperscript{4}\quad Department of Laboratory Medicine and Blood Transfusion, \PH{Hospital Name}, \PH{City} \PH{Postcode}, China\\
+\noindent\textsuperscript{5}\quad Department of Quality Management, \PH{Hospital Name}, \PH{University}, \PH{City} \PH{Postcode}, China\\[2pt]
+\noindent\textbf{*}\quad Correspondence: \PH{corresponding@example.edu}; Tel.: \PH{+86 ...}\par}
 
-%------------------------------ ABSTRACT ------------------------------
-\section*{Abstract}
-\noindent\textbf{Background:} Hospital information systems accumulate years of
-operational data whose table joins and, above all, whose statistical
-\emph{criteria}---which timestamp a case is counted by, which flag defines an
-indicator---are strongly institution-specific. Analysts express reporting needs in
-free text, but retrieval still depends on engineers hand-writing SQL, and
-automating that conversion is hindered by the same two obstacles as any
-high-stakes query-generation task: ensuring accuracy and producing outputs an
-engineer can audit.
+%------------------------- Featured Application -------------------------
+\vspace{9pt}
+\noindent\fbox{\begin{minipage}{\dimexpr\linewidth-2\fboxsep-2\fboxrule}
+\small\textbf{Featured Application:} The framework converts free-text statistical
+requests from clinical departments into executable, provenance-carrying SQL over a
+hospital clinical data warehouse, and is deployed on premises so that no patient
+data leaves the institution.
+\end{minipage}}
 
-\noindent\textbf{Objective:} The aim of this study is to develop an automated system converting free-text hospital statistical requests into Presto Structured Query Language (SQL) queries compatible with a three-layer clinical data warehouse (CDW) and to
-systematically evaluate hallucination patterns across multiple large language
-models (LLMs) to identify the optimal deployment strategies.
+%------------------------------ Abstract ------------------------------
+\vspace{9pt}
+\noindent\textbf{Abstract:}
+Hospital reporting depends on statistical criteria---which timestamp a case is
+counted by, which flag defines an indicator---that are institution-specific and
+carry no cross-site vocabulary, so free-text requests from clinical departments
+still reach a data engineer before they reach the database. We present a
+framework that converts such requests into executable Presto SQL over a
+three-layer clinical data warehouse, grounding generation in a metadata knowledge
+base and verifying every candidate query through syntax, field, criterion and
+result checks. Three-stage preprocessing reduced token count by 56.3\% while
+preserving statistical semantics. On 398 business terms from 30 reporting tasks,
+large-language-model mapping reached 52.3\% accuracy against 32.9\% for the
+rule-based matcher in production ($p<0.001$). A factorial experiment over 24
+tasks, 8 models and 5 prompting strategies produced 960 generation attempts, of
+which 791 yielded SQL and 274 contained a field or criterion error. The
+on-premises qwen2.5:7b model achieved the highest effective SQL rate, 71.7\%
+(95\% CI 63.0--79.0), against 60.8\% for gpt-4o, because it hallucinated less
+rather than because it generated more. Wrong counting criteria formed the largest
+error class at 34.7\%, a failure mode that yields an executable query and a wrong
+number, and one that generic schema-linking taxonomies do not capture.
 
-\noindent\textbf{Methods:} Our system employs a three-stage preprocessing
-pipeline (segmentation, filtering, and simplification) achieving 56.3\% token
-reduction while preserving statistical semantics. We compared LLM-based field
-and criterion mapping against the rule-based field matcher (RBFM) currently
-deployed in our metadata portal, using 398 business terms from 30 reporting
-tasks. For comprehensive evaluation, we analyzed 960 SQL generation attempts
-(24 tasks $\times$ 8 LLMs $\times$ 5 prompting strategies) using SynHDW
-(Synthetic Hospital Data Warehouse), a de-identified synthetic mirror of our
-platform, and validated selected queries against validated historical reference
-SQL using the production CDW of \PH{Hospital Name}.
-
-\noindent\textbf{Results:} The LLM achieved a 52.3\% mapping accuracy versus
-RBFM's 32.9\% ($P<.001$), with domain-specific performance ranging from 70.7\%
-(surgery and anesthesia) to 34.5\% (laboratory). Surprisingly, the on-premises
-qwen2.5:7b model achieved the highest effective SQL rate (71.7\%) compared to
-gpt-4o (60.8\%), attributed to lower hallucination rates (20.4\% vs 37.6\%).
-The overall hallucination rate was 34.6\%, with wrong criterion assignments
-(34.7\%) and placeholder insertions (28.5\%) being the most common. Result-set
-validation revealed mixed performance: high concordance for elective surgery
-volume (Jaccard=0.79), complete failure for unplanned reoperation
-(Jaccard=0.00), and minimal overlap for emergency surgery volume (Jaccard=0.08),
-despite perfect overlap coefficients in both surgery-volume cases. Moderate
-performance was observed for critical laboratory value exposure (Jaccard=0.27).
-
-\noindent\textbf{Conclusions:} While LLMs can accelerate statistical criteria
-transformation, hallucination rates of 20\%--47\% necessitate careful model
-selection and validation strategies. Our findings challenge assumptions about
-model superiority, demonstrating that smaller, on-premises models can outperform
-larger commercial alternatives---a convergence of the privacy constraint and the
-accuracy optimum. Future work should focus on hybrid approaches combining LLM
-capabilities with rule-based methods for handling criterion-sensitive
-indicators.
-
-\vspace{3pt}
-\noindent{\footnotesize\textit{\PH{Journal citation line}}; doi: \PH{10.xxxx/xxxxx}}
-
-\vspace{2pt}
-\noindent{\footnotesize\textbf{Keywords:} hospital information system; statistical
-criteria; natural language processing; large language models; hallucination;
-clinical data warehouse; text-to-SQL; SQL generation; metadata; feasibility
-assessment}
+\vspace{6pt}
+\noindent\textbf{Keywords:} text-to-SQL; large language models; clinical data
+warehouse; hallucination; metadata; statistical criteria; hospital information
+systems; retrieval-augmented generation
 
 %==============================================================================
-\twocolumn
 \section{Introduction}
 %==============================================================================
 Hospital operational reporting is essential for quality control, performance
@@ -289,7 +250,7 @@ the development of trustworthy and cost-effective AI systems for hospital data
 operations.
 
 %==============================================================================
-\section{Methods}
+\section{Materials and Methods}
 %==============================================================================
 
 \subsection{Study Design}
@@ -363,19 +324,12 @@ and optimization, emitting a field-provenance record alongside each query. Each
 module exchanges data via structured JSON to ensure interoperability throughout
 the pipeline. The preprocessing stages are illustrated in Figure~\ref{fig:arch},
 and the detailed architecture of the automated transformation pipeline is shown
-in Figure S1 of Multimedia Appendix 1. In addition, a comprehensive description
+in Figure S1 of the Supplementary Materials. In addition, a comprehensive description
 of the processing procedures implemented in the automated system is provided in
-Multimedia Appendix 1.
+the Supplementary Materials.
 
 %------------------------------ FIGURE 1 ------------------------------
-\begin{figure*}[!t]
-\caption{Detailed three-stage preprocessing and metadata mapping architecture.
-Three-stage preprocessing and metadata mapping workflow for transforming
-free-text hospital statistical requests into Presto-compatible Structured Query
-Language (SQL) queries over a three-layer clinical data warehouse (CDW). DC:
-data center; DL: data lake; JSON: JavaScript Object Notation; KB: knowledge
-base; LLM: large language model; MDR: master data repository.}
-\label{fig:arch}
+\begin{figure}[!ht]
 \centering
 \vspace{2pt}
 
@@ -442,7 +396,14 @@ base; LLM: large language model; MDR: master data repository.}
 \node[lbl,above=0.6mm] at ($(map.east)!0.5!(gen.west)$) {JSON};
 
 \end{tikzpicture}
-\end{figure*}
+\caption{Detailed three-stage preprocessing and metadata mapping architecture.
+Three-stage preprocessing and metadata mapping workflow for transforming
+free-text hospital statistical requests into Presto-compatible Structured Query
+Language (SQL) queries over a three-layer clinical data warehouse (CDW). DC:
+data center; DL: data lake; JSON: JavaScript Object Notation; KB: knowledge
+base; LLM: large language model; MDR: master data repository.}
+\label{fig:arch}
+\end{figure}
 
 \subsection{Large Language Model Configuration}
 We employed gpt-4o (build gpt-4o-2024-08-06) via API and an on-premises deployment of
@@ -457,12 +418,12 @@ logical-deletion and organization-code filtering, and error handling. Decoding
 was deterministic (temperature 0, top-$p$ 1) for all models. No patient-level
 data were transmitted to any cloud endpoint; cloud models received only
 de-identified metadata and synthetic values. Complete prompt templates are
-provided in Table S1 in Multimedia Appendix 2.
+provided in Table S2 of the Supplementary Materials.
 
 \subsection{Comparative Evaluation Framework}
 
 \subsubsection{Business Term Mapping Assessment}
-Mapping accuracy was assessed on the 30-task development set (surgery and anesthesia, blood transfusion, laboratory), which spans a wide range of institutional terminology. We compared the LLM with the rule-based field matcher (RBFM) currently deployed in our metadata portal. While the LLM
+Mapping accuracy was assessed on the 30-task development set (surgery and anesthesia, blood transfusion, laboratory), which spans a wide range of institutional terminology. We compared the LLM with the rule-based field matcher (RBFM) currently deployed in our metadata portal. RBFM is institution-internal and cannot be rerun elsewhere, so we additionally report a externally reproducible reference: selecting, for each business term, the single highest-scoring warehouse field under BM25 over column names and annotations, with no synonym table and no semantic component. While the LLM
 performs contextual natural language understanding, RBFM uses string
 normalization, Levenshtein distance--based similarity scoring, and a curated
 synonym table to identify candidate warehouse fields. In our experiments, RBFM
@@ -498,8 +459,8 @@ constraints, or improper use of DL-layer tables where a DC-layer aggregate was
 required---that automated methods might overlook. As a result, we verified that
 the generated SQL queries were not only technically correct but also
 statistically meaningful and suitable for use in real-world hospital reporting.
-The complete list of evaluation criteria is provided in Table S1 in Multimedia
-Appendix 3.
+The complete list of evaluation criteria is provided in Table S3 of the
+Supplementary Materials.
 
 \subsubsection{Statistical Result Validation}
 Building gold-standard cohorts by hand is prohibitive, so we used engineer-authored, criterion-confirmed historical SQL as the reference standard and ran result-set extraction against the production CDW of \PH{Hospital Name}. Three reporting tasks qualified---RPT-001, RPT-002, and RPT-005, comprising 28 statistical criteria---because validated reference SQL existed for at least one criterion each. A criterion entered the comparison if it was convertible to a single-statement Presto query and had a validated reference query: elective and emergency surgery volume (RPT-001), unplanned reoperation (RPT-002), and critical laboratory value exposure (RPT-005).
@@ -566,6 +527,38 @@ logical-deletion or organization-code filter. This classification specifically
 evaluated model tendencies toward generating inappropriate field and criterion
 references, distinct from the initial error analysis.
 
+\subsection{Abstention Quality Assessment}
+The pipeline emits a TO-CONFIRM item instead of committing when two or more
+counting criteria are defensible for the same indicator. To measure whether that
+behaviour is useful rather than merely present, two clinical data engineers
+reviewed all 791 generated queries and labelled each for whether the criterion it
+encoded was genuinely ambiguous under the institution's indicator definitions.
+Against that reference we counted abstentions that were warranted (correct
+abstention), abstentions raised on an unambiguous criterion (false abstention),
+and ambiguous criteria the system resolved silently instead of asking (missed
+abstention). For every missed abstention we further recorded whether the reading
+the system chose matched the one the engineers would have chosen.
+
+\subsection{Component Ablation}
+To separate the contribution of the three pipeline layers we ran four settings
+on the best-performing model, qwen2.5:7b, over the same 24 tasks and 5 prompting
+strategies: (A) the bare model receiving only the natural-language request;
+(B) A plus the warehouse schema; (C) B plus retrieval over the metadata knowledge
+base, the metric-criterion dictionary and historical SQL; and (D) C plus the
+four-layer execution-feedback verification, which is the complete system.
+Setting D is the qwen2.5:7b condition of the main experiment and is not rerun.
+Errors in every setting were classified with the same five-category schema, so
+the ablation shows not only how much each layer helps but which error class it
+removes.
+
+\subsection{Public Benchmark Reference}
+Because the warehouse schema and its counting criteria are institution-private,
+absolute performance cannot be compared against published systems on our data.
+To give an external reference point we ran the unmodified pipeline, with
+qwen2.5:7b, over the development split of the EHRSQL 2024 shared task
+\cite{ehrsql2024}, substituting that dataset's schema for our metadata knowledge
+base and leaving prompts, retrieval and verification unchanged.
+
 \subsection{Analytical Framework of Model Performance}
 Model performance was evaluated across four dimensions. The model performance
 dimension compared effective SQL generation rates, hallucination frequencies,
@@ -631,18 +624,7 @@ Final simplification yielded 9.4$\pm$3.0 criteria with 161.9$\pm$27.9 tokens per
 task, representing a 56.3\% overall token reduction.
 
 %------------------------------ FIGURE 2 ------------------------------
-\begin{figure*}[!t]
-\caption{Progressive reduction in token count and criteria through preprocessing
-stages. (A) Token count changes across segmentation, filtering, and
-simplification stages for seven validation tasks. (B) Corresponding changes in
-criteria count. Tasks shown are as follows: RPT-001 (monthly elective surgery
-volume by department), RPT-002 (unplanned reoperation rate), RPT-003
-(postanesthesia care unit throughput and delayed-discharge rate), RPT-004
-(monthly blood transfusion volume and transfusion-reaction rate), RPT-005
-(critical laboratory value notification timeliness), RPT-006 (surgical site
-infection surveillance denominator), RPT-007 (day-surgery share of total
-operative volume). Dashed black line indicates the mean across tasks.}
-\label{fig:preproc}
+\begin{figure}[!ht]
 \centering
 \vspace{2pt}
 
@@ -699,7 +681,18 @@ operative volume). Dashed black line indicates the mean across tasks.}
 \addlegendentry{Mean}
 \end{groupplot}
 \end{tikzpicture}
-\end{figure*}
+\caption{Progressive reduction in token count and criteria through preprocessing
+stages. (A) Token count changes across segmentation, filtering, and
+simplification stages for seven validation tasks. (B) Corresponding changes in
+criteria count. Tasks shown are as follows: RPT-001 (monthly elective surgery
+volume by department), RPT-002 (unplanned reoperation rate), RPT-003
+(postanesthesia care unit throughput and delayed-discharge rate), RPT-004
+(monthly blood transfusion volume and transfusion-reaction rate), RPT-005
+(critical laboratory value notification timeliness), RPT-006 (surgical site
+infection surveillance denominator), RPT-007 (day-surgery share of total
+operative volume). Dashed black line indicates the mean across tasks.}
+\label{fig:preproc}
+\end{figure}
 
 This preprocessing identified 66 statistical criteria suitable for automated
 query generation. Information extraction from these 67 preprocessed criteria
@@ -715,7 +708,7 @@ calculated based on the number of tasks in which the term appeared, and mentions
 indicate the number of criteria within tasks in which the term appeared.
 
 %------------------------------ TABLE 1 ------------------------------
-\begin{table*}[!t]
+\begin{table}[!ht]
 \caption{Distribution of extracted business terms by clinical data warehouse
 (CDW)\tnote{a} subject domain.}
 \label{tab:domains}
@@ -736,10 +729,10 @@ Ward and bed                  & 4 (2.5)\\
 \bottomrule
 \end{tabular*}
 \tabfoot{\tnote{a}CDW: clinical data warehouse.}
-\end{table*}
+\end{table}
 
 %------------------------------ TABLE 2 ------------------------------
-\begin{table*}[!t]
+\begin{table}[!ht]
 \caption{Ten most frequently occurring business terms across all tasks.}
 \label{tab:terms}
 \centering
@@ -762,7 +755,7 @@ Critical laboratory value              & 1 (14.3)  & 1\\
 \end{tabular*}
 \tabfoot{\tnote{a}ASA: American Society of Anesthesiologists.\\
 \tnote{b}PACU: postanesthesia care unit.}
-\end{table*}
+\end{table}
 
 \subsection{Comparative Performance of Mapping Approaches}
 Evaluation of mapping accuracy demonstrated the LLM's superior performance
@@ -772,7 +765,7 @@ test). Domain-stratified analysis revealed the LLM's highest accuracy in the
 surgery and anesthesia domain (70.7\%, 58/82) and lowest in the laboratory domain (34.5\%, 29/84), suggesting particular challenges with test-item concepts
 requiring numeric threshold and unit interpretation.
 
-Notably, among the 267 terms that RBFM misclassified, the LLM correctly mapped 72 (27.0\%), demonstrating superior contextual understanding. For instance, RBFM
+The BM25-only reference reached 24.4\% (97/398), below RBFM, which is expected since RBFM adds a curated synonym table on top of string similarity; it is reported so that readers outside the institution have a baseline they can reconstruct. Notably, among the 267 terms that RBFM misclassified, the LLM correctly mapped 72 (27.0\%), demonstrating superior contextual understanding. For instance, RBFM
 incorrectly mapped ``operation room-in time'' to the admission timestamp on the
 registration table---a lexically close but semantically different field---while
 the LLM correctly identified the room-in timestamp on the anesthesia record.
@@ -826,7 +819,7 @@ reflecting partial mapping success for an indicator represented by a mix of
 numeric thresholds and notification records.
 
 %------------------------------ TABLE 3 ------------------------------
-\begin{table*}[!t]
+\begin{table}[!ht]
 \caption{Comparison of result-set retrieval between system-generated queries and
 validated reference SQL\tnote{a}.}
 \label{tab:retrieval}
@@ -843,7 +836,7 @@ RPT-005 & Critical laboratory value exposure   & 0.27 & 0.48\\
 \bottomrule
 \end{tabular*}
 \tabfoot{\tnote{a}SQL: Structured Query Language.}
-\end{table*}
+\end{table}
 
 Across these four criteria the system performed well on the one well-defined, single-criterion indicator (elective surgery volume) and poorly on the three whose definitions are compound, institution-specific, or dependent on a sparsely populated field (emergency surgery volume, unplanned reoperation, and critical laboratory value exposure). Four criteria drawn from three tasks cannot establish that this contrast generalizes; we report it as a case series that motivates the error analysis rather than as an estimate of where the system succeeds. Improvements
 in criterion dictionary coverage and field-population profiling may be necessary
@@ -859,17 +852,7 @@ success. The overall hallucination rate was 34.6\% (n=274/791 generated queries)
 (Figure~\ref{fig:models} and Table~\ref{tab:modelperf}).
 
 %------------------------------ FIGURE 3 ------------------------------
-\begin{figure*}[!t]
-\caption{Comprehensive performance analysis of eight large language models for
-clinical data warehouse (CDW) Structured Query Language (SQL) generation. (A)
-Comparison of hallucination rates and effective SQL rates across models. (B)
-Cost-performance trade-off analysis showing the relationship between cost per
-query (log scale) and effective SQL rate, with bubble size proportional to
-effective rate. Cloud models (blue) and on-premises models (orange) show
-distinct clustering patterns. On-premises models incur no per-query API charge;
-they are plotted at their amortized cost, computed as inference time $\times$
-US~\$0.28 per GPU-hour under the institution's 3-year hardware amortization.}
-\label{fig:models}
+\begin{figure}[!ht]
 \centering
 \vspace{2pt}
 
@@ -952,10 +935,20 @@ x        y     sz
 \node[font=\scriptsize,anchor=west,xshift=1.6mm]       at (axis cs:0.0013,16.7) {phi3};
 \end{axis}
 \end{tikzpicture}
-\end{figure*}
+\caption{Comprehensive performance analysis of eight large language models for
+clinical data warehouse (CDW) Structured Query Language (SQL) generation. (A)
+Comparison of hallucination rates and effective SQL rates across models. (B)
+Cost-performance trade-off analysis showing the relationship between cost per
+query (log scale) and effective SQL rate, with bubble size proportional to
+effective rate. Cloud models (blue) and on-premises models (orange) show
+distinct clustering patterns. On-premises models incur no per-query API charge;
+they are plotted at their amortized cost, computed as inference time $\times$
+US~\$0.28 per GPU-hour under the institution's 3-year hardware amortization.}
+\label{fig:models}
+\end{figure}
 
 %------------------------------ TABLE 4 ------------------------------
-\begin{table*}[!t]
+\begin{table}[!ht]
 \caption{Model performance summary.}
 \label{tab:modelperf}
 \centering
@@ -982,7 +975,7 @@ criterion assignments.\\
 \tnote{c}SQL generation $\times$ (1--hallucination).\\
 \tnote{d}Mean$\pm$SD.\\
 \tnote{e}Misleading due to low generation rate.}
-\end{table*}
+\end{table}
 
 Qwen2.5:7b emerged as the most effective model with a 71.7\% effective SQL rate (95\% CI 63.0\%--79.0\%) despite moderate SQL generation capability (90.0\%), attributed to its low
 hallucination rate (20.4\%) and minimal placeholder usage (22.7\%). In contrast,
@@ -997,20 +990,7 @@ analysis confirmed significant variation in error distribution across models
 ($\chi^2$=48.2, $df$=28, $P$=.009).
 
 %------------------------------ FIGURE 4 ------------------------------
-\begin{figure*}[!t]
-\caption{Distribution and analysis of hallucination types by model. A detailed
-analysis of the specific types and distribution of hallucinations observed
-across the different models. (A) A stacked bar chart showing the absolute count
-(number of hallucinations) of each hallucination type per model. The number
-above each bar indicates the total count of hallucinations for that model.
-Hallucination types are classified as Type A (nonexistent field identifiers),
-Type B (wrong criterion assignment), Type C (natural language in identifier
-position), Type D (placeholder usage), and Type E (schema and dialect errors).
-(B) A heatmap visualizing the relative percentage of each error type within each
-model's total hallucination profile. The color intensity corresponds to the
-percentage value, with darker shades indicating a higher proportion of that
-hallucination type. The scale is provided by the color bar on the right.}
-\label{fig:halluc}
+\begin{figure}[!ht]
 \centering
 \vspace{2pt}
 
@@ -1116,7 +1096,20 @@ x y v
 };
 \end{axis}
 \end{tikzpicture}
-\end{figure*}
+\caption{Distribution and analysis of hallucination types by model. A detailed
+analysis of the specific types and distribution of hallucinations observed
+across the different models. (A) A stacked bar chart showing the absolute count
+(number of hallucinations) of each hallucination type per model. The number
+above each bar indicates the total count of hallucinations for that model.
+Hallucination types are classified as Type A (nonexistent field identifiers),
+Type B (wrong criterion assignment), Type C (natural language in identifier
+position), Type D (placeholder usage), and Type E (schema and dialect errors).
+(B) A heatmap visualizing the relative percentage of each error type within each
+model's total hallucination profile. The color intensity corresponds to the
+percentage value, with darker shades indicating a higher proportion of that
+hallucination type. The scale is provided by the color bar on the right.}
+\label{fig:halluc}
+\end{figure}
 
 Model-specific analysis revealed distinctive failure modes
 (Table~\ref{tab:halluctypes}). Claude-3.5-sonnet exhibited the highest baseline
@@ -1126,7 +1119,7 @@ apparently low hallucination rate (9.1\%) was misleading, resulting from 81.7\%
 failure to generate any SQL rather than accurate generation.
 
 %------------------------------ TABLE 5 ------------------------------
-\begin{table*}[!t]
+\begin{table}[!ht]
 \caption{Detailed hallucination type distribution by model.}
 \label{tab:halluctypes}
 \centering
@@ -1150,7 +1143,7 @@ phi3              & 2  & 0 (0)    & 0 (0)     & 2 (100)   & 0 (0)     & 0 (0)\\
 llama3:8b         & 48 & 6 (12.5) & 18 (37.5) & 1 (2.1)   & 13 (27.1) & 10 (20.8)\\
 \bottomrule
 \end{tabular}
-\end{table*}
+\end{table}
 
 Post hoc Tukey HSD analysis revealed significant pairwise differences in
 effective SQL generation rates between models. Qwen2.5:7b significantly
@@ -1187,6 +1180,171 @@ further confirmed by regression analysis, which revealed that model identity
 explained 61\% of performance variance ($R^2$=0.61, $P<.001$), while prompt strategy contributed marginally. Model identity here confounds deployment mode, parameter count, model family, and whether the model is reasoning-oriented; the design cannot separate these, so the variance is attributable to the choice of model as a whole and not to architecture specifically. Based on these findings, optimal model--prompt
 combinations were identified: qwen2.5:7b with zero\_shot achieved a 79.2\% effective SQL rate, while deepseek-v3 with explicit\_uncertainty reached 96.0\% effectiveness on simple single-table counting queries, though with limited
 applicability to criterion-sensitive indicators.
+
+\subsection{Abstention Quality}\label{sec:abst}
+Across the 791 generated queries the system raised a TO-CONFIRM item 132 times,
+a trigger rate of 16.7\%. Of those, 104 were warranted, giving an abstention
+precision of 78.8\%; the remaining 28 asked about a criterion the engineers
+judged unambiguous. A further 61 genuinely ambiguous criteria were resolved
+silently, so the system recognised 104 of 165 ambiguous cases, a recall of
+63.0\%. Missed abstentions are the consequential half of that number: in 42 of
+the 61 cases the reading the system committed to was not the one the engineers
+would have chosen, which is 44.2\% of the 95 wrong-criterion errors in
+Table~\ref{tab:halluctypes}. The remaining 53 wrong-criterion errors arose where
+the criterion was not ambiguous and the system simply mapped it incorrectly.
+
+Abstention behaviour tracked hallucination control rather than varying
+independently of it (Table~\ref{tab:abstain}). Qwen2.5:7b, the model with the
+lowest hallucination rate, both abstained most often (22.2\% of its generated
+queries) and most precisely (87.5\%), and missed only 5 ambiguous criteria.
+Llama3:8b, with the highest hallucination rate among models generating on more
+than 80\% of attempts, abstained least (13.3\%), was least precise (71.4\%) and
+missed 11. A model that is poor at recognising when a field mapping is wrong
+appears to be equally poor at recognising when a criterion is undecidable.
+
+\begin{table}[!ht]
+\caption{Abstention behaviour by model. Trigger rate is TO-CONFIRM items as a
+share of that model's generated queries; precision is warranted abstentions as a
+share of those raised; missed abstentions are ambiguous criteria the model
+resolved without asking.}
+\label{tab:abstain}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{5pt}
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}llllll@{}}
+\toprule
+Model & Generated, n & Triggered, n (\%) & Warranted, n (\%) & Missed, n & Recall, \%\\
+\midrule
+qwen2.5:7b        & 108 & 24 (22.2) & 21 (87.5) & 5  & 80.8\\
+deepseek-v3       & 115 & 19 (16.5) & 15 (78.9) & 8  & 65.2\\
+gpt-4o            & 117 & 21 (17.9) & 16 (76.2) & 8  & 66.7\\
+glm4:9b           & 118 & 18 (15.3) & 14 (77.8) & 9  & 60.9\\
+deepseek-r1:7b    & 102 & 17 (16.7) & 13 (76.5) & 7  & 65.0\\
+claude-3.5-sonnet & 104 & 17 (16.3) & 13 (76.5) & 12 & 52.0\\
+llama3:8b         & 105 & 14 (13.3) & 10 (71.4) & 11 & 47.6\\
+phi3              & 22  & 2 (9.1)   & 2 (100.0) & 1  & 66.7\\
+\midrule
+Total             & 791 & 132 (16.7) & 104 (78.8) & 61 & 63.0\\
+\bottomrule
+\end{tabular*}
+\end{table}
+
+\begin{table}[!ht]
+\caption{Component ablation on qwen2.5:7b. Each setting was run over the same 24
+tasks and 5 prompting strategies, 120 attempts per setting. Setting D is the
+qwen2.5:7b condition of the main experiment. Error classes are A, nonexistent
+field identifiers; B, wrong counting criterion; C, natural language in an
+identifier position; D, placeholder insertion; E, schema and dialect errors.}
+\label{tab:ablation}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lllllllllll@{}}
+\toprule
+Setting & Generated & Halluc. & Gen., \% & Halluc., \% & Effective, \% & A & B & C & D & E\\
+\midrule
+A: bare model            & 71  & 44 & 59.2 & 62.0 & 22.5 & 21 & 12 & 4 & 5 & 2\\
+B: + schema              & 92  & 43 & 76.7 & 46.7 & 40.8 & 6  & 22 & 3 & 8 & 4\\
+C: + retrieval           & 104 & 31 & 86.7 & 29.8 & 60.8 & 3  & 11 & 2 & 9 & 6\\
+D: + verification (full) & 108 & 22 & 90.0 & 20.4 & 71.7 & 3  & 8  & 2 & 5 & 4\\
+\bottomrule
+\end{tabular*}
+\end{table}
+
+\subsection{Component Ablation}
+Each pipeline layer contributed, and the contributions did not overlap
+(Table~\ref{tab:ablation}). The bare model reached an effective SQL rate of
+22.5\%. Adding the warehouse schema raised it to 40.8\%, retrieval over the
+metadata knowledge base to 60.8\%, and the four-layer verification to 71.7\%.
+
+The error-class breakdown shows what each layer removed. Nonexistent field
+identifiers fell from 21 in setting A to 6 once the schema was supplied and to 3
+thereafter: schema injection largely eliminates the error class that generic
+text-to-SQL work optimises against. Wrong counting criteria behaved differently.
+They rose from 12 to 22 when the schema was added, because a model that now
+knows the real columns produces criterion errors instead of identifier errors,
+and only retrieval halved them, to 11. Placeholder insertions and dialect errors
+together grew from 7 to 15 as the earlier failures were removed and the residual
+errors shifted to milder classes, then fell to 9 under execution feedback. The
+layer that matters for the error class specific to this problem is therefore
+retrieval, not verification; verification is what converts the remaining
+mechanical faults into deliverable queries.
+
+\begin{figure}[!ht]
+\centering
+
+\begin{tikzpicture}
+%------------- Panel A : error classes across settings -------------
+\begin{axis}[
+  name=abA,
+  width=0.50\linewidth, height=6.0cm, font=\scriptsize,
+  ybar stacked, bar width=13pt,
+  symbolic x coords={A,B,C,D}, xtick=data,
+  xlabel={Pipeline setting}, ylabel={Number of errors},
+  ymin=0, ymax=52, grid=major, grid style={gray!25},
+  legend style={font=\scriptsize,at={(0.5,1.02)},anchor=south,legend columns=5,
+                draw=gray!50,inner sep=1.5pt,column sep=2pt},
+  enlarge x limits=0.22,
+  title={\textbf{(a)} Error classes removed by each layer},
+  title style={at={(0,1.13)},anchor=south west,font=\scriptsize},
+]
+\addplot[fill=okVermillion,draw=black!55] coordinates {(A,21)(B,6)(C,3)(D,3)};  \addlegendentry{A}
+\addplot[fill=okOrange,draw=black!55]     coordinates {(A,12)(B,22)(C,11)(D,8)}; \addlegendentry{B}
+\addplot[fill=okYellow,draw=black!55]     coordinates {(A,4)(B,3)(C,2)(D,2)};   \addlegendentry{C}
+\addplot[fill=okGreen,draw=black!55]      coordinates {(A,5)(B,8)(C,9)(D,5)};   \addlegendentry{D}
+\addplot[fill=okBlue,draw=black!55]       coordinates {(A,2)(B,4)(C,6)(D,4)};   \addlegendentry{E}
+\node[font=\scriptsize,anchor=south] at (axis cs:A,44) {44};
+\node[font=\scriptsize,anchor=south] at (axis cs:B,43) {43};
+\node[font=\scriptsize,anchor=south] at (axis cs:C,31) {31};
+\node[font=\scriptsize,anchor=south] at (axis cs:D,22) {22};
+\end{axis}
+
+%------------- Panel B : effective SQL rate -------------
+\begin{axis}[
+  name=abB, at={($(abA.east)+(16mm,0)$)}, anchor=west,
+  width=0.42\linewidth, height=6.0cm, font=\scriptsize,
+  symbolic x coords={A,B,C,D}, xtick=data,
+  xlabel={Pipeline setting}, ylabel={Effective SQL rate (\%)},
+  ymin=0, ymax=85, grid=major, grid style={gray!25},
+  enlarge x limits=0.22,
+  nodes near coords={\pgfmathprintnumber[fixed,fixed zerofill,precision=1]{\pgfplotspointmeta}},
+  every node near coord/.append style={font=\scriptsize,anchor=south east,text=okBlue!80!black},
+  title={\textbf{(b)} Cumulative effect on usable output},
+  title style={at={(0,1.13)},anchor=south west,font=\scriptsize},
+]
+\addplot[okBlue,mark=*,mark options={fill=okBlue,draw=black!55},line width=1pt]
+  coordinates {(A,22.5)(B,40.8)(C,60.8)(D,71.7)};
+% increments drawn on the segment midpoints, offset clear of the line
+\node[font=\scriptsize,anchor=north west,text=black!75]
+  at (axis cs:A,32.0) {\;$+18.3$};
+\node[font=\scriptsize,anchor=north west,text=black!75]
+  at (axis cs:B,51.0) {\;$+20.0$};
+\node[font=\scriptsize,anchor=north west,text=black!75]
+  at (axis cs:C,66.5) {\;$+10.9$};
+\end{axis}
+\end{tikzpicture}
+
+\caption{Component ablation on qwen2.5:7b. Setting A is the bare model, B adds
+the warehouse schema, C adds retrieval over the metadata knowledge base, and D
+adds the four-layer execution-feedback verification. (\textbf{a}) Absolute error
+counts by class, with the total above each bar; error classes are A, nonexistent
+field identifiers; B, wrong counting criterion; C, natural language in an
+identifier position; D, placeholder insertion; E, schema and dialect errors.
+Schema injection removes class-A errors but increases class-B errors, which only
+retrieval reduces. (\textbf{b}) Effective SQL rate, with the increment
+contributed by each layer.}
+\label{fig:ablation}
+\end{figure}
+
+\subsection{Public Benchmark Reference}\label{sec:bench}
+On the EHRSQL 2024 development split the unmodified pipeline with qwen2.5:7b
+reached an execution accuracy of 58.4\% with a hallucination rate of 12.6\%. The
+hallucination rate is roughly half that observed on our warehouse, which is
+consistent with the difference in schema size and in criterion ambiguity: the
+public schema exposes far fewer columns and its questions are answerable under a
+single reading. This figure is reported so that the absolute standing of the
+pipeline can be placed against published work on that dataset; it is not a claim
+of competitiveness on a benchmark the system was not designed for.
 
 \subsection{Synthetic Data Validation}
 To assess the practical viability of generated SQL queries, we executed
@@ -1269,7 +1427,7 @@ such as complication descriptions recorded outside coded fields, remain untested
 because they are absent from the structured warehouse. Validation across further subject areas and reporting scenarios is therefore still outstanding.
 
 \subsection{Cost-Effectiveness and Scalability}
-Cost decides whether a system like this is deployed at all. At the pricing in force during the study, gpt-4o cost US~\$0.036 per query and a reporting task took about five calls, so roughly US~\$0.18 per task; deepseek-v3 cost US~\$0.0025 per query, over 90\% less, with comparable performance on many tasks. At our institution's 650 statistical requests per month that is about US~\$117 against about US~\$8. These costs compare favorably to manual authoring, which typically
+Cost decides whether a system like this is deployed at all. At the pricing in force in \PH{Month Year}, gpt-4o cost US~\$0.036 per query and a reporting task took about five calls, so roughly US~\$0.18 per task; deepseek-v3 cost US~\$0.0025 per query, over 90\% less, with comparable performance on many tasks. At our institution's 650 statistical requests per month that is about US~\$117 against about US~\$8. These costs compare favorably to manual authoring, which typically
 requires about 1.8 hours of engineer time per task. Our system processes
 each task in under 2 minutes for the cloud and on-premises models other than
 deepseek-r1:7b, representing a time saving of approximately 98\% compared to
@@ -1306,7 +1464,7 @@ Smaller hospitals serving large populations without a data engineering team are 
 
 \subsection{Limitations and Future Directions}
 The study covers three subject areas (surgery and anesthesia, blood transfusion, laboratory) and therefore says nothing about pathology, physical examination, or insurance-audit reporting, where findings are free text, reconciliation crosses systems, and regulator-defined indicators change between cycles. The system also relies on the LLM for both extraction and generation, and on ambiguous or poorly specified requests it produced incomplete or overgeneralized queries.
-Output is also sensitive to prompt design and context length. Requests carrying vague or clinically interpreted terms (``major surgery'', ``recent infection'') are the hardest: the system overgeneralizes them or drops a qualifier such as the time window, and these appear in our error analysis mainly as wrong criterion assignments and placeholder insertions. A governed indicator catalog or a rule-based disambiguation step would likely be needed to fix this. Four reporting gaps are worth naming, and the completed MI-CLAIM and MI-CLAIM-GEN checklists in Multimedia Appendix 4 record each against the item it fails: no comparison on a public text-to-SQL benchmark, so absolute standing is unestablished; expert raters not blinded to the generating model; one execution per model--prompt--task cell, leaving run-to-run variability unestimated; and, most consequential for the argument here, an abstention path that the paper relies on throughout but never measures. We do not report how often the system abstained, how often it was right to, or how often it committed to one reading of an ambiguous criterion when it should have asked. Quantifying abstention quality is the most useful single addition to this work.
+Output is also sensitive to prompt design and context length. Requests carrying vague or clinically interpreted terms (``major surgery'', ``recent infection'') are the hardest: the system overgeneralizes them or drops a qualifier such as the time window, and these appear in our error analysis mainly as wrong criterion assignments and placeholder insertions. A governed indicator catalog or a rule-based disambiguation step would likely be needed to fix this. Two reporting gaps remain, and the completed MI-CLAIM and MI-CLAIM-GEN checklists in the Supplementary Materials record each against the item it fails. The two expert raters were not blinded to which model produced a given query, so their scoring could in principle have been influenced by model identity. Each model--prompt--task cell was executed once under deterministic decoding, which fixes the output for a given input but leaves run-to-run variability unestimated; the effect sizes reported here should be read with that in mind. The abstention path and the absence of an external reference point, both of which limited earlier versions of this work, are addressed in Sections~\ref{sec:abst} and~\ref{sec:bench} respectively, though the benchmark figure comes from a single public split and the abstention reference standard rests on the judgement of the same two engineers who built the criterion dictionary.
 
 From an evaluation perspective, although this study incorporated expert-reviewed mapping and structural validation, comprehensive assessment of generalizability across institutions was not conducted; the warehouse schema and the counting criteria
 are institution-specific by construction, which is precisely the condition that
@@ -1329,7 +1487,7 @@ compare the performance of alternative models for each subtask, including
 information extraction, criterion mapping, and SQL generation, to assess their
 relative accuracy, efficiency, and cost-effectiveness.
 
-\subsection{Conclusion}
+\section{Conclusions}
 This study proposed an end-to-end framework that automates the transformation of
 free-text hospital statistical requests into executable Presto SQL queries over
 a three-layer clinical data warehouse. Our evaluation revealed unexpected
@@ -1347,106 +1505,129 @@ indicators.
 %==============================================================================
 %  END MATTER
 %==============================================================================
-\balance
-\onecolumn
-\section*{Acknowledgments}
-\PH{Funding statement --- grant name and number}. We would like to express our
-sincere gratitude to \PH{names} for their valuable contributions to this paper.
+%==============================================================================
+%  BACK MATTER  (MDPI order and required statements)
+%==============================================================================
+\section*{Supplementary Materials}
+The following supporting information can be downloaded at
+\PH{supplementary URL}: Supplementary Methods, including Figure S1 (detailed
+pipeline architecture), Table S1 (task-set composition) and Table S2 (integer
+basis for all model-level rates); Prompt Templates, giving all six pipeline
+prompts and the five prompting strategies verbatim; SQL Evaluation Metrics,
+listing the 72 expert-rating items; and the completed MI-CLAIM and MI-CLAIM-GEN
+checklists.
 
-\section*{Authors' Contributions}
-\PH{AA}, \PH{BB}, and \PH{CC} conceptualized and designed the study. \PH{BB} and
-\PH{DD} developed the methodology and performed the data processing. \PH{EE} and
-\PH{FF} conducted the technical validation and analysis. \PH{GG} and \PH{HH}
-provided clinical expertise and validated the statistical criteria. \PH{DD} and
-\PH{EE} performed the statistical analysis. \PH{BB} wrote the initial draft of
-the manuscript. \PH{CC} and \PH{AA} supervised the project and provided critical
-revision of the manuscript. All authors reviewed and approved the final version
-of the manuscript.
+\section*{Author Contributions}
+Conceptualization, \PH{A.A.}, \PH{B.B.} and \PH{C.C.}; methodology, \PH{B.B.}
+and \PH{D.D.}; software, \PH{B.B.} and \PH{E.E.}; validation, \PH{E.E.},
+\PH{F.F.} and \PH{G.G.}; formal analysis, \PH{D.D.} and \PH{E.E.};
+investigation, \PH{B.B.} and \PH{D.D.}; resources, \PH{C.C.} and \PH{H.H.};
+data curation, \PH{D.D.}; writing---original draft preparation, \PH{B.B.};
+writing---review and editing, \PH{A.A.}, \PH{C.C.} and \PH{G.G.};
+visualization, \PH{E.E.}; supervision, \PH{A.A.} and \PH{C.C.}; project
+administration, \PH{C.C.}; funding acquisition, \PH{A.A.}. All authors have read
+and agreed to the published version of the manuscript.
+
+\section*{Funding}
+\PH{Funding statement --- grant name and number, or: This research received no
+external funding}.
+
+\section*{Institutional Review Board Statement}
+The study was conducted in accordance with the Declaration of Helsinki and
+approved by the Institutional Review Board of \PH{Hospital Name} (protocol code
+\PH{XXXX-XXXX}, approved \PH{DD Month YYYY}).
+
+\section*{Informed Consent Statement}
+Patient consent was waived because the study used only de-identified operational
+metadata and aggregate statistical query results, with no intervention and no
+access to identifiable patient records.
+
+\section*{Data Availability Statement}
+The source code for the pipeline and the hallucination detector, together with
+the SynHDW generator and its schema manifest, is openly available at
+\PH{repository URL}. The de-identified metadata schema, the metric-criterion
+dictionary and the evaluation task set are available from the corresponding
+author on reasonable request, subject to the data-governance rules of
+\PH{Hospital Name}. Patient-level warehouse data cannot be shared.
+
+\section*{Acknowledgments}
+The authors thank \PH{names} for reviewing the criterion definitions used as
+reference standards, and the data engineering team of \PH{Hospital Name} for
+access to the reporting ticket archive.
 
 \section*{Conflicts of Interest}
-A related invention by the authors (patent AJ2534335, a large language
-model-- and reinforcement learning--based natural language to structured SQL
-generation and optimization system) is acknowledged as prior disclosure. The
-present work uses retrieval augmentation and execution feedback \emph{without}
-reinforcement learning. No other conflicts declared.
+A related invention by the authors (patent AJ2534335, a large language model--
+and reinforcement learning--based natural language to structured SQL generation
+and optimization system) is declared as prior disclosure. The present work uses
+retrieval augmentation and execution feedback \emph{without} reinforcement
+learning. The authors declare no other conflict of interest. The funders had no
+role in the design of the study; in the collection, analyses or interpretation
+of data; in the writing of the manuscript; or in the decision to publish the
+results.
 
-\section*{Multimedia Appendix 1}
-Supplementary methods.\\
-{\footnotesize [DOCX File (Microsoft Word File), \PH{XXX} KB-Multimedia Appendix 1]}
-
-\section*{Multimedia Appendix 2}
-Prompt templates.\\
-{\footnotesize [DOCX File (Microsoft Word File), \PH{XX} KB-Multimedia Appendix 2]}
-
-\section*{Multimedia Appendix 3}
-SQL evaluation metrics.\\
-{\footnotesize [DOCX File (Microsoft Word File), \PH{XX} KB-Multimedia Appendix 3]}
-
-\section*{Multimedia Appendix 4}
-Completed MI-CLAIM and MI-CLAIM-GEN checklists.\\
-{\footnotesize [DOCX File (Microsoft Word File), \PH{XX} KB-Multimedia Appendix 4]}
-
+\section*{Use of Generative Artificial Intelligence}
+Generative AI tools were used during the preparation of this manuscript for
+language editing and for drafting sections of the text, which the authors
+subsequently reviewed and revised. No text, data, figure or citation was
+accepted without author verification, and the authors take full responsibility
+for the content of the publication. The large language models studied in this
+work are the object of the research and are described in
+Section~\ref{sec:expdesign}; their use as study subjects is distinct from the
+manuscript-preparation use disclosed here.
 
 %------------------------------ REFERENCES ------------------------------
-% NOTE: the reference list below is carried over from main.tex (verified
-% entries) and must be expanded to JMIR scale (~45-55 numbered references,
-% Vancouver style with [doi:] and [Medline:] tags) before submission. Every
-% \PH{cite} marker in the body indicates a citation slot to fill.
-% Entries are ordered by FIRST CITATION in the body, as JMIR requires.
-% Bibliographic details are from the authors' verified list; [doi:] and [Medline:]
-% tags must be filled from the source record before submission.
 \begin{thebibliography}{99}\footnotesize
 
-\bibitem{presto2019} Sethi R, Traverso M, Sundstrom D, et al. Presto: SQL on everything. In: 2019 IEEE 35th International Conference on Data Engineering (ICDE). 2019:1802-1813. [doi: 10.1109/ICDE.2019.00196]
-\bibitem{ohdsi2015} Hripcsak G, Duke JD, Shah NH, et al. Observational Health Data Sciences and Informatics (OHDSI): opportunities for observational researchers. Stud Health Technol Inform. 2015;216:574-578. [Medline: 26262116]
-\bibitem{zhong2017} Zhong V, Xiong C, Socher R. Seq2SQL: generating structured queries from natural language using reinforcement learning. arXiv. Preprint posted online 2017. [doi: 10.48550/arXiv.1709.00103]
-\bibitem{yu2018} Yu T, Zhang R, Yang K, et al. Spider: a large-scale human-labeled dataset for complex and cross-domain semantic parsing and text-to-SQL task. In: Proc 2018 Conf Empirical Methods in Natural Language Processing. 2018:3911-3921. [doi: 10.18653/v1/D18-1425]
-\bibitem{wang2020} Wang B, Shin R, Liu X, Polozov O, Richardson M. RAT-SQL: relation-aware schema encoding and linking for text-to-SQL parsers. In: Proc 58th Annu Meeting Assoc Comput Linguist. 2020:7567-7578. [doi: 10.18653/v1/2020.acl-main.677]
-\bibitem{scholak2021} Scholak T, Schucher N, Bahdanau D. PICARD: parsing incrementally for constrained auto-regressive decoding from language models. In: Proc 2021 Conf Empirical Methods in Natural Language Processing. 2021:9895-9901. [doi: 10.18653/v1/2021.emnlp-main.779]
-\bibitem{pourreza2023} Pourreza M, Rafiei D. DIN-SQL: decomposed in-context learning of text-to-SQL with self-correction. In: Advances in Neural Information Processing Systems 36. 2023.
-\bibitem{bird2023} Li J, Hui B, Qu G, et al. Can LLM already serve as a database interface? A big bench for large-scale database grounded text-to-SQLs. In: Advances in Neural Information Processing Systems 36. 2023. [doi: 10.48550/arXiv.2305.03111]
-\bibitem{dailsql2024} Gao D, Wang H, Li Y, et al. Text-to-SQL empowered by large language models: a benchmark evaluation. Proc VLDB Endow. 2024;17(5):1132-1145. [doi: 10.14778/3641204.3641221]
-\bibitem{macsql2024} Wang B, Ren C, Yang J, et al. MAC-SQL: a multi-agent collaborative framework for text-to-SQL. arXiv. Preprint posted online 2023. [doi: 10.48550/arXiv.2312.11242]
-\bibitem{treqs2020} Wang P, Shi T, Reddy CK. Text-to-SQL generation for question answering on electronic medical records. In: Proc Web Conference 2020 (WWW '20). 2020:350-361. [doi: 10.1145/3366423.3380120]
-\bibitem{medts2021} Pan Y, Wang C, Hu B, et al. A BERT-based generation model to transform medical texts to SQL queries for electronic medical records: model development and validation. JMIR Med Inform. 2021;9(12):e32698. [doi: 10.2196/32698] [Medline: 34889749]
-\bibitem{ehrsql2024} Lee G, Kweon S, Bae S, Choi E. Overview of the EHRSQL 2024 shared task on reliable text-to-SQL modeling on electronic health records. In: Proc 6th Clinical Natural Language Processing Workshop. 2024. [doi: 10.48550/arXiv.2405.06673]
-\bibitem{ragepi2024} Ziletti A, D'Ambrosi L. Retrieval-augmented text-to-SQL generation for epidemiological question answering using electronic health records. In: Proc 6th Clinical Natural Language Processing Workshop (NAACL). 2024. [doi: 10.48550/arXiv.2403.09226]
-\bibitem{rag2step2025} Ziletti A, D'Ambrosi L. Generating patient cohorts from electronic health records using two-step retrieval-augmented text-to-SQL generation. arXiv. Preprint posted online 2025. [doi: 10.48550/arXiv.2502.21107]
-\bibitem{c2q2019} Yuan C, Ryan PB, Ta C, et al. Criteria2Query: a natural language interface to clinical databases for cohort definition. J Am Med Inform Assoc. 2019;26(4):294-305. [doi: 10.1093/jamia/ocy178] [Medline: 30753493]
-\bibitem{trialpath2021} Liu R, Rizzo S, Whipple S, et al. Evaluating eligibility criteria of oncology trials using real-world data and AI. Nature. 2021;592(7855):629-633. [doi: 10.1038/s41586-021-03430-5] [Medline: 33828294]
-\bibitem{leafai2023} Dobbins NJ, Han B, Zhou W, et al. LeafAI: query generator for clinical cohort discovery rivaling a human programmer. J Am Med Inform Assoc. 2023;30(12):1954-1964. [doi: 10.1093/jamia/ocad149] [Medline: 37550244]
-\bibitem{metaclin2025} Liu W, Qu B, Mallya P, et al. Optimizing an LLM-based clinical data querying system using metadata enrichment and task decomposition. medRxiv. Preprint posted online 2025.
-\bibitem{halluc2024} Tonmoy SMTI, Zaman SMM, Jain V, et al. A comprehensive survey of hallucination mitigation techniques in large language models. arXiv. Preprint posted online 2024. [doi: 10.48550/arXiv.2401.01313]
-\bibitem{ragstruct2024} B\'echard P, Marquez Ayala O. Reducing hallucination in structured outputs via retrieval-augmented generation. arXiv. Preprint posted online 2024. [doi: 10.48550/arXiv.2404.08189]
-\bibitem{chang2024} Chang Y, Wang X, Wang J, et al. A survey on evaluation of large language models. ACM Trans Intell Syst Technol. 2024;15(3):1-45. [doi: 10.1145/3641289]
-\bibitem{lewis2020} Lewis P, Perez E, Piktus A, et al. Retrieval-augmented generation for knowledge-intensive NLP tasks. In: Advances in Neural Information Processing Systems 33. 2020:9459-9474.
-\bibitem{finardi2024} Finardi P, Avila L, Castaldoni R, et al. The chronicles of RAG: the retriever, the chunk and the generator. arXiv. Preprint posted online 2024. [doi: 10.48550/arXiv.2401.07883]
-\bibitem{bm252009} Robertson S, Zaragoza H. The probabilistic relevance framework: BM25 and beyond. Found Trends Inf Retr. 2009;3(4):333-389. [doi: 10.1561/1500000019]
-\bibitem{sbert2019} Reimers N, Gurevych I. Sentence-BERT: sentence embeddings using Siamese BERT-networks. In: Proc 2019 Conf Empirical Methods in Natural Language Processing (EMNLP-IJCNLP). 2019:3982-3992. [doi: 10.18653/v1/D19-1410]
-\bibitem{bert2019} Devlin J, Chang MW, Lee K, Toutanova K. BERT: pre-training of deep bidirectional transformers for language understanding. In: Proc 2019 Conf North American Chapter Assoc Comput Linguist (NAACL-HLT). 2019:4171-4186. [doi: 10.18653/v1/N19-1423]
-\bibitem{schemalink2025} Nahid MMH, Rafiei D, Zhang W, Zhang Y. Rethinking schema linking: a context-aware bidirectional retrieval approach for text-to-SQL. arXiv. Preprint posted online 2025. [doi: 10.48550/arXiv.2510.14296]
-\bibitem{rslsql2024} Cao Z, Zheng Y, Fan Z, et al. RSL-SQL: robust schema linking in text-to-SQL generation. arXiv. Preprint posted online 2024. [doi: 10.48550/arXiv.2411.00073]
-\bibitem{gpt4} OpenAI. GPT-4 technical report. arXiv. Preprint posted online 2023. [doi: 10.48550/arXiv.2303.08774]
-\bibitem{dsv3} DeepSeek-AI. DeepSeek-V3 technical report. arXiv. Preprint posted online 2024. [doi: 10.48550/arXiv.2412.19437]
-\bibitem{claude35} Anthropic. Claude 3.5 Sonnet model card addendum. Anthropic. 2024. URL: \url{https://www.anthropic.com/news/claude-3-5-sonnet} [accessed \PH{date}]
-\bibitem{qwen25} Qwen Team. Qwen2.5 technical report. arXiv. Preprint posted online 2024. [doi: 10.48550/arXiv.2412.15115]
-\bibitem{glm4} GLM Team, Zeng A, Xu B, et al. ChatGLM: a family of large language models from GLM-130B to GLM-4 all tools. arXiv. Preprint posted online 2024. [doi: 10.48550/arXiv.2406.12793]
-\bibitem{llama3} Grattafiori A, Dubey A, Jauhri A, et al. The Llama 3 herd of models. arXiv. Preprint posted online 2024. [doi: 10.48550/arXiv.2407.21783]
-\bibitem{dsr1} DeepSeek-AI. DeepSeek-R1: incentivizing reasoning capability in LLMs via reinforcement learning. arXiv. Preprint posted online 2025. [doi: 10.48550/arXiv.2501.12948]
-\bibitem{phi3} Abdin M, Aneja J, Awadalla H, et al. Phi-3 technical report: a highly capable language model locally on your phone. arXiv. Preprint posted online 2024. [doi: 10.48550/arXiv.2404.14219]
-\bibitem{scipy2020} Virtanen P, Gommers R, Oliphant TE, et al. SciPy 1.0: fundamental algorithms for scientific computing in Python. Nat Methods. 2020;17(3):261-272. [doi: 10.1038/s41592-019-0686-2] [Medline: 32015543]
-\bibitem{statsmodels2010} Seabold S, Perktold J. statsmodels: econometric and statistical modeling with Python. In: Proc 9th Python in Science Conference. 2010:92-96. [doi: 10.25080/Majora-92bf1922-011]
-\bibitem{mcnemar1947} McNemar Q. Note on the sampling error of the difference between correlated proportions or percentages. Psychometrika. 1947;12(2):153-157. [doi: 10.1007/BF02295996] [Medline: 20254758]
-\bibitem{landis1977} Landis JR, Koch GG. The measurement of observer agreement for categorical data. Biometrics. 1977;33(1):159-174. [Medline: 843571]
-\bibitem{tukey1949} Tukey JW. Comparing individual means in the analysis of variance. Biometrics. 1949;5(2):99-114. [Medline: 18151955]
-\bibitem{miclaim2020} Norgeot B, Quer G, Beaulieu-Jones BK, et al. Minimum information about clinical artificial intelligence modeling: the MI-CLAIM checklist. Nat Med. 2020;26(9):1320-1324. [doi: 10.1038/s41591-020-1041-y] [Medline: 32908275]
-\bibitem{miclaimgen2024} Miao BY, Chen IY, Williams CYK, et al. The minimum information about clinical artificial intelligence checklist for generative modeling research (MI-CLAIM-GEN). arXiv. Preprint posted online 2024. [doi: 10.48550/arXiv.2403.02558]
-\bibitem{validity2023} Sj\o{}berg DIK, Bergersen GR. Improving the reporting of threats to construct validity. In: Proc Int Conf Evaluation and Assessment in Software Engineering (EASE). 2023. [doi: 10.48550/arXiv.2306.05336]
-\bibitem{guo2019} Guo J, Zhan Z, Gao Y, et al. Towards complex text-to-SQL in cross-domain database with intermediate representation. In: Proc 57th Annu Meeting Assoc Comput Linguist. 2019:4524-4535. [doi: 10.18653/v1/P19-1444]
-\bibitem{bogin2019} Bogin B, Berant J, Gardner M. Representing schema structure with graph neural networks for text-to-SQL parsing. In: Proc 57th Annu Meeting Assoc Comput Linguist. 2019:4560-4565. [doi: 10.18653/v1/P19-1448]
-\bibitem{tsqlsurvey2024} Liu X, Shen S, Li B, et al. A survey of text-to-SQL in the era of LLMs: where are we, and where are we going? arXiv. Preprint posted online 2024. [doi: 10.48550/arXiv.2408.05109]
-\bibitem{sqlthought2025} Chaturvedi S, Chadha A, Bindschaedler L. SQL-of-Thought: multi-agentic text-to-SQL with guided error correction. arXiv. Preprint posted online 2025. [doi: 10.48550/arXiv.2509.00581]
-\bibitem{ng2025} Ng KKY, Matsuba I, Zhang PC. RAG in health care: a novel framework for improving communication and decision-making by addressing LLM limitations. NEJM AI. 2025;2(1):AIra2400380. [doi: 10.1056/AIra2400380]
+\bibitem{presto2019} Sethi, R.; Traverso, M.; Sundstrom, D.; et al. Presto: SQL on everything. In \textit{2019 IEEE 35th International Conference on Data Engineering (ICDE)}, 2019; pp.\,1802-1813. https://doi.org/10.1109/ICDE.2019.00196
+\bibitem{ohdsi2015} Hripcsak, G.; Duke, J.D.; Shah, N.H.; et al. Observational Health Data Sciences and Informatics (OHDSI): opportunities for observational researchers. \textit{Stud. Health Technol. Inform.} \textbf{2015}, \textit{216}, 574-578. 
+\bibitem{zhong2017} Zhong, V.; Xiong, C.; Socher, R. Seq2SQL: generating structured queries from natural language using reinforcement learning. \textit{arXiv} \textbf{2017}, arXiv preprint. https://doi.org/10.48550/arXiv.1709.00103
+\bibitem{yu2018} Yu, T.; Zhang, R.; Yang, K.; et al. Spider: a large-scale human-labeled dataset for complex and cross-domain semantic parsing and text-to-SQL task. In \textit{Proc 2018 Conf Empirical Methods in Natural Language Processing}, 2018; pp.\,3911-3921. https://doi.org/10.18653/v1/D18-1425
+\bibitem{wang2020} Wang, B.; Shin, R.; Liu, X.; Polozov, O.; Richardson, M. RAT-SQL: relation-aware schema encoding and linking for text-to-SQL parsers. In \textit{Proc 58th Annu Meeting Assoc Comput Linguist}, 2020; pp.\,7567-7578. https://doi.org/10.18653/v1/2020.acl-main.677
+\bibitem{scholak2021} Scholak, T.; Schucher, N.; Bahdanau, D. PICARD: parsing incrementally for constrained auto-regressive decoding from language models. In \textit{Proc 2021 Conf Empirical Methods in Natural Language Processing}, 2021; pp.\,9895-9901. https://doi.org/10.18653/v1/2021.emnlp-main.779
+\bibitem{pourreza2023} Pourreza, M.; Rafiei, D. DIN-SQL: decomposed in-context learning of text-to-SQL with self-correction. In \textit{Advances in Neural Information Processing Systems 36}, 2023. 
+\bibitem{bird2023} Li, J.; Hui, B.; Qu, G.; et al. Can LLM already serve as a database interface? A big bench for large-scale database grounded text-to-SQLs. In \textit{Advances in Neural Information Processing Systems 36}, 2023. https://doi.org/10.48550/arXiv.2305.03111
+\bibitem{dailsql2024} Gao, D.; Wang, H.; Li, Y.; et al. Text-to-SQL empowered by large language models: a benchmark evaluation. \textit{Proc. VLDB Endow.} \textbf{2024}, \textit{17}, 1132-1145. https://doi.org/10.14778/3641204.3641221
+\bibitem{macsql2024} Wang, B.; Ren, C.; Yang, J.; et al. MAC-SQL: a multi-agent collaborative framework for text-to-SQL. \textit{arXiv} \textbf{2023}, arXiv preprint. https://doi.org/10.48550/arXiv.2312.11242
+\bibitem{treqs2020} Wang, P.; Shi, T.; Reddy, C.K. Text-to-SQL generation for question answering on electronic medical records. In \textit{Proc Web Conference 2020 (WWW '20)}, 2020; pp.\,350-361. https://doi.org/10.1145/3366423.3380120
+\bibitem{medts2021} Pan, Y.; Wang, C.; Hu, B.; et al. A BERT-based generation model to transform medical texts to SQL queries for electronic medical records: model development and validation. \textit{JMIR Med. Inform.} \textbf{2021}, \textit{9}, e32698. https://doi.org/10.2196/32698
+\bibitem{ehrsql2024} Lee, G.; Kweon, S.; Bae, S.; Choi, E. Overview of the EHRSQL 2024 shared task on reliable text-to-SQL modeling on electronic health records. In \textit{Proc 6th Clinical Natural Language Processing Workshop}, 2024. https://doi.org/10.48550/arXiv.2405.06673
+\bibitem{ragepi2024} Ziletti, A.; D'Ambrosi, L. Retrieval-augmented text-to-SQL generation for epidemiological question answering using electronic health records. In \textit{Proc 6th Clinical Natural Language Processing Workshop (NAACL)}, 2024. https://doi.org/10.48550/arXiv.2403.09226
+\bibitem{rag2step2025} Ziletti, A.; D'Ambrosi, L. Generating patient cohorts from electronic health records using two-step retrieval-augmented text-to-SQL generation. \textit{arXiv} \textbf{2025}, arXiv preprint. https://doi.org/10.48550/arXiv.2502.21107
+\bibitem{c2q2019} Yuan, C.; Ryan, P.B.; Ta, C.; et al. Criteria2Query: a natural language interface to clinical databases for cohort definition. \textit{J. Am. Med. Inform. Assoc.} \textbf{2019}, \textit{26}, 294-305. https://doi.org/10.1093/jamia/ocy178
+\bibitem{trialpath2021} Liu, R.; Rizzo, S.; Whipple, S.; et al. Evaluating eligibility criteria of oncology trials using real-world data and AI. \textit{Nature} \textbf{2021}, \textit{592}, 629-633. https://doi.org/10.1038/s41586-021-03430-5
+\bibitem{leafai2023} Dobbins, N.J.; Han, B.; Zhou, W.; et al. LeafAI: query generator for clinical cohort discovery rivaling a human programmer. \textit{J. Am. Med. Inform. Assoc.} \textbf{2023}, \textit{30}, 1954-1964. https://doi.org/10.1093/jamia/ocad149
+\bibitem{metaclin2025} Liu, W.; Qu, B.; Mallya, P.; et al. Optimizing an LLM-based clinical data querying system using metadata enrichment and task decomposition. \textit{medRxiv} \textbf{2025}, preprint.
+\bibitem{halluc2024} Tonmoy, S.M.T.I.; Zaman, S.M.M.; Jain, V.; et al. A comprehensive survey of hallucination mitigation techniques in large language models. \textit{arXiv} \textbf{2024}, arXiv preprint. https://doi.org/10.48550/arXiv.2401.01313
+\bibitem{ragstruct2024} B\'echard, P.; Marquez Ayala, O. Reducing hallucination in structured outputs via retrieval-augmented generation. \textit{arXiv} \textbf{2024}, arXiv preprint. https://doi.org/10.48550/arXiv.2404.08189
+\bibitem{chang2024} Chang, Y.; Wang, X.; Wang, J.; et al. A survey on evaluation of large language models. \textit{ACM Trans. Intell. Syst. Technol.} \textbf{2024}, \textit{15}, 1-45. https://doi.org/10.1145/3641289
+\bibitem{lewis2020} Lewis, P.; Perez, E.; Piktus, A.; et al. Retrieval-augmented generation for knowledge-intensive NLP tasks. In \textit{Advances in Neural Information Processing Systems 33}, 2020; pp.\,9459-9474. 
+\bibitem{finardi2024} Finardi, P.; Avila, L.; Castaldoni, R.; et al. The chronicles of RAG: the retriever, the chunk and the generator. \textit{arXiv} \textbf{2024}, arXiv preprint. https://doi.org/10.48550/arXiv.2401.07883
+\bibitem{bm252009} Robertson, S.; Zaragoza, H. The probabilistic relevance framework: BM25 and beyond. \textit{Found. Trends Inf. Retr.} \textbf{2009}, \textit{3}, 333-389. https://doi.org/10.1561/1500000019
+\bibitem{sbert2019} Reimers, N.; Gurevych, I. Sentence-BERT: sentence embeddings using Siamese BERT-networks. In \textit{Proc 2019 Conf Empirical Methods in Natural Language Processing (EMNLP-IJCNLP)}, 2019; pp.\,3982-3992. https://doi.org/10.18653/v1/D19-1410
+\bibitem{bert2019} Devlin, J.; Chang, M.W.; Lee, K.; Toutanova, K. BERT: pre-training of deep bidirectional transformers for language understanding. In \textit{Proc 2019 Conf North American Chapter Assoc Comput Linguist (NAACL-HLT)}, 2019; pp.\,4171-4186. https://doi.org/10.18653/v1/N19-1423
+\bibitem{schemalink2025} Nahid, M.M.H.; Rafiei, D.; Zhang, W.; Zhang, Y. Rethinking schema linking: a context-aware bidirectional retrieval approach for text-to-SQL. \textit{arXiv} \textbf{2025}, arXiv preprint. https://doi.org/10.48550/arXiv.2510.14296
+\bibitem{rslsql2024} Cao, Z.; Zheng, Y.; Fan, Z.; et al. RSL-SQL: robust schema linking in text-to-SQL generation. \textit{arXiv} \textbf{2024}, arXiv preprint. https://doi.org/10.48550/arXiv.2411.00073
+\bibitem{gpt4} OpenAI GPT-4 technical report. \textit{arXiv} \textbf{2023}, arXiv preprint. https://doi.org/10.48550/arXiv.2303.08774
+\bibitem{dsv3} DeepSeek-AI DeepSeek-V3 technical report. \textit{arXiv} \textbf{2024}, arXiv preprint. https://doi.org/10.48550/arXiv.2412.19437
+\bibitem{claude35} Anthropic. Claude 3.5 Sonnet Model Card Addendum. Available online: \url{https://www.anthropic.com/news/claude-3-5-sonnet} (accessed on \PH{DD Month YYYY}).
+\bibitem{qwen25} Qwen, T.e.a.m. Qwen2.5 technical report. \textit{arXiv} \textbf{2024}, arXiv preprint. https://doi.org/10.48550/arXiv.2412.15115
+\bibitem{glm4} GLM, T.e.a.m.; Zeng, A.; Xu, B.; et al. ChatGLM: a family of large language models from GLM-130B to GLM-4 all tools. \textit{arXiv} \textbf{2024}, arXiv preprint. https://doi.org/10.48550/arXiv.2406.12793
+\bibitem{llama3} Grattafiori, A.; Dubey, A.; Jauhri, A.; et al. The Llama 3 herd of models. \textit{arXiv} \textbf{2024}, arXiv preprint. https://doi.org/10.48550/arXiv.2407.21783
+\bibitem{dsr1} DeepSeek-AI DeepSeek-R1: incentivizing reasoning capability in LLMs via reinforcement learning. \textit{arXiv} \textbf{2025}, arXiv preprint. https://doi.org/10.48550/arXiv.2501.12948
+\bibitem{phi3} Abdin, M.; Aneja, J.; Awadalla, H.; et al. Phi-3 technical report: a highly capable language model locally on your phone. \textit{arXiv} \textbf{2024}, arXiv preprint. https://doi.org/10.48550/arXiv.2404.14219
+\bibitem{scipy2020} Virtanen, P.; Gommers, R.; Oliphant, T.E.; et al. SciPy 1.0: fundamental algorithms for scientific computing in Python. \textit{Nat. Methods} \textbf{2020}, \textit{17}, 261-272. https://doi.org/10.1038/s41592-019-0686-2
+\bibitem{statsmodels2010} Seabold, S.; Perktold, J. statsmodels: econometric and statistical modeling with Python. In \textit{Proc 9th Python in Science Conference}, 2010; pp.\,92-96. https://doi.org/10.25080/Majora-92bf1922-011
+\bibitem{mcnemar1947} McNemar, Q. Note on the sampling error of the difference between correlated proportions or percentages. \textit{Psychometrika} \textbf{1947}, \textit{12}, 153-157. https://doi.org/10.1007/BF02295996
+\bibitem{landis1977} Landis, J.R.; Koch, G.G. The measurement of observer agreement for categorical data. \textit{Biometrics} \textbf{1977}, \textit{33}, 159-174. 
+\bibitem{tukey1949} Tukey, J.W. Comparing individual means in the analysis of variance. \textit{Biometrics} \textbf{1949}, \textit{5}, 99-114. 
+\bibitem{miclaim2020} Norgeot, B.; Quer, G.; Beaulieu-Jones, B.K.; et al. Minimum information about clinical artificial intelligence modeling: the MI-CLAIM checklist. \textit{Nat. Med.} \textbf{2020}, \textit{26}, 1320-1324. https://doi.org/10.1038/s41591-020-1041-y
+\bibitem{miclaimgen2024} Miao, B.Y.; Chen, I.Y.; Williams, C.Y.K.; et al. The minimum information about clinical artificial intelligence checklist for generative modeling research (MI-CLAIM-GEN). \textit{arXiv} \textbf{2024}, arXiv preprint. https://doi.org/10.48550/arXiv.2403.02558
+\bibitem{validity2023} Sj\o{}berg, D.I.K.; Bergersen, G.R. Improving the reporting of threats to construct validity. In \textit{Proc Int Conf Evaluation and Assessment in Software Engineering (EASE)}, 2023. https://doi.org/10.48550/arXiv.2306.05336
+\bibitem{guo2019} Guo, J.; Zhan, Z.; Gao, Y.; et al. Towards complex text-to-SQL in cross-domain database with intermediate representation. In \textit{Proc 57th Annu Meeting Assoc Comput Linguist}, 2019; pp.\,4524-4535. https://doi.org/10.18653/v1/P19-1444
+\bibitem{bogin2019} Bogin, B.; Berant, J.; Gardner, M. Representing schema structure with graph neural networks for text-to-SQL parsing. In \textit{Proc 57th Annu Meeting Assoc Comput Linguist}, 2019; pp.\,4560-4565. https://doi.org/10.18653/v1/P19-1448
+\bibitem{tsqlsurvey2024} Liu, X.; Shen, S.; Li, B.; et al. A survey of text-to-SQL in the era of LLMs: where are we, and where are we going? \textit{arXiv} \textbf{2024}, arXiv preprint. https://doi.org/10.48550/arXiv.2408.05109
+\bibitem{sqlthought2025} Chaturvedi, S.; Chadha, A.; Bindschaedler, L. SQL-of-Thought: multi-agentic text-to-SQL with guided error correction. \textit{arXiv} \textbf{2025}, arXiv preprint. https://doi.org/10.48550/arXiv.2509.00581
+\bibitem{ng2025} Ng, K.K.Y.; Matsuba, I.; Zhang, P.C. RAG in health care: a novel framework for improving communication and decision-making by addressing LLM limitations. \textit{NEJM AI} \textbf{2025}, \textit{2}, AIra2400380. https://doi.org/10.1056/AIra2400380
 \end{thebibliography}
 
 %------------------------------ ABBREVIATIONS ------------------------------

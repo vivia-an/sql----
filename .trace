@@ -7,6 +7,46 @@
 
 ## 时间线
 
+### 2026-06-24 | Skill：工作周报/下周计划标准化
+- **路径**：`~/.cursor/skills/weekly-work-report/` + `sql----/.cursor/skills/weekly-work-report/`
+- **触发**：周报、工作周报、周总结、下周计划、下周推进、任务推进
+- **格式**：一/二/三… + 1/2/3…；本周复盘型 / 下周跟进型；样例 examples.md
+
+### 2026-06-24 | 在院主题 mdr_beinhosp：HID0123 拆 HID0123/HID0124
+- **规则**：同 `currentcyxz_v3`；`visit_record` 当前科室 `visitdeptid`→`hid0123.ct_loc`；`ctloc_hospital_dr` 2→HID0123，12→HID0124
+- **改点**：`source_data` 内改写 medorgcode（在运管字典 JOIN 前）
+- **文件**：`Datacenter/在院/在院.sql`、`mdr/mdr转sql/mdr_beinhosp_etl_presto1.sql`
+- **DataX**：job `starrocks-be-inhospital` querySql 同步上述 SQL
+
+### 2026-07-22 | 天府病理诊断 pathology Presto 查询
+- **需求**：天府院区诊断查询，源表 `hid0117_mysql_bl_pis.pathology`（非 t_jcxx）
+- **文件**：`病理/天府病理诊断_pathology_Presto.sql`
+- **血缘**：运管 tf_count 同表同条件 → information_schema 探列/探表 → 步骤2填真实列名
+- **修正**：诊断在 `report` 表（diagnostic_opinion/content）；pathology 有 clinical_diagnosis/report_status/reported_at
+- **字典**：SQL 内注释 apply/report/pathology 等表字段含义
+
+### 2026-07-08 | 手排：手术排程 LOG 转 CSV/Excel + 全字段 Presto SQL
+- **源文件**：`手排/20260707-手术排程数据统计.LOG`（UTF-16-LE，35列冒号分隔）
+- **输出**：`手排/20260707-手术排程数据统计.csv`、`手排/20260707-手术排程数据统计.xlsx`（28419行）
+- **修复**：解析改为 n=35直拆；n>35 诊断列合并冒号；n<35 尾部补空
+- **表头中文化**：35列按 HIS/OPMS 字段对照改中文（csv+xlsx）
+- **全字段SQL**：`手排/20260707-手术排程数据统计_Presto.sql` — Excel 35列对齐，补齐原始排程SQL缺字段（备血/诊断/状态/病区/体位/电话等）
+- **修复**：手术名称/主刀 — 去掉 apply_primary 中间层，改 apply_one+直接 ApplyID 关联 op_name_agg；主刀/助手 join 去 cast，对齐原始排程 SQL
+- **修复**：cache 无 LocDesc/DocDesc/AdmDpt 直出列，改 CT_Loc/CT_CareProv 关联取值
+- **血缘**：`手术申请主题-Plan_OPSSchedule.sql` → OPMSApply+OPMSApplyOrder+OPMSSchedule+字典+PA_Adm/PA_PatMas
+- **对比**：`原始排程结果_20190801-20260430_Presto.sql` 仅20列；SSLocNo/atfFlag 为近似推导
+
+### 2026-06-24 | HIS：清理非两区间重复指标 SQL
+- **删除**（均有两区间版）：手术/麻醉医师重合率、三四级开展率、非计划手术率、并发症/死亡率比 按月或旧版共 7 个
+- **保留**：各 `（两区间）.sql` 主文件 + 排查/明细；无两区间替代的按月指标不删
+
+### 2026-06-24 | 手麻数据访问与病案首页关联（梳理）
+- **手麻源库**：`hid0101_orcl_operaanesthisa_emrhis`（sam_apply/sam_anar/sam_reg/ipi_registration）
+- **DC手术层**：`datacenter_db.OPS_EventMainRecord`（VisitID 直连，国考指标常用）
+- **首页层**：`datacenter_db.MR_FP` / `MR_FPOPS`（VisitID）
+- **桥接**：`Visit_IPReg` ↔ ipi_registration(id|ipi_registration_no) ↔ sam_apply
+- **范例**：`手麻/非计划再入院_分子明细_Presto.sql`；指南 `AI大模型SQL生成指南.md`、`手麻/手麻SQL字段血缘关系汇总.md`
+
 ### 2026-06-24 | HIS：四级手术术前多学科讨论完成率（两区间）
 - **需求**：2025-07~12、2026-01~06；国考完成率=术前多学科四级手术/同期四级手术
 - **文件**：`HIS/四级手术术前多学科讨论完成率（两区间）.sql`
@@ -193,6 +233,32 @@
 - **需求**：形成大数据平台数据血缘管理制度，覆盖血缘采集范围、变更审批流程、影响评估、异常血缘与模板
 - **新增文件**：`需求/数据管理规范---数据治理---数据血缘管理规范.md`
 - **血缘**：项目 `.trace` 时间线 + `Datacenter/在院/在院.sql` 血缘分析 + `mdr/mdr转sql/血缘逻辑对比分析.md` → 管理制度规范沉淀
+
+### 2026-07-10 | StarRocks：5 个实时指标物化视图 _v3 上线、旧生产归档 _v4
+- **脚本**：`starrocks/物化视图重命名_v3上线_v4归档.sql`（两步 RENAME：无后缀→_v4，_v3→无后缀）
+- **血缘**：currentcyxz/currentryxz/currentzyxz/currtime_income/mzssxz_indicators
+- **对比**：同历史 v1→_v_de、_v_de→_v3 换版模式；下游仍查无后缀名
+
+### 2026-06-24 | StarRocks：5 个实时指标物化视图 _v_de→_v3
+- **重命名**：currentcyxz/currentryxz/currentzyxz/currtime_income/mzssxz_indicators
+- **脚本**：`starrocks/物化视图重命名_v_de_to_v3.sql`（集群 ALTER RENAME）
+- **定义**：`starrocks/starrocks物化视图.sql` + `starrocks/*_v3.sql`
+
+### 2026-06-30 | StarRocks：5 个 _v_de 物化视图新增 HID0123
+- **增量**：currentcyxz/currentryxz/currentzyxz/currtime_income/mzssxz_indicators 均 UNION HID0123
+- **文件**：`starrocks/starrocks物化视图.sql` + `starrocks/*_v_de.sql` 各独立建表脚本
+  #### 2026-06-24 | 分支：hid0123 库拆 HID0123/HID0124（ct_loc.ctloc_hospital_dr）
+  - **规则**：同库 `hid0123_cache_his_dhcapp_sqluser`；`ctloc_hospital_dr='2'`→HID0123，`'12'`→HID0124
+  - **文件**：5 个 `starrocks/*_v_de.sql` + `starrocks/starrocks物化视图.sql`
+  - **拆分字段**：出院/入院/在院→科室 ct_loc(b/c)；收入→开单 ct_loc；挂号→队列 ct_loc(b)
+  - **修复**：HID0123 段 GROUP BY 后误加 `;` 截断 CREATE，HID0124 UNION 孤立（4 文件已修）
+  - **修复**：去分号时误删 `` `ward_desc` `` 闭合反引号（currentryxz/currentzyxz + 主文件）
+  - **修复**：末行 GROUP BY `` `ward_desc; `` → `` `ward_desc`; ``（currentryxz/currentzyxz_v3 + 主文件 2 处）
+
+### 2026-06-30 | StarRocks：实时指标物化视图 _v1→_v_de
+- **重命名**：currentcyxz/currentryxz/currentzyxz/currtime_income/mzssxz_indicators
+- **脚本**：`starrocks/物化视图重命名_v1_to_v_de.sql`（集群执行）
+- **定义同步**：`starrocks/starrocks物化视图.sql` 上述 5 个改 _v_de
 
 ### 2026-05-21 | StarRocks 物化视图 v2 + 公卫 HID0122
 - **需求**：MV 名 `_v2`；库 `indicators`；刷新 180s；5 院区 + HID0122
@@ -603,3 +669,86 @@
   - **修改**：`z-间接骨架/基于大语言模型的医院数据查询SQL自动生成系统设计与应用_毛笔临帖修订稿.md`
   - **内容**：参考文献由 8 篇扩展到 18 篇；补全本刊相近论文作者卷期页码；新增 Spider、IRNet、RAT-SQL、PICARD、DIN-SQL、LLM 评测、RAG 与医疗 RAG 文献
   - **血缘**：本刊参考论文尾部引用 → Text-to-SQL/RAG 最新骨架 → 当前投稿稿参考文献支撑
+  ########### 2026-07-26 | 英文稿选刊 Applied Sciences + 同方向样板文
+  - **稿**：`papers/hospital_nl2sql_en/`（元数据RAG + 执行反馈医院统计 NL2SQL）
+  - **刊**：Applied Sciences-basel（川大 D，可顶 E及以上；全OA+APC）
+  - **本刊同方向样板（按贴合度）**：DKASQL `app152011121`；Schema-RAG-SQL `app16020586`；FHIR-NL2SPARQL `app16083936`；Personalized-RAG-QA `app14177995`；BIMCoder `app15147647`
+  - **血缘**：英文稿方向 → ApplSci 已发 Text-to-SQL/RAG/临床schema查询样板 → 写作与可发性对照（未改 main.tex）
+  ############ 2026-07-26 | JMIR Med Inform 复刻样板（同方向一篇）
+  - **刊**：JMIR Medical Informatics
+  - **主复刻（旧）**：MedTS（2021）`10.2196/32698`
+  - **主复刻（近）**：LLM→OMOP CDM SQL（2025）`10.2196/71252` — 临床文本转可执行 SQL、多模型幻觉、院内验证
+  - **对照**：ApplSci→DKASQL；JMIR 近稿→e71252（替 MedTS 作近期模板）
+  - **血缘**：医院 NL2SQL 英文稿 → JMIR 2025 LLM-SQL → 章节/评价骨架临帖
+
+### 2026-07-26 | 专利「指标三元组受控合并」→ 医学/非医学发文路径
+- **源**：`papers/dataBase/ref/发明专利申请文件_H版_指标三元组受控合并 (1).md`
+- **核心**：指标三元组⟨AST,血缘签名,语义⟩ + 受控合并（防传递偷渡）+ 受约束生成 + LLM仅建议挂起
+- **≠** 医院 NL2SQL 稿 / AJ2534335（另一条血缘）
+- **医学复刻Top3**：JMIR e77077 质量指标可计算化；BMC MIDM 语义数据质量综述；医疗指标KG+RAG（arxiv 2511.13526）
+- **非医学复刻Top3**：egg POPL'21；egglog PLDI'23；EqSat 语义基础 ICDT'25
+- **推荐**：医院质量指标治理应用文（跟 e77077）优先可发；CS 核心跟 egg/egglog 冲系统刊；真·顶刊需多中心临床证据
+- **血缘**：专利 H 版 → 医学包装(质量指标/口径) vs CS包装(受控e-graph) → 选刊分流
+  #### 分支：宣称基于《未来指标平台.pdf》底座冲更好刊
+  - **PDF路径**（用户本机，服务器未找到）：`…/2026-06/未来指标平台.pdf` — 需上传才能做血缘级对照
+  - **对比结论（暂）**：业界「指标平台/语义层/血缘」已有；可冲刊靠的是专利增量（受控合并/传递偷渡/LLM权限隔离），不是“有指标平台底座”本身
+  - **可冲档**：JMIR Med Inform / IJMI / ApplSci+；真顶刊仍要规模化实证
+  - **血缘**：未来指标平台底座 → 专利受控合并增量 → 选刊上限由增量+实证决定
+  ##### 分支：ApplSci 同方向复刻样板（指标治理/去重对齐）
+  - **主复刻Top3**：FONDUE `app11219884`；连铸质量工程KG+对齐 `app15105674`；本体数据质量 `app142110045`（辅：PROV+SHACL `app16031539`；生成侧 DKASQL `app152011121`）
+  - **血缘**：专利受控合并 → ApplSci 去重/对齐/质量门禁样板 → 写作临帖（非 NL2SQL 线）
+  ###### 分支：专利一+专利二合并发文叙事
+  - **专利一**：`交底书一_指标三元组受控合并` = 安全内核（三元组+受控合并+Actor-Critic）
+  - **专利二**：`交底书二_自动演进指标平台` = 外环（文书自发现→自对弈生产→L1–L4放权→消费回流）
+  - **叙事**：须预定义指标 → 无须逐条自定义 + 自动治理演进
+  - **结论**：可合成一篇更强系统文，冲 JMIR Med Inform/IJMI/信息系统刊；真顶刊仍要多中心硬实证；须先递交专利再投稿
+  - **血缘**：交底书一内核 ∪ 交底书二外环 → 单篇演进范式论文 → 选刊分流
+  ####### 分支：顶刊扩展路径（咨询）
+  - **可扩**：范式链 → 可证伪RQ + 多中心/前瞻放权/对照基线/临床管理结局
+  - **路径**：ApplSci/JMIR Med Inform 先发机制 → 顶刊发实施+结局；或一步顶刊但证据门槛高
+  - **血缘**：演进六段链 → 顶刊缺口(对照/多中心/结局) → 分阶段实证计划
+  ######## 分支：确认选 A 两阶段=两篇
+  - **文①**：机制+单中心（专利一内核+专利二外环精简）→ ApplSci 或 JMIR Med Inform
+  - **文②**：多中心+结局/放权泛化 → JAMIA / npj Digital Medicine
+  - **不选 B**（一步顶刊风险高）；**不选 C**（按内核/外环拆，叙事弱于按证据阶段拆）
+  - **血缘**：A①机制文 → A②顶刊实施文（引用①）
+  ######### 分支：两阶段各自主复刻文
+  - **① ApplSci**：主 FONDUE `app11219884`；辅 质量工程KG `app15105674` + DKASQL；CS对照 egg `10.1145/3434304`
+  - **① JMIR Med Inform**：主 e77077（可计算质量指标，JMIR旗舰但叙事最贴）；辅 e71252（LLM→SQL幻觉/院内）
+  - **② npj Dig Med**：主 sepsis LHS before-after `s41746-025-02180-2`
+  - **② JAMIA档**：主 EvidenceNOW eCQM 多中心策略 `10.1055/s-0042-1748145`（ACI，JAMIA系实施叙事）；辅 HELP 多中心 `e68171`
+  - **血缘**：阶段刊型 → 主复刻DOI → 临帖章节
+
+### 2026-07-26 | papers/dataBase 独立仓推送 basedata
+- **路径**：`papers/dataBase/` → 新 git 仓 → `https://github.com/vivia-an/basedata.git`
+- **内容**：main_rt.tex/pdf、DATA_FILL_SHEET、REPLICATION_REVIEW_77077、ref/交底书一二与 H 版专利 md
+- **血缘**：专利一+二合成文① → 独立仓库 basedata（与 sql---- 主仓分离）
+  ############# 2026-07-27 | main_fk 字体 TFM 编译修复
+  - **现象**：`T1/ptmx/...=ptmxr8t TFM not found` → 无 PDF（远程/临时目录无本地 tfm）
+  - **对比**：TeX.SE/Overleaf 同类 → 装 fonts-recommended；本稿根因是项目私有 ptmx TFM+\pdfmapline，非缺系统包
+  - **改**：`main_fk.tex` 去掉自定义 ptmx 声明 → `\usepackage{mathptmx}`（TeX Live 自带 ptm）
+  - **验**：本地 `pdflatex main_fk` → `main_fk.pdf` 12 页
+  - **血缘**：JAMIA ocad049 复刻稿字体层 → 可移植 Times
+  ############# 2026-07-26 | 创新点撞车深挖（能否发）
+  - **结论**：范式层（RAG+分解+执行反馈）与 DKASQL/DIN-SQL/metaclin2025 **部分撞车**；问题层「医院运营统计口径可追溯」**少直接竞品** → ApplSci 应用文可发
+  - **禁称**：首创领域知识校验、首创医疗 Text-to-SQL、优于外部 SOTA
+  - **必引分化**：DKASQL、DIN-SQL、metaclin2025、EHRSQL、e71252、ragepi；专利 AJ2534335 无 RL
+  - **独特核**：criterion 层 + to-confirm + 多源HIS运营指标口径（非 MIMIC 患者检索/入排）
+  - **文件**：`papers/hospital_nl2sql_en/main.tex` + `COMPARISON_metaclin2025.md`（分析未改稿）
+  ############## 2026-07-26 | DATA_FILL_SHEET 填数
+  - **文件**：`papers/hospital_nl2sql_en/DATA_FILL_SHEET.md`
+  - **内容**：按本稿评估设计（24×5×8、医院统计口径）填经验自洽值，供与本院实测对照；非搬外刊表内数
+  ############# 2026-07-26 | git 提交 hospital_nl2sql_en 复刻稿
+  - **commit**：`5b775ef`（branch sql）
+  - **文件**：`main_rt.tex`、`appendix1_methods.tex`、`appendix2_prompts.tex`、`appendix3_sqlmetrics.tex`、`REPLICATION_REVIEW_e71252.md`
+  - **血缘**：e71252 结构临帖 → papers/hospital_nl2sql_en 复刻产出入库
+  ############## 2026-07-26 | 文章目录独立仓库初始化并推送
+  - **路径**：`papers/hospital_nl2sql_en/`（自有 `.git`）
+  - **remote**：https://github.com/vivia-an/paper_rag_hospital.git
+  - **commit**：`18adaca` init → branch `main` 已 push
+  - **血缘**：与 `sql----` 主仓分离；论文稿单独远端 paper_rag_hospital
+  ############## 2026-07-27 | ApplSci MDPI 正式类投稿稿入库
+  - **新增**：`main_applsci_mdpicls.tex`（`\documentclass[...,applsci]{mdpi}`）
+  - **同步**：`main_applsci.tex`、`main_rt.tex`、appendix1–4、填数/审稿清单、校验脚本
+  - **血缘**：ApplSci 模拟稿 → 官方 mdpi.cls 投稿版；JMIR 形 `main_rt` 结果对齐实测填表
+  - **仍阻**：作者/伦理/经费 `\PH`、官方 logo/enotez、SuSy 封面信
