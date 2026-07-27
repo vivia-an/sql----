@@ -1,22 +1,19 @@
 %==============================================================================
 %  main_applsci_mdpicls.tex — Applied Sciences submission, official mdpi.cls
 %
-%  Same manuscript as main_applsci.tex, compiled with MDPI's own class rather
-%  than an emulation of it. The class and journalnames.tex come from MDPI's
-%  distribution. Two local substitutions are needed on this machine and must be
-%  removed before submission:
-%    * enotez.sty is stubbed (mdpi.cls loads it for endnotes, which this paper
-%      does not use; the real package needs a LaTeX kernel newer than TL2013)
-%    * the four MDPI logo files are blank placeholders; the real artwork ships
-%      with MDPI's official template download
+%  Same manuscript as main_applsci.tex, compiled with MDPI's own class.
+%  Official bundle lives in ./Definitions/ (from MDPI_template.zip):
+%    https://www.mdpi.com/authors/latex
+%  Overleaf: set this file as main; TeX Live 202X has enotez/paracol.
+%  Local TL2013 may still need a personal texmf for enotez — Overleaf does not.
 %==============================================================================
-\documentclass[applsci,article,submit,pdftex,moreauthors]{mdpi}
+\documentclass[applsci,article,submit,pdftex,moreauthors]{Definitions/mdpi}
 
 %--- mdpi.cls loads paracol, which draws page-building boxes from the same
 %--- \@freelist as floats. With 12 floats the stock 18-box list runs out and
-%--- LaTeX stops placing floats ("Too many unprocessed floats"). morefloats is
-%--- not on this machine and this kernel predates \extrafloats, so the list is
-%--- extended here by the same mechanism those provide.
+%--- LaTeX stops placing floats ("Too many unprocessed floats"). morefloats /
+%--- \extrafloats cover this on modern TeX; keep a portable freelist extend
+%--- for older kernels and for Overleaf float pressure.
 \makeatletter
 \newcount\mf@i
 \newcommand*\mf@extrafloats[1]{%
@@ -29,10 +26,6 @@
   \repeat}
 \mf@extrafloats{80}
 \makeatother
-
-%--- local only: this machine has no ghostscript, so the .eps logo names that
-%--- mdpi.cls hard-codes are served by PDF files carrying that extension.
-\AtBeginDocument{\DeclareGraphicsRule{.eps}{pdf}{.eps}{}}
 
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.16}
@@ -51,10 +44,23 @@
 
 %--- mdpi.cls ships captionsetup for figure/specialtable but not for the
 %--- plain table environment; this gives table captions the same MDPI style.
+%--- long DOI strings in the reference list are otherwise unbreakable
+\makeatletter
+\g@addto@macro\UrlBreaks{\do\a\do\b\do\c\do\d\do\e\do\f\do\g\do\h\do\i\do\j
+  \do\k\do\l\do\m\do\n\do\o\do\p\do\q\do\r\do\s\do\t\do\u\do\v\do\w\do\x\do\y
+  \do\z\do\A\do\B\do\C\do\D\do\E\do\F\do\G\do\H\do\I\do\J\do\K\do\L\do\M\do\N
+  \do\O\do\P\do\Q\do\R\do\S\do\T\do\U\do\V\do\W\do\X\do\Y\do\Z\do\0\do\1\do\2
+  \do\3\do\4\do\5\do\6\do\7\do\8\do\9}
+\makeatother
+
+\emergencystretch=1.5em
+
 \captionsetup[table]{position=top, labelfont={bf, small, stretch=1.17},
   labelsep=period, textfont={small, stretch=1.17}, aboveskip=6pt,
   singlelinecheck=off, justification=justified}
 
+%--- DOIs are set in the running font but may break like a URL
+\newcommand{\doilink}[1]{\begingroup\urlstyle{same}\url{#1}\endgroup}
 \newcommand{\PH}[1]{{\color{red}\textbf{[#1]}}}
 \newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
 \newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
@@ -292,14 +298,14 @@ the Supplementary Materials.
 
 \begin{tikzpicture}[
   font=\scriptsize,
-  node distance=3.2mm and 4mm,
+  node distance=3.2mm and 3.5mm,
   io/.style   ={draw,rounded corners=2pt,fill=gray!12,align=center,
-                text width=18mm,minimum height=8mm,inner sep=2pt},
-  st/.style   ={draw,fill=blue!7,align=center,text width=21mm,
+                text width=16mm,minimum height=8mm,inner sep=2pt},
+  st/.style   ={draw,fill=blue!7,align=center,text width=19mm,
                 minimum height=11mm,inner sep=2.5pt},
-  mod/.style  ={draw,fill=orange!10,align=center,text width=24mm,
+  mod/.style  ={draw,fill=orange!10,align=center,text width=23mm,
                 minimum height=12mm,inner sep=2.5pt},
-  kb/.style   ={draw,fill=green!8,align=center,text width=22mm,
+  kb/.style   ={draw,fill=green!8,align=center,text width=21mm,
                 minimum height=7mm,inner sep=2pt},
   lbl/.style  ={font=\scriptsize\itshape,inner sep=1pt},
   >={Stealth[length=4pt]}]
@@ -319,13 +325,13 @@ the Supplementary Materials.
 \node[lbl,anchor=south west,yshift=0.8mm] at (pre.north west) {Preprocessing module};
 
 % ---------- Row 2 : information extraction ----------
-\node[mod, below=16mm of s1.south, anchor=north, text width=25mm] (ie)
+\node[mod, below=16mm of s1.south, anchor=north, text width=24mm] (ie)
   {\textbf{Information extraction}\\{\tiny 7 elements: business terms,\\metadata systems, field IDs,\\values, attributes, temporal,\\negation}};
-\node[mod, right=5mm of ie, text width=25mm] (map)
+\node[mod, right=5mm of ie, text width=24mm] (map)
   {\textbf{Field and criterion}\\\textbf{mapping}\\{\tiny LLM constrained to\\retrieved candidates; emits\\TO-CONFIRM on ambiguous\\criterion}};
-\node[mod, right=5mm of map, text width=25mm] (gen)
+\node[mod, right=5mm of map, text width=24mm] (gen)
   {\textbf{SQL generation}\\{\tiny sub-structure synthesis,\\logical-delete and org-code\\filters, Presto dialect}};
-\node[io, right=5mm of gen, text width=21mm] (out)
+\node[io, right=5mm of gen, text width=20mm] (out)
   {Presto SQL\\+ field provenance\\+ TO-CONFIRM list};
 
 \draw[->] (norm.south) -- ++(0,-7mm) -| (ie.north);
@@ -435,7 +441,7 @@ successfully generated SQL queries were executed against SynHDW to assess
 retrieval capabilities. Patient counts were recorded for selected tasks where
 queries were executed without errors.
 
-\subsection{Experimental Design}
+\subsection{Experimental Design}\label{sec:expdesign}
 Although gpt-4o was used for initial system development due to its strong
 performance, the limited metadata coverage in SynHDW provided an opportunity to
 systematically compare hallucination patterns across multiple LLMs, informing
@@ -587,8 +593,8 @@ task, representing a 56.3\% overall token reduction.
 
 \begin{tikzpicture}
 \begin{groupplot}[
-  group style={group size=2 by 1, horizontal sep=15mm},
-  width=0.455\linewidth, height=5.6cm,
+  group style={group size=2 by 1, horizontal sep=13mm},
+  width=0.44\linewidth, height=5.6cm,
   /tikz/font=\scriptsize,
   symbolic x coords={Segmentation,Filtering,Simplification},
   xtick=data,
@@ -910,11 +916,11 @@ US~\$0.28 per GPU-hour under the institution's 3-year hardware amortization.}
 \label{tab:modelperf}
 \centering
 \footnotesize
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{@{}L{2.5cm}L{1.5cm}L{1.5cm}L{1.6cm}L{1.5cm}L{1.9cm}L{1.5cm}@{}}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}L{2.35cm}L{1.42cm}L{1.42cm}L{1.5cm}L{1.42cm}L{1.8cm}L{1.42cm}@{}}
 \toprule
-Model & Architecture & SQL\tnote{a} generation (\%) & Hallucination (\%)\tnote{b}
-      & Effective SQL (\%)\tnote{c} & Time (s)\tnote{d} & Cost (US \$)/Query\\
+Model & Architec\-ture & SQL\tnote{a} genera\-tion (\%) & Halluci\-nation (\%)\tnote{b}
+      & Effec\-tive SQL (\%)\tnote{c} & Time (s)\tnote{d} & Cost (US \$)/Query\\
 \midrule
 qwen2.5:7b        & On-premises & 90.0  & 20.4          & 71.7 & 27.3$\pm$6.4      & 0.000\\
 deepseek-v3       & Cloud       & 95.8  & 30.4          & 66.7 & 7.6$\pm$1.9       & 0.003\\
@@ -955,7 +961,7 @@ analysis confirmed significant variation in error distribution across models
 %------------- Panel A : stacked bars -------------
 \begin{axis}[
   name=hA,
-  width=0.535\linewidth, height=6.2cm, font=\scriptsize,
+  width=0.52\linewidth, height=6.2cm, font=\scriptsize,
   ybar stacked, bar width=9pt,
   symbolic x coords={gpt-4o,deepseek-v3,claude-3.5-s,qwen2.5:7b,glm4:9b,
                      deepseek-r1:7b,phi3,llama3:8b},
@@ -1082,7 +1088,7 @@ failure to generate any SQL rather than accurate generation.
 \centering
 \footnotesize
 \setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}L{2.6cm}L{1.7cm}L{1.8cm}L{1.8cm}L{1.8cm}L{1.7cm}L{1.7cm}@{}}
+\begin{tabular}{@{}L{2.4cm}L{1.55cm}L{1.65cm}L{1.65cm}L{1.65cm}L{1.55cm}L{1.55cm}@{}}
 \toprule
 Model & Total halluci\-nations & Category A (nonexis\-tent), n (\%)
       & Category B (wrong criterion), n (\%)
@@ -1210,7 +1216,7 @@ D: + verification (full) & 108 & 22 & 90.0 & 20.4 & 71.7 & 3  & 8  & 2 & 5 & 4\\
 
 \subsection{Component Ablation}
 Each pipeline layer contributed, and the contributions did not overlap
-(Table~\ref{tab:ablation}). The bare model reached an effective SQL rate of
+(Table~\ref{tab:ablation}, Figure~\ref{fig:ablation}). The bare model reached an effective SQL rate of
 22.5\%. Adding the warehouse schema raised it to 40.8\%, retrieval over the
 metadata knowledge base to 60.8\%, and the four-layer verification to 71.7\%.
 
@@ -1544,87 +1550,63 @@ manuscript-preparation use disclosed here.
   \item[SynHDW:] Synthetic Hospital Data Warehouse
 \end{description}}
 
-%------------------------------ EDITORIAL FOOTER ------------------------------
-\vspace{10pt}
-{\footnotesize\noindent
-Edited by \PH{Editor}; peer-reviewed by \PH{Reviewers}; submitted \PH{DD.MM.YYYY};
-final revised version received \PH{DD.MM.YYYY}; accepted \PH{DD.MM.YYYY};
-published \PH{DD.MM.YYYY}
 
-\vspace{6pt}\noindent
-Please cite as:\\
-\PH{Author list}\\
-Large Language Models for Automating Hospital Statistical Criteria Conversion to
-Clinical Data Warehouse Queries: Validation and Evaluation Study\\
-\PH{Journal citation}\\
-URL: \PH{article URL}\\
-doi: \PH{10.xxxx/xxxxx}
-
-\vspace{6pt}\noindent
-\copyright\ \PH{Author list}. Originally published in \PH{Journal}
-(\PH{journal URL}), \PH{date}. This is an open-access article distributed under
-the terms of the Creative Commons Attribution License
-(https://creativecommons.org/licenses/by/4.0/), which permits unrestricted use,
-distribution, and reproduction in any medium, provided the original work, first
-published in \PH{Journal}, is properly cited. The complete bibliographic
-information, a link to the original publication on \PH{journal URL}, as well as
-this copyright and license information must be included.\par}
 }
 
 \reftitle{References}
 
 \begin{thebibliography}{99}\footnotesize
 
-\bibitem{presto2019} Sethi, R.; Traverso, M.; Sundstrom, D.; et al. Presto: SQL on everything. In \textit{2019 IEEE 35th International Conference on Data Engineering (ICDE)}, 2019; pp.\,1802-1813. https://doi.org/10.1109/ICDE.2019.00196
+\bibitem{presto2019} Sethi, R.; Traverso, M.; Sundstrom, D.; et al. Presto: SQL on everything. In \textit{2019 IEEE 35th International Conference on Data Engineering (ICDE)}, 2019; pp.\,1802-1813. \doilink{https://doi.org/10.1109/ICDE.2019.00196}
 \bibitem{ohdsi2015} Hripcsak, G.; Duke, J.D.; Shah, N.H.; et al. Observational Health Data Sciences and Informatics (OHDSI): opportunities for observational researchers. \textit{Stud. Health Technol. Inform.} \textbf{2015}, \textit{216}, 574-578. 
-\bibitem{zhong2017} Zhong, V.; Xiong, C.; Socher, R. Seq2SQL: generating structured queries from natural language using reinforcement learning. \textit{arXiv} \textbf{2017}, arXiv preprint. https://doi.org/10.48550/arXiv.1709.00103
-\bibitem{yu2018} Yu, T.; Zhang, R.; Yang, K.; et al. Spider: a large-scale human-labeled dataset for complex and cross-domain semantic parsing and text-to-SQL task. In \textit{Proc 2018 Conf Empirical Methods in Natural Language Processing}, 2018; pp.\,3911-3921. https://doi.org/10.18653/v1/D18-1425
-\bibitem{wang2020} Wang, B.; Shin, R.; Liu, X.; Polozov, O.; Richardson, M. RAT-SQL: relation-aware schema encoding and linking for text-to-SQL parsers. In \textit{Proc 58th Annu Meeting Assoc Comput Linguist}, 2020; pp.\,7567-7578. https://doi.org/10.18653/v1/2020.acl-main.677
-\bibitem{scholak2021} Scholak, T.; Schucher, N.; Bahdanau, D. PICARD: parsing incrementally for constrained auto-regressive decoding from language models. In \textit{Proc 2021 Conf Empirical Methods in Natural Language Processing}, 2021; pp.\,9895-9901. https://doi.org/10.18653/v1/2021.emnlp-main.779
+\bibitem{zhong2017} Zhong, V.; Xiong, C.; Socher, R. Seq2SQL: generating structured queries from natural language using reinforcement learning. \textit{arXiv} \textbf{2017}, arXiv preprint. \doilink{https://doi.org/10.48550/arXiv.1709.00103}
+\bibitem{yu2018} Yu, T.; Zhang, R.; Yang, K.; et al. Spider: a large-scale human-labeled dataset for complex and cross-domain semantic parsing and text-to-SQL task. In \textit{Proc 2018 Conf Empirical Methods in Natural Language Processing}, 2018; pp.\,3911-3921. \doilink{https://doi.org/10.18653/v1/D18-1425}
+\bibitem{wang2020} Wang, B.; Shin, R.; Liu, X.; Polozov, O.; Richardson, M. RAT-SQL: relation-aware schema encoding and linking for text-to-SQL parsers. In \textit{Proc 58th Annu Meeting Assoc Comput Linguist}, 2020; pp.\,7567-7578. \doilink{https://doi.org/10.18653/v1/2020.acl-main.677}
+\bibitem{scholak2021} Scholak, T.; Schucher, N.; Bahdanau, D. PICARD: parsing incrementally for constrained auto-regressive decoding from language models. In \textit{Proc 2021 Conf Empirical Methods in Natural Language Processing}, 2021; pp.\,9895-9901. \doilink{https://doi.org/10.18653/v1/2021.emnlp-main.779}
 \bibitem{pourreza2023} Pourreza, M.; Rafiei, D. DIN-SQL: decomposed in-context learning of text-to-SQL with self-correction. In \textit{Advances in Neural Information Processing Systems 36}, 2023. 
-\bibitem{bird2023} Li, J.; Hui, B.; Qu, G.; et al. Can LLM already serve as a database interface? A big bench for large-scale database grounded text-to-SQLs. In \textit{Advances in Neural Information Processing Systems 36}, 2023. https://doi.org/10.48550/arXiv.2305.03111
-\bibitem{dailsql2024} Gao, D.; Wang, H.; Li, Y.; et al. Text-to-SQL empowered by large language models: a benchmark evaluation. \textit{Proc. VLDB Endow.} \textbf{2024}, \textit{17}, 1132-1145. https://doi.org/10.14778/3641204.3641221
-\bibitem{macsql2024} Wang, B.; Ren, C.; Yang, J.; et al. MAC-SQL: a multi-agent collaborative framework for text-to-SQL. \textit{arXiv} \textbf{2023}, arXiv preprint. https://doi.org/10.48550/arXiv.2312.11242
-\bibitem{treqs2020} Wang, P.; Shi, T.; Reddy, C.K. Text-to-SQL generation for question answering on electronic medical records. In \textit{Proc Web Conference 2020 (WWW '20)}, 2020; pp.\,350-361. https://doi.org/10.1145/3366423.3380120
-\bibitem{medts2021} Pan, Y.; Wang, C.; Hu, B.; et al. A BERT-based generation model to transform medical texts to SQL queries for electronic medical records: model development and validation. \textit{JMIR Med. Inform.} \textbf{2021}, \textit{9}, e32698. https://doi.org/10.2196/32698
-\bibitem{ehrsql2024} Lee, G.; Kweon, S.; Bae, S.; Choi, E. Overview of the EHRSQL 2024 shared task on reliable text-to-SQL modeling on electronic health records. In \textit{Proc 6th Clinical Natural Language Processing Workshop}, 2024. https://doi.org/10.48550/arXiv.2405.06673
-\bibitem{ragepi2024} Ziletti, A.; D'Ambrosi, L. Retrieval-augmented text-to-SQL generation for epidemiological question answering using electronic health records. In \textit{Proc 6th Clinical Natural Language Processing Workshop (NAACL)}, 2024. https://doi.org/10.48550/arXiv.2403.09226
-\bibitem{rag2step2025} Ziletti, A.; D'Ambrosi, L. Generating patient cohorts from electronic health records using two-step retrieval-augmented text-to-SQL generation. \textit{arXiv} \textbf{2025}, arXiv preprint. https://doi.org/10.48550/arXiv.2502.21107
-\bibitem{c2q2019} Yuan, C.; Ryan, P.B.; Ta, C.; et al. Criteria2Query: a natural language interface to clinical databases for cohort definition. \textit{J. Am. Med. Inform. Assoc.} \textbf{2019}, \textit{26}, 294-305. https://doi.org/10.1093/jamia/ocy178
-\bibitem{trialpath2021} Liu, R.; Rizzo, S.; Whipple, S.; et al. Evaluating eligibility criteria of oncology trials using real-world data and AI. \textit{Nature} \textbf{2021}, \textit{592}, 629-633. https://doi.org/10.1038/s41586-021-03430-5
-\bibitem{leafai2023} Dobbins, N.J.; Han, B.; Zhou, W.; et al. LeafAI: query generator for clinical cohort discovery rivaling a human programmer. \textit{J. Am. Med. Inform. Assoc.} \textbf{2023}, \textit{30}, 1954-1964. https://doi.org/10.1093/jamia/ocad149
+\bibitem{bird2023} Li, J.; Hui, B.; Qu, G.; et al. Can LLM already serve as a database interface? A big bench for large-scale database grounded text-to-SQLs. In \textit{Advances in Neural Information Processing Systems 36}, 2023. \doilink{https://doi.org/10.48550/arXiv.2305.03111}
+\bibitem{dailsql2024} Gao, D.; Wang, H.; Li, Y.; et al. Text-to-SQL empowered by large language models: a benchmark evaluation. \textit{Proc. VLDB Endow.} \textbf{2024}, \textit{17}, 1132-1145. \doilink{https://doi.org/10.14778/3641204.3641221}
+\bibitem{macsql2024} Wang, B.; Ren, C.; Yang, J.; et al. MAC-SQL: a multi-agent collaborative framework for text-to-SQL. \textit{arXiv} \textbf{2023}, arXiv preprint. \doilink{https://doi.org/10.48550/arXiv.2312.11242}
+\bibitem{treqs2020} Wang, P.; Shi, T.; Reddy, C.K. Text-to-SQL generation for question answering on electronic medical records. In \textit{Proc Web Conference 2020 (WWW '20)}, 2020; pp.\,350-361. \doilink{https://doi.org/10.1145/3366423.3380120}
+\bibitem{medts2021} Pan, Y.; Wang, C.; Hu, B.; et al. A BERT-based generation model to transform medical texts to SQL queries for electronic medical records: model development and validation. \textit{JMIR Med. Inform.} \textbf{2021}, \textit{9}, e32698. \doilink{https://doi.org/10.2196/32698}
+\bibitem{ehrsql2024} Lee, G.; Kweon, S.; Bae, S.; Choi, E. Overview of the EHRSQL 2024 shared task on reliable text-to-SQL modeling on electronic health records. In \textit{Proc 6th Clinical Natural Language Processing Workshop}, 2024. \doilink{https://doi.org/10.48550/arXiv.2405.06673}
+\bibitem{ragepi2024} Ziletti, A.; D'Ambrosi, L. Retrieval-augmented text-to-SQL generation for epidemiological question answering using electronic health records. In \textit{Proc 6th Clinical Natural Language Processing Workshop (NAACL)}, 2024. \doilink{https://doi.org/10.48550/arXiv.2403.09226}
+\bibitem{rag2step2025} Ziletti, A.; D'Ambrosi, L. Generating patient cohorts from electronic health records using two-step retrieval-augmented text-to-SQL generation. \textit{arXiv} \textbf{2025}, arXiv preprint. \doilink{https://doi.org/10.48550/arXiv.2502.21107}
+\bibitem{c2q2019} Yuan, C.; Ryan, P.B.; Ta, C.; et al. Criteria2Query: a natural language interface to clinical databases for cohort definition. \textit{J. Am. Med. Inform. Assoc.} \textbf{2019}, \textit{26}, 294-305. \doilink{https://doi.org/10.1093/jamia/ocy178}
+\bibitem{trialpath2021} Liu, R.; Rizzo, S.; Whipple, S.; et al. Evaluating eligibility criteria of oncology trials using real-world data and AI. \textit{Nature} \textbf{2021}, \textit{592}, 629-633. \doilink{https://doi.org/10.1038/s41586-021-03430-5}
+\bibitem{leafai2023} Dobbins, N.J.; Han, B.; Zhou, W.; et al. LeafAI: query generator for clinical cohort discovery rivaling a human programmer. \textit{J. Am. Med. Inform. Assoc.} \textbf{2023}, \textit{30}, 1954-1964. \doilink{https://doi.org/10.1093/jamia/ocad149}
 \bibitem{metaclin2025} Liu, W.; Qu, B.; Mallya, P.; et al. Optimizing an LLM-based clinical data querying system using metadata enrichment and task decomposition. \textit{medRxiv} \textbf{2025}, preprint.
-\bibitem{halluc2024} Tonmoy, S.M.T.I.; Zaman, S.M.M.; Jain, V.; et al. A comprehensive survey of hallucination mitigation techniques in large language models. \textit{arXiv} \textbf{2024}, arXiv preprint. https://doi.org/10.48550/arXiv.2401.01313
-\bibitem{ragstruct2024} B\'echard, P.; Marquez Ayala, O. Reducing hallucination in structured outputs via retrieval-augmented generation. \textit{arXiv} \textbf{2024}, arXiv preprint. https://doi.org/10.48550/arXiv.2404.08189
-\bibitem{chang2024} Chang, Y.; Wang, X.; Wang, J.; et al. A survey on evaluation of large language models. \textit{ACM Trans. Intell. Syst. Technol.} \textbf{2024}, \textit{15}, 1-45. https://doi.org/10.1145/3641289
+\bibitem{halluc2024} Tonmoy, S.M.T.I.; Zaman, S.M.M.; Jain, V.; et al. A comprehensive survey of hallucination mitigation techniques in large language models. \textit{arXiv} \textbf{2024}, arXiv preprint. \doilink{https://doi.org/10.48550/arXiv.2401.01313}
+\bibitem{ragstruct2024} B\'echard, P.; Marquez Ayala, O. Reducing hallucination in structured outputs via retrieval-augmented generation. \textit{arXiv} \textbf{2024}, arXiv preprint. \doilink{https://doi.org/10.48550/arXiv.2404.08189}
+\bibitem{chang2024} Chang, Y.; Wang, X.; Wang, J.; et al. A survey on evaluation of large language models. \textit{ACM Trans. Intell. Syst. Technol.} \textbf{2024}, \textit{15}, 1-45. \doilink{https://doi.org/10.1145/3641289}
 \bibitem{lewis2020} Lewis, P.; Perez, E.; Piktus, A.; et al. Retrieval-augmented generation for knowledge-intensive NLP tasks. In \textit{Advances in Neural Information Processing Systems 33}, 2020; pp.\,9459-9474. 
-\bibitem{finardi2024} Finardi, P.; Avila, L.; Castaldoni, R.; et al. The chronicles of RAG: the retriever, the chunk and the generator. \textit{arXiv} \textbf{2024}, arXiv preprint. https://doi.org/10.48550/arXiv.2401.07883
-\bibitem{bm252009} Robertson, S.; Zaragoza, H. The probabilistic relevance framework: BM25 and beyond. \textit{Found. Trends Inf. Retr.} \textbf{2009}, \textit{3}, 333-389. https://doi.org/10.1561/1500000019
-\bibitem{sbert2019} Reimers, N.; Gurevych, I. Sentence-BERT: sentence embeddings using Siamese BERT-networks. In \textit{Proc 2019 Conf Empirical Methods in Natural Language Processing (EMNLP-IJCNLP)}, 2019; pp.\,3982-3992. https://doi.org/10.18653/v1/D19-1410
-\bibitem{bert2019} Devlin, J.; Chang, M.W.; Lee, K.; Toutanova, K. BERT: pre-training of deep bidirectional transformers for language understanding. In \textit{Proc 2019 Conf North American Chapter Assoc Comput Linguist (NAACL-HLT)}, 2019; pp.\,4171-4186. https://doi.org/10.18653/v1/N19-1423
-\bibitem{schemalink2025} Nahid, M.M.H.; Rafiei, D.; Zhang, W.; Zhang, Y. Rethinking schema linking: a context-aware bidirectional retrieval approach for text-to-SQL. \textit{arXiv} \textbf{2025}, arXiv preprint. https://doi.org/10.48550/arXiv.2510.14296
-\bibitem{rslsql2024} Cao, Z.; Zheng, Y.; Fan, Z.; et al. RSL-SQL: robust schema linking in text-to-SQL generation. \textit{arXiv} \textbf{2024}, arXiv preprint. https://doi.org/10.48550/arXiv.2411.00073
-\bibitem{gpt4} OpenAI GPT-4 technical report. \textit{arXiv} \textbf{2023}, arXiv preprint. https://doi.org/10.48550/arXiv.2303.08774
-\bibitem{dsv3} DeepSeek-AI DeepSeek-V3 technical report. \textit{arXiv} \textbf{2024}, arXiv preprint. https://doi.org/10.48550/arXiv.2412.19437
+\bibitem{finardi2024} Finardi, P.; Avila, L.; Castaldoni, R.; et al. The chronicles of RAG: the retriever, the chunk and the generator. \textit{arXiv} \textbf{2024}, arXiv preprint. \doilink{https://doi.org/10.48550/arXiv.2401.07883}
+\bibitem{bm252009} Robertson, S.; Zaragoza, H. The probabilistic relevance framework: BM25 and beyond. \textit{Found. Trends Inf. Retr.} \textbf{2009}, \textit{3}, 333-389. \doilink{https://doi.org/10.1561/1500000019}
+\bibitem{sbert2019} Reimers, N.; Gurevych, I. Sentence-BERT: sentence embeddings using Siamese BERT-networks. In \textit{Proc 2019 Conf Empirical Methods in Natural Language Processing (EMNLP-IJCNLP)}, 2019; pp.\,3982-3992. \doilink{https://doi.org/10.18653/v1/D19-1410}
+\bibitem{bert2019} Devlin, J.; Chang, M.W.; Lee, K.; Toutanova, K. BERT: pre-training of deep bidirectional transformers for language understanding. In \textit{Proc 2019 Conf North American Chapter Assoc Comput Linguist (NAACL-HLT)}, 2019; pp.\,4171-4186. \doilink{https://doi.org/10.18653/v1/N19-1423}
+\bibitem{schemalink2025} Nahid, M.M.H.; Rafiei, D.; Zhang, W.; Zhang, Y. Rethinking schema linking: a context-aware bidirectional retrieval approach for text-to-SQL. \textit{arXiv} \textbf{2025}, arXiv preprint. \doilink{https://doi.org/10.48550/arXiv.2510.14296}
+\bibitem{rslsql2024} Cao, Z.; Zheng, Y.; Fan, Z.; et al. RSL-SQL: robust schema linking in text-to-SQL generation. \textit{arXiv} \textbf{2024}, arXiv preprint. \doilink{https://doi.org/10.48550/arXiv.2411.00073}
+\bibitem{gpt4} OpenAI GPT-4 technical report. \textit{arXiv} \textbf{2023}, arXiv preprint. \doilink{https://doi.org/10.48550/arXiv.2303.08774}
+\bibitem{dsv3} DeepSeek-AI DeepSeek-V3 technical report. \textit{arXiv} \textbf{2024}, arXiv preprint. \doilink{https://doi.org/10.48550/arXiv.2412.19437}
 \bibitem{claude35} Anthropic. Claude 3.5 Sonnet Model Card Addendum. Available online: \url{https://www.anthropic.com/news/claude-3-5-sonnet} (accessed on \PH{DD Month YYYY}).
-\bibitem{qwen25} Qwen, T.e.a.m. Qwen2.5 technical report. \textit{arXiv} \textbf{2024}, arXiv preprint. https://doi.org/10.48550/arXiv.2412.15115
-\bibitem{glm4} GLM, T.e.a.m.; Zeng, A.; Xu, B.; et al. ChatGLM: a family of large language models from GLM-130B to GLM-4 all tools. \textit{arXiv} \textbf{2024}, arXiv preprint. https://doi.org/10.48550/arXiv.2406.12793
-\bibitem{llama3} Grattafiori, A.; Dubey, A.; Jauhri, A.; et al. The Llama 3 herd of models. \textit{arXiv} \textbf{2024}, arXiv preprint. https://doi.org/10.48550/arXiv.2407.21783
-\bibitem{dsr1} DeepSeek-AI DeepSeek-R1: incentivizing reasoning capability in LLMs via reinforcement learning. \textit{arXiv} \textbf{2025}, arXiv preprint. https://doi.org/10.48550/arXiv.2501.12948
-\bibitem{phi3} Abdin, M.; Aneja, J.; Awadalla, H.; et al. Phi-3 technical report: a highly capable language model locally on your phone. \textit{arXiv} \textbf{2024}, arXiv preprint. https://doi.org/10.48550/arXiv.2404.14219
-\bibitem{scipy2020} Virtanen, P.; Gommers, R.; Oliphant, T.E.; et al. SciPy 1.0: fundamental algorithms for scientific computing in Python. \textit{Nat. Methods} \textbf{2020}, \textit{17}, 261-272. https://doi.org/10.1038/s41592-019-0686-2
-\bibitem{statsmodels2010} Seabold, S.; Perktold, J. statsmodels: econometric and statistical modeling with Python. In \textit{Proc 9th Python in Science Conference}, 2010; pp.\,92-96. https://doi.org/10.25080/Majora-92bf1922-011
-\bibitem{mcnemar1947} McNemar, Q. Note on the sampling error of the difference between correlated proportions or percentages. \textit{Psychometrika} \textbf{1947}, \textit{12}, 153-157. https://doi.org/10.1007/BF02295996
+\bibitem{qwen25} Qwen, T.e.a.m. Qwen2.5 technical report. \textit{arXiv} \textbf{2024}, arXiv preprint. \doilink{https://doi.org/10.48550/arXiv.2412.15115}
+\bibitem{glm4} GLM, T.e.a.m.; Zeng, A.; Xu, B.; et al. ChatGLM: a family of large language models from GLM-130B to GLM-4 all tools. \textit{arXiv} \textbf{2024}, arXiv preprint. \doilink{https://doi.org/10.48550/arXiv.2406.12793}
+\bibitem{llama3} Grattafiori, A.; Dubey, A.; Jauhri, A.; et al. The Llama 3 herd of models. \textit{arXiv} \textbf{2024}, arXiv preprint. \doilink{https://doi.org/10.48550/arXiv.2407.21783}
+\bibitem{dsr1} DeepSeek-AI DeepSeek-R1: incentivizing reasoning capability in LLMs via reinforcement learning. \textit{arXiv} \textbf{2025}, arXiv preprint. \doilink{https://doi.org/10.48550/arXiv.2501.12948}
+\bibitem{phi3} Abdin, M.; Aneja, J.; Awadalla, H.; et al. Phi-3 technical report: a highly capable language model locally on your phone. \textit{arXiv} \textbf{2024}, arXiv preprint. \doilink{https://doi.org/10.48550/arXiv.2404.14219}
+\bibitem{scipy2020} Virtanen, P.; Gommers, R.; Oliphant, T.E.; et al. SciPy 1.0: fundamental algorithms for scientific computing in Python. \textit{Nat. Methods} \textbf{2020}, \textit{17}, 261-272. \doilink{https://doi.org/10.1038/s41592-019-0686-2}
+\bibitem{statsmodels2010} Seabold, S.; Perktold, J. statsmodels: econometric and statistical modeling with Python. In \textit{Proc 9th Python in Science Conference}, 2010; pp.\,92-96. \doilink{https://doi.org/10.25080/Majora-92bf1922-011}
+\bibitem{mcnemar1947} McNemar, Q. Note on the sampling error of the difference between correlated proportions or percentages. \textit{Psychometrika} \textbf{1947}, \textit{12}, 153-157. \doilink{https://doi.org/10.1007/BF02295996}
 \bibitem{landis1977} Landis, J.R.; Koch, G.G. The measurement of observer agreement for categorical data. \textit{Biometrics} \textbf{1977}, \textit{33}, 159-174. 
 \bibitem{tukey1949} Tukey, J.W. Comparing individual means in the analysis of variance. \textit{Biometrics} \textbf{1949}, \textit{5}, 99-114. 
-\bibitem{miclaim2020} Norgeot, B.; Quer, G.; Beaulieu-Jones, B.K.; et al. Minimum information about clinical artificial intelligence modeling: the MI-CLAIM checklist. \textit{Nat. Med.} \textbf{2020}, \textit{26}, 1320-1324. https://doi.org/10.1038/s41591-020-1041-y
-\bibitem{miclaimgen2024} Miao, B.Y.; Chen, I.Y.; Williams, C.Y.K.; et al. The minimum information about clinical artificial intelligence checklist for generative modeling research (MI-CLAIM-GEN). \textit{arXiv} \textbf{2024}, arXiv preprint. https://doi.org/10.48550/arXiv.2403.02558
-\bibitem{validity2023} Sj\o{}berg, D.I.K.; Bergersen, G.R. Improving the reporting of threats to construct validity. In \textit{Proc Int Conf Evaluation and Assessment in Software Engineering (EASE)}, 2023. https://doi.org/10.48550/arXiv.2306.05336
-\bibitem{guo2019} Guo, J.; Zhan, Z.; Gao, Y.; et al. Towards complex text-to-SQL in cross-domain database with intermediate representation. In \textit{Proc 57th Annu Meeting Assoc Comput Linguist}, 2019; pp.\,4524-4535. https://doi.org/10.18653/v1/P19-1444
-\bibitem{bogin2019} Bogin, B.; Berant, J.; Gardner, M. Representing schema structure with graph neural networks for text-to-SQL parsing. In \textit{Proc 57th Annu Meeting Assoc Comput Linguist}, 2019; pp.\,4560-4565. https://doi.org/10.18653/v1/P19-1448
-\bibitem{tsqlsurvey2024} Liu, X.; Shen, S.; Li, B.; et al. A survey of text-to-SQL in the era of LLMs: where are we, and where are we going? \textit{arXiv} \textbf{2024}, arXiv preprint. https://doi.org/10.48550/arXiv.2408.05109
-\bibitem{sqlthought2025} Chaturvedi, S.; Chadha, A.; Bindschaedler, L. SQL-of-Thought: multi-agentic text-to-SQL with guided error correction. \textit{arXiv} \textbf{2025}, arXiv preprint. https://doi.org/10.48550/arXiv.2509.00581
-\bibitem{ng2025} Ng, K.K.Y.; Matsuba, I.; Zhang, P.C. RAG in health care: a novel framework for improving communication and decision-making by addressing LLM limitations. \textit{NEJM AI} \textbf{2025}, \textit{2}, AIra2400380. https://doi.org/10.1056/AIra2400380
+\bibitem{miclaim2020} Norgeot, B.; Quer, G.; Beaulieu-Jones, B.K.; et al. Minimum information about clinical artificial intelligence modeling: the MI-CLAIM checklist. \textit{Nat. Med.} \textbf{2020}, \textit{26}, 1320-1324. \doilink{https://doi.org/10.1038/s41591-020-1041-y}
+\bibitem{miclaimgen2024} Miao, B.Y.; Chen, I.Y.; Williams, C.Y.K.; et al. The minimum information about clinical artificial intelligence checklist for generative modeling research (MI-CLAIM-GEN). \textit{arXiv} \textbf{2024}, arXiv preprint. \doilink{https://doi.org/10.48550/arXiv.2403.02558}
+\bibitem{validity2023} Sj\o{}berg, D.I.K.; Bergersen, G.R. Improving the reporting of threats to construct validity. In \textit{Proc Int Conf Evaluation and Assessment in Software Engineering (EASE)}, 2023. \doilink{https://doi.org/10.48550/arXiv.2306.05336}
+\bibitem{guo2019} Guo, J.; Zhan, Z.; Gao, Y.; et al. Towards complex text-to-SQL in cross-domain database with intermediate representation. In \textit{Proc 57th Annu Meeting Assoc Comput Linguist}, 2019; pp.\,4524-4535. \doilink{https://doi.org/10.18653/v1/P19-1444}
+\bibitem{bogin2019} Bogin, B.; Berant, J.; Gardner, M. Representing schema structure with graph neural networks for text-to-SQL parsing. In \textit{Proc 57th Annu Meeting Assoc Comput Linguist}, 2019; pp.\,4560-4565. \doilink{https://doi.org/10.18653/v1/P19-1448}
+\bibitem{tsqlsurvey2024} Liu, X.; Shen, S.; Li, B.; et al. A survey of text-to-SQL in the era of LLMs: where are we, and where are we going? \textit{arXiv} \textbf{2024}, arXiv preprint. \doilink{https://doi.org/10.48550/arXiv.2408.05109}
+\bibitem{sqlthought2025} Chaturvedi, S.; Chadha, A.; Bindschaedler, L. SQL-of-Thought: multi-agentic text-to-SQL with guided error correction. \textit{arXiv} \textbf{2025}, arXiv preprint. \doilink{https://doi.org/10.48550/arXiv.2509.00581}
+\bibitem{ng2025} Ng, K.K.Y.; Matsuba, I.; Zhang, P.C. RAG in health care: a novel framework for improving communication and decision-making by addressing LLM limitations. \textit{NEJM AI} \textbf{2025}, \textit{2}, AIra2400380. \doilink{https://doi.org/10.1056/AIra2400380}
 \end{thebibliography}
 
 %--- mdpi.cls opens paracol{2} at \maketitle (narrow citation column + wide

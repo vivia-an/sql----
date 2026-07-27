@@ -728,7 +728,8 @@
   - **对比**：TeX.SE/Overleaf 同类 → 装 fonts-recommended；本稿根因是项目私有 ptmx TFM+\pdfmapline，非缺系统包
   - **改**：`main_fk.tex` 去掉自定义 ptmx 声明 → `\usepackage{mathptmx}`（TeX Live 自带 ptm）
   - **验**：本地 `pdflatex main_fk` → `main_fk.pdf` 12 页
-  - **血缘**：JAMIA ocad049 复刻稿字体层 → 可移植 Times
+  - **推送**：basedata `dc03fed` → `github.com/vivia-an/basedata` main（含 main_fk.tex/pdf、FK_REPLICATION_PLAN.md）
+  - **血缘**：JAMIA ocad049 复刻稿字体层 → 可移植 Times → Overleaf
   ############# 2026-07-26 | 创新点撞车深挖（能否发）
   - **结论**：范式层（RAG+分解+执行反馈）与 DKASQL/DIN-SQL/metaclin2025 **部分撞车**；问题层「医院运营统计口径可追溯」**少直接竞品** → ApplSci 应用文可发
   - **禁称**：首创领域知识校验、首创医疗 Text-to-SQL、优于外部 SOTA
@@ -751,4 +752,10 @@
   - **paper 仓**：`3d0e3ea` ← `main_applsci_mdpicls.tex`
   - **sql----**：`dbba932` ← ApplSci/JMIR 稿 + fill sheet + appendix + `.trace`
   - **血缘**：ApplSci 模拟稿 → 官方 mdpi.cls 投稿版；JMIR 形 `main_rt` 结果对齐实测填表
-  - **仍阻**：作者/伦理/经费 `\PH`、官方 logo/enotez、SuSy 封面信
+  - **仍阻**：作者/伦理/经费 `\PH`、SuSy 封面信
+  ############## 2026-07-27 | Overleaf 缺 mdpi.cls → 接入官方 Definitions
+  - **paper 仓**：`5031ed4`
+  - **现象**：`main_applsci_mdpicls` → `File mdpi.cls not found`
+  - **对比**：MDPI 官方包用 `{Definitions/mdpi}`；仓内原先未带 Definitions
+  - **改**：入库 `Definitions/`（MDPI_template.zip）；`documentclass`→`Definitions/mdpi`；去掉破坏真 EPS 的 GraphicsRule；`README_OVERLEAF_APPLSCI.md`
+  - **血缘**：Overleaf Git → paper_rag_hospital → Definitions/mdpi.cls → submit 页眉 logo-mdpi.eps
