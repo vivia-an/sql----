@@ -759,3 +759,64 @@
   - **对比**：MDPI 官方包用 `{Definitions/mdpi}`；仓内原先未带 Definitions
   - **改**：入库 `Definitions/`（MDPI_template.zip）；`documentclass`→`Definitions/mdpi`；去掉破坏真 EPS 的 GraphicsRule；`README_OVERLEAF_APPLSCI.md`
   - **血缘**：Overleaf Git → paper_rag_hospital → Definitions/mdpi.cls → submit 页眉 logo-mdpi.eps
+  ############## 2026-07-27 | 数据可得：无公开仓库 URL
+  - **改**：Methods Data/Code + `\dataavailability` → 通讯作者合理请求；同步 `main_applsci.tex`、`appendix4_miclaim.tex`
+  - **文件**：`main_applsci_mdpicls.tex`、`main_applsci.tex`、`appendix4_miclaim.tex`
+  - **血缘**：ApplSci 投稿声明 → 无 GitHub → on request（患者级仍不可分享）
+  ############## 2026-07-27 | 独作署名：李世楷 / 信息与数据管理部 / 华西
+  - **作者**：Shikai Li（`oneauthor`）；单位 Department of Information and Data Management, West China Hospital, Sichuan University, Chengdu 610041
+  - **日期**：accessed / IRB approved / Claude accessed → 27 July 2026；定价 July 2026
+  - **仍 PH**：通讯邮箱/电话、IRB 号、基金、XX%、supplementary URL
+  - **文件**：`main_applsci_mdpicls.tex`、`main_applsci.tex`
+  ############## 2026-07-27 | main_fk：JAMIA ocad049 复刻收敛（12 页）
+  - **选刊**：JAMIA `10.1093/jamia/ocad049`（PMC10198529，30(6):1167-1178，12页/6图/4表）— 42 篇 OA JAMIA 候选按图表数+章节脊筛出；选题按上轮差距分析转「指标注册表受控合并」，QI 降为案例
+  - **文件**：`papers/dataBase/main_fk.tex`、`data_fk.tex`、`check_fk.py`、`make_bib.py`、`FK_REPLICATION_PLAN.md`
+  - **版面**：trim 595.276×782.362bp；正文 54.65..540.73（双栏 234.05 + gutter 18）；前言窄栏 413.35；页规 124.80/670.08 @1.92bp；页眉 28.20 + 1.02bp 规 @42.00 且奇偶换边
+  - **字体**：正文/表**衬线**、页眉/标题/图表题**无衬线**（源即混排，非单一字族）；14 档字号按 600dpi 墨迹实测
+  - **间距**：节 28.6/16.4、小节 23.4/11.6；表 题→头 16.90、头→首行 17.20、行距 10.00 — 均与源等值
+  - **图**：6 图 TikZ，配色自源图取样（Office 主题 E2F0D9/DEEBF7/FFF2CD/4472C4/2F528F/FF0000）；图5/6 pgfplots 直读 `data_fk.tex`，换数即重绘
+  - **文献**：59 条全部 Crossref 核验且全部被引；表体 7.8/10.05、悬挂 12.70、条目间无额外间距
+  - **数据**：163 处 `\dv{}` 宏 + `\provisionaltrue` 红显；正文零硬编码数字
+  - **校验**：`check_fk.py` 66 项（几何/页图/算术）全过；页图 12 对 12，18 地标 10 精确、8 差一页
+  - **坑**：TeX pt≠PDF bp（595.276pt→593.05bp）；poppler word bbox 较真实墨迹高 ~1.3bp（改 600dpi 光栅测）；afm2tfm 造的 TFM 无连字，`--` 直出双连字号（波及 cite 范围与文献页码）；`\color` 置于 `p{}` 首位吞一行（改 `\textcolor`）；DOI 内 `_` 未转义致 bibitem 编号重复；multicol 每环境末页自动配平（`\raggedcolumns`）
+  - **仍阻**：53 处 `\PH{}`（作者/单位/刊名/日期/经费/利益冲突）；`data_fk.tex` 待另一集群实测覆盖
+  - **血缘**：交底书一+二 → 受控合并选题 → JAMIA ocad049 版式复刻 → `papers/dataBase/main_fk.*`
+  ############## 2026-07-27 | main_fk 字体回退代价复核（承「TFM 编译修复」条）
+  - **背景**：`dc03fed` 为过 Overleaf 去掉项目内 ptmx TFM + `\pdfmapline` 改 `mathptmx`；`*.tfm` 本就在 `.gitignore`，远端必缺，回退方向正确
+  - **代价**：源衬线比 Times 窄 3.3%；扩 0.967 时逐行套准中位 0.998，回退后 0.967 — 正文每行多容约 3.3% 字符
+  - **未受影响**：12 页、页图 10 精确/8 差一页、66 项校验、0 error 全部维持
+  - **可选恢复**：自管编译环境时改回 `afm2tfm -e 0.967` + `\pdfmapline`，并把 4 个 `ptmx*.tfm` 纳入版本库（须先删 `.gitignore` 的 `*.tfm`）
+  - **血缘**：可移植性优先 → 字宽保真让位；套准实测留档备恢复
+  ############## 2026-07-27 | check_fk 扩到 76 项：把手测节奏纳入自动校验
+  - **动因**：`dc03fed` 换字体后，此前逐轮手测的标题间距/表节奏/文献几何无人守护
+  - **复核**：换 `mathptmx` 后三者均未走样 — 标题 28.7/16.3/23.4/11.5（源 28.7/16.4/23.4/11.6）；表 17.4/17.2/9.9（源 16.90/17.20/10.00）；文献 ink 6.97/lead 10.00/悬挂 12.33（源 6.94/10.05/12.70）
+  - **新增**：`check_fk.py` +10 项（标题四段间距、表题→头→行三段、文献 ink/行距/悬挂），66 → **76 项全过**
+  - **坑**：表头单元格换行会给「头→首行」加整数倍行距（p4 Table 1 = 17.20+10.00）— 判定里按行距整除折回，避免把内容换行误判成节奏错
+  - **血缘**：手测指标 → 落进 `check_fk.py` → 换字体/改内容后可一条命令复验
+  ############## 2026-07-27 | papers/dataBase 双稿定向：README 重写 + 旧 TODO 限域
+  - **问题**：仓内已有两份完整稿（`main_rt` JMIR e77077 复刻 19pp / `main_fk` JAMIA ocad049 复刻 12pp），但 `README.md`、`TODO_BEFORE_SUBMISSION.md` 只描述旧稿，冷启动会拿错
+  - **改**：`README.md` 重写为双轨对照表（稿件/主张/复刻源/数据文件/校验器/文献/待办各一行）+ 「为什么有两份」+ 双轨构建命令
+  - **定调**：**FK 为投稿轨**；RT 保留（术语审计 + STARE-HI 附录 + fill sheet 可复用，退役与否由作者定）
+  - **限域**：`TODO_BEFORE_SUBMISSION.md` 顶部加 Track RT 限域提示，FK 待办指向 `FK_REPLICATION_PLAN.md` §5b
+  - **记录**：README 写明「任何实测数字不得写进正文」这条硬规矩与 `check_fk.py` 的四类失败条件；字体可移植性取舍指向本 `.trace`
+  - **血缘**：RT 差距复盘 → FK 另起选题/选刊 → 双稿并存需导航层
+  ############## 2026-07-27 | 撤掉已收敛的复刻循环 e2888f82
+  - **原因**：复刻自 iter 10 起收敛（12 页、76 项校验、10 地标精确），与 `.trace` 循环 408bbf13 同 10min 双触发，纯耗
+  - **动作**：`CronDelete e2888f82`；保留 408bbf13（.trace 更新）
+  - **恢复**：实测数据落地后值得重开 — 真数会重排页图，需再跑一轮校验收敛
+  - **血缘**：收敛判定 → 停循环止损
+  ############## 2026-07-27 | starrocks：currentcyxz_v3 / currentryxz_v3 全量建表落盘
+  - **文件**：`starrocks/currentcyxz_v3.sql`（实时出院人次汇总）、`starrocks/currentryxz_v3.sql`（实时入院人次），各 37 行
+  - **院区**：HID0101/0103/0117/0120/0122/0123/0124；`hid0123` 库两院区按 `ct_loc.ctloc_hospital_dr` 2→HID0123、12→HID0124 拆分
+  - **MV**：`indicators` 库异步物化视图，`HASH(hosp_code)` 分布，`REFRESH ASYNC EVERY(INTERVAL 180 SECOND)`，`replication_num=3`
+  - **注意**：异步 MV 不支持直接改 AS 定义 — 已存在的需 DROP 后重建
+  - **血缘**：在院主题 HID0123/HID0124 拆分规则（见本文件 2026-06-24 条）→ 出/入院两张 MV 建表脚本入库
+  ############## 2026-07-27 | hospital_nl2sql_en：配图评分表 + 本机构建脚本
+  - **文件**：`papers/hospital_nl2sql_en/FIGURE_SCORECARD.md`（第 21 轮测量）
+  - **评分**：`main_rt.tex` 四图 + 附录 Fig S1，八项各 0–10（与原文同构/印刷可读性/色觉安全/灰度可分/无遮挡裁切/数据-墨水比/题注自足/与正文数值一致）；正文四图均分 **9.7/10**，Fig S1 9.2
+  - **同构**：四图与 e71252 一一对应 — Fig1 单幅架构、Fig2 (A)(B) 双面板折线、Fig3 (A) 分组柱+(B) 对数轴气泡、Fig4 (A) 堆叠柱+(B) 热力图+色条；题注在图上方、面板标签 **(A)** 加粗，均与原文一致
+  - **构建**：新增 `build_local.sh` + `figs/.eps-stand-in.pdf`（606B）— 只补本机两处环境缺陷，不污染投稿稿
+  - **本机缺陷一**：无 ghostscript，pdftex 读不了 `Definitions/*.eps` → 构建目录另建 Definitions，EPS 全部换 PDF 替身 + graphics 规则按 PDF 读；仓内真 `Definitions/` 不动
+  - **本机缺陷二**：TeX Live 2013 的 caption3 定义 `\l@addto@macro`，其后 mdpi.cls 载入的 KOMA scrbase 用 `\newcommand` 重定义报错 → shim 在两者之间取消定义
+  - **血缘**：ApplSci mdpi.cls 投稿轨（见 2026-07-27 前条）→ 本机可复现构建 + 图件量化验收
+
