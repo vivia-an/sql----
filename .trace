@@ -7,6 +7,15 @@
 
 ## 时间线
 
+### 2026-08-25 | MDR：在院 DataX 跑完数据没变化 — 表延迟与调度排查
+- **需求**：`starrocks-be-inhospital` 执行后业务数据不变；列涉及表延迟 + 调度问题
+- **文件**：`mdr/mdr转sql/mdr_beinhosp_涉及表_数据延迟与调度排查_Presto.sql`
+- **血缘**：`datacenter_db.visit_record`(P0) → 字典 md.* / `hid0123.ct_loc`(P1拆院区) → DataX → `m1.mdr_beinhosp`
+- **判定**：时点快照；`lastupdatedttm` 来自 visit_record 不是任务时间；hoodie session 空=关增量读当前快照
+- **未找到**：visit_record 的 HIS 源表脚本；md 无 lastupdatedttm 证据
+  #### 分支：不改 DataX 作业
+  - 先跑排查 SQL；确认 DC 延迟或写入口径后再改作业
+
 ### 2026-06-24 | HIS：四级手术术前多学科讨论完成率（两区间）
 - **需求**：2025-07~12、2026-01~06；国考完成率=术前多学科四级手术/同期四级手术
 - **文件**：`HIS/四级手术术前多学科讨论完成率（两区间）.sql`
