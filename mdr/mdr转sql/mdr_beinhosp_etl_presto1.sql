@@ -1,8 +1,8 @@
 -- =====================================================
 -- MDR在院病人表 ETL Presto SQL实现
 -- 原PySpark脚本: mdr_beinhosp_mul_omdept.py + dict_yg.py
--- 转换日期: 2026-01-27
--- 执行环境: Presto
+-- 执行环境: Presto → DataX starrockswriter → m1.mdr_beinhosp
+-- hid0123 拆院区：ct_loc.ctloc_hospital_dr 2→HID0123，12→HID0124（对齐 currentcyxz_v3）
 -- =====================================================
 
 -- =====================================================
@@ -10,14 +10,10 @@
 -- =====================================================
 -- 【源表】
 --   datacenter_db.visit_record    - 就诊记录主表
+--   hid0123_cache_his_dhcapp_sqluser.ct_loc - HID0123/0124 拆分依据
 -- 
 -- 【字典表】
---   md.dict_loc8                  - 八级科室字典
---   md.tbl_1308_h                 - 三级院区字典
---   md.tbl_1305_h                 - 运管科室字典
---   md.tbl_1306_h                 - 科室-运管科室映射
---   md.tbl_1307_h                 - 医生-运管科室映射
---   md.mappingmember              - 映射成员表(院区映射)
+--   md.dict_loc8 / tbl_1308_h / tbl_1305_h / tbl_1306_h / tbl_1307_h / mappingmember
 --
 -- 【目标表】
 --   m1.mdr_beinhosp               - 在院病人宽表
@@ -182,56 +178,76 @@ source_data AS (
     SELECT
         CAST(uuid() AS VARCHAR) AS uuid,
         CAST(NULL AS VARCHAR) AS medorgid,
-        CAST(visit_record_medorgcode AS VARCHAR) AS medorgcode,
-        CAST(visit_record_medorgname AS VARCHAR) AS medorgname,
+        -- HID0123 同库拆院区：ctloc_hospital_dr 2→HID0123，12→HID0124（对齐 currentcyxz_v3）
+        CAST(
+            CASE
+                WHEN cast(vr.visit_record_medorgcode AS varchar) = 'HID0123'
+                 AND cast(loc0123.ctloc_hospital_dr AS varchar) = '12'
+                    THEN 'HID0124'
+                WHEN cast(vr.visit_record_medorgcode AS varchar) = 'HID0123'
+                 AND cast(loc0123.ctloc_hospital_dr AS varchar) = '2'
+                    THEN 'HID0123'
+                ELSE cast(vr.visit_record_medorgcode AS varchar)
+            END AS VARCHAR
+        ) AS medorgcode,
+        CAST(
+            CASE
+                WHEN cast(vr.visit_record_medorgcode AS varchar) = 'HID0123'
+                 AND cast(loc0123.ctloc_hospital_dr AS varchar) = '12'
+                    THEN coalesce(cast(vr.visit_record_medorgname AS varchar), 'HID0124')
+                ELSE cast(vr.visit_record_medorgname AS varchar)
+            END AS VARCHAR
+        ) AS medorgname,
         CAST(NULL AS VARCHAR) AS empiid,
         CAST(NULL AS VARCHAR) AS empino,
-        CAST(visit_record_persid AS VARCHAR) AS persid,
-        CAST(visit_record_persno AS VARCHAR) AS persno,
-        CAST(visit_record_extstr3 AS VARCHAR) AS visitid,
-        CAST(visit_record_visitno AS VARCHAR) AS visitno,
+        CAST(vr.visit_record_persid AS VARCHAR) AS persid,
+        CAST(vr.visit_record_persno AS VARCHAR) AS persno,
+        CAST(vr.visit_record_extstr3 AS VARCHAR) AS visitid,
+        CAST(vr.visit_record_visitno AS VARCHAR) AS visitno,
         CAST(NULL AS VARCHAR) AS serialno,
-        CAST(visit_record_persname AS VARCHAR) AS persname,
+        CAST(vr.visit_record_persname AS VARCHAR) AS persname,
         CAST(current_date AS DATE) AS beinhospdate,
         CAST(date_format(current_timestamp, '%Y-%m-%d') AS VARCHAR) AS repdate,
         CAST(date_format(current_timestamp, '%H:%i:%s') AS VARCHAR) AS reptime,
         CAST(date_format(current_timestamp, '%Y-%m-%d %H:%i:%s') AS VARCHAR) AS repdttm,
         CAST(date_format(current_timestamp, '%H') AS VARCHAR) AS rephour,
         CAST('1' AS VARCHAR) AS newest,
-        CAST(visit_record_visitbedid AS VARCHAR) AS bednoid,
-        CAST(visit_record_visitbedcode AS VARCHAR) AS bedno,
-        CAST(visit_record_visitdttm AS VARCHAR) AS inhospdate,
+        CAST(vr.visit_record_visitbedid AS VARCHAR) AS bednoid,
+        CAST(vr.visit_record_visitbedcode AS VARCHAR) AS bedno,
+        CAST(vr.visit_record_visitdttm AS VARCHAR) AS inhospdate,
         CAST(NULL AS VARCHAR) AS inhospwardid,
         CAST(NULL AS VARCHAR) AS inhospwardcode,
         CAST(NULL AS VARCHAR) AS inhospwardname,
         CAST(NULL AS VARCHAR) AS inhospmedelementid,
         CAST(NULL AS VARCHAR) AS inhospmedelementcode,
         CAST(NULL AS VARCHAR) AS inhospmedelementname,
-        CAST(visit_record_visitwardid AS VARCHAR) AS currentwardid,
-        CAST(visit_record_visitwardcode AS VARCHAR) AS currentwardcode,
-        CAST(visit_record_visitwardname AS VARCHAR) AS currentwardname,
-        CAST(visit_record_visitdeptid AS VARCHAR) AS currentmedelementid,
-        CAST(visit_record_visitdeptcode AS VARCHAR) AS currentmedelementcode,
-        CAST(visit_record_visitdeptname AS VARCHAR) AS currentmedelementname,
-        CAST(visit_record_attendingdoctid AS VARCHAR) AS currentstaffgroupid,
-        CAST(visit_record_attendingdoctcode AS VARCHAR) AS currentstaffgroupcode,
-        CAST(visit_record_attendingdoctname AS VARCHAR) AS currentstaffgroupname,
-        CAST(CASE WHEN visit_record_visitbedcode IS NULL THEN '1' ELSE '0' END AS VARCHAR) AS iswait,
-        CAST(CASE WHEN visit_record_visitbedcode IS NOT NULL THEN 1 ELSE 0 END AS INTEGER) AS beinhospperscount,
+        CAST(vr.visit_record_visitwardid AS VARCHAR) AS currentwardid,
+        CAST(vr.visit_record_visitwardcode AS VARCHAR) AS currentwardcode,
+        CAST(vr.visit_record_visitwardname AS VARCHAR) AS currentwardname,
+        CAST(vr.visit_record_visitdeptid AS VARCHAR) AS currentmedelementid,
+        CAST(vr.visit_record_visitdeptcode AS VARCHAR) AS currentmedelementcode,
+        CAST(vr.visit_record_visitdeptname AS VARCHAR) AS currentmedelementname,
+        CAST(vr.visit_record_attendingdoctid AS VARCHAR) AS currentstaffgroupid,
+        CAST(vr.visit_record_attendingdoctcode AS VARCHAR) AS currentstaffgroupcode,
+        CAST(vr.visit_record_attendingdoctname AS VARCHAR) AS currentstaffgroupname,
+        CAST(CASE WHEN vr.visit_record_visitbedcode IS NULL THEN '1' ELSE '0' END AS VARCHAR) AS iswait,
+        CAST(CASE WHEN vr.visit_record_visitbedcode IS NOT NULL THEN 1 ELSE 0 END AS INTEGER) AS beinhospperscount,
         CAST('datacenter_db' AS VARCHAR) AS datasourceflag,
         CAST('visit_record' AS VARCHAR) AS dstable,
         CAST('rowkey' AS VARCHAR) AS indatasourcekey,
-        CAST(rowkey AS VARCHAR) AS indatasourcekeyvalue,
-        CAST(visit_record_isdeleted AS VARCHAR) AS isdelete,
-        CAST(visit_record_lastupdatedttm AS VARCHAR) AS lastupdatedttm,
+        CAST(vr.rowkey AS VARCHAR) AS indatasourcekeyvalue,
+        CAST(vr.visit_record_isdeleted AS VARCHAR) AS isdelete,
+        CAST(vr.visit_record_lastupdatedttm AS VARCHAR) AS lastupdatedttm,
         CAST(date_format(current_timestamp, '%Y-%m-%d %H:%i:%s') AS VARCHAR) AS datacreatedttm,
-        -- 用于字典关联的辅助字段
         CAST(date_format(current_timestamp, '%Y-%m-%d %H:%i:%s') AS VARCHAR) AS outhospdate1
-    FROM datacenter_db.visit_record
-    WHERE visit_record_isdeleted = '0'
-      AND visit_record_visitwardcode IS NOT NULL
-      AND visit_record_visitrecordstatuscode = 'A'
-      AND visit_record_visittypecode = 'I'
+    FROM datacenter_db.visit_record vr
+    LEFT JOIN hid0123_cache_his_dhcapp_sqluser.ct_loc loc0123
+        ON cast(vr.visit_record_medorgcode AS varchar) = 'HID0123'
+       AND cast(loc0123.ctloc_rowid AS varchar) = cast(vr.visit_record_visitdeptid AS varchar)
+    WHERE vr.visit_record_isdeleted = '0'
+      AND vr.visit_record_visitwardcode IS NOT NULL
+      AND vr.visit_record_visitrecordstatuscode = 'A'
+      AND vr.visit_record_visittypecode = 'I'
 ),
 
 -- =====================================================

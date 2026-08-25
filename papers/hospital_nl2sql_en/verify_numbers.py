@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 """
-Cross-check every number in main_rt.tex against the canonical data in
-DATA_FILL_SHEET.md.
+Cross-check every number in the submission manuscript against the canonical
+data in DATA_FILL_SHEET.md.
+
+The manuscript audited is named in TEX below and printed on every run. Read that
+line: this script spent the whole Applied Sciences conversion pointed at
+main_rt.tex, the retired JMIR-era file, reporting a clean 189 about a manuscript
+that was not being submitted.
 
 Why this exists: several editing passes were applied by scripts that aborted
 part-way on a failed anchor match and wrote nothing, while the run was reported
@@ -22,7 +27,14 @@ import sys
 import os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-TEX = os.path.join(HERE, "main_rt.tex")
+# TEX must be the manuscript that is actually being submitted. It used to be
+# main_rt.tex - the retired JMIR-era file - which meant this auditor reported
+# "189 passed" about a manuscript nobody was going to send anywhere, while every
+# number the Applied Sciences conversion touched went unchecked. Same shape of
+# failure as the checker that validated a PDF from an ended session: a green
+# result about the wrong artifact is worse than no result, because it stops the
+# search.
+TEX = os.path.join(HERE, "main_applsci_mdpicls.tex")
 APPLSCI = os.path.join(HERE, "main_applsci.tex")
 TOVERIFY = os.path.join(HERE, "TO_VERIFY.md")
 SHEET = os.path.join(HERE, "DATA_FILL_SHEET.md")
@@ -76,6 +88,7 @@ def main():
     if len(models) != 8:
         print("could not parse eight models from %s" % SHEET)
         return 1
+    print("auditing %s" % os.path.basename(TEX))
     flat = load_tex(TEX)
     chk = Checker()
 
@@ -214,6 +227,58 @@ def main():
             chk("T7 setting D equals main-experiment qwen row",
                 int(dg) == qw[2] and int(dh) == qw[3] and dcls == qw[4],
                 "%s/%s/%s vs %d/%d/%s" % (dg, dh, dcls, qw[2], qw[3], qw[4]))
+
+    # -- scalars the prose states about the preprocessing stage ---------------
+    # These were not covered before, and the manuscript said "66 statistical
+    # criteria" in one sentence and "these 67 preprocessed criteria" in the next,
+    # about the same set. 189 assertions passed while that sat in the Results,
+    # because none of them looked at this number. Anything the prose asserts about
+    # a count in the fill sheet belongs here.
+    sheet = open(SHEET, encoding="utf-8").read()
+    for key, patterns in (
+            ("criteria_for_generation",
+             [r"identified (\d+) statistical criteria",
+              r"these (\d+) preprocessed criteria"]),
+            ("unique_terms_validation",
+             [r"yielded (\d+) unique business terms"]),
+            ("dev_terms_total",
+             [r"across (\d+) business terms extracted"]),
+    ):
+        m = re.search(r"^\s*%s:\s*(\d+)" % key, sheet, re.M)
+        if m is None:
+            chk("fill sheet has %s" % key, False, "key not found")
+            continue
+        want = int(m.group(1))
+        for pat in patterns:
+            found = re.search(pat, flat)
+            chk("prose %s" % pat[:34], found is not None and int(found.group(1)) == want,
+                "%s vs %d" % (found.group(1) if found else "absent", want))
+
+    # Table 8 states, in its own note, that it contains no new numbers: "No figure
+    # in this table is new; all are drawn from the Results." That is a claim the
+    # manuscript makes about itself, so it is checked rather than trusted - a
+    # management table that quietly introduced an unsourced figure would be making a
+    # false statement in print.
+    mgmt = re.search(r"\\begin\{table\}[^\0]*?\\label\{tab:mgmt\}([^\0]*?)\\end\{table\}",
+                     open(TEX, encoding="utf-8").read())
+    if mgmt:
+        raw = re.sub(r"(?<!\\)%.*", "", open(TEX, encoding="utf-8").read())
+        i = raw.index("\\label{tab:mgmt}")
+        j = raw.index("\\end{table}", i)
+        k = raw.rindex("\\begin{table}", 0, i)
+        body = raw[i:j]
+        rest = (raw[:k] + raw[j:]).split("\\begin{thebibliography}")[0]
+
+        def _nums(t):
+            t = re.sub(r"[LCp]\{[\d.]+\s*(cm|mm|pt|bp)\}", "", t)
+            t = re.sub(r"\{?[\d.]+\s*(cm|mm|pt|bp|em|ex)\}?", "", t)
+            t = re.sub(r"(?<=\d),(?=\d)", "", t)
+            return re.findall(r"\d+(?:\.\d+)?", t)
+
+        pool = set(_nums(rest))
+        for tok in dict.fromkeys(_nums(body)):
+            chk("Table 8 figure %s also in Results" % tok, tok in pool,
+                "not found elsewhere in the manuscript")
 
     return chk.report()
 

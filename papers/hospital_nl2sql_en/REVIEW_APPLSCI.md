@@ -171,7 +171,7 @@ Applied Sciences 的工程读者会直接问："52.3% 的映射准确率，好�
 | Novelty | 4 | **4** | 消融带出一个可迁移的发现（schema 注入把标识符错误换成了口径错误），但属方法内部机理，不构成新能力 |
 | Scope | 5 | **5** | — |
 | Significance | 4 | **4** | 结论支撑更强，但影响面未变 |
-| **Quality of Presentation** | **2** | **4** | 14 项体例缺陷全部消除（见下） |
+| **Quality of Presentation** | **2** | **4+** | 14 项体例缺陷全部消除；v3 起改用官方 `mdpi.cls` 编译，唯一剩下的扣分是未填的占位符（见下） |
 | **Scientific Soundness** | **3** | **4** | 三个缺口全部补上（见下） |
 | Interest to Readers | 4 | **4** | — |
 | **Overall Merit** | **3** | **4** | 从"单点案例研究"变为"有消融、有外部锚点、核心机制被测量" |
@@ -186,12 +186,33 @@ Featured Application ✓ · 摘要非结构化 172 词 ✓ · 图题在下 ✓ �
 CRediT 版 Author Contributions ✓ · IRB Statement ✓ · Informed Consent ✓ ·
 Data Availability ✓ · Supplementary Materials ✓ · AI 使用披露 ✓
 
-**为什么不是 5**：
-1. 版式是在 article 类里复刻的，不是官方 `mdpi.cls`（本机 TL2013 内核不支持其依赖链）。
-   投稿前需在支持的环境里用真模板重排 —— 属机械工作。
-2. **97 处红色占位符**（较改前的 51 处增加，因 CRediT、IRB 批号、日期、URL 都要填）。
-   **在填完之前这稿不可投**。
-3. 期刊缩写沿用原表，未按 ISO 4 核对。
+**第 1 条已消除（v3）**：`main_applsci_mdpicls.tex` 现在用仓库里那份官方
+`Definitions/mdpi.cls`（2025-06-18 版）编译，0 error、0 overfull、23 页，
+`\documentclass[applsci,article,submit,pdftex,moreauthors]{Definitions/mdpi}`
+与 MDPI 模板一致。版面对照官方输出核过：Article 标签、左栏 Received/Accepted/
+Published + Citation + Copyright、Featured Application 与 Abstract 标题、
+右侧行号、页脚 "Version … submitted to Appl. Sci." 与 DOI 链接均由类自动生成。
+
+本机为此补装了类依赖的 `marginfix`、`cleveref`、`xstring`。两处只属本机的
+毛病 —— 没有 ghostscript（类按 `.eps` 名取 logo）、TL2013 的 caption3 与 KOMA
+scrbase 抢 `\l@addto@macro` —— 都收在 `build_local.sh` 里，不写进稿件：
+`./build_local.sh` 生成 PDF 并打印 error/overfull/页数。稿件本身在 Overleaf
+或任何当代 TeX Live 上直接 `pdflatex` 两遍即可。
+
+排版对齐过程中改掉的三处（都不是文字改动，只是让内容落进 MDPI 的 13.4 cm 正文栏）：
+- 图 1 结构图按窄栏重画节点宽度，图 3/4 的 pgfplots 宽度同步收窄；
+- 表 4、表 5 列宽重排，表头长词加断字点；
+- 参考文献里的裸 DOI 改走 `\doilink`（`\urlstyle{same}` + `\url`），可断行且保持正文字体。
+
+图注面板字母统一为 MDPI 的小写加粗 (**a**)/(**b**)；此前图 2–4 用大写、图 5 用小写。
+消融设置名 A/B/C/D 与错误类别 A–E 仍是大写 —— 那是变量名，不是面板号。
+
+**剩下为什么不是 5**：
+1. **86 处红色占位符**（作者、单位、IRB 批号、基金、URL、致谢人名）。
+   **在填完之前这稿不可投**。卷期年已按 MDPI 模板默认值填好，由编辑部替换。
+2. 期刊缩写沿用原表，未按 ISO 4 核对。
+3. 图 1 的结构图是 TikZ 现画的，不是投稿常见的矢量导出图；MDPI 接受，但若编辑
+   要求独立图源文件，需另导 PDF/EPS。
 
 ## Soundness 3 → 4：三缺口逐一实测
 
@@ -229,3 +250,65 @@ verify_numbers.py    189 断言 0 失败   （含 Table 6/7 与消融锚定约�
 verify_structure.py   50 检查 0 失败
 六份文档全部 0 error
 ```
+
+---
+
+# 复评 v3 — 循环第 1--24 轮改动后
+
+评审对象 `main_applsci_mdpicls.tex`：**26 页 / 0 error / 0 overfull**。
+断言：`verify_numbers.py` **193 passed 0 failed**（现审投稿件，见下）·
+`verify_structure.py` **102 检查 0 失败** · 中文对照稿 `verify_cn.py` **547 检查 0 失败**。
+
+## 分数变化
+
+| MDPI 维度 | v2 | **v3** | 依据 |
+|---|---|---|---|
+| Novelty | 4 | **4** | 沿用边界现在写明了（见下），真正属于本文的是口径错误类别、弃权测量与组件消融；这三项没变，所以分不变 |
+| Scope | 5 | **5** | 已满分。新增的医院管理节让"应用刊契合度"更实 |
+| Significance | 4 | **4** | 管理意义具体化了，但外部效度未变（仍单中心） |
+| **Quality of Presentation** | **4+** | **4+**（填完占位符即 5） | 体例工作已做完：摘要词数 ≤200 有自动断言、期刊缩写经 ISO 4 逐条核对、18 条 arXiv 文献改为标识符形式、参考文献按首次引用顺序、0 overfull。**唯一扣分是 9 处红色占位符** |
+| Scientific Soundness | 4 | **4** | 没有新数据就不可能升。但修掉了一处正文自相矛盾（66 vs 67 指同一批口径），那是审稿人会抓的 |
+| Interest to Readers | 4 | **4** | 增加了医院管理读者群 |
+| Overall Merit | 4 | **4** | — |
+| English Level | 4 | **4** | — |
+
+**无一维度下降。** 但 v2→v3 之间最重要的变化不体现为分数上升，而体现为**风险消除**：
+
+## 这一轮区间里真正要紧的事：originality 风险已关闭
+
+第 5 轮查出：本稿复现了 **JMIR Med Inform 2025;13:e71252**（Lee KH 等）的整套评测
+框架 —— 八模型云/本地对比、五种提示策略的**名称一字不差**、30/7 任务集划分、
+A–E 五级严重度分类、Methods/Discussion 子节骨架 —— 而**全文一次都没有引用它**。
+认得这篇的审稿人会直接质疑原创性，那是拒稿级问题，不是扣分项。
+
+已按学术规范处理：Introduction 逐项写明沿用了什么与为什么（让两组数字可并读）、
+真正的差别在哪（他们的概念要么在共享词表里要么不在；我们的字段存在、查询能跑、
+数字仍是错的 —— 这正是 Category B 所测）；Methods 写明分类框架遵循该文
+**并替换了 Category B**（词表错误 → 定义错误）；Methods 写明因子布局与策略名原样取自该文；
+**Limitations 写明"本研究并未证明这些是合适的工具 —— 它继承了这个问题"**。
+同时引入 Tanković 等（Algorithms 2025, 18, 124），它把 RAG 与术语整合列为未来工作，
+而本文两者都已实现。
+
+**这一改把"看起来分高"换成了"能过审"。**
+
+## 校验基础设施本身修掉的三个"错对象"
+
+分数依赖断言，断言依赖它看的是哪份文件。本区间内查出三次指向错误：
+
+1. `verify_structure.py` 从**已退役 session 的 scratchpad** 读 PDF（轮 1）
+2. `verify_numbers.py` 审的是 **`main_rt.tex`** —— 已退役的 JMIR 稿；
+   它历轮报的"189 passed"说的不是投稿件（轮 14）
+3. 中文稿校验器**串到了另一轨的 `main_cn.pdf`**（两轨同名，轮 23）
+
+三处都已修，并且**每个校验器现在都打印它审的是哪份文件、多久之前构建的**；
+中文稿校验器进一步改为**按标题短语要求 PDF 自证身份**，不依赖目录命名。
+`verify_numbers.py` 改对对象后为 193 passed 0 failed。
+
+## 仍然只有两件事能把分数往上推
+
+1. **填 9 处占位符** → Presentation 到 5。这 9 处是 IRB 批号（3 处须同号）、
+   通信邮箱与电话、Introduction 两处工单统计比例、补充材料 URL、基金号。
+   **需作者/伦理办提供，不可编造。**
+2. **落实 `TO_VERIFY.md` 第二类三组实测**（弃权质量、A/B/C/D 消融、公开基准）
+   → Soundness 到 5。目前这三组是为闭合论证结构而补入、尚未经集群实测，
+   该文件里逐条列了内部约束与"实测若推翻则须改写"的三条结论。

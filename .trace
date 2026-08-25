@@ -11,6 +11,8 @@
 - **路径**：`~/.cursor/skills/weekly-work-report/` + `sql----/.cursor/skills/weekly-work-report/`
 - **触发**：周报、工作周报、周总结、下周计划、下周推进、任务推进
 - **格式**：一/二/三… + 1/2/3…；本周复盘型 / 下周跟进型；样例 examples.md
+  - **2026-07-31 | 换行定稿**：交付必须用 ` ```text ` 围栏；大项与 1/2/3 各占一行、大项间空行；禁止标题与细则堆同一行
+  - **文件**：`SKILL.md`、`examples.md`（两处路径同步）
 
 ### 2026-06-24 | 在院主题 mdr_beinhosp：HID0123 拆 HID0123/HID0124
 - **规则**：同 `currentcyxz_v3`；`visit_record` 当前科室 `visitdeptid`→`hid0123.ct_loc`；`ctloc_hospital_dr` 2→HID0123，12→HID0124
@@ -768,6 +770,37 @@
   - **日期**：accessed / IRB approved / Claude accessed → 27 July 2026；定价 July 2026
   - **仍 PH**：通讯邮箱/电话、IRB 号、基金、XX%、supplementary URL
   - **文件**：`main_applsci_mdpicls.tex`、`main_applsci.tex`
+  ############## 2026-07-30 | 编译中英文稿
+  - **英**：`./build_local.sh` → `main_applsci_mdpicls.pdf`（26 页，0 error）
+  - **中**：`xelatex main_cn`×2 → `main_cn.pdf`（19 页，0 error；院内对照非投稿）
+  ############## 2026-07-30 | main_jmir JMIR 体例编译
+  - **命令**：`pdflatex main_jmir`×2
+  - **产出**：`papers/dataBase/main_jmir.pdf` 14 页，0 error
+  - **校验**：`verify_jmir.py` 143 checks / 0 failed（6 图 4 表 60 文献；17 处 `\PH{}`）
+  - **数据**：共用 `data_fk.tex`（仍 provisional）
+  - **血缘**：FK 机制内容 → JMIR 家具组装 → PDF
+  ############## 2026-08-01 | main_jmir 外置 redrawn 图接入（不降分）
+  - **源**：`figure/Figure1–6.pdf` + legends；替掉文内 TikZ/pgfplots
+  - **位**：仍在首次引用处的 `\floatstart`（Fig1–6 顺序不变）
+  - **护分**：题注按 legends 改写且计数走 `\dv{}`；Fig5/6 正文改对齐新图（定位+消融 / 均匀性+测点）；删未再用的 CNF 缩写
+  - **校**：`\jpdffig` + verify 增文件/顺序断言；580 checks / 0 fail；16 页
+  - **重评**：呈现 4→5；其余维不降；仍不可投（provisional）
+  - **推送**：basedata `ac6a7de` → github.com/vivia-an/basedata main
+  - **血缘**：legends 论证形 → PDF 墨迹 → main_jmir 引用点 → REVIEW_JMIR 重评 → 远端
+  ############## 2026-08-01 | 外置图迁分支 + main 回滚 TikZ
+  - **保留**：分支 `jmir-redrawn-figures` @ `ac6a7de`（含 figure/ 与 jpdffig）
+  - **main**：恢复文内 TikZ；删 `figure/`；verify 去掉 jpdffig 断言；重编 15 页
+  - **提交**：`Revert JMIR redrawn PDF figures on main…` → push main
+  - **血缘**：ac6a7de 分叉 → 分支留 redrawn / main 回 TikZ
+  ############## 2026-08-01 | 复刻 JAMIA.tex 投稿轨
+  - **源**：`main_fk.tex`（JAMIA ocad049 临帖）→ `JAMIA.tex` / `JAMIA.pdf`（12 页）
+  - **数据**：共用 `data_fk.tex`；`check_fk.py --pdf JAMIA.pdf`
+  - **推送**：basedata main（含 JAMIA.tex/pdf、README、check_fk）
+  - **血缘**：交底书 → FK 机制文 → JAMIA 命名投稿轨（与 main_jmir 并列）
+  ############## 2026-08-03 | 作者改为 Nan Li
+  - **改**：`JAMIA.tex` / `main_fk.tex` / `main_jmir.tex` 署名与通讯作者 → Nan Li；JMIR `\RUNAUTH`=Li；贡献声明同步；PDF 重编
+  - **提交**：`作者修改` `b13790b` → basedata main（修正前误写 Linan 的 `90ba2e3`）
+  - **血缘**：独作署名层
   ############## 2026-07-27 | main_fk：JAMIA ocad049 复刻收敛（12 页）
   - **选刊**：JAMIA `10.1093/jamia/ocad049`（PMC10198529，30(6):1167-1178，12页/6图/4表）— 42 篇 OA JAMIA 候选按图表数+章节脊筛出；选题按上轮差距分析转「指标注册表受控合并」，QI 降为案例
   - **文件**：`papers/dataBase/main_fk.tex`、`data_fk.tex`、`check_fk.py`、`make_bib.py`、`FK_REPLICATION_PLAN.md`
@@ -819,4 +852,19 @@
   - **本机缺陷一**：无 ghostscript，pdftex 读不了 `Definitions/*.eps` → 构建目录另建 Definitions，EPS 全部换 PDF 替身 + graphics 规则按 PDF 读；仓内真 `Definitions/` 不动
   - **本机缺陷二**：TeX Live 2013 的 caption3 定义 `\l@addto@macro`，其后 mdpi.cls 载入的 KOMA scrbase 用 `\newcommand` 重定义报错 → shim 在两者之间取消定义
   - **血缘**：ApplSci mdpi.cls 投稿轨（见 2026-07-27 前条）→ 本机可复现构建 + 图件量化验收
+  ############## 2026-07-27 | starrocks：实时指标 MV 全家 v3 + 三段重命名剧本
+  - **补前条**：先前只记了 currentcyxz/currentryxz 两张，实为**五张一族** — 另有 `currentzyxz_v3.sql`（实时在院人次）、`currtime_income_v3.sql`（实时收入）、`mzssxz_indicators_v3.sql`（实时就诊挂号）
+  - **共同头**：五张同注释头 — 七院区 HID0101/0103/0117/0120/0122/0123/0124；`hid0123` 按 `ct_loc.ctloc_hospital_dr` 2→HID0123、12→HID0124；异步 MV 不支持改 AS 定义，已有的须 DROP 重建
+  - **重命名三段**：`物化视图重命名_v1_to_v_de.sql`（_v1→_v_de，27L）→ `物化视图重命名_v_de_to_v3.sql`（_v_de→_v3，27L）→ `物化视图重命名_v3上线_v4归档.sql`（_v3 顶到无后缀生产名、旧生产名降为 _v4，47L）
+  - **上线前提**：三者缺一不可 — 存在无后缀生产名五张；存在待上线 _v3 五张；**不存在 _v4 同名 MV**（否则 RENAME 冲突）
+  - **执行前确认**：下游报表/接口的表名引用需同步改，两段重命名脚本头部均写明
+  - **状态**：八个文件均**未入版本库**（`??`），`starrocks/starrocks物化视图.sql` 另有未提交改动
+  - **血缘**：在院主题 HID0123/HID0124 拆分（2026-06-24 条）→ 五张实时 MV v3 建表 → 三段式灰度改名上线
+  ############## 2026-07-27 | cba1e33 补记：ApplSci 类选项与宏层改动
+  - **背景**：`cba1e33` 的两条 trace（数据可得 / 独作署名）记了声明与署名，未记同一提交里的版式机制改动 — 这类改动最易被后续「整理」误删
+  - **类选项**：`Definitions/mdpi` 的 `moreauthors` → **`oneauthor`**（配合独作署名）
+  - **删自定义**：去掉手写的 `\UrlBreaks` 逐字符断行、`\emergencystretch=1.5em`、`captionsetup[table]` — 官方 mdpi.cls 已自带对应处理，保留反而与类冲突
+  - **加 `\panel`**：mdpi.cls 令 `\thesubfigure` 为 `(\textbf{a})`；pgfplots 画的子面板需同款标签且置于面板**下方**，故新增 `\panel{a}{...}`
+  - **改 `\tabfoot`**：MDPI 表注为规线下**左齐**、标记与注文分离；浮动体内 `\centering` 仍生效故显式 `\raggedright` 复位，并加 `\tnotedef` 出标记
+  - **血缘**：ApplSci 官方 mdpi.cls 投稿版 → 弃自造补丁改用类自带机制 → 子图/表注对齐官方样式
 
