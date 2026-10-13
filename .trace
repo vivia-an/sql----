@@ -25,6 +25,11 @@
       - **探测**：`mdr/mdr转sql/在院床位_dict_bednum字段探测_StarRocks.sql`
       - **实测**：核定床位列是 `approvebed`（少一个 d），SQL 已跑通
       - **改动**：`在院床位_StarRocks.sql` 改为 approvebed
+      ###### 扩展：最近时刻取值不对（只定位，未改 SQL）
+      - **原因**：开窗按「每天×护理×医疗×运管」各自取最大 `rephour`，不是全表最近一个快照
+      - **原因**：`having sum>0` 在排序前过滤，最近小时人数为 0 会退回更早小时
+      - **原因**：`order by rephour desc` 按字符串；日快照 SQL 已 `cast(rephour as integer)`
+      - **对照**：`mdr/mdr在院_护理单元日快照_上月_Presto.sql`；`newest` 每小时都写 '1' 不能当最新标记
 
 ### 2026-06-24 | HIS：四级手术术前多学科讨论完成率（两区间）
 - **需求**：2025-07~12、2026-01~06；国考完成率=术前多学科四级手术/同期四级手术
