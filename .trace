@@ -13,6 +13,11 @@
 - **血缘**：m1.MDR_BEINHOSP → mdv.DICT_BEDNUM(编制/核定/极限床) → mdv.tbl_1306_h → mdv.tbl_1305_h → md.dim_ygloctype
 - **未找到**：DICT_BEDNUM 后半关联；GROUP BY 缺 CURRENTMEDELEMENTCODE
 - **对照**：在院 ETL 运管科室是 1307 医生优先 + 1306.ygks=1305.rowkey，且要字典版本和日期
+  #### 分支：Hive/Kylin → StarRocks，字典 mdv→md
+  - **文件**：`mdr/mdr转sql/在院床位_StarRocks.sql`
+  - **逻辑**：仍按截图 在院人次/最大时刻/1306→1305.id=ygks
+  - **引擎**：派生表别名、反引号中文列、GROUP BY 补医疗单元编码
+  - **未编造**：DICT_BEDNUM 仅 wardId_Code；后半 AND CURRENTMEDELEMENT 仍缺
 
 ### 2026-06-24 | HIS：四级手术术前多学科讨论完成率（两区间）
 - **需求**：2025-07~12、2026-01~06；国考完成率=术前多学科四级手术/同期四级手术
