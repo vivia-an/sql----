@@ -10,6 +10,9 @@
 --
 -- dict_bednum：截图可见 currentwardcode = wardid_code；
 --   and a.currentmedelement 后半被截断，仓库无表结构，未编造 b 侧字段
+-- 【未找到】md.dict_bednum.approvedbed 已报 cannot be resolved
+--   prebednum / limitbed 同表、仓库同样无证据，下一报错也会是这两列
+--   先跑 在院床位_dict_bednum字段探测_StarRocks.sql，再改三列映射
 
 select
     t.`日期`,
