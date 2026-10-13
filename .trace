@@ -7,6 +7,33 @@
 
 ## 时间线
 
+### 2026-10-13 | 在院床位：还原截图 SQL 并判定原始问题
+- **需求**：补全床位 SQL；判定 JOIN/口径/膨胀问题
+- **文件**：`mdr/mdr转sql/在院床位_原始SQL还原与问题.sql`
+- **血缘**：m1.MDR_BEINHOSP → mdv.DICT_BEDNUM(编制/核定/极限床) → mdv.tbl_1306_h → mdv.tbl_1305_h → md.dim_ygloctype
+- **未找到**：DICT_BEDNUM 后半关联；GROUP BY 缺 CURRENTMEDELEMENTCODE
+- **对照**：在院 ETL 运管科室是 1307 医生优先 + 1306.ygks=1305.rowkey，且要字典版本和日期
+  #### 分支：Hive/Kylin → StarRocks，字典 mdv→md
+  - **文件**：`mdr/mdr转sql/在院床位_StarRocks.sql`
+  - **逻辑**：仍按截图 在院人次/最大时刻/1306→1305.id=ygks
+  - **引擎**：派生表别名、反引号中文列、GROUP BY 补医疗单元编码
+  - **未编造**：dict_bednum 仅 wardid_code；后半 and currentmedelement 仍缺
+    ##### 扩展：表名字段名改小写
+    - **文件**：`mdr/mdr转sql/在院床位_StarRocks.sql`
+    - **改动**：dict_bednum/rephour/currentward* 等标识符全小写，口径不变
+      ###### 扩展：approvedbed 无法解析
+      - **探测**：`mdr/mdr转sql/在院床位_dict_bednum字段探测_StarRocks.sql`
+      - **实测**：核定床位列是 `approvebed`（少一个 d），SQL 已跑通
+      - **改动**：`在院床位_StarRocks.sql` 改为 approvebed
+      ###### 扩展：最近时刻取值不对（只定位，未改 SQL）
+      - **原因**：开窗按「每天×护理×医疗×运管」各自取最大 `rephour`，不是全表最近一个快照
+      - **原因**：`having sum>0` 在排序前过滤，最近小时人数为 0 会退回更早小时
+      - **原因**：`order by rephour desc` 按字符串；日快照 SQL 已 `cast(rephour as integer)`
+      - **对照**：`mdr/mdr在院_护理单元日快照_上月_Presto.sql`；`newest` 每小时都写 '1' 不能当最新标记
+      ###### 扩展：给出最近一个快照的可执行 SQL
+      - **文件**：`mdr/mdr转sql/在院床位_最近时刻_StarRocks.sql`
+      - **口径**：最大 repdate 上再取最大数值 rephour；字典和床位列沿用已跑通 SQL
+
 ### 2026-06-24 | HIS：四级手术术前多学科讨论完成率（两区间）
 - **需求**：2025-07~12、2026-01~06；国考完成率=术前多学科四级手术/同期四级手术
 - **文件**：`HIS/四级手术术前多学科讨论完成率（两区间）.sql`
