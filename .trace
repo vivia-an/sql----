@@ -23,7 +23,8 @@
     - **改动**：dict_bednum/rephour/currentward* 等标识符全小写，口径不变
       ###### 扩展：approvedbed 无法解析
       - **探测**：`mdr/mdr转sql/在院床位_dict_bednum字段探测_StarRocks.sql`
-      - **未找到**：md.dict_bednum.approvedbed；prebednum/limitbed 同表无证据不改名
+      - **实测**：核定床位列是 `approvebed`（少一个 d），SQL 已跑通
+      - **改动**：`在院床位_StarRocks.sql` 改为 approvebed
 
 ### 2026-06-24 | HIS：四级手术术前多学科讨论完成率（两区间）
 - **需求**：2025-07~12、2026-01~06；国考完成率=术前多学科四级手术/同期四级手术

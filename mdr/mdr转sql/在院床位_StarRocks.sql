@@ -10,9 +10,7 @@
 --
 -- dict_bednum：截图可见 currentwardcode = wardid_code；
 --   and a.currentmedelement 后半被截断，仓库无表结构，未编造 b 侧字段
--- 【未找到】md.dict_bednum.approvedbed 已报 cannot be resolved
---   prebednum / limitbed 同表、仓库同样无证据，下一报错也会是这两列
---   先跑 在院床位_dict_bednum字段探测_StarRocks.sql，再改三列映射
+-- 床位三列已实测：prebednum / approvebed（不是 approvedbed）/ limitbed
 
 select
     t.`日期`,
@@ -53,7 +51,7 @@ from (
         ) as num,
         sum(a.beinhospperscount) as `在院人次`,
         cast(max(b.prebednum) as int) as `编制床位`,
-        cast(max(b.approvedbed) as int) as `核定床位`,
+        cast(max(b.approvebed) as int) as `核定床位`,
         cast(max(b.limitbed) as int) as `极限床位`
     from m1.mdr_beinhosp as a
     left join md.dict_bednum as b
