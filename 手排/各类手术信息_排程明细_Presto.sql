@@ -160,12 +160,11 @@ base AS (
 typed AS (
     SELECT
         b.*,
-        concat_ws(
-            '|',
-            coalesce(b.ops_type_name, ''),
-            coalesce(b.room_name, ''),
-            coalesce(b.room_building, ''),
-            coalesce(b.exec_dept_name, ''),
+        concat(
+            coalesce(b.ops_type_name, ''), '|',
+            coalesce(b.room_name, ''), '|',
+            coalesce(b.room_building, ''), '|',
+            coalesce(b.exec_dept_name, ''), '|',
             coalesce(b.apply_dept_name, '')
         ) AS loc_text
     FROM base b
